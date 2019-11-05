@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29102.190
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wumpus", "CSharpPlayground\Wumpus.csproj", "{A732291A-52DD-4C2A-875C-F6D0A42F2F78}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B0FA2428-25AE-4766-83A1-B4C56137F43D} = {B0FA2428-25AE-4766-83A1-B4C56137F43D}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameEngine", "GameEngine\GameEngine.csproj", "{B0FA2428-25AE-4766-83A1-B4C56137F43D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarbaseTesting", "StarbaseTesting\StarbaseTesting.csproj", "{EE4E60DD-86AD-4BCC-9CB7-368DA3C13053}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A732291A-52DD-4C2A-875C-F6D0A42F2F78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A732291A-52DD-4C2A-875C-F6D0A42F2F78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A732291A-52DD-4C2A-875C-F6D0A42F2F78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A732291A-52DD-4C2A-875C-F6D0A42F2F78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0FA2428-25AE-4766-83A1-B4C56137F43D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0FA2428-25AE-4766-83A1-B4C56137F43D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0FA2428-25AE-4766-83A1-B4C56137F43D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0FA2428-25AE-4766-83A1-B4C56137F43D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE4E60DD-86AD-4BCC-9CB7-368DA3C13053}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE4E60DD-86AD-4BCC-9CB7-368DA3C13053}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE4E60DD-86AD-4BCC-9CB7-368DA3C13053}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE4E60DD-86AD-4BCC-9CB7-368DA3C13053}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9DB44B73-9110-4326-8FF2-6CA8D45948FD}
+	EndGlobalSection
+EndGlobal
