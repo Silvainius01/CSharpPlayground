@@ -43,10 +43,9 @@ namespace CSharpPlayground.Wumpus
             gameBoard = generator;
             window = WumpusWindow.StartWindow(this);
             window.FormClosed += OnWindowClose;
-
-            ConsolePrompts.SetTextBox(window.consoleInput);
         }
 
+        #region Instance Methods
         public override void Awake()
         {
             if (gameBoard == null)
@@ -69,6 +68,35 @@ namespace CSharpPlayground.Wumpus
 
         }
 
+        public void ReceiveCommand(string command)
+        {
+            commandq.Enqueue(command);
+            if(commandLineHistory.Count == 0 || commandLineHistory[commandLineHistory.Count-1] != command)
+                commandLineHistory.Add(command);
+            ResetCommandIndex();
+        }
+        public string GetCommandHistoryNext(int step)
+        {
+            currCommIndex = Mathc.Clamp(currCommIndex + step, 0, commandLineHistory.Count);
+            if (currCommIndex == commandLineHistory.Count)
+                return string.Empty;
+            return commandLineHistory[currCommIndex];
+        }
+        public string GetCommandHistoryLast()
+        {
+            return GetCommandHistoryNext(-currCommIndex);
+        }
+        public void ResetCommandIndex()
+        {
+            currCommIndex = commandLineHistory.Count;
+        }
+        public void OnWindowClose(object sender, EventArgs e)
+        {
+            WindowOpen = false;
+        }
+        #endregion
+
+        #region Static Methods
         /// <summary> Get a random room on the game board </summary>
         public static BoardRoom GetRandomRoom()
         {
@@ -157,38 +185,18 @@ namespace CSharpPlayground.Wumpus
             return instance.gameBoard.rooms[rIndex];
         }
 
-        public void ReceiveCommand(string command)
-        {
-            commandq.Enqueue(command);
-            commandLineHistory.Add(command);
-            ResetCommandIndex();
-        }
-        public string GetCommandHistoryNext(int step)
-        {
-            currCommIndex = Mathc.Clamp(currCommIndex + step, 0, commandLineHistory.Count);
-            if (currCommIndex == commandLineHistory.Count)
-                return string.Empty;
-            return commandLineHistory[currCommIndex];
-        }
-        public string GetCommandHistoryLast()
-        {
-            return GetCommandHistoryNext(-currCommIndex);
-        }
-        public void ResetCommandIndex()
-        {
-            currCommIndex = commandLineHistory.Count;
-        }
-
         public static string GetNextCommand()
         {
-            if (commandq.Count == 0)
-                return string.Empty;
+            if (instance.commandq.Count == 0)
+                return null;
             return instance.commandq.Dequeue();
         }
 
-        public void OnWindowClose(object sender, EventArgs e)
+        public static void WriteLine(string msg)
         {
-            WindowOpen = false;
+            instance.window.AppendToConsoleSafe(msg);
+            instance.window.AppendToConsoleSafe("\r\n");
         }
+        #endregion
     }
 }

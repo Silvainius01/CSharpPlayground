@@ -17,7 +17,7 @@ namespace CSharpPlayground.Wumpus
         {
             if(moveTimer.Update(TimeManager.DeltaTime))
             {
-                Console.WriteLine("You hear shuffling in the darkness...");
+                WumpusGameManager.WriteLine("You hear shuffling in the darkness...");
                 moveTimer.Activate();
             }
         }

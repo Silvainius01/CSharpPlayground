@@ -26,8 +26,9 @@ namespace CSharpPlayground.Wumpus
 
         public override void Update()
         {
-            if(nextCommandTask == null || nextCommandTask.IsCompleted)
-                nextCommandTask = commandModule.GetNextCommandAsync("Next Command", true, false);            
+            string command = WumpusGameManager.GetNextCommand();
+            if (command != null)
+                commandModule.ParseCommand(command, false);          
         }
 
         public void GiveItem(ITEM_ID item, int count = 1)
@@ -68,7 +69,7 @@ namespace CSharpPlayground.Wumpus
             if (!hasItems)
                 msg.Append("\n\t*Empty*");
 
-            Console.WriteLine(msg.ToString());
+            WumpusGameManager.WriteLine(msg.ToString());
         }
     }
 }

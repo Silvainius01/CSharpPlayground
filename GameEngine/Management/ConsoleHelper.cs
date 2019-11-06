@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 
 namespace GameEngine
 {
-    public static class ConsolePrompts
+    public static class CommandManager
     {
         static Dictionary<string, ConsoleCommand> universalCommands = new Dictionary<string, ConsoleCommand>();
         
-        #region Sync
+        #region Console Sync
         public static string UserInputPrompt(string message, bool newline)
         {
             if (newline)
@@ -97,7 +97,7 @@ namespace GameEngine
         }
         #endregion
 
-        #region Async
+        #region Console Async
         public static async Task<string> UserInputPromptAsync(string message, bool newline)
         {
             if (newline)
@@ -179,6 +179,55 @@ namespace GameEngine
         }
         #endregion
 
+        #region From Input
+        public static void ParseUniversalCommand(string input)
+        {
+            string command = input.Split(' ')[0];
+
+            if (universalCommands.ContainsKey(command))
+                universalCommands[input].ExecuteDelegate(input.Remove(0, command.Length));
+            else
+            {
+                var color = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Command '{command}' is not valid.");
+                Console.ForegroundColor = color;
+            }
+        }
+
+        public static void ParseUniversalCommand(string input, Dictionary<string, ConsoleCommand> additonalCommands)
+        {
+            string command = input.Split(' ')[0];
+
+            if (universalCommands.ContainsKey(command))
+                universalCommands[input].ExecuteDelegate(input.Remove(0, command.Length));
+            else if (additonalCommands.ContainsKey(command))
+                additonalCommands[input].ExecuteDelegate(input.Remove(0, command.Length));
+            else
+            {
+                var color = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Command '{command}' is not valid.");
+                Console.ForegroundColor = color;
+            }
+        }
+
+        public static void ParseCommandSet(string input, Dictionary<string, ConsoleCommand> commands)
+        {
+            string command = input.Split(' ')[0];
+
+            if (commands.ContainsKey(command))
+                commands[command].ExecuteDelegate(input.Remove(0, command.Length));
+            else
+            {
+                var color = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Command '{command}' is not valid.");
+                Console.ForegroundColor = color;
+            }
+        }
+        #endregion
+
         public static void RegisterUniversalCommand(ConsoleCommand command)
         {
             if (!universalCommands.ContainsKey(command.Name))
@@ -232,15 +281,22 @@ namespace GameEngine
         public void GetNextCommand(string message, bool newline, bool allowUniversalCommands)
         {
             if (allowUniversalCommands)
-                ConsolePrompts.GetNextUniversalCommand(message, newline, entityCommands);
-            else ConsolePrompts.GetNextCommand(message, newline, entityCommands);
+                CommandManager.GetNextUniversalCommand(message, newline, entityCommands);
+            else CommandManager.GetNextCommand(message, newline, entityCommands);
         }
 
         public async Task GetNextCommandAsync(string message, bool newline, bool allowUniversalCommands)
         {
             if (allowUniversalCommands)
-                await ConsolePrompts.GetNextUniversalCommandAsync(message, newline, entityCommands);
-            else await ConsolePrompts.GetNextCommandAsync(message, newline, entityCommands);
+                await CommandManager.GetNextUniversalCommandAsync(message, newline, entityCommands);
+            else await CommandManager.GetNextCommandAsync(message, newline, entityCommands);
+        }
+
+        public void ParseCommand(string input, bool allowUniversalCommands)
+        {
+            if (allowUniversalCommands)
+                CommandManager.ParseUniversalCommand(input, entityCommands);
+            else CommandManager.ParseCommandSet(input, entityCommands);
         }
 
         public void RegisterCommand(ConsoleCommand command)
