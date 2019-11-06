@@ -43,6 +43,8 @@ namespace CSharpPlayground.Wumpus
             gameBoard = generator;
             window = WumpusWindow.StartWindow(this);
             window.FormClosed += OnWindowClose;
+
+            ConsolePrompts.SetTextBox(window.consoleInput);
         }
 
         public override void Awake()
@@ -179,6 +181,8 @@ namespace CSharpPlayground.Wumpus
 
         public static string GetNextCommand()
         {
+            if (commandq.Count == 0)
+                return string.Empty;
             return instance.commandq.Dequeue();
         }
 

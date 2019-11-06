@@ -14,9 +14,7 @@ namespace GameEngine
     public static class ConsolePrompts
     {
         static Dictionary<string, ConsoleCommand> universalCommands = new Dictionary<string, ConsoleCommand>();
-
         
-
         #region Sync
         public static string UserInputPrompt(string message, bool newline)
         {

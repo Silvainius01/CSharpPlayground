@@ -89,9 +89,9 @@
 
         #endregion
 
-        private System.Windows.Forms.Label consoleLabel;
-        private System.Windows.Forms.TextBox consoleInput;
-        private System.Windows.Forms.TextBox consoleOutput;
-        private System.Windows.Forms.PictureBox pictureBox1;
+        public System.Windows.Forms.Label consoleLabel;
+        public System.Windows.Forms.TextBox consoleInput;
+        public System.Windows.Forms.TextBox consoleOutput;
+        public System.Windows.Forms.PictureBox pictureBox1;
     }
 }
