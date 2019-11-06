@@ -89,6 +89,10 @@ namespace GameEngine
         public const double RAD2DEG = 360 / (Math.PI * 2);
         public const double DEG2RAD = (Math.PI * 2) / 360;
 
+        public static int Clamp(int v, int min, int max)
+        {
+            return Min(max, Max(v, min));
+        }
         public static float Clamp(float v, float min, float max)
         {
             return Min(max, Max(v, min));
@@ -101,6 +105,19 @@ namespace GameEngine
             return value2;
         }
         public static float Max(float value1, float value2)
+        {
+            if (value1 > value2)
+                return value1;
+            return value2;
+        }
+
+        public static int Min(int value1, int value2)
+        {
+            if (value1 < value2)
+                return value1;
+            return value2;
+        }
+        public static int Max(int value1, int value2)
         {
             if (value1 > value2)
                 return value1;

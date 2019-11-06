@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -8,6 +9,11 @@ using System.Text;
 using System.Threading.Tasks;
 using GameEngine;
 
+// using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+using System.Collections.ObjectModel;
+
 namespace CSharpPlayground.Wumpus
 {
     public class WumpusGameManager : Component
@@ -16,6 +22,13 @@ namespace CSharpPlayground.Wumpus
 
         IBoardGenerator gameBoard;
         Dictionary<Type, List<BoardEntity>> entityDict = new Dictionary<Type, List<BoardEntity>>();
+        WumpusWindow window;
+
+        int currCommIndex = -1;
+        List<string> commandLineHistory = new List<string>();
+        Queue<string> commandq = new Queue<string>();
+
+        public static bool WindowOpen { get; private set; } = true;
 
         public static WumpusGameManager CreateInstance(IBoardGenerator generator)
         {
@@ -28,6 +41,8 @@ namespace CSharpPlayground.Wumpus
         public WumpusGameManager(IBoardGenerator generator)
         {
             gameBoard = generator;
+            window = WumpusWindow.StartWindow(this);
+            window.FormClosed += OnWindowClose;
         }
 
         public override void Awake()
@@ -138,6 +153,38 @@ namespace CSharpPlayground.Wumpus
                 rIndex = indexMap[rIndex];
 
             return instance.gameBoard.rooms[rIndex];
+        }
+
+        public void ReceiveCommand(string command)
+        {
+            commandq.Enqueue(command);
+            commandLineHistory.Add(command);
+            ResetCommandIndex();
+        }
+        public string GetCommandHistoryNext(int step)
+        {
+            currCommIndex = Mathc.Clamp(currCommIndex + step, 0, commandLineHistory.Count);
+            if (currCommIndex == commandLineHistory.Count)
+                return string.Empty;
+            return commandLineHistory[currCommIndex];
+        }
+        public string GetCommandHistoryLast()
+        {
+            return GetCommandHistoryNext(-currCommIndex);
+        }
+        public void ResetCommandIndex()
+        {
+            currCommIndex = commandLineHistory.Count;
+        }
+
+        public static string GetNextCommand()
+        {
+            return instance.commandq.Dequeue();
+        }
+
+        public void OnWindowClose(object sender, EventArgs e)
+        {
+            WindowOpen = false;
         }
     }
 }

@@ -23,29 +23,13 @@ namespace CSharpPlayground
     {
         static void Main(string[] args)
         {
-            NeuralNetwork testNetwork = new NeuralNetwork(5, 5, 9, 7);
             EngineManager engineManager = new EngineManager();
             WumpusGameManager gameManager = WumpusGameManager.CreateInstance(new DefaultBoardGenerator(10, 10, false));
 
-
-            
-
-
-           
-
-
-
-            while (true)
+            while (WumpusGameManager.WindowOpen)
             {
                 EngineManager.FrameUpdate();
             }
-
-            Console.ReadLine();
-        }
-
-        private static void form1_Paint(object sender, PaintEventArgs e)
-        {
-            Graphics g = e.Graphics;
         }
     }
 }
