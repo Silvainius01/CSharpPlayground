@@ -3,15 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using GameEngine;
 
 namespace CSharpPlayground.Wumpus
 {
     class Player : BoardEntity
     {
+        bool invChanged = false;
+
         EntityCommandModule commandModule;
         Dictionary<ITEM_ID, int> inventory = new Dictionary<ITEM_ID, int>();
         Task nextCommandTask =null;
+        TextBox inventoryWindow;
+
+        public Player(TextBox invWindow)
+        {
+            inventoryWindow = invWindow;
+        }
 
         public override void Awake()
         {
@@ -36,17 +45,21 @@ namespace CSharpPlayground.Wumpus
             if (HasItemInInventory(item))
                 inventory[item] += count;
             else inventory.Add(item, count);
+            invChanged = true;
         }
 
         public void RemoveItem(ITEM_ID item, int count = 1)
         {
             if (HasItemInInventory(item))
+            {
+                invChanged = true;
                 inventory[item] -= inventory[item] > count ? count : inventory[item];
+            }
         }
 
         public bool HasItemInInventory(ITEM_ID item)
         {
-            return inventory.ContainsKey(item) || inventory[item] > 0;
+            return inventory.ContainsKey(item) && inventory[item] > 0;
         }
 
         void PeekCommand(string input) { }
@@ -63,13 +76,30 @@ namespace CSharpPlayground.Wumpus
                 if (kvp.Value > 0)
                 {
                     hasItems = true;
-                    msg.Append($"\n\t{kvp.Key} * {kvp.Value}");
+                    msg.Append($"\r\n\t{kvp.Key} * {kvp.Value}");
                 }
             }
             if (!hasItems)
-                msg.Append("\n\t*Empty*");
+                msg.Append("\r\n\t*Empty*");
 
             WumpusGameManager.WriteLine(msg.ToString());
+        }
+
+        string GetInventoryString()
+        {
+            bool hasItems = false;
+            StringBuilder msg = new StringBuilder();
+            foreach (var kvp in inventory)
+            {
+                if (kvp.Value > 0)
+                {
+                    hasItems = true;
+                    msg.Append($"\r\n{kvp.Key} * {kvp.Value}");
+                }
+            }
+            if (!hasItems)
+                msg.Append("\r\n*Empty*");
+            return msg.ToString();
         }
     }
 }

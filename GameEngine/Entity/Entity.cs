@@ -10,7 +10,7 @@ namespace GameEngine
     /// <summary>
     /// Base class for entities, does not contain a definition for position.
     /// </summary>
-    public class Entity
+    public class Entity : ILayeredObject
     {
         public readonly ulong Id;
         public bool Enabled { get; private set; }
@@ -28,6 +28,8 @@ namespace GameEngine
                 __layer__ = value;
             }
         }
+
+        public Dictionary<int, int> Layers { get; } = new Dictionary<int, int>();
 
         public Entity(bool enabled = true, int layer = 0)
         {
@@ -64,8 +66,7 @@ namespace GameEngine
             T c = (T)Activator.CreateInstance(typeof(T));
             c.entity = this;
             components.Add(typeof(T), c);
-            EngineManager.newComponents[Layer].Add(c);
-            c.Awake();
+            EngineManager.RegisterNewComponent(c);
             return c;
         }
         public T AddComponent<T>(params object[] args) where T : Component
@@ -73,8 +74,7 @@ namespace GameEngine
             T c = (T)Activator.CreateInstance(typeof(T), args);
             c.entity = this;
             components.Add(typeof(T), c);
-            EngineManager.newComponents[Layer].Add(c);
-            c.Awake();
+            EngineManager.RegisterNewComponent(c);
             return c;
         }
         public T GetComponent<T>() where T : Component
@@ -82,6 +82,12 @@ namespace GameEngine
             if (components.ContainsKey(typeof(T)))
                 return components[typeof(T)] as T;
             return null;
+        }
+
+        public void OnLayerChanged(int systemID, int? prevLayer, bool added)
+        {
+            foreach (var kvp in components)
+                EngineManager.RegisterNewComponent(kvp.Value);
         }
     }
 }

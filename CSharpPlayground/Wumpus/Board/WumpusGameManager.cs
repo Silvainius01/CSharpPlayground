@@ -56,11 +56,14 @@ namespace CSharpPlayground.Wumpus
 
         public override void Start()
         {
-            Player p = new Entity("Player").AddComponent<Player>();
+            Player p = new Entity("Player").AddComponent<Player>(window.invWindow);
             Wumpus w = new Entity("Wumpus").AddComponent<Wumpus>();
 
             p.SetRoom(GetRandomRoom());
             w.SetRoom(GetRandomUnconnectedRoom(p.CurrentRoom));
+
+            p.GiveItem(ITEM_ID.BOW);
+            p.GiveItem(ITEM_ID.ARROW, 5);
         }
 
         public override void Update()

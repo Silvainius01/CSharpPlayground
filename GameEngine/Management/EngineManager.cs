@@ -7,6 +7,7 @@ using System.Data;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Runtime.Remoting.Messaging;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,14 +16,65 @@ using System.Windows.Forms;
 
 namespace GameEngine
 {
+    internal interface ILayeredObject
+    {
+        Dictionary<int, int> Layers { get; } 
+
+        void OnLayerChanged(int systemID, int? prevLayer, bool added);
+    }
+
+    internal class LayeredSystem<T> where T : ILayeredObject
+    {
+        public readonly int id;
+        public List<int> layerIDs = new List<int>();
+        public Dictionary<int, HashSet<T>> objDict = new Dictionary<int, HashSet<T>>();
+
+        public int Count { get { return layerIDs.Count; } }
+
+        public HashSet<T> this[int index]
+        {
+            get { return objDict[index]; }
+            set { objDict[index] = value; }
+        }
+
+        public LayeredSystem()
+        {
+            id = this.GetHashCode();
+        }
+
+        /// <summary>
+        /// Sets the layer of the object within this sytem. Returns true if the object was added, false if just modified.
+        /// </summary>
+        public bool SetObjLayer(T obj, int layer)
+        {
+            // Remove entity from it's current layer
+            int currLayer = obj.Layers[id];
+            int? prevLayer = null;
+            if (objDict.ContainsKey(currLayer) && objDict[currLayer].Contains(obj))
+            {
+                prevLayer = currLayer;
+                objDict[currLayer].Remove(obj);
+            }
+
+            // If the new layer doesn't exist
+            if (!objDict.ContainsKey(layer))
+            {
+                objDict.Add(layer, new HashSet<T>());
+                layerIDs.Add(layer);
+                layerIDs.Sort();
+            }
+            objDict[layer].Add(obj);
+            obj.OnLayerChanged(id, prevLayer, prevLayer == null);
+            return prevLayer == null;
+        }
+    }
+
     public class EngineManager
     {
         private static ulong __nextId__ = 0;
         internal static ulong NextId { get { return __nextId__++; } }
 
-        static List<int> activeLayers = new List<int>();
-        static Dictionary<int, Entity> entityDict = new Dictionary<int, Entity>();
-        static Dictionary<int, HashSet<Entity>> layeredEntityDict = new Dictionary<int, HashSet<Entity>>();
+        static LayeredSystem<Entity> entityLayers = new LayeredSystem<Entity>();
         internal static Dictionary<int, List<Component>> newComponents = new Dictionary<int, List<Component>>();
 
         public static void FrameUpdate()
@@ -33,31 +85,29 @@ namespace GameEngine
 
         internal static void SetEntityLayer(Entity ent, int layer)
         {
-            // Remove entity from it's current layer
-            if (layeredEntityDict.ContainsKey(ent.Layer) && layeredEntityDict[ent.Layer].Contains(ent))
-                layeredEntityDict[ent.Layer].Remove(ent);
-         
-            // If the new layer doesn't exist
-            if (!layeredEntityDict.ContainsKey(layer))
-            {
-                layeredEntityDict.Add(layer, new HashSet<Entity>());
-                newComponents.Add(layer, new List<Component>());
-                activeLayers.Add(layer);
-                activeLayers.Sort();
-            }
-            layeredEntityDict[layer].Add(ent);
+            entityLayers.SetObjLayer(ent, layer);
+        }
+        internal static void RegisterNewComponent(Component c)
+        {
+            if(!newComponents.ContainsKey(c.entity.Layer))
+                newComponents.Add(c.entity.Layer, new List<Component>());
+            newComponents[c.entity.Layer].Add(c);
+            c.Awake();
         }
 
         internal static void EntityUpdate()
         {
-            for(int i = 0; i < activeLayers.Count; ++i)
+            for(int i = 0; i < entityLayers.Count; ++i)
             {
-                int layer = activeLayers[i];
+                int layer = entityLayers.layerIDs[i];
 
+                // Update new components on this layer
                 foreach (var c in newComponents[layer])
                     c.Start();
                 newComponents[layer].Clear();
-                foreach (var ent in layeredEntityDict[layer])
+
+                // Update entities on this layer
+                foreach (var ent in entityLayers[layer])
                     ent.Update();
             }
         }
