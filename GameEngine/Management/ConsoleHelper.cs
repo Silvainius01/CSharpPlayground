@@ -4,10 +4,13 @@ using System.Collections.Generic;
 using System.Data;
 using System.Dynamic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Runtime.Remoting;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms.VisualStyles;
+using System.Xml.Serialization;
 
 namespace GameEngine
 {
@@ -52,7 +55,7 @@ namespace GameEngine
             string command = input.Split(' ')[0];
 
             if (universalCommands.ContainsKey(command))
-                universalCommands[input].ExecuteDelegate(input.Remove(0, command.Length));
+                universalCommands[input].Execute(input.Remove(0, command.Length));
             else
             {
                 var color = Console.ForegroundColor;
@@ -68,9 +71,9 @@ namespace GameEngine
             string command = input.Split(' ')[0];
 
             if (universalCommands.ContainsKey(command))
-                universalCommands[input].ExecuteDelegate(input.Remove(0, command.Length));
+                universalCommands[input].Execute(input.Remove(0, command.Length));
             else if (additonalCommands.ContainsKey(command))
-                additonalCommands[input].ExecuteDelegate(input.Remove(0, command.Length));
+                additonalCommands[input].Execute(input.Remove(0, command.Length));
             else
             {
                 var color = Console.ForegroundColor;
@@ -86,7 +89,7 @@ namespace GameEngine
             string command = input.Split(' ')[0];
 
             if (commands.ContainsKey(command))
-                commands[command].ExecuteDelegate(input.Remove(0, command.Length));
+                commands[command].Execute(input.Remove(0, command.Length));
             else
             {
                 var color = Console.ForegroundColor;
@@ -134,7 +137,7 @@ namespace GameEngine
             string command = input.Split(' ')[0];
 
             if (universalCommands.ContainsKey(command))
-                universalCommands[input].ExecuteDelegate(input.Remove(0, command.Length));
+                universalCommands[input].Execute(input.Remove(0, command.Length));
             else
             {
                 var color = Console.ForegroundColor;
@@ -150,9 +153,9 @@ namespace GameEngine
             string command = input.Split(' ')[0];
 
             if (universalCommands.ContainsKey(command))
-                universalCommands[input].ExecuteDelegate(input.Remove(0, command.Length));
+                universalCommands[input].Execute(input.Remove(0, command.Length));
             else if (additonalCommands.ContainsKey(command))
-                additonalCommands[input].ExecuteDelegate(input.Remove(0, command.Length));
+                additonalCommands[input].Execute(input.Remove(0, command.Length));
             else
             {
                 var color = Console.ForegroundColor;
@@ -168,7 +171,7 @@ namespace GameEngine
             string command = input.Split(' ')[0];
 
             if (commands.ContainsKey(command))
-                commands[command].ExecuteDelegate(input.Remove(0, command.Length));
+                commands[command].Execute(input.Remove(0, command.Length));
             else
             {
                 var color = Console.ForegroundColor;
@@ -185,7 +188,7 @@ namespace GameEngine
             string command = input.Split(' ')[0];
 
             if (universalCommands.ContainsKey(command))
-                universalCommands[input].ExecuteDelegate(input.Remove(0, command.Length));
+                universalCommands[input].Execute(input.Remove(0, command.Length));
             else
             {
                 var color = Console.ForegroundColor;
@@ -200,9 +203,9 @@ namespace GameEngine
             string command = input.Split(' ')[0];
 
             if (universalCommands.ContainsKey(command))
-                universalCommands[input].ExecuteDelegate(input.Remove(0, command.Length));
+                universalCommands[input].Execute(input.Remove(0, command.Length));
             else if (additonalCommands.ContainsKey(command))
-                additonalCommands[input].ExecuteDelegate(input.Remove(0, command.Length));
+                additonalCommands[input].Execute(input.Remove(0, command.Length));
             else
             {
                 var color = Console.ForegroundColor;
@@ -217,7 +220,7 @@ namespace GameEngine
             string command = input.Split(' ')[0];
 
             if (commands.ContainsKey(command))
-                commands[command].ExecuteDelegate(input.Remove(0, command.Length));
+                commands[command].Execute(input.Remove(0, command.Length));
             else
             {
                 var color = Console.ForegroundColor;
@@ -237,40 +240,76 @@ namespace GameEngine
 
     public class ConsoleCommand
     {
-        public delegate void ExecutionDelegate(string input);
+        public delegate void ExecutionDelegate(List<string> arguments);
 
         public string Name { get; set; }
-        public ExecutionDelegate ExecuteDelegate { get; set; }
+        ExecutionDelegate ExecuteDelegate { get; set; }
+        public List<string> arguments = new List<string>(); 
 
-        public static string GetNextArg(string input)
+        public ConsoleCommand(string name, ExecutionDelegate executionDelegate)
         {
-            StringBuilder sb = new StringBuilder(input);
+            Name = name;
+            ExecuteDelegate = executionDelegate;
+        }
 
-            // Spaces between arguments are eaten by parser
-            while (sb[0] == ' ')
-                sb.Remove(0, 1);
-            if(sb[0] == '"')
+        public void Execute(string inputStr)
+        {
+            ParseInput(inputStr);
+            ExecuteDelegate(arguments);
+        }
+
+        private void ParseInput(string inputStr)
+        {
+            StringBuilder input = new StringBuilder(inputStr);
+            StringBuilder args = new StringBuilder(inputStr.Length);
+            arguments.Clear();
+
+            // Parse command
+            while (input.Length > 0)
             {
-                for(int i = 1; i < sb.Length; ++i)
+                // Spaces between arguments are eaten by parser
+                while (input[0] == ' ')
+                    input.Remove(0, 1);
+
+                // Quotes are eaten by parser, everything inside them is added as an argument.
+                // If no closing quote is found, the rest of the command line is returned.
+                if (input[0] == '"')
                 {
-                    if (sb[i] != '"')
-                        continue;
+                    for (int i = 1; i < input.Length; ++i)
+                    {
+                        // Backslash adds the next character in the string to the arugment.
+                        if (input[i] == '\\' && i < input.Length - 1)
+                        {
+                            args.Append(input[++i]);
+                        }
+                        else if (input[i] != '"')
+                        {
+                            args.Append(input[i]);
+                        }
+                    }
 
-                    // Remove quotes, and everything after them
-                    sb.Remove(i, sb.Length-i);
-                    sb.Remove(0, 1);
-                    
-                    // Return what was inside the quotes as the next arg
-                    return sb.ToString();
+                    input.Remove(0, args.Length);
+                    AddArgument(ref args);
+                    continue;
                 }
+                // Return the next space seperated string
+                else
+                {
+                    for (int i = 0; i < input.Length && input[i] != ' '; ++i)
+                    {
+                        args.Append(input[i]);
+                    }
 
-                // If no closing quote is found, just return the rest of the command line.
-                sb.Remove(0, 1);
-                return sb.ToString();
+                    input.Remove(0, args.Length);
+                    AddArgument(ref args);
+                    continue;
+                }
             }
-
-            // Return the next string seperated by a space if no other format is encountered.
-            return sb.ToString().Split(' ')[0];
+        }
+        private void AddArgument(ref StringBuilder sb)
+        {
+            arguments.Add(sb.ToString());
+            sb.Clear();
         }
     }
 

@@ -14,7 +14,6 @@ namespace CSharpPlayground.Wumpus
 
         EntityCommandModule commandModule;
         Dictionary<ITEM_ID, int> inventory = new Dictionary<ITEM_ID, int>();
-        Task nextCommandTask =null;
         TextBox inventoryWindow;
 
         public Player(TextBox invWindow)
@@ -25,19 +24,28 @@ namespace CSharpPlayground.Wumpus
         public override void Awake()
         {
             commandModule = entity.AddComponent<EntityCommandModule>();
-            commandModule.RegisterCommand(new ConsoleCommand { Name = "Use", ExecuteDelegate = UseCommand });
-            commandModule.RegisterCommand(new ConsoleCommand { Name = "Peek", ExecuteDelegate = PeekCommand });
-            commandModule.RegisterCommand(new ConsoleCommand { Name = "Move", ExecuteDelegate = MoveCommand });
-            commandModule.RegisterCommand(new ConsoleCommand { Name = "Pickup", ExecuteDelegate = PickCommand });
-            commandModule.RegisterCommand(new ConsoleCommand { Name = "Drop", ExecuteDelegate = DropCommand });
-            commandModule.RegisterCommand(new ConsoleCommand { Name = "Inventory", ExecuteDelegate = InventoryCommand });
+            commandModule.RegisterCommand(new ConsoleCommand("Use", UseCommand));
+            commandModule.RegisterCommand(new ConsoleCommand("Peek", PeekCommand));
+            commandModule.RegisterCommand(new ConsoleCommand("Move", MoveCommand));
+            commandModule.RegisterCommand(new ConsoleCommand("Pickup", PickCommand));
+            commandModule.RegisterCommand(new ConsoleCommand("Drop", DropCommand));
+        }
+
+        public override void Init(BoardRoom room)
+        {
+            base.Init(room);
+            WumpusGameManager.WriteLine($"Player Spawned at room {CurrentRoom.index}");
         }
 
         public override void Update()
         {
-            string command = WumpusGameManager.GetNextCommand();
-            if (command != null)
-                commandModule.ParseCommand(command, false);          
+            if (WumpusGameManager.GetNextCommand(out string command))
+                commandModule.ParseCommand(command, false);
+            if (invChanged)
+            {
+                invChanged = false;
+                WumpusWindow.SetTextSafe(GetInventoryString(), inventoryWindow);
+            }
         }
 
         public void GiveItem(ITEM_ID item, int count = 1)
@@ -62,28 +70,26 @@ namespace CSharpPlayground.Wumpus
             return inventory.ContainsKey(item) && inventory[item] > 0;
         }
 
-        void PeekCommand(string input) { }
-        void MoveCommand(string input) { }
-        void UseCommand(string input) { }
-        void PickCommand(string input) { }
-        void DropCommand(string input) { }
-        void InventoryCommand(string input)
+        void PeekCommand(List<string> arguments) { }
+        void MoveCommand(List<string> arguments) { }
+        void UseCommand(List<string> arguments)
         {
-            bool hasItems = false;
-            StringBuilder msg = new StringBuilder($"Inventory: ");
-            foreach(var kvp in inventory)
+            if (arguments.Count == 0)
             {
-                if (kvp.Value > 0)
-                {
-                    hasItems = true;
-                    msg.Append($"\r\n\t{kvp.Key} * {kvp.Value}");
-                }
+                WumpusGameManager.WriteLine($"Invalid Command Format: No item specified.");
+                return;
             }
-            if (!hasItems)
-                msg.Append("\r\n\t*Empty*");
 
-            WumpusGameManager.WriteLine(msg.ToString());
+            if (ItemManager.StringToItem(arguments[0], out ITEM_ID item))
+            {
+                if(HasItemInInventory(item))
+                    WumpusGameManager.WriteLine($"Used {item}!!");
+                else WumpusGameManager.WriteLine($"Invalid Command Input: \"{arguments[0]}\" is not in your inventory.");
+            }
+            else WumpusGameManager.WriteLine($"Invalid Command Input: \"{arguments[0]}\" is not a valid item.");
         }
+        void PickCommand(List<string> arguments) { }
+        void DropCommand(List<string> arguments) { }
 
         string GetInventoryString()
         {

@@ -16,7 +16,9 @@ namespace CSharpPlayground
     {
         WumpusGameManager manager;
 
-        delegate void SafeCallDelegate(string str);
+        delegate void StringDelegate(string str);
+        delegate void StringTextBoxDelegate(string str, TextBox textBox);
+        delegate void TextBoxDelegate(TextBox textBox);
 
         public WumpusWindow(WumpusGameManager manager)
         {
@@ -85,15 +87,45 @@ namespace CSharpPlayground
             if(e.KeyCode == Keys.Up)
                 consoleInput.SelectionStart = consoleInput.TextLength;
         }
-
-        public void AppendToConsoleSafe(string msg)
+        private void ConsoleInput_Enter(object sender, System.EventArgs e)
         {
-            if (consoleOutput.InvokeRequired)
+            if(consoleInput.Text.Length > 0)
             {
-                var d = new SafeCallDelegate(AppendToConsoleSafe);
-                consoleOutput.Invoke(d, msg);
+                manager.ReceiveCommand(consoleInput.Text);
+                consoleInput.Clear();
             }
-            else consoleOutput.AppendText(msg);
+        }
+
+        public static void AppendToTextBoxSafe(string msg, TextBox textBox)
+        {
+            if (textBox.InvokeRequired)
+            {
+                var d = new StringTextBoxDelegate(AppendToTextBoxSafe);
+                textBox.Invoke(d, msg, textBox);
+            }
+            else textBox.AppendText(msg);
+        }
+        public static void ClearTextSafe(TextBox textBox)
+        {
+            if (textBox.InvokeRequired)
+            {
+                var d = new TextBoxDelegate(ClearTextSafe);
+                textBox.Invoke(d);
+            }
+            else textBox.Clear();
+        }
+        public static void SetTextSafe(string msg, TextBox textBox)
+        {
+            if (textBox.InvokeRequired)
+            {
+                var d = new StringTextBoxDelegate(AppendToTextBoxSafe);
+                textBox.Invoke(d, msg, textBox);
+            }
+            else
+            {
+                textBox.Clear();
+                textBox.AppendText(msg);
+            }
         }
     }
 }

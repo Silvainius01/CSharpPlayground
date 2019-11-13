@@ -51,6 +51,8 @@
             this.consoleInput.Name = "consoleInput";
             this.consoleInput.Size = new System.Drawing.Size(600, 22);
             this.consoleInput.TabIndex = 0;
+            this.consoleInput.KeyDown += ConsoleInput_KeyDown;
+            this.consoleInput.KeyUp += ConsoleInput_KeyUp;
             // 
             // consoleOutput
             // 

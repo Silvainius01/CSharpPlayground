@@ -10,15 +10,32 @@ namespace CSharpPlayground.Wumpus
     public enum WUMPUS_DIFFICULTY { EASY, MEDIUM, HARD }
     class Wumpus : BoardEntity
     {
-        Timer moveTimer = new Timer(5.0f, true);
+        Timer moveTimer = new Timer(1.0f, true);
+        Player player;
 
+        public void Init(BoardRoom room, Player p)
+        {
+            base.Init(room);
+            player = p;
+            WumpusGameManager.WriteLine($"Wumpus Spawned at room {CurrentRoom.index}");
+        }
 
         public override void Update()
         {
-            if(moveTimer.Update(TimeManager.DeltaTime))
+            if (moveTimer.Update(TimeManager.DeltaTime))
             {
-                WumpusGameManager.WriteLine("You hear shuffling in the darkness...");
                 moveTimer.Activate();
+
+                SetRoom(WumpusGameManager.GetRandomConnectedRoom(CurrentRoom));
+
+                if (CurrentRoom.ContainsEntity(player))
+                {
+                    WumpusGameManager.WriteLine($"The wumpus killed you!! ({CurrentRoom.index})");
+                }
+                else
+                {
+                    WumpusGameManager.WriteLine($"You hear shuffling in the darkness... ({CurrentRoom.index})");
+                }
             }
         }
     }

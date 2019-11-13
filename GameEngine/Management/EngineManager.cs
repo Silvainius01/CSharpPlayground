@@ -48,13 +48,17 @@ namespace GameEngine
         public bool SetObjLayer(T obj, int layer)
         {
             // Remove entity from it's current layer
-            int currLayer = obj.Layers[id];
             int? prevLayer = null;
-            if (objDict.ContainsKey(currLayer) && objDict[currLayer].Contains(obj))
+            if (obj.Layers.ContainsKey(id))
             {
-                prevLayer = currLayer;
-                objDict[currLayer].Remove(obj);
+                int currLayer = obj.Layers[id];
+                if (objDict.ContainsKey(currLayer) && objDict[currLayer].Contains(obj))
+                {
+                    prevLayer = currLayer;
+                    objDict[currLayer].Remove(obj);
+                }
             }
+            else obj.Layers.Add(id, layer);
 
             // If the new layer doesn't exist
             if (!objDict.ContainsKey(layer))

@@ -24,7 +24,7 @@ namespace CSharpPlayground
         static void Main(string[] args)
         {
             EngineManager engineManager = new EngineManager();
-            WumpusGameManager gameManager = WumpusGameManager.CreateInstance(new DefaultBoardGenerator(10, 10, false));
+            WumpusGameManager gameManager = WumpusGameManager.CreateInstance(new DefaultBoardGenerator(5, 5, false));
 
             while (WumpusGameManager.WindowOpen)
             {

@@ -59,8 +59,8 @@ namespace CSharpPlayground.Wumpus
             Player p = new Entity("Player").AddComponent<Player>(window.invWindow);
             Wumpus w = new Entity("Wumpus").AddComponent<Wumpus>();
 
-            p.SetRoom(GetRandomRoom());
-            w.SetRoom(GetRandomUnconnectedRoom(p.CurrentRoom));
+            p.Init(GetRandomRoom());
+            w.Init(GetRandomUnconnectedRoom(p.CurrentRoom), p);
 
             p.GiveItem(ITEM_ID.BOW);
             p.GiveItem(ITEM_ID.ARROW, 5);
@@ -194,11 +194,19 @@ namespace CSharpPlayground.Wumpus
                 return null;
             return instance.commandq.Dequeue();
         }
+        public static bool GetNextCommand(out string command)
+        {
+            command = null;
+            if (instance.commandq.Count == 0)
+                return false;
+            command = instance.commandq.Dequeue();
+            return true;
+        }
 
         public static void WriteLine(string msg)
         {
-            instance.window.AppendToConsoleSafe(msg);
-            instance.window.AppendToConsoleSafe("\r\n");
+            WumpusWindow.AppendToTextBoxSafe(msg, instance.window.consoleOutput);
+            WumpusWindow.AppendToTextBoxSafe("\r\n", instance.window.consoleOutput);
         }
         #endregion
     }
