@@ -12,6 +12,7 @@ namespace CSharpPlayground.Wumpus
     {
         Timer moveTimer = new Timer(1.0f, true);
         Player player;
+        int health = WumpusGameSettings.MAX_WUMPUS_HEALTH;
 
         public void Init(BoardRoom room, Player p)
         {
@@ -37,6 +38,18 @@ namespace CSharpPlayground.Wumpus
                     WumpusGameManager.WriteLine($"You hear shuffling in the darkness... ({CurrentRoom.index})");
                 }
             }
+        }
+        public override void OnDestroy()
+        {
+            CurrentRoom.RemoveEntity(this);
+            --WumpusGameManager.wumpusCount;
+        }
+
+        public void TakeDamage(int damage)
+        {
+            health -= damage;
+            if (health <= 0)
+                EngineManager.DestroyEntity(this.entity);
         }
     }
 }

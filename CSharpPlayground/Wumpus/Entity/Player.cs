@@ -76,14 +76,30 @@ namespace CSharpPlayground.Wumpus
         {
             if (arguments.Count == 0)
             {
-                WumpusGameManager.WriteLine($"Invalid Command Format: No item specified.");
+                WumpusGameManager.WriteLine($"Invalid Command Input: No item specified.");
                 return;
             }
 
             if (ItemManager.StringToItem(arguments[0], out ITEM_ID item))
             {
-                if(HasItemInInventory(item))
+                if (HasItemInInventory(item))
+                {
                     WumpusGameManager.WriteLine($"Used {item}!!");
+                    switch(item)
+                    {
+                        case ITEM_ID.ARROW:
+                            WumpusGameManager.WriteLine($"Invalid Command Input: Arrows cannot be used directly.");
+                            break;
+                        case ITEM_ID.BOW:
+                            if(arguments.Count > 1 && int.TryParse(arguments[1], out int roomIndex))
+                            {
+                                ShootBow(roomIndex);
+                            }
+                            break;
+                        case ITEM_ID.TORCH:
+                            break;
+                    }
+                }
                 else WumpusGameManager.WriteLine($"Invalid Command Input: \"{arguments[0]}\" is not in your inventory.");
             }
             else WumpusGameManager.WriteLine($"Invalid Command Input: \"{arguments[0]}\" is not a valid item.");
@@ -106,6 +122,28 @@ namespace CSharpPlayground.Wumpus
             if (!hasItems)
                 msg.Append("\r\n*Empty*");
             return msg.ToString();
+        }
+
+        void ShootBow(int roomIndex)
+        {
+            BoardRoom nextRoom = CurrentRoom.GetConnectedRoom(roomIndex);
+            if(nextRoom==null)
+            {
+                WumpusGameManager.WriteLine($"Invalid Command Input: Room {roomIndex} is not connected to room {CurrentRoom.index}");
+                return;
+            }
+            if(!HasItemInInventory(ITEM_ID.ARROW))
+            {
+                WumpusGameManager.WriteLine($"You have no Arrows!");
+                return;
+            }
+
+            RemoveItem(ITEM_ID.ARROW);
+            if(nextRoom.ContainsEntityType<Wumpus>())
+            {
+                foreach (var wumpus in nextRoom.GetEntitiesInRoom<Wumpus>())
+                    wumpus.TakeDamage(1);
+            }
         }
     }
 }

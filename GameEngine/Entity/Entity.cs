@@ -16,7 +16,7 @@ namespace GameEngine
         public bool Enabled { get; private set; }
         public string Name { get; private set; }
 
-        private Dictionary<Type, Component> components = new Dictionary<Type, Component>();
+        internal Dictionary<Type, Component> components = new Dictionary<Type, Component>();
 
         private int __layer__;
         public int Layer

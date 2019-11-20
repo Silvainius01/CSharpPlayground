@@ -71,6 +71,16 @@ namespace GameEngine
             obj.OnLayerChanged(id, prevLayer, prevLayer == null);
             return prevLayer == null;
         }
+
+        public void RemoveObj(T obj)
+        {
+            if(obj.Layers.ContainsKey(id))
+            {
+                int layer = obj.Layers[id];
+                if (objDict[layer].Contains(obj))
+                    objDict[layer].Remove(obj);
+            }
+        }
     }
 
     public class EngineManager
@@ -97,6 +107,26 @@ namespace GameEngine
                 newComponents.Add(c.entity.Layer, new List<Component>());
             newComponents[c.entity.Layer].Add(c);
             c.Awake();
+        }
+
+        public static void DestroyEntity(Entity e)
+        {
+            // Remove entity from the layer system
+            int objLayer = e.Layers[entityLayers.id];
+            entityLayers.RemoveObj(e);
+
+            // Remove any components from the init list
+            for(int i = 0; i < newComponents[objLayer].Count; ++i)
+            {
+                var comp = newComponents[objLayer][i];
+                if (comp.entity.Id == e.Id)
+                    newComponents[objLayer].RemoveAt(i--);
+            }
+
+            // Destroy components.
+            foreach (var comp in e.components)
+                comp.Value.Destroy();
+            e.components.Clear();
         }
 
         internal static void EntityUpdate()

@@ -6,13 +6,14 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Policy;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using GameEngine;
 
 // using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Collections.ObjectModel;
+using System.Windows.Forms.VisualStyles;
 
 namespace CSharpPlayground.Wumpus
 {
@@ -20,13 +21,14 @@ namespace CSharpPlayground.Wumpus
     {
         static WumpusGameManager instance = null;
 
-        IBoardGenerator gameBoard;
-        Dictionary<Type, List<BoardEntity>> entityDict = new Dictionary<Type, List<BoardEntity>>();
         WumpusWindow window;
+        IBoardGenerator gameBoard;
 
         int currCommIndex = -1;
         List<string> commandLineHistory = new List<string>();
         Queue<string> commandq = new Queue<string>();
+
+        public static uint wumpusCount = 0;
 
         public static bool WindowOpen { get; private set; } = true;
 
@@ -57,13 +59,29 @@ namespace CSharpPlayground.Wumpus
         public override void Start()
         {
             Player p = new Entity("Player").AddComponent<Player>(window.invWindow);
-            Wumpus w = new Entity("Wumpus").AddComponent<Wumpus>();
-
             p.Init(GetRandomRoom());
-            w.Init(GetRandomUnconnectedRoom(p.CurrentRoom), p);
-
             p.GiveItem(ITEM_ID.BOW);
             p.GiveItem(ITEM_ID.ARROW, 5);
+
+            WeakReference wumpusRef = null;
+            for (uint i = 0; i < WumpusGameSettings.WUMPUS_COUNT; ++i)
+            {
+                Wumpus w = new Entity("Wumpus").AddComponent<Wumpus>();
+                w.Init(GetRandomUnconnectedRoom(p.CurrentRoom), p);
+                ++wumpusCount;
+
+                wumpusRef = new WeakReference(w);
+                w.TakeDamage(1);
+                w = null;
+            }
+
+            while (wumpusRef.IsAlive)
+            {
+                WriteLine("Wumpus is still ref'd!");
+                GC.Collect();
+                Thread.Sleep(100);
+            }
+            WriteLine("Wumpus Cleaned!");
         }
 
         public override void Update()

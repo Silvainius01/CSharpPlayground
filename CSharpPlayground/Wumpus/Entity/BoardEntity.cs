@@ -13,15 +13,23 @@ namespace CSharpPlayground.Wumpus
 
         public void SetRoom(BoardRoom room)
         {
+            var type = this.GetType();
             if (CurrentRoom != null)
-                CurrentRoom.RemoveEntity(this);
-            room.AddEntity(this);
+                CurrentRoom.RemoveEntity(this, type);
+            room.AddEntity(this, type);
             CurrentRoom = room;
         }
 
         public virtual void Init(BoardRoom room)
         {
             SetRoom(room);
+        }
+
+        public override void OnDestroy()
+        {
+            var type = this.GetType();
+            CurrentRoom.RemoveEntity(this, type);
+            CurrentRoom = null;
         }
     }
 }

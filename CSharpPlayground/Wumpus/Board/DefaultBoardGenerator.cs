@@ -37,7 +37,7 @@ namespace CSharpPlayground.Wumpus
             // Construct Rooms
             for (int i = 0; i < rooms.Capacity; ++i)
             {
-                rooms.Add(new BoardRoom2D(i, new Vector2Int(i % dimensions.X, i / dimensions.Y)));
+                rooms.Add(new BoardRoom2D(i, new Vector2(i % dimensions.X, i / dimensions.Y)));
             }
 
             // Connect rooms

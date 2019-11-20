@@ -12,7 +12,16 @@ namespace GameEngine
         public Entity entity { get; internal set; }
 
         public virtual void Awake() { }
+
         public virtual void Start() { }
         public virtual void Update() { }
+
+        public virtual void OnDestroy() { }
+
+        internal void Destroy()
+        {
+            OnDestroy();
+            entity = null;
+        }
     }
 }
