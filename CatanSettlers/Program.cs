@@ -8,7 +8,7 @@ using GameEngine;
 
 namespace CatanSettlers
 {
-    class BoardGenerator
+    class HexGridGenerator
     {
         int layerCount = 0;
         List<HexTile> tiles = new List<HexTile>();
@@ -27,35 +27,55 @@ namespace CatanSettlers
                 for (int j = 0; j < qLimit; ++j)
                 {
                     HexTile currTile = q.Dequeue();
-
-                    // Create 0th tile if it does not exist
-                    if (currTile.connections[0] == null)
-                    {
-                        HexTile newTile = (currTile.CreateConnectedTile(0, tiles.Count));
-                        q.Enqueue(newTile);
-                        tiles.Add(newTile);
-                    }
-
-                    // Create and/or connect tiles around currTile
-                    for(int k = 1; k < currTile.connections.Length; ++k)
-                    {
-                        if(currTile.connections[k] == null)
-                        {
-                            HexTile newTile = (currTile.CreateConnectedTile(k, tiles.Count));
-                            q.Enqueue(newTile);
-                            tiles.Add(newTile);
-                        }
-
-                        // Connect to the tile around the parent that is "behind" it
-                        HexTile.Connect((i + 4) % 6, currTile.connections[k], currTile.connections[k - 1]);
-                    }
-
-                    // Connect first tile to last tile.
-                    HexTile.Connect(4, currTile.connections[0], currTile.connections[5]);
+                    FillTileConnections(currTile, in q);
                 }
             }
         }
 
+        public void AddLayer()
+        {
+            if(layerCount <= 0)
+            {
+                layerCount = 1;
+                tiles.Add(new HexTile(Vector2.Zero, 0, 0));
+                return;
+            }
+
+            Queue<HexTile> q = new Queue<HexTile>(tiles.Where(tile => tile.layer == layerCount - 1));
+
+            foreach(var tile in tiles.Where(tile => tile.layer == layerCount - 1))
+            {
+                FillTileConnections(tile, in q);
+            }
+        }
+
+        private void FillTileConnections(HexTile currTile, in Queue<HexTile> q)
+        {
+            // Create 0th tile if it does not exist
+            if (currTile.connections[0] == null)
+            {
+                HexTile newTile = (currTile.CreateConnectedTile(0, tiles.Count));
+                q.Enqueue(newTile);
+                tiles.Add(newTile);
+            }
+
+            // Create and/or connect tiles around currTile
+            for (int i = 1; i < currTile.connections.Length; ++i)
+            {
+                if (currTile.connections[i] == null)
+                {
+                    HexTile newTile = (currTile.CreateConnectedTile(i, tiles.Count));
+                    q.Enqueue(newTile);
+                    tiles.Add(newTile);
+                }
+
+                // Connect to the tile around the parent that is "behind" it
+                HexTile.Connect((i + 4) % 6, currTile.connections[i], currTile.connections[i - 1]);
+            }
+
+            // Connect first tile to last tile.
+            HexTile.Connect(4, currTile.connections[0], currTile.connections[5]);
+        }
 
         public string GetBoardInfo()
         {
@@ -133,12 +153,38 @@ namespace CatanSettlers
         }
     }
 
+    enum TerrainType
+    {
+        DESERT,
+        WOOD,
+        CLAY,
+        WHEAT,
+        SHEEP,
+        STONE,
+        WATER,
+        PORT_MISC,
+        PORT_wOOD,
+        PORT_CLAY,
+        PORT_WHEAT,
+        PORT_SHEEP,
+        PORT_STONE
+    }
 
     class Program
     {
         static void Main(string[] args)
         {
-            BoardGenerator generator = new BoardGenerator();
+            HexGridGenerator generator = new HexGridGenerator();
+            List<TerrainType> TerrainDeck = new List<TerrainType>(19)
+            {
+                TerrainType.DESERT,
+                TerrainType.WOOD, TerrainType.WOOD, TerrainType.WOOD, TerrainType.WOOD,
+                TerrainType.CLAY, TerrainType.CLAY, TerrainType.CLAY,
+                TerrainType.WHEAT, TerrainType.WHEAT, TerrainType.WHEAT, TerrainType.WHEAT,
+                TerrainType.SHEEP, TerrainType.SHEEP, TerrainType.SHEEP, TerrainType.SHEEP,
+                TerrainType.STONE, TerrainType.STONE, TerrainType.STONE,
+                TerrainType.WOOD, TerrainType.WOOD, TerrainType.WOOD, TerrainType.WOOD,
+            };
 
             generator.GenerateGridCirc(2);
             Console.WriteLine(generator.GetBoardInfo());
