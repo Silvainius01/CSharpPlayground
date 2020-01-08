@@ -27,15 +27,15 @@ namespace CSharpPlayground.Wumpus
             {
                 moveTimer.Activate();
 
-                SetRoom(WumpusGameManager.GetRandomConnectedRoom(CurrentRoom));
+                // SetRoom(WumpusGameManager.GetRandomConnectedRoom(CurrentRoom));
 
                 if (CurrentRoom.ContainsEntity(player))
                 {
-                    WumpusGameManager.WriteLine($"The wumpus killed you!! ({CurrentRoom.index})");
+                    // WumpusGameManager.WriteLine($"The wumpus killed you!! ({CurrentRoom.index})");
                 }
                 else
                 {
-                    WumpusGameManager.WriteLine($"You hear shuffling in the darkness... ({CurrentRoom.index})");
+                    // WumpusGameManager.WriteLine($"You hear shuffling in the darkness... ({CurrentRoom.index})");
                 }
             }
         }

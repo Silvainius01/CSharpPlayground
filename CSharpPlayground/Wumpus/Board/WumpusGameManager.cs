@@ -63,24 +63,13 @@ namespace CSharpPlayground.Wumpus
             p.GiveItem(ITEM_ID.BOW);
             p.GiveItem(ITEM_ID.ARROW, 5);
 
-            WeakReference wumpusRef = null;
             for (uint i = 0; i < WumpusGameSettings.WUMPUS_COUNT; ++i)
             {
                 Wumpus w = new Entity("Wumpus").AddComponent<Wumpus>();
                 w.Init(GetRandomUnconnectedRoom(p.CurrentRoom), p);
                 ++wumpusCount;
-
-                wumpusRef = new WeakReference(w);
-                w.TakeDamage(1);
-                w = null;
             }
 
-            while (wumpusRef.IsAlive)
-            {
-                WriteLine("Wumpus is still ref'd!");
-                GC.Collect();
-                Thread.Sleep(100);
-            }
             WriteLine("Wumpus Cleaned!");
         }
 

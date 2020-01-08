@@ -118,7 +118,7 @@ namespace CSharpPlayground
         {
             if (textBox.InvokeRequired)
             {
-                var d = new StringTextBoxDelegate(AppendToTextBoxSafe);
+                var d = new StringTextBoxDelegate(SetTextSafe);
                 textBox.Invoke(d, msg, textBox);
             }
             else

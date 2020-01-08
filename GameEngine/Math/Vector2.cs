@@ -123,6 +123,10 @@ namespace GameEngine
         {
             return $"({X}, {Y})";
         }
+        public string ToString(string format)
+        {
+            return $"({X.ToString(format)}, {Y.ToString(format)})";
+        }
     }
 
     public struct Vector2_64

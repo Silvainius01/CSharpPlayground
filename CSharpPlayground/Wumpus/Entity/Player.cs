@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -50,7 +51,7 @@ namespace CSharpPlayground.Wumpus
 
         public void GiveItem(ITEM_ID item, int count = 1)
         {
-            if (HasItemInInventory(item))
+            if (inventory.ContainsKey(item))
                 inventory[item] += count;
             else inventory.Add(item, count);
             invChanged = true;
@@ -70,8 +71,41 @@ namespace CSharpPlayground.Wumpus
             return inventory.ContainsKey(item) && inventory[item] > 0;
         }
 
-        void PeekCommand(List<string> arguments) { }
-        void MoveCommand(List<string> arguments) { }
+        void PeekCommand(List<string> arguments)
+        {
+            StringBuilder msg = new StringBuilder();
+            var connectedRooms = CurrentRoom.GetConnectedRooms();
+
+            msg.Append("Items in room:");
+            foreach (var kvp in CurrentRoom.GetItemCounts())
+            {
+                msg.Append($"\r\n{kvp.Key} : {kvp.Value}");
+            }
+
+            msg.Append("\r\nConnected Rooms:");
+            foreach (var room in connectedRooms)
+            {
+                msg.Append($"\r\n{room.index}");
+            }
+
+            WumpusGameManager.WriteLine(msg.ToString());
+        }
+        void MoveCommand(List<string> arguments) 
+        {
+            if (arguments.Count == 0)
+            {
+                WumpusGameManager.WriteLine($"Invalid Command Input: No room specified.");
+                return;
+            }
+
+            if(int.TryParse(arguments[0], out int targetRoom))
+            {
+                if (CurrentRoom.IsConnectedTo(targetRoom))
+                    SetRoom(CurrentRoom.GetConnectedRoom(targetRoom));
+                else WumpusGameManager.WriteLine("Invalid Command Input: Target room is not connected.");
+            }
+            else WumpusGameManager.WriteLine("Invalid Command Input: Did not enter a number.");
+        }
         void UseCommand(List<string> arguments)
         {
             if (arguments.Count == 0)
@@ -104,8 +138,50 @@ namespace CSharpPlayground.Wumpus
             }
             else WumpusGameManager.WriteLine($"Invalid Command Input: \"{arguments[0]}\" is not a valid item.");
         }
-        void PickCommand(List<string> arguments) { }
-        void DropCommand(List<string> arguments) { }
+        void PickCommand(List<string> arguments) 
+        {
+            if(arguments.Count == 0)
+            {
+                WumpusGameManager.WriteLine("Invalid Command Input: No item specified");
+                return;
+            }
+
+            if (ItemManager.StringToItem(arguments[0], out ITEM_ID item))
+            {
+                if (CurrentRoom.ContainsItem(item))
+                {
+                    int amount = CurrentRoom.GetItemCount(item);
+                    if (arguments.Count > 1 && int.TryParse(arguments[1], out int inputAmount) && inputAmount <= amount)
+                        amount = inputAmount;
+                    CurrentRoom.RemoveItem(item, amount);
+                    GiveItem(item, amount);
+                }
+                else WumpusGameManager.WriteLine($"Invalid Command Input: {item} is not in the room.");
+            }
+            else WumpusGameManager.WriteLine($"Invalid Command Input: {arguments[0]} is not an item.");
+        }
+        void DropCommand(List<string> arguments) 
+        {
+            if (arguments.Count == 0)
+            {
+                WumpusGameManager.WriteLine("Invalid Command Input: No item specified");
+                return;
+            }
+
+            if (ItemManager.StringToItem(arguments[0], out ITEM_ID item))
+            {
+                if (HasItemInInventory(item))
+                {
+                    int amount = inventory[item];
+                    if (arguments.Count > 1 && int.TryParse(arguments[1], out int inputAmount) && inputAmount <= amount)
+                        amount = inputAmount;
+                    CurrentRoom.AddItem(item, amount);
+                    RemoveItem(item, amount);
+                }
+                else WumpusGameManager.WriteLine($"Invalid Command Input: You do not have {item} in your inventory.");
+            }
+            else WumpusGameManager.WriteLine($"Invalid Command Input: {arguments[0]} is not an item.");
+        }
 
         string GetInventoryString()
         {

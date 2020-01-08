@@ -28,7 +28,7 @@ namespace CSharpPlayground.Wumpus
             this.plane = plane;
         }
     }
-    
+
     /// <summary>
     /// The class used by the game. Inherited classes should only contain data neccessary for board generation, as it will not be accessed by entities.
     /// </summary>
@@ -38,6 +38,7 @@ namespace CSharpPlayground.Wumpus
         Dictionary<int, BoardRoom> connections = new Dictionary<int, BoardRoom>();
         Dictionary<ulong, BoardEntity> entitiesInRoom = new Dictionary<ulong, BoardEntity>();
         Dictionary<Type, HashSet<BoardEntity>> entityTypesInRoom = new Dictionary<Type, HashSet<BoardEntity>>();
+        Dictionary<ITEM_ID, int> itemsInRoom = new Dictionary<ITEM_ID, int>();
 
         public int NumConnections { get { return connections.Count; } }
 
@@ -63,7 +64,7 @@ namespace CSharpPlayground.Wumpus
                     entityTypesInRoom[type].Add(entity);
                 return;
             }
-            entityTypesInRoom.Add(type, new HashSet<BoardEntity> () { entity });
+            entityTypesInRoom.Add(type, new HashSet<BoardEntity>() { entity });
         }
 
         public bool AddEntity(BoardEntity entity, Type entityType)
@@ -74,7 +75,7 @@ namespace CSharpPlayground.Wumpus
             AddEntityType(entity, entityType);
             return true;
         }
-        private void AddEntityType(BoardEntity entity, Type entityType) 
+        private void AddEntityType(BoardEntity entity, Type entityType)
         {
             if (entityTypesInRoom.ContainsKey(entityType))
             {
@@ -132,6 +133,38 @@ namespace CSharpPlayground.Wumpus
             return entityTypesInRoom[type].Cast<T>().ToArray();
         }
 
+        public void AddItem(ITEM_ID itemId, int count)
+        {
+            if (itemsInRoom.ContainsKey(itemId))
+                itemsInRoom[itemId] += count;
+            else itemsInRoom.Add(itemId, count);
+        }
+        /// <summary> Removes all items if count is less than 0 </summary>
+        public void RemoveItem(ITEM_ID itemId, int count)
+        {
+            if (itemsInRoom.ContainsKey(itemId))
+            {
+                int currCount = itemsInRoom[itemId];
+                itemsInRoom[itemId] -= count < 0 || count < currCount ? count : currCount;
+            }
+            else itemsInRoom.Add(itemId, 0);
+        }
+
+        public bool ContainsItem(ITEM_ID itemId)
+        {
+            return itemsInRoom.ContainsKey(itemId);
+        }
+        public int GetItemCount(ITEM_ID itemId)
+        {
+            if (!itemsInRoom.ContainsKey(itemId))
+                itemsInRoom.Add(itemId, 0);
+            return itemsInRoom[itemId];
+        }
+        public KeyValuePair<ITEM_ID, int>[] GetItemCounts()
+        {
+            return itemsInRoom.Where(kvp => kvp.Value > 0).ToArray();
+        }
+
         public bool ConnectRoom(BoardRoom room)
         {
             if (connections.ContainsKey(room.index))
@@ -147,7 +180,7 @@ namespace CSharpPlayground.Wumpus
             connections.Remove(room.index);
             return true;
         }
-        
+
         public bool IsConnectedTo(BoardRoom room)
         {
             return connections.ContainsKey(room.index);
@@ -160,11 +193,10 @@ namespace CSharpPlayground.Wumpus
         public BoardRoom[] GetConnectedRooms()
         {
             return connections.Values.ToArray();
-            //return connections.Values.Cast<BoardRoom>().ToArray();
         }
         public BoardRoom GetConnectedRoom(int index)
         {
-            if(IsConnectedTo(index))
+            if (IsConnectedTo(index))
             {
                 return connections[index];
             }
