@@ -11,14 +11,16 @@ namespace CatanSettlers
     class HexGridGenerator
     {
         int layerCount = 0;
-        List<HexTile> tiles = new List<HexTile>();
+        List<HexTile> allTiles = new List<HexTile>();
+        Dictionary<int, List<HexTile>> tileLayerDict = new Dictionary<int, List<HexTile>>();
+
         public void GenerateGridCirc(int numLayers)
         {
             Queue<HexTile> q = new Queue<HexTile>();
 
             this.layerCount = numLayers;
-            tiles.Add(new HexTile(Vector2.Zero, 0, 0));
-            q.Enqueue(tiles[0]);
+            allTiles.Add(new HexTile(Vector2.Zero, 0, 0));
+            q.Enqueue(allTiles[0]);
 
             // numLayers-1, as this algo will create up to the INDEX, instead of the COUNT.
             for (int i = 0; i < numLayers-1; ++i)
@@ -37,13 +39,13 @@ namespace CatanSettlers
             if(layerCount <= 0)
             {
                 layerCount = 1;
-                tiles.Add(new HexTile(Vector2.Zero, 0, 0));
+                allTiles.Add(new HexTile(Vector2.Zero, 0, 0));
                 return;
             }
 
-            Queue<HexTile> q = new Queue<HexTile>(tiles.Where(tile => tile.layer == layerCount - 1));
+            Queue<HexTile> q = new Queue<HexTile>(allTiles.Where(tile => tile.layer == layerCount - 1));
 
-            foreach(var tile in tiles.Where(tile => tile.layer == layerCount - 1))
+            foreach(var tile in allTiles.Where(tile => tile.layer == layerCount - 1))
             {
                 FillTileConnections(tile, in q);
             }
@@ -54,9 +56,9 @@ namespace CatanSettlers
             // Create 0th tile if it does not exist
             if (currTile.connections[0] == null)
             {
-                HexTile newTile = (currTile.CreateConnectedTile(0, tiles.Count));
+                HexTile newTile = (currTile.CreateConnectedTile(0, allTiles.Count));
                 q.Enqueue(newTile);
-                tiles.Add(newTile);
+                allTiles.Add(newTile);
             }
 
             // Create and/or connect tiles around currTile
@@ -64,9 +66,9 @@ namespace CatanSettlers
             {
                 if (currTile.connections[i] == null)
                 {
-                    HexTile newTile = (currTile.CreateConnectedTile(i, tiles.Count));
+                    HexTile newTile = (currTile.CreateConnectedTile(i, allTiles.Count));
                     q.Enqueue(newTile);
-                    tiles.Add(newTile);
+                    allTiles.Add(newTile);
                 }
 
                 // Connect to the tile around the parent that is "behind" it
@@ -77,13 +79,22 @@ namespace CatanSettlers
             HexTile.Connect(4, currTile.connections[0], currTile.connections[5]);
         }
 
+        private void AddTile(HexTile hexTile)
+        {
+            if (!tileLayerDict.ContainsKey(hexTile.layer))
+                tileLayerDict.Add(hexTile.layer, new List<HexTile>());
+            tileLayerDict[hexTile.layer].Add(hexTile);
+            allTiles.Add(hexTile);
+
+        }
+
         public string GetBoardInfo()
         {
             StringBuilder msg = new StringBuilder($"Num Layers: {layerCount}\n");
             StringBuilder tmsg = new StringBuilder();
             Dictionary<int, int> layerDict = new Dictionary<int, int>();
                        
-            foreach(var tile in tiles)
+            foreach(var tile in allTiles)
             {
                 if (!layerDict.ContainsKey(tile.layer))
                     layerDict.Add(tile.layer, 1);
