@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 using GameEngine;
 
@@ -183,22 +185,63 @@ namespace CatanSettlers
 
     class Program
     {
+        [STAThread]
         static void Main(string[] args)
         {
-            HexGridGenerator generator = new HexGridGenerator();
-            List<TerrainType> TerrainDeck = new List<TerrainType>(19)
-            {
-                TerrainType.DESERT,
-                TerrainType.WOOD, TerrainType.WOOD, TerrainType.WOOD, TerrainType.WOOD,
-                TerrainType.CLAY, TerrainType.CLAY, TerrainType.CLAY,
-                TerrainType.WHEAT, TerrainType.WHEAT, TerrainType.WHEAT, TerrainType.WHEAT,
-                TerrainType.SHEEP, TerrainType.SHEEP, TerrainType.SHEEP, TerrainType.SHEEP,
-                TerrainType.STONE, TerrainType.STONE, TerrainType.STONE,
-                TerrainType.WOOD, TerrainType.WOOD, TerrainType.WOOD, TerrainType.WOOD,
-            };
+            //HexGridGenerator generator = new HexGridGenerator();
+            //List<TerrainType> TerrainDeck = new List<TerrainType>(19)
+            //{
+            //    TerrainType.DESERT,
+            //    TerrainType.WOOD, TerrainType.WOOD, TerrainType.WOOD, TerrainType.WOOD,
+            //    TerrainType.CLAY, TerrainType.CLAY, TerrainType.CLAY,
+            //    TerrainType.WHEAT, TerrainType.WHEAT, TerrainType.WHEAT, TerrainType.WHEAT,
+            //    TerrainType.SHEEP, TerrainType.SHEEP, TerrainType.SHEEP, TerrainType.SHEEP,
+            //    TerrainType.STONE, TerrainType.STONE, TerrainType.STONE,
+            //    TerrainType.WOOD, TerrainType.WOOD, TerrainType.WOOD, TerrainType.WOOD,
+            //};
 
-            generator.GenerateGridCirc(2);
-            Console.WriteLine(generator.GetBoardInfo());
+            //generator.GenerateGridCirc(2);
+            //Console.WriteLine(generator.GetBoardInfo());
+            //Console.ReadLine();
+
+            TextLoader users = new TextLoader(@"c:\users\v-anad\Desktop\RedditGiveAwayWinnersList.txt");
+            TextLoader codes = new TextLoader(@"c:\users\v-anad\Desktop\GiveAwayCodes.txt");
+
+            for (int i = 141; i < 1000; ++i)
+            {
+                StringBuilder msg = new StringBuilder();
+
+                // Setter for body
+                msg.Append("document.getElementsByName(\"text\")[1].value = \""); 
+                msg.Append($"Hi u/{users.lines[i]},");
+                msg.Append($"\\n\\nYou commented on the [Collidalot Give Away](https://www.reddit.com/r/NintendoSwitch/comments/euy3pu/giveaway_i_have_500_codes_for_collidalot_a/) I posted last week, and have been selected as a winner! Here is your code:");
+                msg.Append($"\\n\\n{codes.lines[i]}");
+                msg.Append($"\\n\\nHave fun dominating the wasteland!");
+                msg.Append($"\\n\\n- Connor \\\"Silvainius\\\" Adam");
+                msg.Append($"\\n\\nHere are some statistics, in case it interests you:");
+                msg.Append($"\\n\\n- Placement: {i + 1}");
+                msg.Append($"\\n- Number of qualified users: ~3100");
+                msg.Append($"\\n- Chance of selection: {((1000.0 / 3100.0)*100).ToString("F3")}%");
+                msg.Append($"\";\n");
+
+                // Set subject
+                msg.Append("document.getElementsByName(\"subject\")[0].value = \"");
+                msg.Append("Collidalot Code");
+                msg.Append("\";\n");
+
+                //Set To
+                msg.Append("document.getElementsByName(\"to\")[0].value = \"");
+                msg.Append($"{users.lines[i]}");
+                msg.Append("\";\n");
+
+                msg.Append("document.getElementById(\"send\").click();");
+
+                Console.WriteLine(msg.ToString());
+                Console.ReadLine();
+                Console.Clear();
+                msg.Clear();
+            }
+
             Console.ReadLine();
         }
     }
