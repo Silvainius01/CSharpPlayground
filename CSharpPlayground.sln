@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarbaseTesting", "Starbase
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatanSettlers", "CatanSettlers\CatanSettlers.csproj", "{7F5B4973-24F2-402E-9157-0B7E24FBD622}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DieRoller", "DieRoller\DieRoller.csproj", "{A841558C-DD19-444B-AF77-897D96285DE6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +38,10 @@ Global
 		{7F5B4973-24F2-402E-9157-0B7E24FBD622}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F5B4973-24F2-402E-9157-0B7E24FBD622}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F5B4973-24F2-402E-9157-0B7E24FBD622}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A841558C-DD19-444B-AF77-897D96285DE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A841558C-DD19-444B-AF77-897D96285DE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A841558C-DD19-444B-AF77-897D96285DE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A841558C-DD19-444B-AF77-897D96285DE6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
