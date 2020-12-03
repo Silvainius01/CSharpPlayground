@@ -183,27 +183,39 @@ namespace CatanSettlers
         PORT_STONE
     }
 
+    class Test
+    {
+        public int Test0 { get; set; }
+        public int Test1 { get; set; }
+        public double Test2 { get; set; }
+        public double Test3 { get; set; }
+    }
+
     class Program
     {
         [STAThread]
         static void Main(string[] args)
         {
-            //HexGridGenerator generator = new HexGridGenerator();
-            //List<TerrainType> TerrainDeck = new List<TerrainType>(19)
-            //{
-            //    TerrainType.DESERT,
-            //    TerrainType.WOOD, TerrainType.WOOD, TerrainType.WOOD, TerrainType.WOOD,
-            //    TerrainType.CLAY, TerrainType.CLAY, TerrainType.CLAY,
-            //    TerrainType.WHEAT, TerrainType.WHEAT, TerrainType.WHEAT, TerrainType.WHEAT,
-            //    TerrainType.SHEEP, TerrainType.SHEEP, TerrainType.SHEEP, TerrainType.SHEEP,
-            //    TerrainType.STONE, TerrainType.STONE, TerrainType.STONE,
-            //    TerrainType.WOOD, TerrainType.WOOD, TerrainType.WOOD, TerrainType.WOOD,
-            //};
+            Dictionary<string, string> dict = new Dictionary<string, string>()
+            {
+                ["Test0"] = "0",
+                ["Test1"] = "0.0"
+            };
 
-            //generator.GenerateGridCirc(2);
-            //Console.WriteLine(generator.GetBoardInfo());
-            //Console.ReadLine();
+            string v = string.Empty;
+            var t = new Test()
+            {
+                Test0 = dict.TryGetValue("Test", out v) ? int.Parse(v) : -1,
+                Test1 = dict.TryGetValue("Test0", out v) ? int.Parse(v) : -1,
+                Test2 = dict.TryGetValue("Test", out v) ? double.Parse(v) : -1,
+                Test3 = dict.TryGetValue("Test1", out v) ? double.Parse(v) : -1
+            };
 
+            Console.ReadLine();
+        }
+
+        static void RedditPmFillerCommandGenerator()
+        {
             TextLoader users = new TextLoader(@"c:\users\v-anad\Desktop\RedditGiveAwayWinnersList.txt");
             TextLoader codes = new TextLoader(@"c:\users\v-anad\Desktop\GiveAwayCodes.txt");
 
@@ -212,7 +224,7 @@ namespace CatanSettlers
                 StringBuilder msg = new StringBuilder();
 
                 // Setter for body
-                msg.Append("document.getElementsByName(\"text\")[1].value = \""); 
+                msg.Append("document.getElementsByName(\"text\")[1].value = \"");
                 msg.Append($"Hi u/{users.lines[i]},");
                 msg.Append($"\\n\\nYou commented on the [Collidalot Give Away](https://www.reddit.com/r/NintendoSwitch/comments/euy3pu/giveaway_i_have_500_codes_for_collidalot_a/) I posted last week, and have been selected as a winner! Here is your code:");
                 msg.Append($"\\n\\n{codes.lines[i]}");
@@ -221,7 +233,7 @@ namespace CatanSettlers
                 msg.Append($"\\n\\nHere are some statistics, in case it interests you:");
                 msg.Append($"\\n\\n- Placement: {i + 1}");
                 msg.Append($"\\n- Number of qualified users: ~3100");
-                msg.Append($"\\n- Chance of selection: {((1000.0 / 3100.0)*100).ToString("F3")}%");
+                msg.Append($"\\n- Chance of selection: {((1000.0 / 3100.0) * 100).ToString("F3")}%");
                 msg.Append($"\";\n");
 
                 // Set subject
@@ -241,8 +253,24 @@ namespace CatanSettlers
                 Console.Clear();
                 msg.Clear();
             }
+        }
 
-            Console.ReadLine();
+        static void HexGridGubbins()
+        {
+            HexGridGenerator generator = new HexGridGenerator();
+            List<TerrainType> TerrainDeck = new List<TerrainType>(19)
+            {
+                TerrainType.DESERT,
+                TerrainType.WOOD, TerrainType.WOOD, TerrainType.WOOD, TerrainType.WOOD,
+                TerrainType.CLAY, TerrainType.CLAY, TerrainType.CLAY,
+                TerrainType.WHEAT, TerrainType.WHEAT, TerrainType.WHEAT, TerrainType.WHEAT,
+                TerrainType.SHEEP, TerrainType.SHEEP, TerrainType.SHEEP, TerrainType.SHEEP,
+                TerrainType.STONE, TerrainType.STONE, TerrainType.STONE,
+                TerrainType.WOOD, TerrainType.WOOD, TerrainType.WOOD, TerrainType.WOOD,
+            };
+
+            generator.GenerateGridCirc(2);
+            Console.WriteLine(generator.GetBoardInfo());
         }
     }
 }

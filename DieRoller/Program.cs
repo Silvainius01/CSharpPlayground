@@ -12,7 +12,6 @@ namespace DieRoller
         static void Main(string[] args)
         {
             //DiceRoller.GetRollStats(4, 2);
-
             Console.WriteLine("Enter dice in the following format: XdY ZdW \nExample: 4d4 2d6");
 
 
@@ -21,17 +20,40 @@ namespace DieRoller
                 Console.WriteLine("\n\nEnter Dice to Roll:");
                 string input = Console.ReadLine();
 
-                string[] diceRollsRaw = input.Split(' ', 'd');
+                string[] diceRollsRaw = input.Split(' ');
 
                 List<(int NumDice, int NumSides)> diceRolls = new List<(int NumDice, int NumSides)>(diceRollsRaw.Length / 2);
-                for (int i = 0; i < diceRollsRaw.Length - 1; i += 2)
+                for (int i = 0; i < diceRollsRaw.Length; ++i)
                 {
-                    diceRolls.Add((int.Parse(diceRollsRaw[i]), int.Parse(diceRollsRaw[i + 1])));
+                    bool success = DiceRoller.TryParse(diceRollsRaw[i], out var diceRoll);
+                    if (success)
+                        diceRolls.Add(diceRoll);
                 }
 
-                int result = DiceRoller.RollDice(diceRolls);
-                Console.WriteLine($"Result: {result}");
-                DiceRoller.GetRollStats(diceRolls);
+                if (diceRollsRaw[0] == "s")
+                {
+                    int total = 0;
+
+                    foreach(var roll in diceRolls)
+                    {
+                        StringBuilder msg = new StringBuilder($"\n{roll.NumDice}d{roll.NumSides}: ");
+                        for (int i = 0; i < roll.NumDice; ++i)
+                        {
+                            int r = DiceRoller.RollDice(1, roll.NumSides);
+                            total += r;
+                            msg.Append($"{r} ");
+                        }
+                        Console.WriteLine(msg.ToString());
+                    }
+                    Console.WriteLine($"\nTotal: {total}");
+                    DiceRoller.GetRollStats(diceRolls);
+                }
+                else
+                {
+                    int result = DiceRoller.RollDice(diceRolls);
+                    Console.WriteLine($"Result: {result}");
+                    DiceRoller.GetRollStats(diceRolls);
+                }
             }
 
             //var vaxDamage = new List<(int NumDice, int NumSides)>()

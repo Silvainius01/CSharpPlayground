@@ -180,8 +180,25 @@ namespace DieRoller
                 foreach (var result in diceRollEnum)
                     yield return result;
             }
+        }
 
+        public static bool TryParse(string str, out (int NumDice, int NumSides) diceRoll)
+        {
+            string[] values = str.Split('d');
+            
+            if (values.Length != 2)
+            {
+                diceRoll = (0, 0);
+                return false;
+            }
 
+            bool success = int.TryParse(values[0], out int numDice);
+            success &= int.TryParse(values[1], out int numSides);
+            diceRoll = (numDice, numSides);
+            return
+                success &&
+                numDice > 0 &&
+                numSides > 0;
         }
     }
 }
