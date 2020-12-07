@@ -10,6 +10,8 @@ namespace DieRoller
 {
     public class DiceRoller
     {
+        public delegate TResult TryParseDelegate<TInput, TOutParam, TResult>(TInput input, out TOutParam output);
+
         static Random rng = new Random();
 
         public static int RollDice(int numDice, int numSides)
@@ -19,52 +21,112 @@ namespace DieRoller
                 result += rng.Next(numSides) + 1;
             return result;
         }
-        public static int RollDice((int NumDice, int NumSides) diceRoll)
-        {
-            return RollDice(diceRoll.NumDice, diceRoll.NumSides);
-        }
-        public static int RollDice(IEnumerable<(int NumDice, int NumSides)> diceRolls)
+
+        public static (int Result, string Message) RollDice(DiceRollSet diceSet, DiceRollerMessageOptions options)
         {
             int result = 0;
-            foreach (var diceRoll in diceRolls)
-                result += RollDice(diceRoll);
-            return result;
+            StringBuilder msg = new StringBuilder();
+            if (options.RollSeperate)
+            {
+                int total = 0;
+
+                foreach (var dice in diceSet)
+                {
+                    msg.Append($"\n{dice.NumDice}d{dice.NumSides}: ");
+                    if (options.DisplayIndividualRolls)
+                    {
+                        var rolls = RollSeperate(dice);
+                        result = rolls.Result;
+                        total += result;
+                        msg.Append($"{result} [{rolls.Message}]");
+                    }
+                    else
+                    {
+                        result = dice.Roll();
+                        total += result;
+                        msg.Append($"{result}");
+                    }
+
+                    if (options.DisplaySeperateStats)
+                    {
+                        msg.Append($"\n{dice.GetStats()}\n");
+                    }
+                }
+
+                msg.Append($"\nTotal: {total}");
+            }
+            else
+            {
+                if (options.DisplayIndividualRolls)
+                {
+                    var rolls = RollSeperate(diceSet);
+                    msg.Append($"\nTotal: {rolls.Result} [{rolls.Message}]");
+                }
+                else
+                {
+                    result = diceSet.Roll();
+                    msg.Append($"\nTotal: {result}");
+                }
+
+                if (options.DisplaySeperateStats)
+                {
+                    foreach (var roll in diceSet)
+                        msg.Append($"\n{roll.GetStats()}");
+                }
+            }
+
+            if (options.DisplayFullStats)
+                msg.Append($"\n{GetFullRollStats(diceSet)}");
+
+            if (options.DisplayTotalStats)
+                msg.Append($"\n{diceSet.GetStats()}");
+
+            return (result, msg.ToString());
+        }
+        static (int Result, string Message) RollSeperate(IDiceRoll diceRoll)
+        {
+            (IList<int> Rolls, int Total) rolls = diceRoll.RollSeperate();
+            StringBuilder msgBuilder = new StringBuilder();
+
+            foreach(int roll in rolls.Rolls)
+            {
+                msgBuilder.Append($"{roll} ");
+            }
+
+            msgBuilder.Remove(msgBuilder.Length - 1, 1);
+            return (rolls.Total, msgBuilder.ToString());
+        }
+        static (int Result, string Message) RollSeperate(DiceRollSet diceRolls)
+        {
+            int total = 0;
+            StringBuilder msgBuilder = new StringBuilder();
+
+            foreach (IDiceRoll roll in diceRolls)
+            {
+                var rollResult = roll.RollSeperate();
+                total += rollResult.Total;
+                foreach (int r in rollResult.Rolls)
+                    msgBuilder.Append($"{r} ");
+            }
+
+            msgBuilder.Remove(msgBuilder.Length - 1, 1);
+            return (total, msgBuilder.ToString());
         }
 
-        public static void GetRollStats(int numDice, int numSides)
+        public static string GetFullRollStats(IDiceRoll diceRoll)
         {
-            double avg = GetRollAverage(numDice, numSides);
-            (int min, int max) range = GetRollRange(numDice, numSides);
-            Console.WriteLine($"Avg: {avg}\nRange: {range.min}-{range.max}");
+            return GetFullRollStatsInternal(GetDiceSides(diceRoll));
         }
-        public static void GetRollStats((int NumDice, int NumSides) diceRoll)
+        public static string GetFullRollStats(IEnumerable<IDiceRoll> diceRolls)
         {
-            GetRollStats(diceRoll.NumDice, diceRoll.NumSides);
+            return GetFullRollStatsInternal(GetDiceSides(diceRolls));
         }
-        public static void GetRollStats(IEnumerable<(int NumDice, int NumSides)> diceRolls)
-        {
-            double avg = GetRollAverage(diceRolls);
-            (int min, int max) range = GetRollRange(diceRolls);
-            Console.WriteLine($"Avg: {avg}\nRange: {range.min}-{range.max}");
-        }
-
-        public static void GetFullRollStats(int numDice, int numSides)
-        {
-            GetFullRollStatsInternal(GetDiceSides(numDice, numSides));
-        }
-        public static void GetFullRollStats((int NumDice, int NumSides) diceRoll)
-        {
-            GetFullRollStatsInternal(GetDiceSides(diceRoll));
-        }
-        public static void GetFullRollStats(IEnumerable<(int NumDice, int NumSides)> diceRolls)
-        {
-            GetFullRollStatsInternal(GetDiceSides(diceRolls));
-        }
-        static void GetFullRollStatsInternal(IEnumerable<int> resultEnum)
+        static string GetFullRollStatsInternal(IEnumerable<int> resultEnum)
         {
             double average = 0;
             int totalRolls = 0;
             Dictionary<int, int> totals = new Dictionary<int, int>();
+            StringBuilder msg = new StringBuilder();
 
             foreach (var rollResult in resultEnum)
             {
@@ -84,62 +146,26 @@ namespace DieRoller
             foreach (var key in sortedKeyList)
             {
                 double chance = ((double)totals[key] / (double)totalRolls) * 100;
-                Console.WriteLine($"{key}: {totals[key]} ({chance}%)");
+                msg.Append($"{key}: {totals[key]} ({chance}%)\n");
             }
-            Console.WriteLine($"Avg: {average}");
+            msg.Append($"Avg: {average}");
+            return msg.ToString();
         }
 
-        public static double GetRollAverage(int numDice, int numSides)
+        static IEnumerable<int> GetDiceSides(IDiceRoll diceRoll)
         {
-            double avg = (numSides / 2) + 0.5;
-            return avg * numDice;
+            return GetDiceSides(diceRoll, 0);
         }
-        public static double GetRollAverage((int NumDice, int NumSides) diceRoll) 
+        static IEnumerable<int> GetDiceSides(IDiceRoll diceRoll, int currIndex)
         {
-            return GetRollAverage(diceRoll.NumDice, diceRoll.NumSides);
-        }
-        public static double GetRollAverage(IEnumerable<(int NumDice, int NumSides)> diceRolls)
-        {
-            double avg = 0;
-            foreach (var diceRoll in diceRolls)
-                avg += GetRollAverage(diceRoll);
-            return avg;
-        }
-
-        public static (int min, int max) GetRollRange(int numDice, int numSides)
-        {
-            return (numDice, numDice * numSides);
-        }
-        public static (int min, int max) GetRollRange((int NumDice, int NumSides) diceRoll)
-        {
-            return GetRollRange(diceRoll.NumDice, diceRoll.NumSides);
-        }
-        public static (int min, int max) GetRollRange(IEnumerable<(int NumDice, int NumSides)> diceRolls)
-        {
-            (int min, int max) range = (0,0);
-            foreach (var diceRoll in diceRolls)
-            {
-                var r = GetRollRange(diceRoll);
-                range = (range.min + r.min, range.max + r.max);
-            }
-            return range;
-        }
-
-        static IEnumerable<int> GetDieSides(int numSides)
-        {
-            for (int i = 0; i < numSides; ++i)
-                yield return i + 1;
-        }
-        static IEnumerable<int> GetDiceSides(int numDice, int numSides)
-        {
-            var sideEnum = GetDieSides(numSides);
-            var nextDiceEnum = GetDiceSides(numDice - 1, numSides);
+            var sideEnum = diceRoll.GetDieSides();
+            var nextDiceEnum = GetDiceSides(diceRoll, currIndex + 1);
 
             foreach (var side in sideEnum)
             {
                 int total = side;
 
-                if (numDice > 1)
+                if (currIndex < diceRoll.NumDice - 1)
                 {
                     foreach (var nextDiceTotal in nextDiceEnum)
                         yield return total + nextDiceTotal;
@@ -147,22 +173,11 @@ namespace DieRoller
                 else yield return total;
             }
         }
-        static IEnumerable<int> GetDiceSides((int NumDice, int NumSides) diceRoll)
-        {
-            return GetDiceSides(diceRoll.NumDice, diceRoll.NumSides);
-        }
-        static IEnumerable<int> GetDiceSides(IEnumerable<(int NumDice, int NumSides)> diceRolls)
+        static IEnumerable<int> GetDiceSides(IEnumerable<IDiceRoll> diceRolls)
         {
             return GetDiceSides(diceRolls, 0, diceRolls.Count());
-
-            //int min = diceRolls.Count();
-            //int max = 0;
-            //foreach(var diceRoll in diceRolls)
-            //    max += diceRoll.NumDice * diceRoll.NumSides;
-
-
         }
-        static IEnumerable<int> GetDiceSides(IEnumerable<(int NumDice, int NumSides)> diceRolls, int currIndex, int count)
+        static IEnumerable<int> GetDiceSides(IEnumerable<IDiceRoll> diceRolls, int currIndex, int count)
         {
             var diceRollEnum = GetDiceSides(diceRolls.ElementAt(currIndex));
             if (currIndex < count - 1)
@@ -182,23 +197,37 @@ namespace DieRoller
             }
         }
 
-        public static bool TryParse(string str, out (int NumDice, int NumSides) diceRoll)
+        public static void DiceRollPrompt<T>(TryParseDelegate<string, T, bool> TryParse) where T : IDiceRoll
         {
-            string[] values = str.Split('d');
-            
-            if (values.Length != 2)
+            Console.WriteLine("\n\nEnter Dice to Roll:");
+            DiceRollerMessageOptions options = new DiceRollerMessageOptions();
+
+            string input = Console.ReadLine();
+            string[] diceRollsRaw = input.Split(' ');
+
+            DiceRollSet rollSet = new DiceRollSet();
+            for (int i = 0; i < diceRollsRaw.Length; ++i)
             {
-                diceRoll = (0, 0);
-                return false;
+                bool success = TryParse(diceRollsRaw[i], out var diceRoll);
+                if (success)
+                    rollSet.Add(diceRoll);
+                else ParseDiceRollOption(diceRollsRaw[i], ref options);
             }
 
-            bool success = int.TryParse(values[0], out int numDice);
-            success &= int.TryParse(values[1], out int numSides);
-            diceRoll = (numDice, numSides);
-            return
-                success &&
-                numDice > 0 &&
-                numSides > 0;
+            var roll = DiceRoller.RollDice(rollSet, options);
+            Console.WriteLine(roll.Message);
+        }
+
+        static void ParseDiceRollOption(string input, ref DiceRollerMessageOptions options)
+        {
+            switch (input)
+            {
+                case "s": options.RollSeperate ^= true; break;
+                case "i": options.DisplayIndividualRolls ^= true; break;
+                case "st": options.DisplaySeperateStats ^= true; break;
+                case "t": options.DisplayTotalStats ^= true; break;
+                case "f": options.DisplayFullStats ^= true; break;
+            }
         }
     }
 }

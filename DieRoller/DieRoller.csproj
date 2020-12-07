@@ -43,7 +43,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DiceRoll.cs" />
+    <Compile Include="DiceRollerOptions.cs" />
+    <Compile Include="DiceRollSet.cs" />
     <Compile Include="DieRoller.cs" />
+    <Compile Include="IDiceRoll.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
