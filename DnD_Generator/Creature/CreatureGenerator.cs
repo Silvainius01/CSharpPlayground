@@ -7,6 +7,18 @@ namespace DnD_Generator
 {
     public static class CreatureGenerator
     {
+        public static Creature Generate(string name, StatRoll hitPoints, int armorClass, CreatureAttributes attributes, CreatureProfeciencies profeciencies)
+        {
+            return new Creature()
+            {
+                Name = name,
+                HitPoints = hitPoints.Roll(),
+                ArmorClass = armorClass,
+                Attributes = attributes,
+                Profeciencies = profeciencies
+            };
+        }
+
         public static Creature GenerateGoblin(bool rollHitpoints)
         {
             CreatureAttributes attributes = new CreatureAttributes()

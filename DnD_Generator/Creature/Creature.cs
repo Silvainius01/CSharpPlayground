@@ -14,19 +14,12 @@ namespace DnD_Generator
         public int HitPoints { get; set; }
         public int ArmorClass { get; set; }
 
+        public ItemWeapon PrimaryWeapon { get; set; }
+        public ItemWeapon SecondaryWeapon { get; set; }
+        public Dictionary<IItem, int> Inventory { get; set; } = new Dictionary<IItem, int>();
+        public CreatureArmorSlots ArmorSlots;
+
         public CreatureAttributes Attributes { get; set; }
         public CreatureProfeciencies Profeciencies { get; set; }
-
-        public static Creature Generate(string name, StatRoll hitPoints, int armorClass, CreatureAttributes attributes, CreatureProfeciencies profeciencies)
-        {
-            return new Creature()
-            {
-                Name = name,
-                HitPoints = hitPoints.Roll(),
-                ArmorClass = armorClass,
-                Attributes = attributes,
-                Profeciencies = profeciencies
-            };
-        }
     }
 }

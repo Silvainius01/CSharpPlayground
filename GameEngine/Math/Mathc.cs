@@ -18,17 +18,76 @@ namespace GameEngine
             private static bool hasSpareRand = false;
             private static double spareMarsagliaRand;
 
+            public static System.Random RNG { get { return rng; } }
+
             public static int Int { get { return rng.Next(); } }
             public static int NextInt(int maxVal) { return rng.Next(maxVal); }
             public static int NextInt(int minVal, int maxVal) { return rng.Next(minVal, maxVal); }
+            public static int NextInt(Vector2Int range, bool inclusive = false)
+            {
 
-            public static double NormalDouble { get { return rng.NextDouble(); } }
+                return inclusive ? rng.Next(range.X, range.Y + 1) : rng.Next(range.X, range.Y); 
+            }
+
             public static double Double { get { return NextDouble(); } }
+            public static double NormalDouble { get { return rng.NextDouble(); } }
             public static double NextDouble()
             {
-                var byte64 = new byte[64];
-                rng.NextBytes(byte64);
-                return BitConverter.ToDouble(byte64, 0);
+                var byte8 = new byte[8];
+                rng.NextBytes(byte8);
+                return BitConverter.ToDouble(byte8, 0);
+            }
+            
+            public static float NextFloatFromBytes()
+            {
+                var byte4 = new byte[4];
+                rng.NextBytes(byte4);
+                return BitConverter.ToSingle(byte4, 0);
+            }
+            // https://stackoverflow.com/a/3365388
+            private static float NextFloatFromDiscrete()
+            {
+                double mantissa = (rng.NextDouble() * 2.0) - 1.0;
+                // choose -149 instead of -126 to also generate subnormal floats (*)
+                double exponent = Math.Pow(2.0, rng.Next(-126, 127));
+                return (float)(mantissa * exponent);
+            }
+            private static float NextFloatFromRandInt()
+            {
+                // Orginal version uses three random ints.
+                // But testing seems to reveal that using just one with bit shifting is identical.
+                int rInt = rng.Next();
+                int sign = rInt%2;
+                int exponent = rInt%((1 << 8) - 1); // do not generate 0xFF (infinities and NaN) (255)
+                int mantissa = rInt%(1 << 23); // (8 388 608)
+
+                int bits = (sign << 31) + (exponent << 23) + mantissa;
+                return IntBitsToFloat(bits);
+            }
+            private static float IntBitsToFloat(int bits)
+            {
+                unsafe
+                {
+                    return *(float*)&bits;
+                }
+            }
+
+
+            public static float NextFloat() => (float)rng.NextDouble();
+            /// <summary>
+            /// Generate random float between 0 and maxValue
+            /// </summary>
+            public static float NextFloat(float maxValue)
+            {
+                return NextFloat()*maxValue;
+                //return (float)((rng.NextDouble() * 2.0 - 1.0) * (double)float.MaxValue);
+            }
+            public static float NextFloat(Vector2 range)
+            {
+                float min = Math.Abs(range.X), max = Math.Abs(range.Y);
+                float rFloat = NextFloat(min+max);
+                Mathc.Swap(ref min, ref max);
+                return rFloat - max;
             }
 
             /// <summary> Return a random, normally distributed number that is between 0 and 1 </summary>
@@ -88,6 +147,52 @@ namespace GameEngine
 
         public const double RAD2DEG = 360 / (Math.PI * 2);
         public const double DEG2RAD = (Math.PI * 2) / 360;
+
+
+
+        public static T GetRandomItemFromEnumerable<T>(IEnumerable<T> list)
+        {
+            int count = list.Count();
+            return count > 1 ? list.ElementAt(Random.NextInt(count)) : list.First();
+        }
+
+        public static T GetRandomItemFromList<T>(List<T> list)
+        {
+            return list.Count > 1 ? list[Random.NextInt(list.Count)] : list[0];
+        }
+
+        // This solution looks lazy, but according to this Stack Overflow answer: https://stackoverflow.com/a/51099524
+        // The if-chain solution is actually faster than anyother method in .Net Framework.
+        // I know, it's pretty weird.
+        public static int NumDigits(this int n)
+        {
+            if (n >= 0)
+            {
+                if (n < 10) return 1;
+                if (n < 100) return 2;
+                if (n < 1000) return 3;
+                if (n < 10000) return 4;
+                if (n < 100000) return 5;
+                if (n < 1000000) return 6;
+                if (n < 10000000) return 7;
+                if (n < 100000000) return 8;
+                if (n < 1000000000) return 9;
+                return 10;
+            }
+            else
+            {
+                if (n > -10) return 2;
+                if (n > -100) return 3;
+                if (n > -1000) return 4;
+                if (n > -10000) return 5;
+                if (n > -100000) return 6;
+                if (n > -1000000) return 7;
+                if (n > -10000000) return 8;
+                if (n > -100000000) return 9;
+                if (n > -1000000000) return 10;
+                return 11;
+            }
+        }
 
         public static int Clamp(int v, int min, int max)
         {
@@ -223,6 +328,30 @@ namespace GameEngine
             }
             return false;
         }
+        /// <summary> Swaps two values if min is greater than max. </summary>
+        public static bool Swap(ref int min, ref int max)
+        {
+            if (min > max)
+            {
+                min = min + max;
+                max = min - max;
+                min = min - max;
+                return true;
+            }
+            return false;
+        }
+        /// <summary> Swaps two values if min is greater than max. </summary>
+        public static bool Swap(ref float min, ref float max)
+        {
+            if (min > max)
+            {
+                min = min + max;
+                max = min - max;
+                min = min - max;
+                return true;
+            }
+            return false;
+        }
 
         /// <summary> Returns a 0 to 1 value between two numbers. </summary>
         /// <returns> (val - min) / (max - min) </returns>
@@ -276,7 +405,10 @@ namespace GameEngine
             return new List<T>(elements);
         }
 
-
+        public static float Mod(float a, float b)
+        {
+            return (a % b + b) % b;
+        }
         public static double Mod(double a, double b)
         {
             return (a % b + b) % b;

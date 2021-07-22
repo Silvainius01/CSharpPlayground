@@ -33,6 +33,11 @@ namespace GameEngine
             }
         }
         public float AngleDegrees { get { return AngleRadians * (float)Mathc.RAD2DEG; } }
+        public float this[int index]
+        {
+            get => data[index];
+            set => data[index] = value;
+        }
 
         public static Vector2 Zero { get { return new Vector2(0, 0); } }
 
@@ -76,7 +81,6 @@ namespace GameEngine
                 return perp;
             return -perp;
         }
-
 
         #region Operators
         public static Vector2 operator +(Vector2 v2a, Vector2 v2b)
