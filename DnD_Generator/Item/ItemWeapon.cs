@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using GameEngine;
 
@@ -23,6 +24,8 @@ namespace DnD_Generator
 
         public string DebugString()
         {
+            float valueRaw = ((IsLargeWeapon ? 1 : 2) + AttributeRequirements.Attributes.Values.Sum()) * Quality;
+            int value = (int)(valueRaw) + 1;
             float expectedDamage = BaseDamage * Quality + AttributeRequirements[DamageBonusAttribute];
             StringBuilder builder = new StringBuilder($"Weapon Stats for {Name}:");
 
@@ -31,6 +34,7 @@ namespace DnD_Generator
             builder.Append($"\n\tQuality: {Quality}");
             builder.Append($"\n\tWeight: {Weight}");
             builder.Append($"\n\tTwo Handed: {IsLargeWeapon}");
+            builder.Append($"\n\tValue: {value} ({valueRaw})");
             builder.Append($"\n\tRequirements: ");
 
             foreach(KeyValuePair<AttributeType, int> kvp in AttributeRequirements)

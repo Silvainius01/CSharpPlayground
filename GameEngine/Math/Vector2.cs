@@ -262,8 +262,9 @@ namespace GameEngine
             get { return data[1]; }
             set { data[1] = value; }
         }
-        public static Vector2Int Zero { get { return new Vector2Int(0, 0); } }
 
+        public static Vector2Int Zero { get { return new Vector2Int(0, 0); } }
+        
         public Vector2Int(int x, int y)
         {
             data = new int[2] { x, y };

@@ -15,9 +15,9 @@ namespace DnD_Generator
         public bool IsBossRoom;
         public bool HasPathToEntrance;
 
-        public List<DungeonChest> chests;
+        public List<DungeonChest> chests = new List<DungeonChest>();
         public HashSet<int> connections = new HashSet<int>(4);
-        public List<Creature> creatures;
+        public List<Creature> creatures = new List<Creature>();
 
         public override bool Equals(object obj)
         {

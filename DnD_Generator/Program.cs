@@ -11,16 +11,28 @@ namespace DnD_Generator
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Enter dice in the following format: XdY ZdW \nExample: 4d4 2d6");
+            CommandManager.RegisterUniversalCommand(new ConsoleCommand("roll", StatRollWrapper));
+            CommandManager.RegisterUniversalCommand(new ConsoleCommand("weapon", WeaponTest));
+            CommandManager.RegisterUniversalCommand(new ConsoleCommand("dungeon", DungeonTest));
+            CommandManager.RegisterUniversalCommand(new ConsoleCommand("rand", RandomTest));
+            CommandManager.RegisterUniversalCommand(new ConsoleCommand("mod", ModTest));
 
             while (true)
             {
-                //ModTest();
-                //RandomTest();
-                WeaponTest();
-                //DungeonTest();
-                //DiceRoller.DiceRollPrompt<StatRoll>(StatRoll.TryParse);
+                CommandManager.GetNextUniversalCommand("Enter next command", true);
             }
+        }
+
+        static void StatRollWrapper(List<string> arguments)
+        {
+            if (arguments.Count > 0 && arguments[0].ToLower() == "help")
+            {
+                Console.WriteLine("Enter dice in the following format: XdY ZdW \nExample: 4d4 2d6");
+                if (arguments.Count == 1)
+                    return;
+            }
+
+            DiceRoller.DiceRollPrompt<StatRoll>(arguments.ToArray(), StatRoll.TryParse);
         }
 
         int RollAttribute()
@@ -36,7 +48,6 @@ namespace DnD_Generator
             }
             return total - lowest;
         }
-
         public List<int> RollPlayerAttributes()
         {
             List<int> attributes = new List<int>();
@@ -47,32 +58,32 @@ namespace DnD_Generator
 
         static int total = 0;
         static Dictionary<int, int> rCount = new Dictionary<int, int>(10)
-            {
-                [0] = 0,
-                [1] = 0,
-                [2] = 0,
-                [3] = 0,
-                [4] = 0,
-                [5] = 0,
-                [6] = 0,
-                [7] = 0,
-                [8] = 0,
-                [9] = 0
-            };
+        {
+            [0] = 0,
+            [1] = 0,
+            [2] = 0,
+            [3] = 0,
+            [4] = 0,
+            [5] = 0,
+            [6] = 0,
+            [7] = 0,
+            [8] = 0,
+            [9] = 0
+        };
         static Dictionary<int, int> rCount2 = new Dictionary<int, int>(10)
-            {
-                [0] = 0,
-                [1] = 0,
-                [2] = 0,
-                [3] = 0,
-                [4] = 0,
-                [5] = 0,
-                [6] = 0,
-                [7] = 0,
-                [8] = 0,
-                [9] = 0
-            };
-        public static void RandomTest()
+        {
+            [0] = 0,
+            [1] = 0,
+            [2] = 0,
+            [3] = 0,
+            [4] = 0,
+            [5] = 0,
+            [6] = 0,
+            [7] = 0,
+            [8] = 0,
+            [9] = 0
+        };
+        public static void RandomTest(List<string> arguments)
         {
             int numRolls = 10;
             total += numRolls;
@@ -89,19 +100,23 @@ namespace DnD_Generator
                 //Console.WriteLine($"{i}: {(rCount[i] / (float)total) * 100} vs {(rCount2[i] / (float)total) * 100}");
                 //Console.WriteLine($"{i}: {(rCount[i] / (float)total) * 100}");
             }
-            Console.ReadLine();
+
+            if (arguments.Count > 0 && arguments[0][0] == 'r')
+            {
+                arguments.RemoveAt(0);
+                while (Console.ReadLine().Length == 0)
+                    RandomTest(arguments);
+            }
         }
 
-        public static void ModTest()
+        public static void ModTest(List<string> arguments)
         {
-
-            string input = Console.ReadLine();
-            string[] modOptionsRaw = input.Split(' ');
+            string[] modOptionsRaw = arguments.ToArray();
             float toMod, modBase;
 
-            if(modOptionsRaw.Length > 1 && float.TryParse(modOptionsRaw[1], out modBase))
+            if (modOptionsRaw.Length > 1 && float.TryParse(modOptionsRaw[1], out modBase))
             {
-                while(modOptionsRaw[0] != "e")
+                while (modOptionsRaw[0] != "e")
                 {
                     if (float.TryParse(modOptionsRaw[0], out toMod))
                         Console.WriteLine($"{toMod} % {modBase} = {Mathc.Mod(toMod, modBase)}");
@@ -112,13 +127,13 @@ namespace DnD_Generator
             }
         }
 
-        public static void DungeonTest()
+        public static void DungeonTest(List<string> arguments)
         {
             //Dungeon d = new Dungeon(26);
 
             DungeonGenerationParameters dParams = new DungeonGenerationParameters()
             {
-                RoomRange = new Vector2Int(10*9, 10*10),
+                RoomRange = new Vector2Int(10 * 9, 10 * 10),
                 ConnectionRange = new Vector2Int(1, 3),
                 RoomHeightRange = new Vector2Int(1, 1),
                 RoomWidthRange = new Vector2Int(1, 1)
@@ -127,21 +142,53 @@ namespace DnD_Generator
 
             //d.dimensions = new GameEngine.Vector2Int(5, 5);
             Console.WriteLine(d2.DebugString());
-            string s = Console.ReadLine();
+
+            if (arguments.Count > 0 && arguments[0][0] == 'r')
+            {
+                arguments.RemoveAt(0);
+                while (Console.ReadLine().Length == 0)
+                    DungeonTest(arguments);
+            }
         }
 
-        public static void WeaponTest()
+        public static void WeaponTest(List<string> arguments)
         {
-            ItemWeaponGenerationProperties properties = new ItemWeaponGenerationProperties()
+            ItemWeaponGenerationProperties properties = null;
+
+            if (arguments.Count == 0)
+                return;
+
+            switch (arguments[0])
             {
-                QualityRange = new Vector2Int(0, 50),
-                WeightRange = new Vector2Int(25, 100),
-                LargeWeaponProbability = 50
-            };
+                case "s": // Starter
+                    properties =
+                        new ItemWeaponGenerationProperties()
+                        {
+                            WeightRange = new Vector2Int(25, 25),
+                            QualityRange = new Vector2Int(1, 1), // ~28% chance of <1.0 Quality starter
+                            LargeWeaponProbability = ItemWeaponGenerationPresets.NoLargeRate,
+                        };
+                    break;
+                case "f": // full range
+                    properties =
+                        new ItemWeaponGenerationProperties()
+                        {
+                            QualityRange = new Vector2Int(0, 50),
+                            WeightRange = new Vector2Int(25, 100),
+                            LargeWeaponProbability = 50
+                        };
+                    break;
+            }
 
             var weapon = ItemWeaponGenerator.GenerateWeapon(properties);
             Console.WriteLine(weapon.DebugString());
-            Console.ReadLine();
+
+            if (arguments.Count > 0 && arguments[arguments.Count - 1][0] == 'r')
+            {
+                arguments.RemoveAt(arguments.Count-1);
+                while (Console.ReadLine().Length == 0)
+                    WeaponTest(arguments);
+            }
         }
 
     }

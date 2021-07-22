@@ -10,7 +10,7 @@ namespace DnD_Generator
         public Vector2Int WeightRange { get; set; }
         public Vector2Int QualityRange { get; set; }
         public int LargeWeaponProbability { get; set; } = 50;
-        //Dictionary<WeaponType, float> WeaponTypeProbabilityOverrides { get; set; }
+        public List<WeaponType> PossibleWeaponTypes { get; set; } = new List<WeaponType>();
     }
     class WeaponTypeData
     {
@@ -90,7 +90,10 @@ namespace DnD_Generator
 
         public static ItemWeapon GenerateWeapon(ItemWeaponGenerationProperties properties)
         {
-            var weaponType = Mathc.GetRandomItemFromEnumerable(WeaponTypes);
+            var weaponType = properties.PossibleWeaponTypes.Count > 0 
+                ? Mathc.GetRandomItemFromList(properties.PossibleWeaponTypes)
+                : Mathc.GetRandomItemFromEnumerable(WeaponTypes);
+
             ItemWeapon weapon = new ItemWeapon()
             {
                 Name = weaponType.ToString(),

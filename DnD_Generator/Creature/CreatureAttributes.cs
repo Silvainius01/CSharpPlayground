@@ -11,7 +11,7 @@ namespace DnD_Generator
     public class CreatureAttributes : IEnumerable    
     {
         static AttributeType[] AttributeTypes = Mathc.GetEnumValues<AttributeType>();
-        Dictionary<AttributeType, int> Attributes = new Dictionary<AttributeType, int>();
+        public Dictionary<AttributeType, int> Attributes = new Dictionary<AttributeType, int>();
 
         public int Strength 
         {

@@ -200,12 +200,17 @@ namespace DieRoller
         public static void DiceRollPrompt<T>(TryParseDelegate<string, T, bool> TryParse) where T : IDiceRoll
         {
             Console.WriteLine("\n\nEnter Dice to Roll:");
-            DiceRollerMessageOptions options = new DiceRollerMessageOptions();
 
             string input = Console.ReadLine();
             string[] diceRollsRaw = input.Split(' ');
 
+            DiceRollPrompt(diceRollsRaw, TryParse);
+        }
+        public static void DiceRollPrompt<T>(string[] diceRollsRaw, TryParseDelegate<string, T, bool> TryParse) where T : IDiceRoll
+        {
             DiceRollSet rollSet = new DiceRollSet();
+            DiceRollerMessageOptions options = new DiceRollerMessageOptions();
+
             for (int i = 0; i < diceRollsRaw.Length; ++i)
             {
                 bool success = TryParse(diceRollsRaw[i], out var diceRoll);

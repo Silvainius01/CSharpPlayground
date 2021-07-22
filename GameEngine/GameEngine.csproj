@@ -50,10 +50,14 @@
   <ItemGroup>
     <Compile Include="AI\NeuralNet.cs" />
     <Compile Include="ComparerFactory.cs" />
+    <Compile Include="DictionaryByType.cs" />
     <Compile Include="Entity\Component.cs" />
+    <Compile Include="Entity\EntityCommandModule.cs" />
+    <Compile Include="GenericObjectWrapper.cs" />
+    <Compile Include="Management\ConsoleCommand.cs" />
     <Compile Include="Management\TimeManager.cs" />
     <Compile Include="Math\Line.cs" />
-    <Compile Include="Management\ConsoleHelper.cs" />
+    <Compile Include="Management\CommandManager.cs" />
     <Compile Include="Entity\Entity.cs" />
     <Compile Include="Management\EngineManager.cs" />
     <Compile Include="Math\Mathc.cs" />

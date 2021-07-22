@@ -12,6 +12,12 @@ namespace DnD_Generator
         public int NumDice { get; set; }
         public int NumSides { get; set; }
 
+        /// <summary>
+        /// Store a given roll set, with bonus
+        /// </summary>
+        /// <param name="numDice">Number of dice to be thrown when this roll is used</param>
+        /// <param name="numSides">Number of sides per die</param>
+        /// <param name="floor">Flat amount that is added to the roll result</param>
         public StatRoll(int numDice, int numSides, int floor)
         {
             this.NumDice = numDice;

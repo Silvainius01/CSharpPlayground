@@ -35,10 +35,10 @@ namespace DnD_Generator
             return GetWeightRange((ItemWeaponWeightRange)rInt);
         }
 
-        public static readonly Vector2Int LowQuality = new Vector2Int(25, 100);
-        public static readonly Vector2Int MidQuality = new Vector2Int(25, 100);
-        public static readonly Vector2Int HighQuality = new Vector2Int(25, 100);
-        public static readonly Vector2Int AnyQuality = new Vector2Int(25, 100);
+        public static readonly Vector2Int LowQuality = new Vector2Int(1, 16);
+        public static readonly Vector2Int MidQuality = new Vector2Int(17, 33);
+        public static readonly Vector2Int HighQuality = new Vector2Int(34, 50);
+        public static readonly Vector2Int AnyQuality = new Vector2Int(1, 50);
         public static Vector2Int GetQualityRange(ItemWeaponQualityRange QualityRange)
         {
             switch (QualityRange)

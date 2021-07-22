@@ -4,8 +4,8 @@ using System.Text;
 
 namespace DnD_Generator
 {
-    enum ItemArmorSlotType { Head, Body, Legs, Feet, Ring }
-    class ItemArmor : IItem
+    public enum ItemArmorSlotType { Head, Body, Legs, Feet, Ring }
+    public class ItemArmor : IItem
     {
         public int ID { get; set; }
         public float Weight { get; set; }

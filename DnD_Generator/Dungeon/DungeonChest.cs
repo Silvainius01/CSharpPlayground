@@ -6,6 +6,6 @@ namespace DnD_Generator
 {
     class DungeonChest
     {
-        public Dictionary<IItem, int> Items;
+        public Dictionary<IItem, int> Items = new Dictionary<IItem, int>();
     }
 }

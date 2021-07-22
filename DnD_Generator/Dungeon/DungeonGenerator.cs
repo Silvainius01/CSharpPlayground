@@ -222,7 +222,8 @@ namespace DnD_Generator
                 {
                     ChestQuality = DungeonChestQuality.Any,
                     ChestType = DungeonChestType.Weapon,
-                    ChestLootGrade = DungeonChestLootGrade.Any
+                    ChestLootGrade = DungeonChestLootGrade.Any,
+                    ItemRange = new Vector2Int(2, 5)
                 };
                 room.chests.Add(DungeonChestGenerator.GenerateChest(chestProperties));
             }
