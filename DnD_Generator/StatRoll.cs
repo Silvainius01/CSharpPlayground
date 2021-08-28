@@ -6,7 +6,7 @@ using System.Text;
 
 namespace DnD_Generator
 {
-    public class StatRoll : IDiceRoll
+    class StatRoll : IDiceRoll
     {
         public int Floor { get; set; }
         public int NumDice { get; set; }

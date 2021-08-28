@@ -13,8 +13,7 @@ namespace GameEngine
     /// <typeparam name="T">Return type of <see cref="Execute(string)"/></typeparam>
     public class ConsoleCommand<T> : IConsoleCommand
     {
-        public delegate void ExecutionDelegate(List<string> arguments);
-        public delegate TReturn ExecutionDelegate<TReturn>(List<string> arguments);
+        public delegate TReturn ExecutionDelegate<TReturn>(List<string> args);
 
         public string Name { get; set; }
         ExecutionDelegate<T> ExecuteDelegate { get; set; }
@@ -32,59 +31,54 @@ namespace GameEngine
             return ExecuteDelegate(arguments);
         }
 
-        private void ParseInput(string inputStr)
+        private void ParseInput(string input)
         {
-            StringBuilder input = new StringBuilder(inputStr);
-            StringBuilder args = new StringBuilder(inputStr.Length);
+            StringBuilder builder = new StringBuilder(input.Length);
             arguments.Clear();
 
-            // Parse command
-            while (input.Length > 0)
+            void AddArgument()
             {
-                // Spaces between arguments are eaten by parser
-                while (input[0] == ' ')
-                    input.Remove(0, 1);
+                // Only add an argument if it contains characters.
+                if (builder.Length > 0)
+                    arguments.Add(builder.ToString());
+                builder.Clear();
+            }
 
-                // Quotes are eaten by parser, everything inside them is added as an argument.
-                // If no closing quote is found, the rest of the command line is returned.
-                if (input[0] == '"')
+            // Parse command
+            bool quote = false;
+            for(int index = 0; index < input.Length; ++index) 
+            {
+                switch(input[index])
                 {
-                    for (int i = 1; i < input.Length; ++i)
-                    {
-                        // Backslash adds the next character in the string to the arugment.
-                        if (input[i] == '\\' && i < input.Length - 1)
-                        {
-                            args.Append(input[++i]);
-                        }
-                        else if (input[i] != '"')
-                        {
-                            args.Append(input[i]);
-                        }
-                    }
-
-                    input.Remove(0, args.Length);
-                    AddArgument(ref args);
-                    continue;
-                }
-                // Return the next space seperated string
-                else
-                {
-                    for (int i = 0; i < input.Length && input[i] != ' '; ++i)
-                    {
-                        args.Append(input[i]);
-                    }
-
-                    input.Remove(0, args.Length);
-                    AddArgument(ref args);
-                    continue;
+                    // Backslash always adds next character
+                    // Eat back slash if it's the last character.
+                    case '\\': 
+                        if (index != input.Length - 1)
+                            builder.Append(input[++index]);
+                        break;
+                    case ' ':
+                    case '\t': // Eat whitespace, unless inside a quotes.
+                        if (quote)
+                            builder.Append(input[index]);
+                        else AddArgument();
+                        break;
+                    case '"': // Toggle quote state. If at the end, add the current argument.
+                        quote = !quote;
+                        if (!quote)
+                            AddArgument();
+                        break;
+                    default: // Add any other character to the argument.
+                        builder.Append(input[index]);
+                        break;
                 }
             }
+
+            // Add any characters as an arugment to the end.
+            AddArgument();
         }
-        private void AddArgument(ref StringBuilder sb)
-        {
-            arguments.Add(sb.ToString());
-            sb.Clear();
-        }
+
+        public static KeyValuePair<string, ConsoleCommand<T>> Create(string name, ExecutionDelegate<T> d)
+            => new KeyValuePair<string, ConsoleCommand<T>>(name, new ConsoleCommand<T>(name, d));
     }
 
     /// <summary>
@@ -92,6 +86,8 @@ namespace GameEngine
     /// </summary>
     public class ConsoleCommand : ConsoleCommand<object>
     {
+        public delegate void ExecutionDelegate(List<string> args);
+        
         public ConsoleCommand(string name, ExecutionDelegate d) : base(name, delegate (List<string> args) { d(args); return null; })
         { }
 
@@ -100,5 +96,8 @@ namespace GameEngine
         {
             base.Execute(inputStr);
         }
+
+        public static KeyValuePair<string, ConsoleCommand> Create(string name, ExecutionDelegate d)
+            => new KeyValuePair<string, ConsoleCommand>(name, new ConsoleCommand(name, d));
     }
 }

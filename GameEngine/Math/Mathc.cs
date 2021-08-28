@@ -11,7 +11,6 @@ namespace GameEngine
     {
         public class Random
         {
-
             /// <summary> Normalizing factor </summary>
             private static readonly double nf = 3f;
             private static System.Random rng = new System.Random();
@@ -21,13 +20,12 @@ namespace GameEngine
             public static System.Random RNG { get { return rng; } }
 
             public static int Int { get { return rng.Next(); } }
-            public static int NextInt(int maxVal) { return rng.Next(maxVal); }
-            public static int NextInt(int minVal, int maxVal) { return rng.Next(minVal, maxVal); }
-            public static int NextInt(Vector2Int range, bool inclusive = false)
-            {
-
-                return inclusive ? rng.Next(range.X, range.Y + 1) : rng.Next(range.X, range.Y); 
-            }
+            public static int NextInt(int maxVal, bool inclusive = false) 
+                => rng.Next(maxVal + (inclusive ? 1 : 0));
+            public static int NextInt(int minVal, int maxVal, bool inclusive = false) 
+                => rng.Next(minVal, maxVal + (inclusive ? 1 : 0));
+            public static int NextInt(Vector2Int range, bool inclusive = false) 
+                => inclusive ? rng.Next(range.X, range.Y + 1) : rng.Next(range.X, range.Y);
 
             public static double Double { get { return NextDouble(); } }
             public static double NormalDouble { get { return rng.NextDouble(); } }
@@ -72,7 +70,6 @@ namespace GameEngine
                 }
             }
 
-
             public static float NextFloat() => (float)rng.NextDouble();
             /// <summary>
             /// Generate random float between 0 and maxValue
@@ -80,20 +77,18 @@ namespace GameEngine
             public static float NextFloat(float maxValue)
             {
                 return NextFloat()*maxValue;
-                //return (float)((rng.NextDouble() * 2.0 - 1.0) * (double)float.MaxValue);
             }
             public static float NextFloat(Vector2 range)
             {
-                float min = Math.Abs(range.X), max = Math.Abs(range.Y);
-                float rFloat = NextFloat(min+max);
-                Mathc.Swap(ref min, ref max);
-                return rFloat - max;
+                range.SortSelf();
+                float rFloat = NextFloat(Math.Abs(range.X - range.Y));
+                return rFloat + range.X;
             }
 
             /// <summary> Return a random, normally distributed number that is between 0 and 1 </summary>
             /// <param name="negOne2One"> Make the range -1 to 1 instead </param>
             /// <returns></returns>
-            public static double Marsaglia(bool negOne2One)
+            public static double Marsaglia(bool negOne2One = false)
             {
                 if (hasSpareRand)
                 {
@@ -118,48 +113,94 @@ namespace GameEngine
                     return NormalizeBetween(x * s, -nf, nf) * 2 - 1;
                 return Math.Abs(NormalizeBetween(x * s, -nf, nf) * 2 - 1);
             }
-            
-            /// <summary>
-            /// Get a value that is equivalent to the mid value, and shifted a bit to a random side.
-            /// </summary>
+
+            /// <summary>Get a normal distribution between 0 and <paramref name="range"/></summary>
+            public static double MarsagliaRange(double range, bool neg = false)
+            {
+                if (neg)
+                    return Marsaglia(true) * range;
+                return Marsaglia(false) * range;
+            }
+            /// <summary>Get a normal distribution between 0 and <paramref name="range"/></summary>
+            public static float MarsagliaRange(float range, bool neg= false)
+            {
+                if (neg)
+                    return (float)Marsaglia(true) * range;
+                return (float)Marsaglia(false) * range;
+            }
+
+            /// <summary>Get a normal distribution between two numbers</summary>
             public static double GetMarsagliaBetween(double min, double max)
             {
-                if (min > max)
-                {
-                    var t = max;
-                    max = min;
-                    min = t;
-                }
-                return min + ((max - min) * 0.5f * Marsaglia(true));
+                Mathc.Swap(ref min, ref max);
+                double mid = GetMidValue(min, max);
+                return MarsagliaRange(mid, true) + mid;
             }
+            /// <summary>Get a normal distribution between two numbers</summary>
+            public static float GetMarsagliaBetween(float min, float max)
+            {
+                Mathc.Swap(ref min, ref max);
+                float mid = GetMidValue(min, max);
+                return MarsagliaRange(mid, true) + mid;
+            }
+            /// <summary>Get a normal distribution between two numbers</summary>
+            /// <param name="bias">Bias multiplier. >1.0f biases towards <paramref name="min"/>, <1.0f biases toward <paramref name="max"/></param>
+            /// <returns></returns>
+            public static float GetMarsagliaBetween(float min, float max, float bias)
+            {
+                Mathc.Swap(ref min, ref max);
+                float mid = GetMidValue(min, max);
+                return Mathc.Clamp((float)MarsagliaRange(mid, true) + (bias * mid), min, max);
+            }
+            public static float GetMarsagliaBetween(Vector2Int range, float bias)
+                => GetMarsagliaBetween(range.X, range.Y, bias);
         }
 
         /// <summary> I.E. 90 degrees </summary>
-        public const double HALF_PI = Math.PI / 2;
+        public const double HalfPi = Math.PI / 2;
         /// <summary> I.E. 45 degrees </summary>
-        public const double QUARTER_PI = Math.PI / 4;
+        public const double QuarterPi = Math.PI / 4;
         /// <summary> I.E. 22.5 degrees </summary>
-        public const double EIGTH_PI = Math.PI / 8;
+        public const double EigthPi = Math.PI / 8;
         /// <summary> I.E. 360 degrees  </summary>
-        public const double TWO_PI = Math.PI * 2;
+        public const double TwoPi = Math.PI * 2;
         public const double E = 2.7182818284f;
-        public const double ONE_THIRD = 1 / 3;
+        public const double OneThird = 1 / 3;
 
         public const double RAD2DEG = 360 / (Math.PI * 2);
         public const double DEG2RAD = (Math.PI * 2) / 360;
 
 
-
-        public static T GetRandomItemFromEnumerable<T>(IEnumerable<T> list)
+        public static float Frac(float min, float max, int num, int den)
         {
-            int count = list.Count();
-            return count > 1 ? list.ElementAt(Random.NextInt(count)) : list.First();
+           // Swap(ref min, ref max);
+            return (max - min * (num / den)) + min;
         }
 
-        public static T GetRandomItemFromList<T>(List<T> list)
+        public static Vector2Int Clamp(Vector2Int value, Vector2Int clamp)
         {
-            return list.Count > 1 ? list[Random.NextInt(list.Count)] : list[0];
+            clamp.SortSelf();
+            return new Vector2Int(Mathc.Clamp(value.X, clamp.X, clamp.Y), Mathc.Clamp(value.Y, clamp.X, clamp.Y));
         }
+        public static Vector2Int Clamp(Vector2Int value, int min, int max)
+        {
+            Mathc.Swap(ref min, ref max);
+            return new Vector2Int(Math.Max(value.X, min), Math.Min(value.Y, max));
+        }
+
+        public static Vector2Int Min(Vector2Int v, int minValue) 
+            => new Vector2Int(Mathc.Min(v.X, minValue), Mathc.Min(v.Y, minValue));
+        public static Vector2Int Min(Vector2Int vFirst, Vector2Int vSecond)
+            => vFirst.SqrMagnitude < vSecond.SqrMagnitude ? vFirst : vSecond;
+        public static Vector2Int MinValue(Vector2Int vFirst, Vector2Int vSecond)
+            => new Vector2Int(Mathc.Min(vFirst.X, vSecond.X), Mathc.Min(vFirst.Y, vSecond.Y));
+        
+        public static Vector2Int Max(Vector2Int v2, int maxValue) 
+            => new Vector2Int(Mathc.Max(v2.X, maxValue), Mathc.Max(v2.Y, maxValue));
+        public static Vector2Int Max(Vector2Int vFirst, Vector2Int vSecond)
+            => vFirst.SqrMagnitude > vSecond.SqrMagnitude ? vFirst : vSecond;
+        public static Vector2Int MaxValue(Vector2Int vFirst, Vector2Int vSecond)
+            => new Vector2Int(Mathc.Max(vFirst.X, vSecond.X), Mathc.Max(vFirst.Y, vSecond.Y));
 
         // This solution looks lazy, but according to this Stack Overflow answer: https://stackoverflow.com/a/51099524
         // The if-chain solution is actually faster than anyother method in .Net Framework.
@@ -262,58 +303,15 @@ namespace GameEngine
             return (2.0 / (1.0 - Math.Pow(Math.E, -value * weight))) - 1.0;
         }
 
-        /// <summary> Returns a random KeyValuePair from a dicitonary. NOTE: creates a new list every time. not reccommened for large or unchanging dictionaries. </summary>
-        public static KeyValuePair<TKey, TVal> GetRandomKVPFromDict<TKey, TVal>(ref Dictionary<TKey, TVal> dict)
-        {
-            var k = GetRandomKeyFromDict(ref dict);
-            var v = dict[k];
-            return new KeyValuePair<TKey, TVal>(k, v);
-        }
-        /// <summary> Returns a random key from a dicitonary. NOTE: creates a new list every time. not reccommened for large or unchanging dictionaries. </summary>
-        public static TKey GetRandomKeyFromDict<TKey, TVal>(ref Dictionary<TKey, TVal> dict)
-        {
-            Random.NextInt(0, dict.Count);
-            return System.Linq.Enumerable.ToList(dict.Keys)[Random.NextInt(0, dict.Count)];
-        }
-        /// <summary> Returns a random value from a dicitonary. NOTE: creates a new list every time. not reccommened for large or unchanging dictionaries. </summary>
-        public static TVal GetRandomValueFromDict<TKey, TVal>(ref Dictionary<TKey, TVal> dict)
-        {
-            return System.Linq.Enumerable.ToList(dict.Values)[Random.NextInt(0, dict.Count)];
-        }
-
-        /// <summary> Returns an array filled with the declared values of an enum. </summary>
-        public static T[] GetEnumValues<T>()
-        {
-            if (!typeof(T).IsEnum)
-                throw new ArgumentException("Passed type is not an enum.");
-            return (T[])Enum.GetValues(typeof(T));
-        }
-
         public static double Truncate(this double val, int numPlaces)
         {
-            double m = Math.Pow(10.0f, numPlaces);
-            return (double)(Math.Truncate(m * val) / m);
+            double m = Math.Pow(10, numPlaces);
+            return (Math.Truncate(m * val) / m);
         }
-
-        /// <summary> Returns true if array[index].Equals() is true. </summary>
-        public static bool ArrayContains<T>(ref T[] array, T value)
+        public static float Truncate(this float val, int numPlaces)
         {
-            foreach (var val in array)
-                if (val.Equals(value))
-                    return true;
-            return false;
-        }
-        /// <summary> Returns true if array[index].Equals() is true. </summary>
-        public static bool ArrayContains<T>(ref T[] array, T value, out int index)
-        {
-            for (int i = 0; i < array.Length; i++)
-                if (array[i].Equals(value))
-                {
-                    index = i;
-                    return true;
-                }
-            index = -1;
-            return false;
+            double m = Math.Pow(10, numPlaces);
+            return (float)(Math.Truncate(m * val) / m);
         }
 
         /// <summary> Swaps two values if min is greater than max. </summary>
@@ -365,18 +363,6 @@ namespace GameEngine
         public static double Clamp(double val, double min, double max)
         {
             return Math.Max(Math.Min(val, max), min);
-        }
-
-        /// <summary> Steps through any given enum either up or down. </summary>
-        public static T EnumLooper<T>(T currentValue, bool stepUp, int maxValue, int minValue = 0) where T : struct, IConvertible
-        {
-            if (!typeof(T).IsEnum)
-                throw new ArgumentException("It's not an enum, fam. What the fuck?");
-
-            int nextVal = Convert.ToInt32(currentValue) + (stepUp ? 1 : -1);
-            nextVal = ReverseClamp(nextVal, minValue, maxValue);
-
-            return (T)(object)nextVal;
         }
 
         /// <summary>  Will clamp a number between min and max. If value is greater than max, will return min and vice versa. </summary>
@@ -444,7 +430,7 @@ namespace GameEngine
         /// <summary> Turn a |-pi - pi| to a |0 - 2pi| angle. </summary>
         public static double AnglePiToAngle2Pi(double angle)
         {
-            return angle < 0 ? angle + TWO_PI : angle;
+            return angle < 0 ? angle + TwoPi : angle;
         }
 
         /// <summary> Returns true if a - b is less than threshold </summary>
@@ -459,8 +445,17 @@ namespace GameEngine
         public static double GetMidValue(double min, double max)
         {
             if (min > max)
-                return ((min - max) / 2) + max;
-            return ((max - min) / 2) + min;
+                return ((min - max) * 0.5) + max;
+            return ((max - min) * 0.5) + min;
+        }
+        /// <summary>
+        /// Returns the midpoint between two floats.
+        /// </summary>
+        public static float GetMidValue(float min, float max)
+        {
+            if (min > max)
+                return ((min - max) * 0.5f) + max;
+            return ((max - min) * 0.5f) + min;
         }
 
         /// <summary> Returns val is between min and max, or if it is equal to them. </summary>

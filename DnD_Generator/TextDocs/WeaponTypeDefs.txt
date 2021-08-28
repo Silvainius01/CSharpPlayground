@@ -1,0 +1,48 @@
+﻿ItemWeapon {
+	Type=Axe
+	pAttr=STR		# Primary Attribute req
+	sAttr=DEX		# Secondary Attribute req
+	hAttr=DEX		# Hit Bonus attribute
+	dAttr=STR		# Damage Bonus attribute
+	pBaseReq=4		# Primary Attribute base req
+	sBaseReq=2		# Secondary Attribute base req
+	bDamage=1		# Base damage
+	lDamageMult=2.5	# Large Weapon Damage Multiplier
+	lWeightMult=3.0 # Large Weapon Weight Multiplier
+}
+ItemWeapon {
+	Type=Blade
+	pAttr=DEX		# Primary Attribute req
+	sAttr=STR		# Secondary Attribute req
+	hAttr=DEX		# Hit Bonus attribute
+	dAttr=DEX		# Damage Bonus attribute
+	pBaseReq=4		# Primary Attribute base req
+	sBaseReq=2		# Secondary Attribute base req
+	bDamage=1		# Base damage
+	lDamageMult=2.0	# Large Weapon Damage Multiplier
+	lWeightMult=3.0 # Large Weapon Weight Multiplier
+}
+ItemWeapon {
+	Type=Blunt
+	pAttr=STR		# Primary Attribute req
+	sAttr=CON		# Secondary Attribute req
+	hAttr=DEX		# Hit Bonus attribute
+	dAttr=STR		# Damage Bonus attribute
+	pBaseReq=4		# Primary Attribute base req
+	sBaseReq=2		# Secondary Attribute base req
+	bDamage=1		# Base damage
+	lDamageMult=3.0	# Large Weapon Damage Multiplier
+	lWeightMult=4.0 # Large Weapon Weight Multiplier
+}
+ItemWeapon {
+	Type=Ranged
+	pAttr=DEX		# Primary Attribute req
+	sAttr=STR		# Secondary Attribute req
+	hAttr=STR		# Hit Bonus attribute
+	dAttr=DEX		# Damage Bonus attribute
+	pBaseReq=4		# Primary Attribute base req
+	sBaseReq=2		# Secondary Attribute base req
+	bDamage=1		# Base damage
+	lDamageMult=2.5	# Large Weapon Damage Multiplier
+	lWeightMult=3.0 # Large Weapon Weight Multiplier
+}

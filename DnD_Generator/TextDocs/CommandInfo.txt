@@ -1,0 +1,27 @@
+
+Menu Commands:
+	newGame -> start new game
+	again -> Enter a new dungeon
+
+Game Commands:
+	check -> reprint room info
+	check [roomId] -> peek into a border room
+	check all -> peek into all border rooms
+	chest [chestId] -> look in a chest
+	(cr) creature [creautreId] -> inspect a creature
+	equip [itemId] -> equip a weapon in your inventory
+	exit -> exit the dungeon and cahs in your XP
+	fight [creatureId] -> fight a creature
+	item [itemId] -> inspect an item in an opened chest
+	(inv) inventory -> print all items you've picked up
+	(inv) inventory [itemId] -> inspect an item in your inventory
+	map -> print the map
+	move [roomId] -> move to a room connected to your own
+	path [roomId] -> Mark a path to an explorable room on the map
+	rest [int] -> heal X hp
+	take [itemId] -> take an item from an opened chest
+	takeall -> take all items from all chests in a room
+	self -> Print an overview of your stats
+	self full -> Print a full list of your stats
+	self attr -> Print your attributes
+	self weapon -> Print your weapon's stats

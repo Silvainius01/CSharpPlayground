@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DnD_Generator
 {
-    public class CreatureArmorSlots
+    class CreatureArmorSlots
     {
         public List<ItemArmor> EquippedRings = new List<ItemArmor>();
         public Dictionary<ItemArmorSlotType, ItemArmor> EquippedArmor = new Dictionary<ItemArmorSlotType, ItemArmor>();

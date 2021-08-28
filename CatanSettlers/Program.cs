@@ -137,7 +137,7 @@ namespace CatanSettlers
 
         public HexTile CreateConnectedTile(int cIndex, int tileNum)
         {
-            double ang = ((Mathc.TWO_PI / 6) * cIndex) + Mathc.HALF_PI; // Yay radians
+            double ang = ((Mathc.TwoPi / 6) * cIndex) + Mathc.HalfPi; // Yay radians
             Vector2 pos = new Vector2((float)Math.Cos(ang), (float)Math.Sin(ang));
             HexTile newTile = new HexTile(pos, this.layer+1, tileNum);
             Connect(cIndex, this, newTile);

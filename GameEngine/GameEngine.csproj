@@ -53,8 +53,15 @@
     <Compile Include="DictionaryByType.cs" />
     <Compile Include="Entity\Component.cs" />
     <Compile Include="Entity\EntityCommandModule.cs" />
+    <Compile Include="EnumExtensions.cs" />
     <Compile Include="GenericObjectWrapper.cs" />
+    <Compile Include="Management\ColorStringBuilder.cs" />
+    <Compile Include="Management\CommandModule.cs" />
     <Compile Include="Management\ConsoleCommand.cs" />
+    <Compile Include="Management\ConsoleExt.cs" />
+    <Compile Include="Management\EnumCommandModule.cs" />
+    <Compile Include="Management\LinqExtensions.cs" />
+    <Compile Include="Management\SmartStringBuilder.cs" />
     <Compile Include="Management\TimeManager.cs" />
     <Compile Include="Math\Line.cs" />
     <Compile Include="Management\CommandManager.cs" />
@@ -64,6 +71,7 @@
     <Compile Include="Math\Matrix3.cs" />
     <Compile Include="Math\Vector2.cs" />
     <Compile Include="Math\Vector3.cs" />
+    <Compile Include="ObjectPair.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TextLoader.cs" />
     <Compile Include="Timer.cs" />

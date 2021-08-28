@@ -3,102 +3,97 @@ using System.Collections.Generic;
 using System.Text;
 using GameEngine;
 
-namespace DnD_Generator.Crawler
+namespace DnD_Generator
 {
     class CharacterCreator
     {
-        public const string attrStrDesc = "Determines your ability to weild heavier weapons, and usually determines damage bonus in melee";
-        public const string attrDexDesc = "Determines your ability to successgully land attacks, and aim ranged weapons.";
-        public const string attrConDesc = "Is used in calculating your HP, and determines your overall resiliance.";
-        public const string attrIntDesc = "Unused thus far.";
-        public const string attrWisDesc = "Unused thus far.";
-        public const string attrChaDesc = "Unused thus far.";
+        public static Dictionary<AttributeType, string> attributeDescriptions = new Dictionary<AttributeType, string>()
+        {
+            [AttributeType.STR] = "+5 carry weight. Get bonus damage for Axes and Blunt weapons.",
+            [AttributeType.DEX] = "Get bonus damage for Blades and Ranged weapons, and make it easier to hit things.",
+            [AttributeType.CON] = $"+{DungeonCrawlerSettings.HitPointsPerConstitution} HP. Secondary stat for Blunt weapons.",
+        };
 
-        public static Dictionary<string, ConsoleCommand<(AttributeType, int)>> creationCommands = new Dictionary<string, ConsoleCommand<(AttributeType, int)>>()
-        {
-            ["attr"] = new ConsoleCommand<(AttributeType, int)>("attr", null),
-        };
-        public static Dictionary<string, ConsoleCommand<WeaponType>> weaponTypeCommands = new Dictionary<string, ConsoleCommand<WeaponType>>()
-        {
-            ["axe"] = new ConsoleCommand<WeaponType>("axe", (List<string> args) => WeaponType.Axe),
-            ["blunt"] = new ConsoleCommand<WeaponType>("blunt", (List<string> args) => WeaponType.Blunt),
-            ["blade"] = new ConsoleCommand<WeaponType>("blade", (List<string> args) => WeaponType.Blade),
-            ["ranged"] = new ConsoleCommand<WeaponType>("ranged", (List<string> args) => WeaponType.Ranged),
-        };
+        static string WeaponTypePrompt = $"Pick your preferred weapon:\n\t{EnumExt<WeaponType>.Values.ToString(" | ")}\n";
+        static EnumCommandModule<WeaponType> WeaponTypeCommands { get => EnumExt<WeaponType>.GetCommandModule(false); }
+
+        static string AttributeTypePrompt = $"Pick an attribute:\n\t{EnumExt<AttributeType>.Values.ToString(" | ")}\n";
+        static EnumCommandModule<AttributeType> AttributeTypeCommands { get => EnumExt<AttributeType>.GetCommandModule(false); }
 
         public static PlayerCharacter CharacterCreationPrompt()
         {
-            PlayerCharacter character = new PlayerCharacter()
+            PlayerCharacter player = new PlayerCharacter()
             {
+                Level = 2,
                 Name = "Default",
-                HitPoints = 15,
+                HitPoints = DungeonCrawlerSettings.MinCreatureHitPoints,
                 ArmorClass = 0,
-                Attributes = new CreatureAttributes(5)
             };
+            
+            player.Name = CommandManager.UserInputPrompt("Enter name", false);
 
+            var wParams = ItemWeaponGenerationPresets.StartWeaponItem;
+            wParams.PossibleWeaponTypes = new List<WeaponType>() { GetNextWeaponCommand(WeaponTypePrompt, $"[Invalid] Preferred Weapon", false) };
+            player.PrimaryWeapon = DungeonGenerator.GenerateWeapon(wParams);
 
-            character.Name = CommandManager.UserInputPrompt("Enter name", false);
-            character.PrimaryWeapon = ItemWeaponGenerator.GenerateWeapon(
-                new ItemWeaponGenerationProperties()
-                {
-                    WeightRange = new Vector2Int(25, 25),
-                    QualityRange = new Vector2Int(1, 1),
-                    LargeWeaponProbability = ItemWeaponGenerationPresets.NoLargeRate,
-                    PossibleWeaponTypes = new List<WeaponType>() { GetPreferredWeaponType() }
-                }
-            );
+            player.Attributes = new CreatureAttributes(player.PrimaryWeapon.AttributeRequirements);
+            int attrPoints = player.Attributes.Level * (DungeonCrawlerSettings.AttributePointsPerLevel) - player.Attributes.TotalScore;
+            if (attrPoints <= 0)
+            {
+                player.Level = player.Attributes.Level + 1;
+                attrPoints = 2;
+            }
+            else player.Level = player.Attributes.Level;
 
-            return character;
+            player.Attributes[AttributeType.CON] += attrPoints;
+            player.HitPoints = player.MaxHitPoints;
+
+            return player;
         }
 
-        public static WeaponType GetPreferredWeaponType()
+        public static void AttributePrompt(PlayerCharacter player, int levelsGained, int attrPoints, int tabCount)
         {
-            StringBuilder promptBuilder = new StringBuilder("Pick your preferred weapon:");
+            SmartStringBuilder staticBuilder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);
 
-            foreach (var weaponType in Mathc.GetEnumValues<WeaponType>())
+            staticBuilder.Clear();
+            staticBuilder.Append(tabCount, $"\nYou've gained {levelsGained} levels!");
+            staticBuilder.NewlineAppend(tabCount, $"You have {attrPoints} attribute points to allocate as you choose.");
+
+            ++tabCount;
+            foreach (var value in EnumExt<AttributeType>.Values)
+                if (attributeDescriptions.ContainsKey(value))
+                    staticBuilder.NewlineAppend(tabCount, $"{value}: {attributeDescriptions[value]}");
+            else staticBuilder.NewlineAppend(tabCount, $"{value}: Unused.");
+            --tabCount;
+
+            Console.WriteLine(staticBuilder.ToString());
+            staticBuilder.Clear();
+
+            Console.WriteLine(player.Attributes.DebugString("Your Current Attributes:", tabCount));
+            while (attrPoints > 0)
             {
-                promptBuilder.Append($"\n\t- {weaponType}");
+                AttributeType attr = GetNextAttributeCommand("Add point to: ", "[INVALID] Add point to: ", false);
+                ++player.Attributes[attr];
+                --attrPoints;
+                Console.WriteLine($"{attr} {player.Attributes[attr] - 1} -> {player.Attributes[attr]}");
             }
-            promptBuilder.Append('\n');
 
-            bool success = CommandManager.GetNextCommand(promptBuilder.ToString(), false, weaponTypeCommands, out WeaponType type);
+            Console.WriteLine(player.Attributes.InspectString("All points distributed.\nNew attributes:", tabCount));
+        }
+
+        public static WeaponType GetNextWeaponCommand(string firstPrompt, string failPrompt, bool newline)
+        {
+            bool success = WeaponTypeCommands.TryGetValueFromCommand(firstPrompt, newline, out WeaponType type);
             while (!success)
-                success = CommandManager.GetNextCommand("Invalid Weapon Type. Try Again: ", false, weaponTypeCommands, out type);
+                success = WeaponTypeCommands.TryGetValueFromCommand(failPrompt, newline, out type);
             return type;
         }
-
-        public static (AttributeType attr, int amt) AttributeCommand(List<string> arguments)
+        public static AttributeType GetNextAttributeCommand(string firstPrompt, string failPrompt, bool newline)
         {
-            if (arguments.Count < 1)
-            {
-                var color = Console.ForegroundColor;
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Not enough arguments, expected at least 1.");
-                Console.ForegroundColor = color;
-                return (AttributeType.STR, 0);
-            }
-
-            for (int i = 0; i < arguments.Count; ++i)
-                arguments[0] = arguments[0].ToLower();
-
-            if (arguments.Count > 1 && int.TryParse(arguments[1], out int amt))
-            {
-                switch (arguments[0].ToLower())
-                {
-                    case "str": return (AttributeType.STR, amt);
-                    case "dex": return (AttributeType.DEX, amt);
-                    case "con": return (AttributeType.CON, amt);
-                    case "int": return (AttributeType.INT, amt);
-                    case "wis": return (AttributeType.WIS, amt);
-                    case "cha": return (AttributeType.CHA, amt);
-                }
-            }
-            else if(arguments[0] == "help")
-            {
-                Console.WriteLine("Usage: attr [str|dex|con|int|wis|cha] [amount]");
-            }
-
-            return (AttributeType.STR, 0);
+            bool success = AttributeTypeCommands.TryGetValueFromCommand(firstPrompt, newline, out AttributeType type);
+            while (!success)
+                success = AttributeTypeCommands.TryGetValueFromCommand(failPrompt, newline, out type);
+            return type;
         }
     }
 }

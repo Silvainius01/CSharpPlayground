@@ -4,11 +4,9 @@ using System.Text;
 
 namespace DnD_Generator
 {
-    public interface IItem
+    interface IDungeonObject
     {
         int ID { get; set; }
-        float Weight { get; set; }
         string Name { get; set; }
-        float Quality { get; set; }
     }
 }

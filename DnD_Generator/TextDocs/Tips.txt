@@ -1,0 +1,8 @@
+﻿IMPORTANT: 
+	- PLEASE USE BLUNT WEAPONS!!
+		- They use CON as their secondary stat, so by leveling it you wont fall behind for damage in other weapon types. A fix is on the way.
+
+- Creatures attack you after two fight commands, or when you attempt to leave a room. If you need to flee the room, do so early.
+- Resting heals you, but also all creatures you've damaged for the same amount. Sometimes you wont be able to win.
+- You get a bonus for exploring every room
+- You can use the `path` command on ?? rooms, if you know what their index is.

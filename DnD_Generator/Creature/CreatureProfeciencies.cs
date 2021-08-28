@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DnD_Generator
 {
-    public class CreatureProfeciencies
+    class CreatureProfeciencies
     {
     }
 }

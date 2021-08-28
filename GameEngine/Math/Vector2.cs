@@ -82,6 +82,15 @@ namespace GameEngine
             return -perp;
         }
 
+        public Vector2 Sort()
+        {
+            return new Vector2(Mathc.Min(X, Y), Mathc.Max(X, Y));
+        }
+        public void SortSelf()
+        {
+            Mathc.Swap(ref data[0], ref data[1]);
+        }
+
         #region Operators
         public static Vector2 operator +(Vector2 v2a, Vector2 v2b)
         {
@@ -252,22 +261,46 @@ namespace GameEngine
     public struct Vector2Int
     {
         private int[] data;
-        public int X
+        public ref int X
         {
-            get { return data[0]; }
-            set { data[0] = value; }
+            get { return ref data[0]; }
         }
-        public int Y
+        public ref int Y
         {
-            get { return data[1]; }
-            set { data[1] = value; }
+            get { return ref data[1]; }
         }
+        public float Magnitude { get { return (float)Mathc.Pythag(X, Y); } }
+        public float SqrMagnitude { get { return (float)Mathc.PythagSqr(X, Y); } }
+        public float AngleRadians
+        {
+            get
+            {
+                var direction = this.Normal();
+                return (float)Math.Atan2(direction.Y, direction.X);
+            }
+        }
+        public float AngleDegrees { get { return AngleRadians * (float)Mathc.RAD2DEG; } }
 
         public static Vector2Int Zero { get { return new Vector2Int(0, 0); } }
         
         public Vector2Int(int x, int y)
         {
             data = new int[2] { x, y };
+        }
+
+        public Vector2Int Sort()
+        {
+            int min = Mathc.Min(X, Y);
+            return new Vector2Int(min, Mathc.Max(X, Y));
+        }
+        public void SortSelf()
+        {
+            Mathc.Swap(ref data[0], ref data[1]);
+        }
+
+        public Vector2 Normal()
+        {
+            return new Vector2(X, Y) / Magnitude;
         }
 
         #region Operators
@@ -288,5 +321,10 @@ namespace GameEngine
             return new Vector2Int(v2a.X / v2b.X, v2a.Y / v2b.Y);
         }
         #endregion
+
+        public override string ToString()
+        {
+            return $"({X}, {Y})";
+        }
     }
 }

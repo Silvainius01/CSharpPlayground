@@ -66,6 +66,8 @@ namespace GameEngine
             return false;
         }
 
+        public bool ContainsType<T>() => dictionary.ContainsKey(typeof(T));
+
         public IEnumerator GetEnumerator()
         {
             return dictionary.GetEnumerator();

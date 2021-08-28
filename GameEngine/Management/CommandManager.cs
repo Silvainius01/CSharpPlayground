@@ -17,6 +17,7 @@ namespace GameEngine
     public static class CommandManager
     {
         static Dictionary<string, ConsoleCommand> universalCommands = new Dictionary<string, ConsoleCommand>();
+        //static DictionaryByType enumCommandDict = new DictionaryByType();
         
         #region Console Sync
         public static string UserInputPrompt(string message, bool newline)
@@ -71,6 +72,19 @@ namespace GameEngine
         {
             return ParseCommandSet(UserInputPrompt(message, newline), commands, out result);
         }
+
+        //public static TEnum GetNextEnumCommand<TEnum>(string message, bool newline) where TEnum : struct, Enum
+        //{
+        //    if (!enumCommandDict.ContainsType<EnumCommandModule<TEnum>>())
+        //        enumCommandDict.Add(new EnumCommandModule<TEnum>());
+        //    return enumCommandDict.Get<EnumCommandModule<TEnum>>().GetValueFromCommand(message, newline);
+        //}
+        //public static bool TryGetNextEnumCommand<TEnum>(string message, bool newline, out TEnum value) where TEnum : struct, Enum
+        //{
+        //    if (!enumCommandDict.ContainsType<EnumCommandModule<TEnum>>())
+        //        enumCommandDict.Add(new EnumCommandModule<TEnum>());
+        //    return enumCommandDict.Get<EnumCommandModule<TEnum>>().TryGetValueFromCommand(message, newline, out value);
+        //}
         #endregion
 
         #region Console Async
@@ -204,6 +218,21 @@ namespace GameEngine
                 Console.WriteLine($"Command '{command}' is not valid.");
                 Console.ForegroundColor = color;
                 return false;
+            }
+        }
+        public static T ParseCommandSet<T>(string input, Dictionary<string, ConsoleCommand<T>> commands)
+        {
+            string command = input.Split(' ')[0];
+
+            if (commands.ContainsKey(command))
+                return commands[command].Execute(input.Remove(0, command.Length));
+            else
+            {
+                var color = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Command '{command}' is not valid.");
+                Console.ForegroundColor = color;
+                return default(T);
             }
         }
         public static bool ParseCommandSet<T>(string input, Dictionary<string, ConsoleCommand<T>> commands, out T result)

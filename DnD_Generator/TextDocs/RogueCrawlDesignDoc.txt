@@ -1,0 +1,22 @@
+STR DEX CON INT WIS CHA
+Weapon Classes:
+	Blade 	- DEX, STR // Longsword, shortsowrd, dagger, or claymore, blades rely on dexterity first and strength second.
+	Axe	- STR, DEX // Axes, regardless of size, require strength above all, but a little dex to aim it is reccomended.
+	Blunt	- STR, CON // Blunt weapons require two things: strength to swing them, and endurance to keep swinging them.
+	Ranged	- DEX, STR // Ranged weapons vary from longbow to sidearm, but they all require expert aim, and the strength to hold them.
+Spell Classes:
+	Element	- INT, WIS // Elemental magic deals in fundamental forces of nature. Kinetics, Electro-Magnetic, Nuclear, etc.
+	Nature	- WIS, INT // Nature magic delves into the realm of biology. Disease, poisons, afflictions, you name it.
+	Astral	- INT, WIS // Astral magic deals in the fabric of space and time. Manipulate time or bend space at will.
+	Arcane	- WIS, CHA // Arcane magic defies description. Wield the power of a god, but beware you draw the attention of one... 
+Armor Classes:
+	None	- DEX, CON // Unarmored individuals seek to avoid hits rather than mitigate their effect.
+	Light	- CON, DEX // Light armor allows one to hold more and move faster, but requires diligence to ensure that whatever is angry at you doesnt hit its many openings.
+	Medium	- STR, CON // Medium armor's modus operandi is versatility. Can take hits and doesnt weigh you down, but maintenance is expensive and demanding.
+	Heavy	- STR, CON // Heavy armor dont care. Heavy armor strong. Heavy armor take hit, heavy armor SMASH
+Tool Classes:
+	Armorer	- STR, CON // Make and Repair weapons and armor
+	Thief	- DEX, INT // Unlock objects and disarm traps, or vice versa
+	Mage	- INT, WIS // Create spells and empower objects
+	Alchemy - WIS, DEX // Create and Identify potions
+	
