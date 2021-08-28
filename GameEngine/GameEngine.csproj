@@ -68,7 +68,8 @@
     <Compile Include="Entity\Entity.cs" />
     <Compile Include="Management\EngineManager.cs" />
     <Compile Include="Math\Mathc.cs" />
-    <Compile Include="Math\Matrix3.cs" />
+    <Compile Include="Math\Matrix\Matrix.cs" />
+    <Compile Include="Math\Matrix\Matrix3.cs" />
     <Compile Include="Math\Vector2.cs" />
     <Compile Include="Math\Vector3.cs" />
     <Compile Include="ObjectPair.cs" />
