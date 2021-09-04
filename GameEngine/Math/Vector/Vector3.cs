@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GameEngine
 {
-    class Vector3
+    public class Vector3
     {
         private double[] data;
         public ref double X => ref data[0];
@@ -24,6 +24,16 @@ namespace GameEngine
         public Vector3(double x, double y, double z)
         {
             data = new double[3] { x, y, z };
+        }
+        public Vector3(double[] values)
+        {
+            if (values.Length != 3)
+            {
+                data = new double[3];
+                for (int i = 0; i < data.Length; ++i)
+                    data[i] = i < values.Length ? values[i] : 0.0;
+            }
+            else data = values;
         }
 
         public void Normalize()

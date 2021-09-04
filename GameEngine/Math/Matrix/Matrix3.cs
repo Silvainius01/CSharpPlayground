@@ -1,5 +1,4 @@
-﻿using GameEngine.Math;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
@@ -9,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GameEngine
 {
-    class Matrix3 : SquareMatrix
+    public class Matrix3 : SquareMatrix
     {
         public Matrix3() : base(3) { }
         public Matrix3(Vector3 v3a, Vector3 v3b, Vector3 v3c, bool asColumns) : this()
@@ -28,13 +27,13 @@ namespace GameEngine
             }
         }
 
-        public Vector3 GetRow(int row)
+        public new Vector3 GetRow(int row)
         {
-            return new Vector3(data[0, row], data[1, row], data[2, row]);
+            return new Vector3(base.GetRow(row));
         }
-        public Vector3 GetColumn(int col)
+        public new Vector3 GetColumn(int col)
         {
-            return new Vector3(data[col, 0], data[col, 1], data[col, 2]);
+            return new Vector3(base.GetColumn(col));
         }
 
         public void SetRow(int row, Vector3 v3)

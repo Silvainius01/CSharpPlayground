@@ -48,13 +48,22 @@
   <ItemGroup>
     <Compile Include="AutomaticGuns\ReceiverCore.cs" />
     <Compile Include="AutomaticGuns\TargetingSystem.cs" />
+    <Compile Include="OzzySRC\OzzySrc.cs" />
+    <Compile Include="OzzySRC\StarbaseCraftManager.cs" />
+    <Compile Include="OzzySRC\StarbaseResearchNode.cs" />
+    <Compile Include="OzzySRC\StarbaseResearchManager.cs" />
+    <Compile Include="OzzySRC\StarbaseCraftRecipe.cs" />
+    <Compile Include="OzzySRC\StarbaseResourceManager.cs" />
+    <Compile Include="OzzySRC\StarbaseResource.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ResearchPriceCalculator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="TextDocs\Json\OzzyData.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

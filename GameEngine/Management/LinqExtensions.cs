@@ -70,5 +70,11 @@ namespace GameEngine
             }
             return builder.ToString();
         }
+
+        public static void EnqueueAll<T>(this Queue<T> q, IEnumerable<T> enumerable)
+        {
+            foreach (var v in enumerable)
+                q.Enqueue(v);
+        }
     }
 }

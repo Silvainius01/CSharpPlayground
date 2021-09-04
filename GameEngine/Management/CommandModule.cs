@@ -20,10 +20,14 @@ namespace GameEngine
         {
             commands.Add(name, new ConsoleCommand(name, executionDelegate));
         }
-
-        public void NextCommand()
+        public void Add(ConsoleCommand command)
         {
-            CommandManager.GetNextCommand(DefaultPrompt, true, commands);
+            commands.Add(command.Name, command);
+        }
+
+        public void NextCommand(bool newLine)
+        {
+            CommandManager.GetNextCommand(DefaultPrompt, newLine, commands);
         }
         public void NextCommand(string prompt, bool newline)
         {

@@ -68,10 +68,12 @@
     <Compile Include="Entity\Entity.cs" />
     <Compile Include="Management\EngineManager.cs" />
     <Compile Include="Math\Mathc.cs" />
+    <Compile Include="Math\Matrix\SquareMatrix.cs" />
     <Compile Include="Math\Matrix\Matrix.cs" />
     <Compile Include="Math\Matrix\Matrix3.cs" />
-    <Compile Include="Math\Vector2.cs" />
-    <Compile Include="Math\Vector3.cs" />
+    <Compile Include="Math\Vector\Vector.cs" />
+    <Compile Include="Math\Vector\Vector2.cs" />
+    <Compile Include="Math\Vector\Vector3.cs" />
     <Compile Include="ObjectPair.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TextLoader.cs" />

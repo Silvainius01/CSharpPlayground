@@ -1,0 +1,1258 @@
+{
+  "objects": [
+    {
+      "Name": "Block of 4 Ore Crates",
+      "CraftingTime": 60,
+      "Materials": {
+        "Bastium": 2321.71,
+        "Vokarium": 542.34
+      },
+      "Research": {
+        "Cube": 171,
+        "Power": 32,
+        "Gear": 32
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Basic Crafting Bench",
+      "CraftingTime": 300,
+      "Materials": {
+        "Ajatite": 1987.02,
+        "Bastium": 3974.04,
+        "Charodium": 4371.44,
+        "Vokarium": 9537.68
+      },
+      "Research": {
+        "Cube": 383,
+        "Power": 576,
+        "Gear": 961
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "T1 Thruster Box",
+      "CraftingTime": 60,
+      "Materials": {
+        "Bastium": 780.24,
+        "Charodium": 1150.96,
+        "Vokarium": 350.74
+      },
+      "Research": {
+        "Cube": 42,
+        "Power": 25,
+        "Gear": 153
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "T1 Thruster Triangle",
+      "CraftingTime": 30,
+      "Materials": {
+        "Bastium": 379,
+        "Charodium": 510.74,
+        "Vokarium": 184.49
+      },
+      "Research": {
+        "Cube": 10,
+        "Power": 18,
+        "Gear": 69
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Main Flight Computer",
+      "CraftingTime": 15,
+      "Materials": {
+        "Ajatite": 77.58,
+        "Bastium": 77.58,
+        "Vokarium": 362.05
+      },
+      "Research": {
+        "Cube": 8,
+        "Power": 37
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Extention Corner 3 Ore Crate",
+      "CraftingTime": 40,
+      "Materials": {
+        "Bastium": 1276.22,
+        "Vokarium": 298.81
+      },
+      "Research": {
+        "Cube": 88,
+        "Power": 24,
+        "Gear": 24
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Box Thruster Body Tier 1",
+      "CraftingTime": 10,
+      "Materials": {
+        "Bastium": 307.51,
+        "Charodium": 439.3,
+        "Vokarium": 131.79
+      },
+      "Research": {
+        "Cube": 17,
+        "Gear": 72
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 1198.35
+    },
+    {
+      "Name": "Resource Bridge",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 15.48,
+        "Bastium": 61.92,
+        "Vokarium": 77.39
+      },
+      "Research": {
+        "Power": 3,
+        "Gear": 9
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Flight Control Unit Basic",
+      "CraftingTime": 6,
+      "Materials": {
+        "Ajatite": 129.15,
+        "Bastium": 129.15,
+        "Vokarium": 387.45
+      },
+      "Research": {
+        "Cube": 4,
+        "Power": 50
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 325.45
+    },
+    {
+      "Name": "Basic 1 Ore Crate (Corner)",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 650.26,
+        "Vokarium": 170.12
+      },
+      "Research": {
+        "Cube": 47,
+        "Power": 8,
+        "Gear": 8
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Curved 1 Ore Crate",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 615.15,
+        "Vokarium": 140.06
+      },
+      "Research": {
+        "Cube": 40,
+        "Power": 8,
+        "Gear": 8
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "L-Shape 1 Ore Crate",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 627.73,
+        "Vokarium": 140.06
+      },
+      "Research": {
+        "Cube": 36,
+        "Power": 8,
+        "Gear": 8
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Basic",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 265.8,
+        "Vokarium": 64.03
+      },
+      "Research": {
+        "Cube": 22
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Basic 1 Hardpoint",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 66.42,
+        "Bastium": 278.07,
+        "Vokarium": 144.89
+      },
+      "Research": {
+        "Cube": 8
+      },
+      "Favourite": 0,
+      "Hide": 1,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "L-Shape 1 Hardpoint",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 66.42,
+        "Bastium": 434.81,
+        "Vokarium": 155.87
+      },
+      "Research": {
+        "Cube": 24
+      },
+      "Favourite": 0,
+      "Hide": 1,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "L-Shape 2 Hardpoint",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 132.84,
+        "Bastium": 415.96,
+        "Vokarium": 248.51
+      },
+      "Research": {
+        "Cube": 10
+      },
+      "Favourite": 0,
+      "Hide": 1,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "L-Shape Basic",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 451.25,
+        "Vokarium": 63.22
+      },
+      "Research": {
+        "Cube": 35
+      },
+      "Favourite": 0,
+      "Hide": 1,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "L-Shape Basic Corner",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 586.05,
+        "Vokarium": 58.19
+      },
+      "Research": {
+        "Cube": 45
+      },
+      "Favourite": 0,
+      "Hide": 1,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Curved Basic",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 404.02,
+        "Vokarium": 66.75
+      },
+      "Research": {
+        "Cube": 32
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Curved Corner 2 Hardpoint",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 132.33,
+        "Bastium": 646.78,
+        "Vokarium": 240.06
+      },
+      "Research": {
+        "Cube": 34
+      },
+      "Favourite": 0,
+      "Hide": 1,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Extention (3 Connection)",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 502.13,
+        "Vokarium": 126.58
+      },
+      "Research": {
+        "Cube": 33
+      },
+      "Favourite": 0,
+      "Hide": 1,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Extention 2 Hardpoint (3 Connection)",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 132.84,
+        "Bastium": 540.6,
+        "Vokarium": 302.93
+      },
+      "Research": {
+        "Cube": 19
+      },
+      "Favourite": 0,
+      "Hide": 1,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Extention 3 Hardpoint (3 Connection)",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 199.26,
+        "Bastium": 568.77,
+        "Vokarium": 391.83
+      },
+      "Research": {
+        "Cube": 8
+      },
+      "Favourite": 0,
+      "Hide": 1,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Extention 4 Hardpoint (2 Connection)",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 265.68,
+        "Bastium": 666.51,
+        "Vokarium": 510.1
+      },
+      "Research": {
+        "Cube": 8
+      },
+      "Favourite": 0,
+      "Hide": 1,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Extention 5 Hardpoint (1 Connection)",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 332.11,
+        "Bastium": 788.59,
+        "Vokarium": 527.06
+      },
+      "Research": {
+        "Cube": 8
+      },
+      "Favourite": 0,
+      "Hide": 1,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Extention Hatch",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 11.43,
+        "Bastium": 256.82,
+        "Nhurgite": 0.44,
+        "Vokarium": 72.52
+      },
+      "Research": {
+        "Cube": 13
+      },
+      "Favourite": 0,
+      "Hide": 1,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Curved L-Shape Adapter",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 424.66,
+        "Vokarium": 63.22
+      },
+      "Research": {
+        "Cube": 32
+      },
+      "Favourite": 0,
+      "Hide": 1,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Inner Corner",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 305.33,
+        "Vokarium": 90.2
+      },
+      "Research": {
+        "Cube": 24
+      },
+      "Favourite": 0,
+      "Hide": 1,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Bottleneck 1",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 347.04,
+        "Vokarium": 130.36
+      },
+      "Research": {
+        "Cube": 26
+      },
+      "Favourite": 0,
+      "Hide": 1,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Bottleneck 2",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 658.37,
+        "Vokarium": 149.79
+      },
+      "Research": {
+        "Cube": 47
+      },
+      "Favourite": 0,
+      "Hide": 1,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Bottleneck 4 Curved",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 1057.13,
+        "Vokarium": 244.26
+      },
+      "Research": {
+        "Cube": 73
+      },
+      "Favourite": 0,
+      "Hide": 1,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Bottleneck 4",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 1008.33,
+        "Vokarium": 244.26
+      },
+      "Research": {
+        "Cube": 71
+      },
+      "Favourite": 0,
+      "Hide": 1,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Extention Wing 5 Hardpoint (1 Connection)",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 45.08,
+        "Bastium": 505.41,
+        "Vokarium": 198.22
+      },
+      "Research": {
+        "Cube": 21
+      },
+      "Favourite": 0,
+      "Hide": 1,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Modular Ore Cargo Crate",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 398.41,
+        "Vokarium": 99.6
+      },
+      "Research": {
+        "Cube": 28,
+        "Power": 8,
+        "Gear": 8
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Pilot Chair",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 64.7,
+        "Vokarium": 34.84
+      },
+      "Research": {
+        "Cube": 7,
+        "Power": 1
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Bolt Tool Magazine",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 20.84
+      },
+      "Research": {
+        "Cube": 1
+      },
+      "Favourite": 0,
+      "Hide": 1,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Cockpit 2 Small Exposed (T1 Laborer)",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 740.6,
+        "Bastium": 2003.61,
+        "Charodium": 1091.54,
+        "Nhurgite": 1363.09,
+        "Vokarium": 4156.68
+      },
+      "Research": {
+        "Cube": 151,
+        "Power": 529,
+        "Gear": 70
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Cockpit 2 Small Exposed",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 646.99,
+        "Bastium": 1788.34,
+        "Charodium": 581.25,
+        "Nhurgite": 1362.95,
+        "Vokarium": 3668.97
+      },
+      "Research": {
+        "Cube": 136,
+        "Power": 483,
+        "Gear": 30
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Cockpit 2 Small Exposed",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 646.99,
+        "Bastium": 1788.34,
+        "Charodium": 581.25,
+        "Nhurgite": 1362.95,
+        "Vokarium": 3668.97
+      },
+      "Research": {
+        "Cube": 136,
+        "Power": 483,
+        "Gear": 30
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Cockpit 3 Small",
+      "CraftingTime": 0,
+      "Materials": {
+        "Aegisium": 1418.33,
+        "Ajatite": 3561.56,
+        "Bastium": 2248.56,
+        "Charodium": 786.19,
+        "Nhurgite": 1.66,
+        "Vokarium": 3769.62
+      },
+      "Research": {
+        "Cube": 505,
+        "Power": 412
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Top Cockpit Exposed 1x2 Long",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 651.34,
+        "Bastium": 1476.53,
+        "Charodium": 786.19,
+        "Nhurgite": 1362.58,
+        "Vokarium": 3689.77
+      },
+      "Research": {
+        "Cube": 138,
+        "Power": 526,
+        "Gear": 30
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Cockpit 3 Medium Exposed",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 852.97,
+        "Bastium": 2912.32,
+        "Charodium": 786.19,
+        "Nhurgite": 1362.58,
+        "Vokarium": 4157.47
+      },
+      "Research": {
+        "Cube": 211,
+        "Power": 532,
+        "Gear": 30
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Top Cockpit Exposed 1x2 Wide",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 659.66,
+        "Bastium": 1565.07,
+        "Charodium": 786.19,
+        "Nhurgite": 1362.58,
+        "Vokarium": 3779.46
+      },
+      "Research": {
+        "Cube": 133,
+        "Power": 528,
+        "Gear": 30
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Assault Rifle Magazine",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 7.56,
+        "Ice": 18.96,
+        "Nhurgite": 0.84
+      },
+      "Research": {
+        "Shield": 1
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Power Pack",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 0.72,
+        "Nhurgite": 800
+      },
+      "Research": {
+        "Power": 7,
+        "Shield": 40
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Tools & Weapons Crafting Bench",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 2392.79,
+        "Bastium": 1595.20,
+        "Charodium": 8773.58,
+        "Vokarium": 3190.39
+      },
+      "Research": {
+        "Cube": 308,
+        "Power": 230,
+        "Shield": 230,
+        "Gear": 775
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Pipe Tool",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 1072.50,
+        "Bastium": 1073,
+        "Vokarium": 536
+      },
+      "Research": {
+        "Cube": 1,
+        "Shield": 4,
+        "Gear": 5
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Bolt Tool",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 682.5,
+        "Bastium": 1594,
+        "Vokarium": 2276.5
+      },
+      "Research": {
+        "Cube": 3,
+        "Shield": 11,
+        "Gear": 7
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Small Fuel Rod Rack",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 172.05
+      },
+      "Research": {
+        "Cube": 17
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Tier 1 Generator Fuel Rod",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 69.14,
+        "Bastium": 34.57,
+        "Vokarium": 34.57
+      },
+      "Research": {
+        "Power": 3,
+        "Gear": 3
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Generator Fuel Chamber Tier 1",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 202,
+        "Charodium": 403.99,
+        "Vokarium": 202
+      },
+      "Research": {
+        "Cube": 16,
+        "Power": 16,
+        "Gear": 50
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Radiator Extension",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 16.9,
+        "Charodium": 42.25,
+        "Vokarium": 25.35
+      },
+      "Research": {
+        "Cube": 2,
+        "Gear": 4
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Radiator Base",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 44.88,
+        "Charodium": 112.21,
+        "Vokarium": 67.32
+      },
+      "Research": {
+        "Cube": 7,
+        "Gear": 13
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Small Rechargeable Battery",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 127.66,
+        "Nhurgite": 680.83,
+        "Vokarium": 42.55
+      },
+      "Research": {
+        "Cube": 7,
+        "Power": 57,
+        "Gear": 15
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Small Cooling Cell",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 14.64
+      },
+      "Research": {
+        "Cube": 1
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Small Hydrogen Propellant Tank",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 180.12,
+        "Vokarium": 77.19
+      },
+      "Research": {
+        "Cube": 10,
+        "Gear": 14
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Triangle Thruster Base Tier 1",
+      "CraftingTime": 5,
+      "Materials": {
+        "Bastium": 154.77,
+        "Charodium": 221.1,
+        "Vokarium": 66.33
+      },
+      "Research": {
+        "Cube": 8,
+        "Gear": 36
+      },
+      "Favourite": 0,
+      "Hide": 1,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Box Thruster Combustion Chamber",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 319.85,
+        "Charodium": 411.23,
+        "Vokarium": 182.77
+      },
+      "Research": {
+        "Cube": 17,
+        "Power": 17,
+        "Gear": 55
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Box Thruster Nozzle Tier 1",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 128.76,
+        "Charodium": 300.44
+      },
+      "Research": {
+        "Cube": 8,
+        "Power": 8,
+        "Gear": 26
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Triangle Thruster Nozzle Tier 1",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 56.65,
+        "Charodium": 105.21
+      },
+      "Research": {
+        "Cube": 3,
+        "Power": 3,
+        "Gear": 9
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Hinge B 48x144 cm",
+      "CraftingTime": 1,
+      "Materials": {
+        "Ajatite": 13.21,
+        "Bastium": 4.07
+      },
+      "Research": {
+        "Cube": 1,
+        "Gear": 1
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Slider Basic A 48x144 cm",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 7.13,
+        "Bastium": 28.21,
+        "Vokarium": 14.25
+      },
+      "Research": {
+        "Cube": 3,
+        "Gear": 1
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Hinge (L-profile) 24x144x36 cm",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 58.95
+      },
+      "Research": {
+        "Cube": 5
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Hinge (C-profile) 48x144x36 cm",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 73.34
+      },
+      "Research": {
+        "Cube": 6
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Hinge A 48x144 cm",
+      "CraftingTime": 0,
+      "Materials": {
+        "Ajatite": 13.57,
+        "Bastium": 4.07
+      },
+      "Research": {
+        "Cube": 1,
+        "Gear": 1
+      },
+      "Favourite": 0,
+      "Hide": 1,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Pilot Chair Stand",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 35.76,
+        "Vokarium": 1.88
+      },
+      "Research": {
+        "Cube": 2,
+        "Power": 1
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Material Point Scanner Fixed Mount",
+      "CraftingTime": 0,
+      "Materials": {
+        "Aegisium": 818.27,
+        "Bastium": 503.8,
+        "Charodium": 862.68,
+        "Exorium": 128.85,
+        "Vokarium": 385.87
+      },
+      "Research": {
+        "Cube": 96,
+        "Gear": 131,
+        "Power": 37,
+        "Shield": 18
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Mining Laser Fixed Mount",
+      "CraftingTime": 0,
+      "Materials": {
+        "Aegisium": 517.6,
+        "Bastium": 2390.18,
+        "Charodium": 6865.92,
+        "Exorium": 4002.12,
+        "Vokarium": 2358.04
+      },
+      "Research": {
+        "Cube": 232,
+        "Gear": 580,
+        "Power": 311,
+        "Shield": 622
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Fixed Weapon Mount 2",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 66.07,
+        "Vokarium": 11.66
+      },
+      "Research": {
+        "Cube": 5,
+        "Power": 1
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Material Point Scanner",
+      "CraftingTime": 0,
+      "Materials": {
+        "Aegisium": 300.67,
+        "Bastium": 257.73,
+        "Exorium": 128.85,
+        "Vokarium": 171.81
+      },
+      "Research": {
+        "Cube": 18,
+        "Gear": 18,
+        "Power": 36,
+        "Shield": 18
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Mining Laser",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 2144.1,
+        "Charodium": 6003.24,
+        "Exorium": 4002.12,
+        "Vokarium": 2143.92
+      },
+      "Research": {
+        "Cube": 154,
+        "Gear": 467,
+        "Power": 310,
+        "Shield": 622
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Small Turntable Mount 2",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 64.18
+      },
+      "Research": {
+        "Cube": 6
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Turret Cradle Advanced",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 338.64,
+        "Vokarium": 84.66
+      },
+      "Research": {
+        "Cube": 19,
+        "Power": 3,
+        "Shield": 17
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Turret Turntable",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 235.37
+      },
+      "Research": {
+        "Cube": 22
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Tripod",
+      "CraftingTime": 19,
+      "Materials": {
+        "Ajatite": 517,
+        "Bastium": 827.3,
+        "Charodium": 723.8
+      },
+      "Research": {
+        "Cube": 17,
+        "Shield": 168
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Tripod Autocannon",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 463.6,
+        "Charodium": 2162.9,
+        "Vokarium": 463.4
+      },
+      "Research": {
+        "Cube": 31,
+        "Shield": 294
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Tripod Autocannon Magazine",
+      "CraftingTime": 0,
+      "Materials": {
+        "Bastium": 515.74,
+        "Ice": 75.2,
+        "Nhurgite": 678.4
+      },
+      "Research": {
+        "Cube": 1,
+        "Shield": 75
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    },
+    {
+      "Name": "Station Foundation (Inside Safe Zone)",
+      "CraftingTime": 310,
+      "Materials": {
+        "Bastium": 3403.5,
+        "Charodium": 7597.42,
+        "Vokarium": 22792.27
+      },
+      "Research": {
+        "Cube": 688,
+        "Gear": 1376,
+        "Power": 1376
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 31390.88
+    },
+    {
+      "Name": "Station Foundation (Outside Safe Zone)",
+      "CraftingTime": 0,
+      "Materials": {
+        "Arkanium": 10256.52,
+        "Bastium": 3007.92,
+        "Kutonium": 8547.09,
+        "Vokarium": 26780.92
+      },
+      "Research": {
+        "Cube": 1154,
+        "Gear": 2309,
+        "Power": 2309
+      },
+      "Favourite": 0,
+      "Hide": 0,
+      "VendorPrice": 0
+    }
+  ]
+}
