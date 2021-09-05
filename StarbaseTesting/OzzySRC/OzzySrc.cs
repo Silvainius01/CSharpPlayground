@@ -10,35 +10,43 @@ using System.IO;
 
 namespace StarbaseTesting
 {
+    enum ClearSwitchValue { None, Unknown, All }
+
     class OzzySrc
     {
         public static string JsonDirectory = $"{Directory.GetCurrentDirectory()}\\TextDocs\\Json";
         
-        public CommandModule srcCommands = new CommandModule("Enter SRC Command");
+        public CommandModule srcCommands = new CommandModule("\nEnter SRC Command");
 
-        StarbaseCraftManager craftManager;
         StarbaseResearchManager researchManager;
 
         public OzzySrc()
         {
-            StarbaseResourceManager.Init();
+            StarbaseResourceManager.LoadResources();
+            StarbaseCraftManager.LoadOzzyRecipeFormat(null);
+            StarbaseResearchManager.LoadResearchNodes(null);
 
             if (!Directory.Exists(JsonDirectory))
                 Directory.CreateDirectory(JsonDirectory);
 
             // Initialize crafting data and commands
-            craftManager = new StarbaseCraftManager();
-            srcCommands.Add("addRecipe", craftManager.AddOzzyRecipeFormat);
-            srcCommands.Add("saveRecipes", craftManager.SaveOzzyRecipeFormat);
-            srcCommands.Add("loadRecipes", craftManager.LoadOzzyRecipeFormat);
-            srcCommands.Add("updateRecipe", craftManager.UpdateOzzyRecipeFormat);
+            srcCommands.Add("addRecipe", StarbaseCraftManager.AddOzzyRecipeFormat);
+            srcCommands.Add("saveRecipes", StarbaseCraftManager.SaveOzzyRecipeFormat);
+            srcCommands.Add("loadRecipes", StarbaseCraftManager.LoadOzzyRecipeFormat);
+            srcCommands.Add("updateRecipe", StarbaseCraftManager.UpdateOzzyRecipeFormat);
 
-            researchManager = new StarbaseResearchManager();
-            srcCommands.Add("addNode", researchManager.AddResearchNode);
-            srcCommands.Add("saveNodes", researchManager.SaveResearchNodes);
-            srcCommands.Add("loadNodes", researchManager.LoadResearchNodes);
-            srcCommands.Add("updateNode", researchManager.UpdateResearchNode);
-            srcCommands.Add("validateNodes", researchManager.ValidateResearchNodes);
+            // Initialize research node data and commands
+            srcCommands.Add("addNode", StarbaseResearchManager.AddResearchNode);
+            srcCommands.Add("saveNodes", StarbaseResearchManager.SaveResearchNodes);
+            srcCommands.Add("loadNodes", StarbaseResearchManager.LoadResearchNodes);
+            srcCommands.Add("updateNode", StarbaseResearchManager.UpdateResearchNode);
+            srcCommands.Add("validateNodes", StarbaseResearchManager.ValidateResearchNodes);
+            srcCommands.Add("childNodes", StarbaseResearchManager.PrintResearchNodeChildren);
+            srcCommands.Add("parentNodes", StarbaseResearchManager.PrintResearchNodeDependencies);
+            srcCommands.Add("setNodeTree", StarbaseResearchManager.SetResearchNodeTree);
+            srcCommands.Add("debugNode", StarbaseResearchManager.ViewResearchNode);
+            // updateNode "Birght Blues" -n "Bright Blues"
+            // "Rocket Launcher -d" -n "Rocket Launcher" -d "Grenade Launcher" -c r 50000 b 75000 p 25000
         }
     }
 }

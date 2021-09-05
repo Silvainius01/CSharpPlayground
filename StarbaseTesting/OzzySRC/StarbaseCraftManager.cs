@@ -14,14 +14,105 @@ namespace StarbaseTesting
     {
         public static string RecipeDataFileDirectory = $"{OzzySrc.JsonDirectory}\\Recipes.json";
 
-        public Dictionary<string, StarbaseCraftRecipe> RecipesByName = new Dictionary<string, StarbaseCraftRecipe>();
+        public static Dictionary<string, StarbaseCraftRecipe> RecipesByName = new Dictionary<string, StarbaseCraftRecipe>();
 
-        public StarbaseCraftManager()
+        public static bool RecipeExists(string name) => RecipesByName.ContainsKey(name);
+
+        #region Commands
+        public static void AddOzzyRecipeFormat(List<string> args)
         {
-            LoadOzzyRecipeFormat(null);
+            AddRecipe(ParseRecipe(args));
         }
 
-        public bool AddRecipe(StarbaseCraftRecipe recipe)
+        public static void SaveOzzyRecipeFormat(List<string> args)
+        {
+            JObject jsonObject = new JObject();
+            JArray jRecipes = new JArray();
+
+            foreach (var r in RecipesByName.Values)
+                jRecipes.Add(JToken.FromObject(r));
+
+            jsonObject["objects"] = jRecipes;
+
+            StreamWriter writer = new StreamWriter(RecipeDataFileDirectory);
+            writer.Write(JsonConvert.SerializeObject(jsonObject));
+            writer.Close();
+        }
+
+        public static void LoadOzzyRecipeFormat(List<string> args)
+        {
+            if(!File.Exists(RecipeDataFileDirectory))
+            {
+                ConsoleExt.WriteWarningLine("Recipe data file does not exist!");
+                return;
+            }
+
+            StreamReader reader = new StreamReader(RecipeDataFileDirectory);
+            string json = reader.ReadToEnd();
+            reader.Close();
+
+            var jObject = JsonConvert.DeserializeObject<JObject>(json);
+            var serializer = JsonSerializer.CreateDefault();
+            foreach (var obj in jObject["objects"])
+            {
+                var r = (StarbaseCraftRecipe)serializer.Deserialize(new JTokenReader(obj), typeof(StarbaseCraftRecipe));
+                AddRecipe(r);
+            }
+        }
+
+        public static void UpdateOzzyRecipeFormat(List<string> args)
+        {
+            if (args.Count < 1 || !RecipesByName.ContainsKey(args[0]))
+            {
+                ConsoleExt.WriteErrorLine("Must specify a valid recipe to update.");
+                return;
+            }
+
+            bool removeOmittedResources = false;
+            string newName = string.Empty;
+
+            for (int i = 1; i < args.Count; ++i)
+            {
+                switch (args[i])
+                {
+                    case "clr":
+                        removeOmittedResources = true;
+                        args.RemoveAt(i--);
+                        break;
+                    case "-n": // Rename the recipe, remove both the switch and the new name from the argument list.
+                        if (i >= args.Count - 1)
+                        {
+                            ConsoleExt.WriteErrorLine("Must provide a new name after -n switch.");
+                            return;
+                        }
+                        newName = args[i + 1];
+                        args.RemoveAt(i + 1);
+                        args.RemoveAt(i--);
+                        break;
+                }
+            }
+
+            StarbaseCraftRecipe update = null;
+            StarbaseCraftRecipe current = RecipesByName[args[0]];
+
+            if (args.Count >= 3 || newName.Length == 0)
+            {
+                update = ParseRecipe(args);
+                current.UpdateValues(update, removeOmittedResources);
+            }
+
+            if (newName.Length > 0)
+            {
+                RecipesByName.Remove(current.Name);
+                current.Name = newName;
+                AddRecipe(current);
+                Console.WriteLine($"Updated recipe to '{current.Name}'");
+            }
+            else Console.WriteLine($"Updated recipe '{current.Name}'");
+        }
+        #endregion
+
+        static bool AddRecipe(StarbaseCraftRecipe recipe)
         {
             if (RecipesByName.ContainsKey(recipe.Name))
             {
@@ -33,8 +124,7 @@ namespace StarbaseTesting
             Console.WriteLine($"Added recipe for {recipe.Name}.");
             return true;
         }
-
-        public StarbaseCraftRecipe ParseRecipe(List<string> args)
+        static StarbaseCraftRecipe ParseRecipe(List<string> args)
         {
             if (args.Count < 3 || args.Count % 2 != 1)
             {
@@ -87,76 +177,6 @@ namespace StarbaseTesting
             }
 
             return recipe;
-        }
-
-        public void AddOzzyRecipeFormat(List<string> args)
-        {
-            AddRecipe(ParseRecipe(args));
-        }
-
-        public void SaveOzzyRecipeFormat(List<string> args)
-        {
-            JObject jsonObject = new JObject();
-            JArray jRecipes = new JArray();
-
-            foreach (var r in RecipesByName.Values)
-                jRecipes.Add(JToken.FromObject(r));
-
-            jsonObject["objects"] = jRecipes;
-
-            StreamWriter writer = new StreamWriter(RecipeDataFileDirectory);
-            writer.Write(JsonConvert.SerializeObject(jsonObject));
-            writer.Close();
-        }
-
-        public void LoadOzzyRecipeFormat(List<string> args)
-        {
-            if(!File.Exists(RecipeDataFileDirectory))
-            {
-                ConsoleExt.WriteWarningLine("Recipe data file does not exist!");
-                return;
-            }
-
-            Console.Write("Loading crafting recipes...");
-
-            StreamReader reader = new StreamReader(RecipeDataFileDirectory);
-            string json = reader.ReadToEnd();
-            reader.Close();
-
-            var jObject = JsonConvert.DeserializeObject<JObject>(json);
-            var serializer = JsonSerializer.CreateDefault();
-            foreach (var obj in jObject["objects"])
-            {
-                var r = (StarbaseCraftRecipe)serializer.Deserialize(new JTokenReader(obj), typeof(StarbaseCraftRecipe));
-                AddRecipe(r);
-            }
-
-            Console.WriteLine("Done");
-        }
-
-        public void UpdateOzzyRecipeFormat(List<string> args)
-        {
-            if (args.Count < 1 || !RecipesByName.ContainsKey(args[0]))
-            {
-                ConsoleExt.WriteErrorLine("Must specify a valid recipe to update.");
-                return;
-            }
-
-            bool removeOmittedResources = false;
-            for (int i = 1; i < args.Count; ++i)
-            {
-                switch (args[i])
-                {
-                    case "clr":
-                        removeOmittedResources = true;
-                        args.RemoveAt(i--);
-                        break;
-                }
-            }
-
-            StarbaseCraftRecipe update = ParseRecipe(args);
-            RecipesByName[update.Name].UpdateValues(update, removeOmittedResources);
-            Console.WriteLine($"Updated recipe '{update.Name}'");
         }
     }
 }

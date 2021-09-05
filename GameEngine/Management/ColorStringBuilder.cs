@@ -20,11 +20,17 @@ namespace GameEngine
 
     public class ColorStringBuilder : SmartStringBuilder
     {
-        ConsoleColor currColor = ConsoleColor.White;
+        ConsoleColor currColor = ConsoleColor.Gray;
         List<ColoredString> strings = new List<ColoredString>();
 
         public ColorStringBuilder() { }
+        public ColorStringBuilder(string tabString) : base(tabString) { }
         public ColorStringBuilder(string startString, ConsoleColor startColor)
+        {
+            builder = new StringBuilder(startString);
+            currColor = startColor;
+        }
+        public ColorStringBuilder(string tabString, string startString, ConsoleColor startColor) : base(tabString)
         {
             builder = new StringBuilder(startString);
             currColor = startColor;

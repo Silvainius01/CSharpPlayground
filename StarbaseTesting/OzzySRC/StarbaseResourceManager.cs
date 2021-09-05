@@ -14,7 +14,7 @@ namespace StarbaseTesting
         public static bool IsInited = false;
         public static Dictionary<string, StarbaseResource> AllResources = new Dictionary<string, StarbaseResource>();
 
-        public static void Init()
+        public static void LoadResources()
         {
             List<StarbaseResource> resources = new List<StarbaseResource>()
             {
@@ -62,7 +62,9 @@ namespace StarbaseTesting
                 return;
             }
 
+            StringBuilder sb = new StringBuilder($"Added resource '{r.Name}' with aliases: ");
             AllResources.Add(r.Name, r);
+
             foreach (var str in r.Aliases)
             {
                 if (AllResources.ContainsKey(str))
@@ -72,7 +74,10 @@ namespace StarbaseTesting
                     continue;
                 }
                 AllResources.Add(str, r);
+                sb.Append($"'{str}' ");
             }
+
+            Console.WriteLine(sb.ToString());
         }
 
         public static bool TryGetResource(string name, out StarbaseResource resource) => AllResources.TryGetValue(name, out resource);
