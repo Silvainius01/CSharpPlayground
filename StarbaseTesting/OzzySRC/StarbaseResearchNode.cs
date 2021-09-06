@@ -17,6 +17,7 @@ namespace StarbaseTesting
         public bool IsOwned { get; set; } = false;
         public HashSet<string> Recipes { get; set; } = new HashSet<string>();
         public HashSet<string> Dependencies { get; set; } = new HashSet<string>();
+        public HashSet<string> Children { get; set; } = new HashSet<string>();
         public Dictionary<string, int> ResearchCosts { get; set; } = new Dictionary<string, int>();
 
         public StarbaseResearchNode() { }
@@ -44,6 +45,8 @@ namespace StarbaseTesting
                     ResearchCosts.Add(costKvp);
             foreach (var d in newValues.Dependencies)
                 Dependencies.Add(d);
+            foreach (var c in newValues.Children)
+                Children.Add(c);
             return true;
         }
 
@@ -65,9 +68,11 @@ namespace StarbaseTesting
                 ++tabCount;
                 foreach(var str in Recipes)
                 {
-                    if(!StarbaseCraftManager.RecipeExists(str))
-                        colorBuilder.AppendNewline(tabCount, $"{str} - Unknown recipe", ConsoleColor.Yellow);
-                    else colorBuilder.AppendNewline(tabCount, str, ConsoleColor.Gray);
+                    if (!StarbaseCraftManager.RecipeExists(str))
+                        colorBuilder.NewlineAppend(tabCount, $"{str} - Unknown recipe", ConsoleColor.Yellow);
+                    else if (!StarbaseCraftManager.RecipeHasNode(str))
+                        colorBuilder.NewlineAppend(tabCount, $"{str} - Doesn't know it has a node");
+                    else colorBuilder.NewlineAppend(tabCount, str, ConsoleColor.Gray);
                 }
                 --tabCount;
             }
@@ -79,11 +84,11 @@ namespace StarbaseTesting
                 ++tabCount;
                 foreach (var kvp in ResearchCosts)
                 {
-                    if (!StarbaseResourceManager.TryGetResource(kvp.Key, out var resource))
+                    if (StarbaseResourceManager.TryGetResource(kvp.Key, out var resource))
                     {
                         if (resource.Type != StarbaseResourceType.Research)
-                            colorBuilder.AppendNewline(tabCount, $"{kvp.Key} - Not a research type", ConsoleColor.Yellow);
-                        else colorBuilder.AppendNewline(tabCount, $"{kvp.Key}: {kvp.Value}", ConsoleColor.Gray);
+                            colorBuilder.NewlineAppend(tabCount, $"{kvp.Key} - Not a research type", ConsoleColor.Yellow);
+                        else colorBuilder.NewlineAppend(tabCount, $"{kvp.Key}: {kvp.Value}", ConsoleColor.Gray);
                     }
                     else colorBuilder.AppendNewline(tabCount, $"{kvp.Key} - Unknown resource", ConsoleColor.Red);
                 }
@@ -99,7 +104,7 @@ namespace StarbaseTesting
                 {
                     if (StarbaseResearchManager.NodeExists(parent))
                     {
-                        if (!StarbaseResearchManager.NodeHasChildren(parent, out bool hasEntry))
+                        if (!StarbaseResearchManager.NodeHasChildren(parent))
                             colorBuilder.NewlineAppend(tabCount, $"{parent} - Dependency has no children", ConsoleColor.Red);
                         else if (!StarbaseResearchManager.GetChildNodes(parent).Contains(Name))
                             colorBuilder.NewlineAppend(tabCount, $"{parent} - Not a child of dependency", ConsoleColor.Red);
@@ -120,7 +125,7 @@ namespace StarbaseTesting
                 {
                     if (StarbaseResearchManager.NodeExists(childName))
                     {
-                        if (!StarbaseResearchManager.NodeHasDependencies(childName) || !StarbaseResearchManager.NodeDependsOn(childName, Name))
+                        if (!StarbaseResearchManager.NodeDependsOn(childName, Name))
                             colorBuilder.NewlineAppend(tabCount, $"{childName} - Child has no dependency", ConsoleColor.Red);
                         else colorBuilder.NewlineAppend(tabCount, childName, ConsoleColor.Gray);
                     }

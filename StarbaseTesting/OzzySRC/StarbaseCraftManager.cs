@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.IO;
+using System.Net;
 
 namespace StarbaseTesting
 {
@@ -17,6 +18,75 @@ namespace StarbaseTesting
         public static Dictionary<string, StarbaseCraftRecipe> RecipesByName = new Dictionary<string, StarbaseCraftRecipe>();
 
         public static bool RecipeExists(string name) => RecipesByName.ContainsKey(name);
+
+        public static bool RecipeHasNode(string recipe) => StarbaseResearchManager.RecipesOnNodes.Contains(recipe);
+
+        static bool AddRecipe(StarbaseCraftRecipe recipe)
+        {
+            if (RecipesByName.ContainsKey(recipe.Name))
+            {
+                ConsoleExt.WriteLine($"Recipe for '{recipe.Name}' has already been added.", ConsoleColor.Yellow);
+                return false;
+            }
+
+            RecipesByName.Add(recipe.Name, recipe);
+            Console.WriteLine($"Added recipe for {recipe.Name}.");
+            return true;
+        }
+        static StarbaseCraftRecipe ParseRecipe(List<string> args)
+        {
+            if (args.Count < 3 || args.Count % 2 != 1)
+            {
+                ConsoleExt.WriteLine(
+                    "Must contain at least 3 args [name] [resource] [count] AND all resource must be paired.",
+                    ConsoleColor.Red);
+                return null;
+            }
+
+            StarbaseCraftRecipe recipe = new StarbaseCraftRecipe();
+
+            // Parse the recipe
+            recipe.Name = args[0];
+            for (int i = 1; i < args.Count - 1; ++i)
+            {
+                string n = args[i];
+                string a = args[++i];
+                bool validValue = float.TryParse(a, out float amt);
+
+                if (!validValue)
+                {
+                    ConsoleExt.WriteLine($"Value '{a}' is not a valid number, skipping entry '{n}'", ConsoleColor.Yellow);
+                    continue;
+                }
+
+                switch (n)
+                {
+                    case "ct":
+                        recipe.CraftingTime = amt; continue;
+                    case "sv":
+                        recipe.VendorPrice = amt; continue;
+                }
+
+                // Get resource name
+                if (StarbaseResourceManager.AllResources.TryGetValue(n, out StarbaseResource r))
+                {
+                    switch (r.Type)
+                    {
+                        case StarbaseResourceType.Ore:
+                            recipe.Materials.Add(r.Name, amt); break;
+                        case StarbaseResourceType.Research:
+                            recipe.Research.Add(r.Name, (int)amt); break;
+                    }
+                }
+                else
+                {
+                    ConsoleExt.WriteLine($"'{n}' is not a valid resource.", ConsoleColor.Yellow);
+                    continue;
+                }
+            }
+
+            return recipe;
+        }
 
         #region Commands
         public static void AddOzzyRecipeFormat(List<string> args)
@@ -110,73 +180,29 @@ namespace StarbaseTesting
             }
             else Console.WriteLine($"Updated recipe '{current.Name}'");
         }
+
+        public static void ValidateRecipes(List<string> args)
+        {
+            int tabCount = 0;
+            ColorStringBuilder sb = new ColorStringBuilder("  ");
+
+            foreach(var recipe in RecipesByName.Values)
+            {
+                sb.Append(tabCount, $"Errors in recipe '{recipe.Name}':", ConsoleColor.Gray);
+                int length = sb.TotalLength();
+
+                ++tabCount;
+                
+                if (!RecipeHasNode(recipe.Name))
+                    sb.NewlineAppend(tabCount, $"Not on a research node", ConsoleColor.Red);
+
+                --tabCount;
+
+                if (length < sb.TotalLength())
+                    sb.WriteLine(false);
+                sb.Clear();
+            }
+        }
         #endregion
-
-        static bool AddRecipe(StarbaseCraftRecipe recipe)
-        {
-            if (RecipesByName.ContainsKey(recipe.Name))
-            {
-                ConsoleExt.WriteLine($"Recipe for '{recipe.Name}' has already been added.", ConsoleColor.Yellow);
-                return false;
-            }
-
-            RecipesByName.Add(recipe.Name, recipe);
-            Console.WriteLine($"Added recipe for {recipe.Name}.");
-            return true;
-        }
-        static StarbaseCraftRecipe ParseRecipe(List<string> args)
-        {
-            if (args.Count < 3 || args.Count % 2 != 1)
-            {
-                ConsoleExt.WriteLine(
-                    "Must contain at least 3 args [name] [resource] [count] AND all resource must be paired.",
-                    ConsoleColor.Red);
-                return null;
-            }
-
-            StarbaseCraftRecipe recipe = new StarbaseCraftRecipe();
-
-            // Parse the recipe
-            recipe.Name = args[0];
-            for (int i = 1; i < args.Count - 1; ++i)
-            {
-                string n = args[i];
-                string a = args[++i];
-                bool validValue = float.TryParse(a, out float amt);
-
-                if (!validValue)
-                {
-                    ConsoleExt.WriteLine($"Value '{a}' is not a valid number, skipping entry '{n}'", ConsoleColor.Yellow);
-                    continue;
-                }
-
-                switch (n)
-                {
-                    case "ct":
-                        recipe.CraftingTime = amt; continue;
-                    case "sv":
-                        recipe.VendorPrice = amt; continue;
-                }
-
-                // Get resource name
-                if (StarbaseResourceManager.AllResources.TryGetValue(n, out StarbaseResource r))
-                {
-                    switch (r.Type)
-                    {
-                        case StarbaseResourceType.Ore:
-                            recipe.Materials.Add(r.Name, amt); break;
-                        case StarbaseResourceType.Research:
-                            recipe.Research.Add(r.Name, (int)amt); break;
-                    }
-                }
-                else
-                {
-                    ConsoleExt.WriteLine($"'{n}' is not a valid resource.", ConsoleColor.Yellow);
-                    continue;
-                }
-            }
-
-            return recipe;
-        }
     }
 }

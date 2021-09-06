@@ -6,23 +6,26 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Runtime.Serialization;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace StarbaseTesting
 {
-    class StarbaseResearchManager
+    partial class StarbaseResearchManager
     {
         public static string NodeDataFileDirectory = $"{OzzySrc.JsonDirectory}\\ResearchNodes.json";
         public static Dictionary<string, StarbaseResearchNode> NodesByName = new Dictionary<string, StarbaseResearchNode>();
-        
-        // We dont want this serialized, so might as well store it here.
-        public static Dictionary<string, HashSet<string>> NodeChildren = new Dictionary<string, HashSet<string>>();
+
+        public static HashSet<string> NodeTreeNames = new HashSet<string>();
+        public static HashSet<string> RecipesOnNodes = new HashSet<string>();
 
         public StarbaseResearchManager() { }
 
@@ -50,6 +53,7 @@ namespace StarbaseTesting
                     case "-r": state = 1; continue;
                     case "-c": state = 2; continue;
                     case "-d": state = 3; continue;
+                    case "-l": state = 4; continue;
                 }
 
                 switch (state)
@@ -57,6 +61,7 @@ namespace StarbaseTesting
                     case 1: node.Recipes.Add(args[i]); break; // Assume recipe is valid for now
                     case 2: researchCosts.Add(args[i]); break;
                     case 3: node.Dependencies.Add(args[i]); break; // Assume dependencies are valid for now
+                    case 4: node.Children.Add(args[i]); break;
                     default:
                         ConsoleExt.WriteWarningLine($"Argument '{args[i]}' is not a valid switch or an argument following one, and was skipped.");
                         break;
@@ -88,57 +93,76 @@ namespace StarbaseTesting
             return node;
         }
 
-        static void AddDependency(StarbaseResearchNode node, string dep)
+        static void AddDependency(StarbaseResearchNode node, string dep, bool warn = true)
         {
-            if (!NodeChildren.ContainsKey(dep))
-                NodeChildren.Add(dep, new HashSet<string>());
-
             node.Dependencies.Add(dep);
-            NodeChildren[dep].Add(node.Name);
+            // Add node to it's parent's child list
+            if (TryGetNode(dep, out var parentNode))
+                parentNode.Children.Add(node.Name);
+            else if (warn) ConsoleExt.WriteWarningLine($"Added unknown dependency '{dep}' to node '{node.Name}'");
         }
+        static void AddChild(StarbaseResearchNode node, string child, bool warn = true)
+        {
+            node.Children.Add(child);
+            // Add node to it's parent's child list
+            if (TryGetNode(child, out var childNode))
+                childNode.Dependencies.Add(node.Name);
+            else if (warn) ConsoleExt.WriteWarningLine($"Added unknown child '{child}' to node '{node.Name}'");
+        }
+        
+        static void SyncDependencies(StarbaseResearchNode node)
+        {
+            foreach (var dep in node.Dependencies)
+                AddDependency(node, dep);
+        }
+
         static void RemoveDependency(StarbaseResearchNode node, string dep)
         {
             // Clear the node from its parent's child list
-            if (NodeChildren.ContainsKey(dep))
-                NodeChildren[dep].Remove(node.Name);
             node.Dependencies.Remove(dep);
+            if (TryGetNode(dep, out var parentNode))
+                parentNode.Children.Remove(node.Name);
         }
-        static void RemoveAllDependencies(StarbaseResearchNode node, bool removeChildren)
+        static void RemoveDependencies(StarbaseResearchNode node)
         {
-            // Remove ourselves as a dependency for all children
-            if (removeChildren && NodeChildren.ContainsKey(node.Name))
-                foreach (var child in NodeChildren[node.Name].ToArray())
-                    if (NodesByName.TryGetValue(child, out var childNode))
-                        RemoveDependency(childNode, node.Name);
-
             // Clear our dependencies
             foreach (var dep in node.Dependencies.ToArray())
                 RemoveDependency(node, dep);
             node.Dependencies.Clear();
         }
-        static void RemoveResearchNode(StarbaseResearchNode node)
+
+        static void RemoveChild(StarbaseResearchNode node, string child)
         {
-            if (node != null)
-            {
-                NodesByName.Remove(node.Name);
-                RemoveAllDependencies(node, true);
-                NodeChildren.Remove(node.Name);
-            }
+            node.Children.Remove(child);
+            if (TryGetNode(child, out var childNode))
+                childNode.Dependencies.Remove(node.Name);
         }
-        static bool AddResearchNode(StarbaseResearchNode node)
+        static void RemoveChildren(StarbaseResearchNode node)
+        {
+            // Remove ourselves as a dependency for all children
+            foreach (var childName in node.Children.ToArray())
+                RemoveChild(node, childName);
+            node.Children.Clear();
+        }
+
+        static bool AddResearchNode(StarbaseResearchNode node, bool warn = true)
         {
             if (node != null)
             {
                 if (node.Tree == null)
                     node.Tree = string.Empty;
 
+                if (node.Tree != string.Empty)
+                    NodeTreeNames.Add(node.Tree);
+
                 NodesByName.Add(node.Name, node);
 
-                if (!NodeChildren.ContainsKey(node.Name))
-                    NodeChildren.Add(node.Name, new HashSet<string>());
-
                 foreach (var dep in node.Dependencies)
-                    AddDependency(node, dep);
+                    AddDependency(node, dep, warn);
+                foreach (var child in node.Children)
+                    AddChild(node, child, warn);
+                foreach (var recipe in node.Recipes)
+                    RecipesOnNodes.Add(recipe);
 
                 Console.WriteLine($"Added research node '{node.Name}'");
                 return true;
@@ -147,15 +171,32 @@ namespace StarbaseTesting
             ConsoleExt.WriteErrorLine($"Cannot add null research node");
             return false;
         }
-        public static HashSet<string> GetAllChildNodes(string node)
+        
+        static void RemoveResearchNode(StarbaseResearchNode node)
         {
-            if(NodeExists(node) && NodeHasChildren(node))
-                return GetChildNodes(NodesByName[node]);
+            if (node != null)
+            {
+                RemoveChildren(node);
+                RemoveDependencies(node);
+                NodesByName.Remove(node.Name);
+            }
+        }
+        
+        public static HashSet<string> GetChildNodes(string name)
+        {
+            if (TryGetNode(name, out var node))
+                return node.Children;
+            return new HashSet<string>();
+        }
+        public static HashSet<string> GetAllChildNodes(string name)
+        {
+            if(TryGetNode(name, out var node))
+                return GetAllChildNodes(node);
             return new HashSet<string>();
         }
         public static HashSet<string> GetAllChildNodes(StarbaseResearchNode node)
         {
-            Queue<string> childQueue = new Queue<string>(NodeChildren[node.Name]);
+            Queue<string> childQueue = new Queue<string>(node.Children);
             HashSet<string> addedChildren = new HashSet<string>();
 
             while (childQueue.Any())
@@ -166,31 +207,26 @@ namespace StarbaseTesting
                     continue;
                 addedChildren.Add(childName);
 
-                if (NodeChildren.ContainsKey(childName))
-                    childQueue.EnqueueAll(NodeChildren[childName]);
+                if (TryGetNode(childName, out var childNode))
+                    childQueue.EnqueueAll(childNode.Children);
             }
 
             return addedChildren;
         }
-        public static HashSet<string> GetChildNodes(string node)
-        {
-            if (NodeExists(node) && NodeHasChildren(node))
-                return NodeChildren[node];
-            return new HashSet<string>();
-        }
-        public static HashSet<string> GetChildNodes(StarbaseResearchNode node)
-        {
-            if (NodeExists(node.Name) && NodeHasChildren(node.Name))
-                return NodeChildren[node.Name];
-            return new HashSet<string>();
-        }
+        
         public static HashSet<string> GetNodeDependencies(string node)
         {
             if (NodeExists(node))
-                return GetNodeDependencies(NodesByName[node]);
+                return GetAllNodeDependencies(NodesByName[node]);
             return new HashSet<string>();
         }
-        public static HashSet<string> GetNodeDependencies(StarbaseResearchNode node)
+        public static HashSet<string> GetAllNodeDependencies(string name)
+        {
+            if (TryGetNode(name, out var node))
+                return GetAllNodeDependencies(node);
+            return new HashSet<string>();
+        }
+        public static HashSet<string> GetAllNodeDependencies(StarbaseResearchNode node)
         {
             Queue<string> parentQueue = new Queue<string>(node.Dependencies);
             HashSet<string> addedParents = new HashSet<string>();
@@ -203,27 +239,25 @@ namespace StarbaseTesting
                     continue;
                 addedParents.Add(parentName);
 
-                if (NodesByName.TryGetValue(parentName, out var parentNode))
+                if (TryGetNode(parentName, out var parentNode))
                     parentQueue.EnqueueAll(parentNode.Dependencies);
             }
 
             return addedParents;
         }
+        
         public static bool NodeExists(string name) => NodesByName.ContainsKey(name);
-        public static bool NodeHasChildren(string name) => NodeChildren.ContainsKey(name) && NodeChildren[name].Count > 0;
-        public static bool NodeHasChildren(string name, out bool hasEntry)
-        {
-            if(NodeChildren.ContainsKey(name))
-            {
-                hasEntry = true;
-                return NodeChildren[name].Count > 0;
-            }
-            hasEntry = false;
-            return false;
-        }
-        public static bool NodeHasDependencies(string name) => NodeExists(name) && NodesByName[name].Dependencies.Count > 0;
-        public static bool NodeDependsOn(string node, string name) => NodeHasDependencies(node) && NodesByName[node].Dependencies.Contains(name);
+        public static bool TryGetNode(string name, out StarbaseResearchNode node) => NodesByName.TryGetValue(name, out node);
 
+        public static bool NodeHasChildren(string name) => NodeExists(name) && NodesByName[name].Children.Count > 0;
+        public static bool NodeChildOf(string node, string parentName) => TryGetNode(parentName, out var parentNode) && parentNode.Children.Contains(node);
+
+        public static bool NodeHasDependencies(string name) => NodeExists(name) && NodesByName[name].Dependencies.Count > 0;
+        public static bool NodeDependsOn(string nodeName, string parentName) => TryGetNode(nodeName, out var node) && node.Dependencies.Contains(parentName);
+
+        public static bool NodeTreeExists(string tree) => NodeTreeNames.Contains(tree);
+
+        #region Commands
         public static void AddResearchNode(List<string> args)
         {
             AddResearchNode(ParseNode(args));
@@ -261,8 +295,11 @@ namespace StarbaseTesting
             foreach (var obj in jObject["objects"])
             {
                 var r = (StarbaseResearchNode)serializer.Deserialize(new JTokenReader(obj), typeof(StarbaseResearchNode));
-                AddResearchNode(r);
+                AddResearchNode(r, false);
             }
+
+            foreach (var node in NodesByName.Values)
+                SyncDependencies(node);
         }
 
         public static void UpdateResearchNode(List<string> args)
@@ -274,13 +311,14 @@ namespace StarbaseTesting
             }
 
             int state = 0;
-            string newName = string.Empty;
+            bool printDebug = false;
             StarbaseResearchNode update = null;
             StarbaseResearchNode current = NodesByName[args[0]];
+            string newName = current.Name;
 
             for (int i = 1; i < args.Count; ++i)
             {
-                if(args[i].Length > 0 && args[i][0] == '-')
+                if (args[i].Length > 0 && args[i][0] == '-')
                     state = -1;
 
                 switch (args[i])
@@ -325,7 +363,7 @@ namespace StarbaseTesting
 
                     case "-dclr":
                         state = 0;
-                        RemoveAllDependencies(current, false);
+                        RemoveDependencies(current);
                         break;
                     case "-dcln":
                         state = 0;
@@ -345,9 +383,14 @@ namespace StarbaseTesting
                         state = 2;
                         args.RemoveAt(i);
                         break;
+
+                    case "-p":
+                        state = 0;
+                        printDebug = true;
+                        break;
                 }
 
-                switch(state)
+                switch (state)
                 {
                     case 0:
                         args.RemoveAt(i--);
@@ -360,37 +403,37 @@ namespace StarbaseTesting
                         newName = args[i];
                         args.RemoveAt(i--);
                         break;
-                    default: 
+                    default:
                         break;
                 }
             }
 
-            if (args.Count >= 3 || newName.Length == 0)
+            if (args.Count > 0)
             {
                 update = ParseNode(args);
-                if(update == null)
+                if (update == null)
                 {
                     ConsoleExt.WriteErrorLine("Cannot update with null node.");
                     return;
                 }
+                if (update.Tree != null && update.Tree != string.Empty)
+                    update.Tree = current.Tree;
                 current.UpdateValues(update);
             }
 
-            if (newName.Length > 0)
-            {
-                var newNode = new StarbaseResearchNode(current);
-                newNode.Name = newName;
+            var newNode = new StarbaseResearchNode(current);
+            newNode.Name = newName;
+            newNode.Tree = current.Tree;
 
-                if (NodeChildren.ContainsKey(current.Name))
-                    foreach (var childName in NodeChildren[current.Name])
-                        if (NodesByName.TryGetValue(childName, out var childNode))
-                            AddDependency(childNode, newName);
+            RemoveResearchNode(current);
+            AddResearchNode(newNode);
+            SyncDependencies(newNode);
 
-                RemoveResearchNode(current);
-                AddResearchNode(newNode);
-                Console.WriteLine($"Updated node to '{current.Name}'");
-            }
-            else Console.WriteLine($"Updated node '{current.Name}'");
+            current = newNode;
+            Console.WriteLine($"Updated node '{current.Name}'");
+
+            if (printDebug)
+                current.DebugColorString().WriteLine(true);
         }
 
         public static void SetResearchNodeTree(List<string> args)
@@ -419,9 +462,9 @@ namespace StarbaseTesting
                 ConsoleColor.Gray);
 
             int tabCount = 1;
-            foreach (var childName in GetChildNodes(node))
+            foreach (var childName in GetAllChildNodes(node))
             {
-                if (NodesByName.TryGetValue(childName, out var childNode))
+                if (TryGetNode(childName, out var childNode))
                 {
                     childNode.Tree = args[1];
                     colorBuilder.AppendNewline(tabCount, $"{childName}");
@@ -440,15 +483,16 @@ namespace StarbaseTesting
 
             StarbaseResearchNode startNode = NodesByName[args[0]];
 
-            if(!NodeChildren[startNode.Name].Any())
+            if(!startNode.Children.Any())
             {
                 Console.WriteLine($"Node '{startNode.Name}' does not have any children.");
                 return;
             }
 
             int tabCount = 0;
-            Queue<string> childQueue = new Queue<string>(NodeChildren[startNode.Name]);
-            HashSet<string> addedChildren = new HashSet<string>();
+            Queue<string> childQueue = new Queue<string>(startNode.Children);
+            HashSet<string> addedNodes = new HashSet<string>();
+            addedNodes.Add(startNode.Name);
 
             ColorStringBuilder colorBuilder = new ColorStringBuilder();
             colorBuilder.TabString = "  ";
@@ -459,19 +503,19 @@ namespace StarbaseTesting
             {
                 string childName = childQueue.Dequeue();
 
-                if (addedChildren.Contains(childName))
+                if (addedNodes.Contains(childName))
                     continue;
-                addedChildren.Add(childName);
+                addedNodes.Add(childName);
 
-                if (!NodesByName.TryGetValue(childName, out var childNode))
-                    colorBuilder.AppendNewline(tabCount, $"{childName} - Unknown research node", ConsoleColor.Yellow);
-                else if (!NodeChildren.ContainsKey(childName))
-                    colorBuilder.AppendNewline(tabCount, $"{childName} - No entry in children dict", ConsoleColor.Yellow);
-                else
+                if (!TryGetNode(childName, out var childNode))
                 {
-                    colorBuilder.AppendNewline(tabCount, childName, ConsoleColor.Gray);
-                    childQueue.EnqueueAll(NodeChildren[childName]);
+                    colorBuilder.AppendNewline(tabCount, $"{childName} - Unknown research node", ConsoleColor.Yellow);
+                    continue;
                 }
+                else if (!childNode.Dependencies.Overlaps(addedNodes))
+                    colorBuilder.AppendNewline(tabCount, $"{childName} - Added before / no dependencies", ConsoleColor.Yellow);
+                else colorBuilder.AppendNewline(tabCount, childName, ConsoleColor.Gray);
+                childQueue.EnqueueAll(childNode.Children);
             }
             --tabCount;
 
@@ -496,7 +540,8 @@ namespace StarbaseTesting
 
             int tabCount = 0;
             Queue<string> parentQueue = new Queue<string>(startNode.Dependencies);
-            HashSet<string> addedParents = new HashSet<string>();
+            HashSet<string> addedNodes = new HashSet<string>();
+            addedNodes.Add(startNode.Name);
 
             ColorStringBuilder colorBuilder = new ColorStringBuilder();
             colorBuilder.TabString = "  ";
@@ -507,14 +552,17 @@ namespace StarbaseTesting
             {
                 string parentName = parentQueue.Dequeue();
 
-                if (addedParents.Contains(parentName))
+                if (addedNodes.Contains(parentName))
                     continue;
-                addedParents.Add(parentName);
+                addedNodes.Add(parentName);
 
                 if (!NodesByName.TryGetValue(parentName, out var parentNode))
+                {
                     colorBuilder.AppendNewline(tabCount, $"{parentName} - Unknown research node", ConsoleColor.Yellow);
-                else if (!NodeChildren.ContainsKey(parentName))
-                    colorBuilder.AppendNewline(tabCount, $"{parentName} - No entry in children dict", ConsoleColor.Yellow);
+                    continue;
+                }
+                else if (!parentNode.Children.Overlaps(addedNodes))
+                    colorBuilder.AppendNewline(tabCount, $"{parentName} - Added before / no children", ConsoleColor.Yellow);
                 else
                 {
                     colorBuilder.AppendNewline(tabCount, parentName, ConsoleColor.Gray);
@@ -528,78 +576,21 @@ namespace StarbaseTesting
 
         public static void ValidateResearchNodes(List<string> args)
         {
-            int tabCount = 0;
-            ColorStringBuilder sb = new ColorStringBuilder();
-            sb.TabString = "  ";
+            NodeValidator validator = new NodeValidator(args);
+            string tree = validator.Tree;
 
-            bool warnEmptyRecipes = false;
-            bool warnEmptyDependencies = false;
-            bool warnEmptyTree = false;
-            bool warnEmptyCost = false;
-            foreach(var arg in args)
+            if(tree != string.Empty && !NodeTreeExists(tree))
             {
-                switch(arg)
-                {
-                    case "-r":
-                        warnEmptyRecipes = true; break;
-                    case "-d":
-                        warnEmptyDependencies = true; break;
-                    case "-t":
-                        warnEmptyTree = true; break;
-                    case "-c":
-                        warnEmptyCost = true; break;
-                }
+                ConsoleExt.WriteErrorLine($"Cannot filter by tree '{tree}' -- it doesn't exist.");
+                return;
             }
 
-            foreach (var node in NodesByName.Values)
-            {
-                sb.AppendNewline(tabCount, $"Errors in node '{node.Name}':", ConsoleColor.Yellow);
-                int length = sb.TotalLength();
+            // Filter by tree if the tree option was used.
+            var nodeEnumerable = tree != string.Empty
+                ? NodesByName.Values.Where(n => n.Tree == tree)
+                : NodesByName.Values;
 
-                ++tabCount;
-                if (warnEmptyTree && (node.Tree == null || node.Tree == string.Empty))
-                    sb.AppendNewline(tabCount, "Is not part of a research tree.");
-
-                if (node.ResearchCosts.Any())
-                {
-                    foreach (var kvp in node.ResearchCosts)
-                        if (StarbaseResourceManager.TryGetResource(kvp.Key, out var resource))
-                        {
-                            if (resource.Type != StarbaseResourceType.Research)
-                                sb.AppendNewline(tabCount, $"Contains non-research resource '{resource}'.", ConsoleColor.Yellow);
-                        }
-                        else sb.AppendNewline(tabCount, $"Contains unknown resource '{resource}'.", ConsoleColor.Yellow);
-                }
-                else if (warnEmptyCost)
-                    sb.AppendNewline(tabCount, $"Contains no research cost.", ConsoleColor.Red);
-
-                if (node.Recipes.Any())
-                {
-                    foreach (var recipe in node.Recipes)
-                        if (!StarbaseCraftManager.RecipeExists(recipe))
-                            sb.AppendNewline(tabCount, $"Contains unknown recipe '{recipe}'.", ConsoleColor.Yellow);
-                }
-                else if(warnEmptyRecipes)
-                    sb.AppendNewline(tabCount, $"Contains no recipes.", ConsoleColor.Yellow);
-
-                if (node.Dependencies.Any())
-                {
-                    foreach (var dep in node.Dependencies)
-                        if (!NodesByName.ContainsKey(dep))
-                            sb.AppendNewline(tabCount, $"Contains unknown dependency '{dep}'.", ConsoleColor.Yellow);
-                }
-                else if(warnEmptyDependencies)
-                    sb.AppendNewline(tabCount, $"Contains no dependencies.", ConsoleColor.Yellow);
-
-                foreach (var child in NodeChildren[node.Name])
-                    if(!NodesByName.ContainsKey(child))
-                        sb.AppendNewline(tabCount, $"Contains unknown child '{child}'.", ConsoleColor.Yellow);
-                --tabCount;
-
-                if (length < sb.TotalLength())
-                    sb.Write(false);
-                sb.Clear();
-            }
+            validator.ValidateNodes(nodeEnumerable);
         }
 
         public static void ViewResearchNode(List<string> args)
@@ -614,5 +605,6 @@ namespace StarbaseTesting
 
             node.DebugColorString().WriteLine(true);
         }
+        #endregion
     }
 }

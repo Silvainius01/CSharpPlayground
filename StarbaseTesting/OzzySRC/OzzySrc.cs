@@ -25,6 +25,7 @@ namespace StarbaseTesting
             StarbaseResourceManager.LoadResources();
             StarbaseCraftManager.LoadOzzyRecipeFormat(null);
             StarbaseResearchManager.LoadResearchNodes(null);
+            StarbaseResearchManager.ValidateResearchNodes(new List<string>() { "-c", "-t" });
 
             if (!Directory.Exists(JsonDirectory))
                 Directory.CreateDirectory(JsonDirectory);
@@ -34,6 +35,7 @@ namespace StarbaseTesting
             srcCommands.Add("saveRecipes", StarbaseCraftManager.SaveOzzyRecipeFormat);
             srcCommands.Add("loadRecipes", StarbaseCraftManager.LoadOzzyRecipeFormat);
             srcCommands.Add("updateRecipe", StarbaseCraftManager.UpdateOzzyRecipeFormat);
+            srcCommands.Add("validateRecipes", StarbaseCraftManager.ValidateRecipes);
 
             // Initialize research node data and commands
             srcCommands.Add("addNode", StarbaseResearchManager.AddResearchNode);

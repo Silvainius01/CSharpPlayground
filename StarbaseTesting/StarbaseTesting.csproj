@@ -49,6 +49,7 @@
     <Compile Include="AutomaticGuns\ReceiverCore.cs" />
     <Compile Include="AutomaticGuns\TargetingSystem.cs" />
     <Compile Include="OzzySRC\OzzySrc.cs" />
+    <Compile Include="OzzySRC\ResearchNodeValidator.cs" />
     <Compile Include="OzzySRC\StarbaseCraftManager.cs" />
     <Compile Include="OzzySRC\StarbaseResearchNode.cs" />
     <Compile Include="OzzySRC\StarbaseResearchManager.cs" />
