@@ -60,7 +60,7 @@ namespace DnD_Generator
         }
         public static int GetRandomRelativeLevel(int level, float bias = 1.0f)
         {
-            var rDouble = Mathc.Random.GetMarsagliaBetween(
+            var rDouble = CommandEngine.Random.GetMarsagliaBetween(
                 RelativeLootLevelFloor(level),
                 RelativeLootLevelCeiling(level)
                 , bias);
@@ -79,7 +79,7 @@ namespace DnD_Generator
         /// <returns></returns>
         public static QualityLevel GetShiftedQuality(QualityLevel level)
         {
-            float rFloat = Mathc.Random.NextFloat();
+            float rFloat = CommandEngine.Random.NextFloat();
             if (rFloat < DungeonCrawlerSettings.QualityLevelShiftChance)
             {
                 // Increase or decrease level by one based on second decimal place

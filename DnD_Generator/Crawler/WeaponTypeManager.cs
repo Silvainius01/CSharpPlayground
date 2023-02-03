@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using CommandEngine;
@@ -48,7 +47,7 @@ namespace DnD_Generator
                 WeaponTypes.Add(data.WeaponType, data);
             }
             TypesLoaded = true;
-            WeaponTypeCommandModule = new MappedCommandModule<WeaponTypeData>(WeaponTypes);
+            WeaponTypeCommandModule = new MappedCommandModule<WeaponTypeData>("What is the default weapon type prompt??", WeaponTypes);
         }
     }
 }

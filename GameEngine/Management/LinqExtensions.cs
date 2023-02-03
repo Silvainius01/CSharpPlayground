@@ -34,9 +34,9 @@ namespace CommandEngine
             dict.Add(kvp.Key, kvp.Value);
         }
 
-        public static T RandomItem<T>(this T[] array) => array[Mathc.Random.NextInt(array.Length)];
-        public static T RandomItem<T>(this IList<T> list) => list[Mathc.Random.NextInt(list.Count)];
-        public static T RandomItem<T>(this IEnumerable<T> enumerable) => enumerable.ElementAt(Mathc.Random.NextInt(enumerable.Count()));
+        public static T RandomItem<T>(this T[] array) => array[CommandEngine.Random.NextInt(array.Length)];
+        public static T RandomItem<T>(this IList<T> list) => list[CommandEngine.Random.NextInt(list.Count)];
+        public static T RandomItem<T>(this IEnumerable<T> enumerable) => enumerable.ElementAt(CommandEngine.Random.NextInt(enumerable.Count()));
         public static T RandomItem<T>(this IEnumerable<T> enumerabe, Func<T, bool> predicate) => enumerabe.Where(predicate).RandomItem();
 
         /// <summary>Create a string with a <paramref name="seperator"/> between the items./// </summary>

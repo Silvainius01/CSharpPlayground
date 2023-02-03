@@ -12,9 +12,9 @@ namespace DnD_Generator
         public static QualityLevel GetRandomQuality()
             => EnumExt<QualityLevel>.RandomValue;
         public static QualityLevel GetQualityOrHigher(QualityLevel lootGrade) 
-            => (QualityLevel)Mathc.Random.NextInt((int)lootGrade, EnumExt<QualityLevel>.Count);
+            => (QualityLevel)CommandEngine.Random.NextInt((int)lootGrade, EnumExt<QualityLevel>.Count);
         public static QualityLevel GetQualityOrLower(QualityLevel lootGrade) 
-            => (QualityLevel)Mathc.Random.NextInt((int)lootGrade, true);
+            => (QualityLevel)CommandEngine.Random.NextInt((int)lootGrade, true);
 
         public static DungeonChestType GetRandomType() 
             => EnumExt<DungeonChestType>.RandomValue;

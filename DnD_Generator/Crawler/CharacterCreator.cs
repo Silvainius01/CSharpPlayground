@@ -87,16 +87,16 @@ namespace DnD_Generator
         public static string GetNextWeaponCommand(string firstPrompt, string failPrompt, bool newline)
         {
             var WeaponTypeCommands = WeaponTypeManager.WeaponTypeCommandModule;
-            bool success = WeaponTypeCommands.TryGetValueFromCommand(firstPrompt, newline, out WeaponTypeData type);
+            bool success = WeaponTypeCommands.NextCommand(firstPrompt, newline, out WeaponTypeData type);
             while (!success)
-                success = WeaponTypeCommands.TryGetValueFromCommand(failPrompt, newline, out type);
+                success = WeaponTypeCommands.NextCommand(failPrompt, newline, out type);
             return type.WeaponType;
         }
         public static AttributeType GetNextAttributeCommand(string firstPrompt, string failPrompt, bool newline)
         {
-            bool success = AttributeTypeCommands.TryGetValueFromCommand(firstPrompt, newline, out AttributeType type);
+            bool success = AttributeTypeCommands.NextCommand(firstPrompt, newline, out AttributeType type);
             while (!success)
-                success = AttributeTypeCommands.TryGetValueFromCommand(failPrompt, newline, out type);
+                success = AttributeTypeCommands.NextCommand(failPrompt, newline, out type);
             return type;
         }
     }

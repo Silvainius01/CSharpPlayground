@@ -26,7 +26,7 @@ namespace DnD_Generator
             // Fill dungeon with the determined creature count
             for(int i = 0; i < roomManager.rooms.Count; ++i)
             {
-                if(Mathc.Random.NextFloat() < dParams.CreatureProbability)
+                if(CommandEngine.Random.NextFloat() < dParams.CreatureProbability)
                 {
                     DungeonRoom room = validRooms.RandomItem();
                     Creature creature = Generate(cParams);
@@ -49,8 +49,8 @@ namespace DnD_Generator
             {
                 ID = NextId,
                 Name = "Gobbo",
-                Level = Mathc.Random.NextInt(cParams.LevelRange),
-                HitPoints = DungeonCrawlerSettings.MinCreatureHitPoints //Mathc.Random.NextInt(cParams.BaseHealthRange), // Base Hitpoints
+                Level = CommandEngine.Random.NextInt(cParams.LevelRange),
+                HitPoints = DungeonCrawlerSettings.MinCreatureHitPoints //CommandEngine.Random.NextInt(cParams.BaseHealthRange), // Base Hitpoints
             };
 
             creature.PrimaryWeapon = GenerateCreatureWeapon(cParams, creature);
@@ -71,7 +71,7 @@ namespace DnD_Generator
             for (int i = attributes.TotalScore; i < maxAttrScore; ++i)
             {
                 bool applied = false;
-                float rFloat = Mathc.Random.NextFloat();
+                float rFloat = CommandEngine.Random.NextFloat();
                 float currChance = 0.0f;
 
                 for (int j = 0; j < attributeRanks.Count; j++)
@@ -143,7 +143,7 @@ namespace DnD_Generator
         ItemWeapon GenerateCreatureWeapon(CreatureGenerationParameters cParams, Creature creature)
         {
             ItemWeapon weapon = null;
-            if (Mathc.Random.NextFloat() < cParams.WeaponChance)
+            if (CommandEngine.Random.NextFloat() < cParams.WeaponChance)
             {
                 ItemWeaponGenerationParameters wParams =
                     ItemWeaponGenerationPresets.GetParamsForCreature(creature, cParams.WeaponQuality, cParams.WeaponWeight);

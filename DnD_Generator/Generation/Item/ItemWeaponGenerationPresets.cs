@@ -25,12 +25,12 @@ namespace DnD_Generator
         }
         public static Vector2Int GetWeightRangeOrHigher(QualityLevel weightRange)
         {
-            int rInt = Mathc.Random.NextInt((int)weightRange, EnumExt<QualityLevel>.Count);
+            int rInt = CommandEngine.Random.NextInt((int)weightRange, EnumExt<QualityLevel>.Count);
             return GetWeightRange((QualityLevel)rInt);
         }
         public static Vector2Int GetWeightRangeOrLower(QualityLevel weightRange)
         {
-            int rInt = Mathc.Random.NextInt(0, (int)weightRange);
+            int rInt = CommandEngine.Random.NextInt(0, (int)weightRange);
             return GetWeightRange((QualityLevel)rInt);
         }
 
@@ -50,12 +50,12 @@ namespace DnD_Generator
         }
         public static Vector2Int GetQualityRangeOrHigher(QualityLevel QualityRange)
         {
-            int rInt = Mathc.Random.NextInt((int)QualityRange, EnumExt<QualityLevel>.Count);
+            int rInt = CommandEngine.Random.NextInt((int)QualityRange, EnumExt<QualityLevel>.Count);
             return GetQualityRange((QualityLevel)rInt);
         }
         public static Vector2Int GetQualityRangeOrLower(QualityLevel QualityRange)
         {
-            int rInt = Mathc.Random.NextInt(0, (int)QualityRange);
+            int rInt = CommandEngine.Random.NextInt(0, (int)QualityRange);
             return GetQualityRange((QualityLevel)rInt);
         }
         public static float GetQualityBias(QualityLevel q)
@@ -75,7 +75,7 @@ namespace DnD_Generator
         public static readonly int MidLargeRate = 50;
         public static readonly int HighLargeRate = 75;
         public static readonly int AllLargeRate = 100;
-        public static int GetRandomLargeProb() => Mathc.Random.NextInt(100, true);
+        public static int GetRandomLargeProb() => CommandEngine.Random.NextInt(100, true);
         public static int GetLargeProbRange(ItemWeaponLargeRate largeRate)
         {
             switch (largeRate)
@@ -89,12 +89,12 @@ namespace DnD_Generator
         }
         public static int GetLargeProbRangeOrHigher(ItemWeaponLargeRate largeRate)
         {
-            int rInt = Mathc.Random.NextInt((int)largeRate, (int)ItemWeaponLargeRate.High);
+            int rInt = CommandEngine.Random.NextInt((int)largeRate, (int)ItemWeaponLargeRate.High);
             return GetLargeProbRange((ItemWeaponLargeRate)rInt);
         }
         public static int GetLargeProbRangeOrLower(ItemWeaponLargeRate largeRate)
         {
-            int rInt = Mathc.Random.NextInt((int)ItemWeaponLargeRate.Low, (int)largeRate);
+            int rInt = CommandEngine.Random.NextInt((int)ItemWeaponLargeRate.Low, (int)largeRate);
             return GetLargeProbRange((ItemWeaponLargeRate)rInt);
         }
 

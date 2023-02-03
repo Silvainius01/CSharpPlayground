@@ -18,7 +18,7 @@ namespace DnD_Generator
         {
             dParams.Validate();
 
-            int numRooms = Mathc.Random.NextInt(dParams.RoomRange, true);
+            int numRooms = CommandEngine.Random.NextInt(dParams.RoomRange, true);
             DungeonRoomManager roomManager = new DungeonRoomManager(numRooms);
 
             // Create and add the rooms
@@ -36,7 +36,7 @@ namespace DnD_Generator
             GenerateDungeonConnections(roomManager, dParams);
 
             // Pick a random "front" room to be the entrance
-            var entranceRoom = roomManager.rooms[Mathc.Random.NextInt(roomManager.dimensions.X)];
+            var entranceRoom = roomManager.rooms[CommandEngine.Random.NextInt(roomManager.dimensions.X)];
             entranceRoom.IsEntrance = entranceRoom.HasPathToEntrance = true;
             entranceRoom.DistanceToEntrace = 0;
             roomManager.EntranceRoom = entranceRoom;
@@ -52,8 +52,8 @@ namespace DnD_Generator
             DungeonRoom room = new DungeonRoom
             {
                 ID = NextId,
-                Width = Mathc.Random.NextInt(dParams.RoomWidthRange, true),
-                Height = Mathc.Random.NextInt(dParams.RoomHeightRange, true),
+                Width = CommandEngine.Random.NextInt(dParams.RoomWidthRange, true),
+                Height = CommandEngine.Random.NextInt(dParams.RoomHeightRange, true),
             };
             return room;
         }
@@ -64,7 +64,7 @@ namespace DnD_Generator
             for (int roomIndex = 0; roomIndex < dungeon.rooms.Count; roomIndex++)
             {
                 DungeonRoom room = dungeon.rooms[roomIndex];
-                int numConnections = Mathc.Random.NextInt(dParams.ConnectionRange);
+                int numConnections = CommandEngine.Random.NextInt(dParams.ConnectionRange);
 
                 // Add connections to meet the desired amount
                 if (room.connections.Count < numConnections)
@@ -80,7 +80,7 @@ namespace DnD_Generator
 
                     // Eliminate sides until we hit the determined connections
                     while (sideRoomConnections.Count > numConnections)
-                        sideRoomConnections.RemoveAt(Mathc.Random.NextInt(sideRoomConnections.Count));
+                        sideRoomConnections.RemoveAt(CommandEngine.Random.NextInt(sideRoomConnections.Count));
 
                     // Generate connections
                     foreach (var connection in sideRoomConnections)

@@ -39,7 +39,7 @@ namespace DnD_Generator
             DungeonChestManager chestManager = new DungeonChestManager(roomManager);
             foreach (var room in roomManager.rooms)
             {
-                if (room.Index != roomManager.EntranceRoom.Index && Mathc.Random.NextFloat() < dParams.ChestProbability)
+                if (room.Index != roomManager.EntranceRoom.Index && CommandEngine.Random.NextFloat() < dParams.ChestProbability)
                 {
                     DungeonChestGenerationParamerters cParams = new DungeonChestGenerationParamerters(2, () => EnumExt<QualityLevel>.RandomValue)
                     {
@@ -70,7 +70,7 @@ namespace DnD_Generator
 
         static string PopulateWeaponsChest(DungeonChest<IItem> chest, DungeonChestGenerationParamerters cParams)
         {
-            int numItems = Mathc.Random.NextInt(cParams.ItemRange, true);
+            int numItems = CommandEngine.Random.NextInt(cParams.ItemRange, true);
             for (int i = 0; i < numItems; ++i)
             {
                 ItemWeaponGenerationParameters weaponProperties =

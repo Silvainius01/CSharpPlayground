@@ -38,8 +38,8 @@ namespace DnD_Generator
             ItemWeapon weapon = new ItemWeapon()
             {
                 ID = NextId,
-                Weight = Mathc.Random.NextInt(wParams.WeightRange, true) / 10.0f,
-                IsLargeWeapon = Mathc.Random.NextInt(100) < wParams.LargeWeaponProbability,
+                Weight = CommandEngine.Random.NextInt(wParams.WeightRange, true) / 10.0f,
+                IsLargeWeapon = CommandEngine.Random.NextInt(100) < wParams.LargeWeaponProbability,
                 WeaponType = weaponType,
                 DamageBonusAttribute = WeaponTypes[weaponType].DamageAttribute,
                 HitBonusAttribute = WeaponTypes[weaponType].ToHitAttribute,
@@ -132,7 +132,7 @@ namespace DnD_Generator
             if (wParams.GenerateRelative)
             {
                 var levelRange = DungeonGenerator.GetRelativeLootRange(wParams.CreatureLevel);
-                int level = (int)Mathc.Random.GetMarsagliaBetween(levelRange, DungeonGenerator.GetQualityBias(wParams.QualityBias));
+                int level = (int)CommandEngine.Random.GetMarsagliaBetween(levelRange, DungeonGenerator.GetQualityBias(wParams.QualityBias));
                 if (wParams.CapToCreatureLevel && level > wParams.CreatureLevel)
                     level = wParams.CreatureLevel;
                 return GetMaxQuality(level, weapon);

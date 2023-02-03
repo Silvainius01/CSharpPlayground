@@ -14,10 +14,8 @@ namespace CSharpPlayground.Wumpus
     }
     public static class ItemManager
     {
-        public static readonly ITEM_ID[] itemArray = Mathc.GetEnumValues<ITEM_ID>();
-
+        public static readonly ITEM_ID[] itemArray = EnumExt<ITEM_ID>.Values;
         public static readonly Dictionary<string, ITEM_ID> stringToItem = itemArray.ToDictionary(itemID => itemID.ToString());
-    
 
         public static bool Equals(this ITEM_ID item, string str)
         {

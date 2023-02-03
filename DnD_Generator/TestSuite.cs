@@ -76,7 +76,7 @@ namespace DnD_Generator
             float rFloat = 0.0f;
             for (int i = 0; i < numRolls; ++i)
             {
-                rFloat = (float)Mathc.Random.NextFloat();
+                rFloat = (float)CommandEngine.Random.NextFloat();
                 if (rFloat < 0.2f)
                 {
                     total += 1;

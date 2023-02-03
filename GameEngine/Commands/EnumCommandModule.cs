@@ -15,7 +15,7 @@ namespace CommandEngine
         bool integerShortcuts = false;
         bool shortcutsCreated = false;
         OnSuccessDelegate OnSuccessCallback;
-        Dictionary<string, ConsoleCommand<TEnum>> enumCommands;
+        //Dictionary<string, ConsoleCommand<TEnum>> enumCommands;
 
         public EnumCommandModule(string defaultPrompt, bool allowIntegerShortcuts) : base(defaultPrompt)
         {
@@ -23,7 +23,7 @@ namespace CommandEngine
 
             OnSuccessCallback = OnSuccess;
             AllowsIntegerShortcuts = allowIntegerShortcuts;
-            enumCommands = new Dictionary<string, ConsoleCommand<TEnum>>(enumValues.Length * (allowIntegerShortcuts ? 2 : 1));
+            commands = new Dictionary<string, ConsoleCommand<TEnum>>(enumValues.Length * (allowIntegerShortcuts ? 2 : 1));
 
             for (int i = 0; i < enumValues.Length; i++)
             {
@@ -37,7 +37,7 @@ namespace CommandEngine
                         return true; 
                     }
                 );
-                enumCommands.Add(valueString, command);
+                commands.Add(valueString, command);
             }
 
             if (allowIntegerShortcuts)
@@ -64,7 +64,7 @@ namespace CommandEngine
             {
                 string name = EnumExt<TEnum>.Names[i];
                 string numString = EnumExt<TEnum>.IntegerValues[i].ToString();
-                enumCommands.Add(numString, enumCommands[name]);
+                commands.Add(numString, commands[name]);
             }
             shortcutsCreated = true;
         }

@@ -17,7 +17,7 @@ namespace CommandEngine.AI
         public Neuron(ulong id)
         {
             neuronId = id;
-            value = Mathc.Random.NormalDouble * 2 - 1;
+            value = CommandEngine.Random.NormalDouble * 2 - 1;
         }
 
         public void ReceiveValue(double value)
@@ -38,7 +38,7 @@ namespace CommandEngine.AI
         }
         public void Mutate()
         {
-            bias += bias * Mathc.Random.Marsaglia(true);
+            bias += bias * CommandEngine.Random.Marsaglia(true);
             foreach (var axon in connections.Values)
                 axon.Mutate();
         }
@@ -72,7 +72,7 @@ namespace CommandEngine.AI
         public Axon(Neuron n)
         {
             connection = n;
-            weight = Mathc.Random.NormalDouble * 2 - 1;
+            weight = CommandEngine.Random.NormalDouble * 2 - 1;
         }
         public void TransmitValue(double value)
         {
@@ -80,7 +80,7 @@ namespace CommandEngine.AI
         }
         public void Mutate()
         {
-            weight += weight * Mathc.Random.Marsaglia(true);
+            weight += weight * CommandEngine.Random.Marsaglia(true);
         }
     }
 
