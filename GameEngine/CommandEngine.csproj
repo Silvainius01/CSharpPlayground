@@ -49,6 +49,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AI\NeuralNet.cs" />
+    <Compile Include="Collections\SegmentedList\SegementedList.cs" />
+    <Compile Include="Collections\SegmentedList\Segment.cs" />
     <Compile Include="ComparerFactory.cs" />
     <Compile Include="DictionaryByType.cs" />
     <Compile Include="Entity\Component.cs" />

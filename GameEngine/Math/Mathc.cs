@@ -313,13 +313,29 @@ namespace CommandEngine
 
         /// <summary> Returns val is between min and max, or if it is equal to them. </summary>
         /// <param name="strict">If true, will return true only if val is between </param>
-        public static bool ValueIsBetween(double val, double min, double max, bool strict)
+        public static bool ValueIsBetween(double val, double min, double max, bool strict = false)
         {
             if (strict)
                 return val > min && val < max;
             return val >= min && val <= max;
         }
-        public static bool VectorIsBetween(Vector2_64 val, Vector2_64 min, Vector2_64 max, bool strict)
+        /// <summary> Returns val is between min and max, or if it is equal to them. </summary>
+        /// <param name="strict">If true, will return true only if val is between </param>
+        public static bool ValueIsBetween(float val, float min, float max, bool strict = false)
+        {
+            if (strict)
+                return val > min && val < max;
+            return val >= min && val <= max;
+        }
+        /// <summary> Returns val is between min and max, or if it is equal to them. </summary>
+        /// <param name="strict">If true, will return true only if val is between </param>
+        public static bool ValueIsBetween(int val, int min, int max, bool strict = false)
+        {
+            if (strict)
+                return val > min && val < max;
+            return val >= min && val <= max;
+        }
+        public static bool VectorIsBetween(Vector2_64 val, Vector2_64 min, Vector2_64 max, bool strict = false)
         {
             return ValueIsBetween(val.X, min.X, max.X, strict) && ValueIsBetween(val.Y, min.Y, max.Y, strict);
         }
