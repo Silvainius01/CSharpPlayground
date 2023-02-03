@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using GameEngine;
+using CommandEngine;
 
 namespace DnD_Generator
 {
@@ -12,7 +12,7 @@ namespace DnD_Generator
         /// Assumes that both rooms are in the same dungeon
         /// </summary>
         public static IEqualityComparer<DungeonRoom> DungeonRoomEquality =
-            GameEngine.EqualityComparerFactory.Create<DungeonRoom>((Func<DungeonRoom, int>)(room => (int)room.Index), (Func<DungeonRoom, DungeonRoom, bool>)((room1, room2) => room1.Index == room2.Index));
+            CommandEngine.EqualityComparerFactory.Create<DungeonRoom>((Func<DungeonRoom, int>)(room => (int)room.Index), (Func<DungeonRoom, DungeonRoom, bool>)((room1, room2) => room1.Index == room2.Index));
 
         public DungeonRoomManager GenerateDungeonRooms(DungeonGenerationParameters dParams)
         {

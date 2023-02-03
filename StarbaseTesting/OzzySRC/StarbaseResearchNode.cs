@@ -1,4 +1,4 @@
-﻿using GameEngine;
+﻿using CommandEngine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +12,7 @@ namespace StarbaseTesting
 {
     class StarbaseResearchNode
     {
+        public static int Index { get; set; } = -1;
         public string Name { get; set; } = string.Empty;
         public string Tree { get; set; } = string.Empty;
         public bool IsOwned { get; set; } = false;

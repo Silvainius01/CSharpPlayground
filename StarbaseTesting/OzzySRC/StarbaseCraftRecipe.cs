@@ -1,4 +1,4 @@
-﻿using GameEngine;
+﻿using CommandEngine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +9,7 @@ namespace StarbaseTesting
 {
     class StarbaseCraftRecipe
     {
+        public int Index { get; set; } = -1;
         public string Name { get; set; }
         public float CraftingTime { get; set; }
         public Dictionary<string, float> Materials { get; set; } = new Dictionary<string, float>();

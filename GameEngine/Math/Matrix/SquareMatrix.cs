@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms.DataVisualization.Charting;
 
-namespace GameEngine
+namespace CommandEngine
 {
     public class SquareMatrix : Matrix
     {

@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="AutomaticGuns\ReceiverCore.cs" />
     <Compile Include="AutomaticGuns\TargetingSystem.cs" />
+    <Compile Include="OzzySRC\StarbaseResearchTree.cs" />
     <Compile Include="OzzySRC\OzzySrc.cs" />
     <Compile Include="OzzySRC\ResearchNodeValidator.cs" />
     <Compile Include="OzzySRC\StarbaseCraftManager.cs" />
@@ -58,6 +59,7 @@
     <Compile Include="OzzySRC\StarbaseResource.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StarbaseShipDesignHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -68,9 +70,9 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <ProjectReference Include="..\GameEngine\GameEngine.csproj">
+    <ProjectReference Include="..\GameEngine\CommandEngine.csproj">
       <Project>{b0fa2428-25ae-4766-83a1-b4c56137f43d}</Project>
-      <Name>GameEngine</Name>
+      <Name>CommandEngine</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

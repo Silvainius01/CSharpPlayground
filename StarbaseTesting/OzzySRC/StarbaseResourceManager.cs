@@ -4,7 +4,7 @@ using System.Linq;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
-using GameEngine;
+using CommandEngine;
 using Newtonsoft.Json;
 
 namespace StarbaseTesting
@@ -42,7 +42,7 @@ namespace StarbaseTesting
                 new StarbaseResource("Ukonium", StarbaseResourceType.Ore, "Uko"),
                 new StarbaseResource("Valkite", StarbaseResourceType.Ore, "Val"),
                 new StarbaseResource("Vokarium", StarbaseResourceType.Ore, "Vok"),
-                new StarbaseResource("Xhallium", StarbaseResourceType.Ore, "Xha"),
+                new StarbaseResource("Xhalium", StarbaseResourceType.Ore, "Xha"),
                 new StarbaseResource("Ymrium", StarbaseResourceType.Ore, "Ymr"),
                 new StarbaseResource("Cube", StarbaseResourceType.Research, "red", "r"),
                 new StarbaseResource("Power", StarbaseResourceType.Research, "yellow", "y"),
@@ -58,7 +58,7 @@ namespace StarbaseTesting
         {
             if (AllResources.ContainsKey(r.Name))
             {
-                GameEngine.ConsoleExt.WriteLine($"Resource '{r.Name}' already exists in the dataset.", ConsoleColor.Yellow);
+                CommandEngine.ConsoleExt.WriteLine($"Resource '{r.Name}' already exists in the dataset.", ConsoleColor.Yellow);
                 return;
             }
 
@@ -70,7 +70,7 @@ namespace StarbaseTesting
                 if (AllResources.ContainsKey(str))
                 {
                     StarbaseResource conflict = AllResources[str];
-                    GameEngine.ConsoleExt.WriteLine($"Alias '{str}' for resource '{r.Name}' conflicts with resource '{conflict.Name}'.", ConsoleColor.Red);
+                    CommandEngine.ConsoleExt.WriteLine($"Alias '{str}' for resource '{r.Name}' conflicts with resource '{conflict.Name}'.", ConsoleColor.Red);
                     continue;
                 }
                 AllResources.Add(str, r);

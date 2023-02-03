@@ -12,11 +12,14 @@ using System.Threading.Tasks;
 using System.Windows.Forms.VisualStyles;
 using System.Xml.Serialization;
 
-namespace GameEngine
+namespace CommandEngine
 {
     public static class CommandManager
     {
-        static Dictionary<string, ConsoleCommand> universalCommands = new Dictionary<string, ConsoleCommand>();
+        public static CommandModule globalCommands = new CommandModule(
+            "Enter Next Global Command: ",
+            "Not a recognized global command.");
+        
         //static DictionaryByType enumCommandDict = new DictionaryByType();
         
         #region Console Sync
@@ -50,27 +53,22 @@ namespace GameEngine
             }
         }
 
-        public static void GetNextUniversalCommand(string message, bool newline)
+        public static void GetNextGlobalCommand(string message, bool newline)
         {
-            ParseUniversalCommand(UserInputPrompt(message, newline));
+            globalCommands.NextCommand(message, newline);
         }
 
-        public static void GetNextUniversalCommand(string message, bool newline, Dictionary<string, ConsoleCommand> additonalCommands)
+        public static bool GetNextCommand(string message, bool newline, Dictionary<string, ConsoleCommand> commands)
         {
-            ParseUniversalCommand(UserInputPrompt(message, newline), additonalCommands);
-        }
-
-        public static void GetNextCommand(string message, bool newline, Dictionary<string, ConsoleCommand> commands)
-        {
-            ParseCommandSet(UserInputPrompt(message, newline), commands);
-        }
-        public static T GetNextCommand<T>(string message, bool newline, Dictionary<string, ConsoleCommand<T>> commands)
-        {
-            return ParseCommandSet(UserInputPrompt(message, newline), commands);
+            string input = UserInputPrompt(message, newline);
+            bool success = ParseCommandSet(input, commands);
+            return success || ParseCommandSet(input, globalCommands.commands);
         }
         public static bool GetNextCommand<T>(string message, bool newline, Dictionary<string, ConsoleCommand<T>> commands, out T result)
         {
-            return ParseCommandSet(UserInputPrompt(message, newline), commands, out result);
+            string input = UserInputPrompt(message, newline);
+            bool success = ParseCommandSet(input, commands, out result);
+            return success;
         }
 
         //public static TEnum GetNextEnumCommand<TEnum>(string message, bool newline) where TEnum : struct, Enum
@@ -123,15 +121,11 @@ namespace GameEngine
             string input = await UserInputPromptAsync(message, newline);
             string command = input.Split(' ')[0];
 
-            if (universalCommands.ContainsKey(command))
-                universalCommands[input].Execute(input.Remove(0, command.Length));
-            else
-            {
-                var color = Console.ForegroundColor;
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Command '{command}' is not valid.");
-                Console.ForegroundColor = color;
-            }
+            var color = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Currently refactoring async global commands.");
+            Console.ForegroundColor = color;
+
         }
 
         public static async Task GetNextUniversalCommandAsync(string message, bool newline, Dictionary<string, ConsoleCommand> additonalCommands)
@@ -139,17 +133,10 @@ namespace GameEngine
             string input = await UserInputPromptAsync(message, newline);
             string command = input.Split(' ')[0];
 
-            if (universalCommands.ContainsKey(command))
-                universalCommands[input].Execute(input.Remove(0, command.Length));
-            else if (additonalCommands.ContainsKey(command))
-                additonalCommands[input].Execute(input.Remove(0, command.Length));
-            else
-            {
-                var color = Console.ForegroundColor;
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Command '{command}' is not valid.");
-                Console.ForegroundColor = color;
-            }
+            var color = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Currently refactoring async global commands.");
+            Console.ForegroundColor = color;
         }
 
         public static async Task GetNextCommandAsync(string message, bool newline, Dictionary<string, ConsoleCommand> commands)
@@ -170,38 +157,6 @@ namespace GameEngine
         #endregion
 
         #region From Input
-        public static void ParseUniversalCommand(string input)
-        {
-            string command = input.Split(' ')[0];
-
-            if (universalCommands.ContainsKey(command))
-                universalCommands[command].Execute(input.Remove(0, command.Length));
-            else
-            {
-                var color = Console.ForegroundColor;
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Command '{command}' is not valid.");
-                Console.ForegroundColor = color;
-            }
-        }
-
-        public static void ParseUniversalCommand(string input, Dictionary<string, ConsoleCommand> additonalCommands)
-        {
-            string command = input.Split(' ')[0];
-
-            if (universalCommands.ContainsKey(command))
-                universalCommands[input].Execute(input.Remove(0, command.Length));
-            else if (additonalCommands.ContainsKey(command))
-                additonalCommands[input].Execute(input.Remove(0, command.Length));
-            else
-            {
-                var color = Console.ForegroundColor;
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Command '{command}' is not valid.");
-                Console.ForegroundColor = color;
-            }
-        }
-
         public static bool ParseCommandSet(string input, Dictionary<string, ConsoleCommand> commands)
         {
             string command = input.Split(' ')[0];
@@ -211,29 +166,7 @@ namespace GameEngine
                 commands[command].Execute(input.Remove(0, command.Length));
                 return true;
             }
-            else
-            {
-                var color = Console.ForegroundColor;
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Command '{command}' is not valid.");
-                Console.ForegroundColor = color;
-                return false;
-            }
-        }
-        public static T ParseCommandSet<T>(string input, Dictionary<string, ConsoleCommand<T>> commands)
-        {
-            string command = input.Split(' ')[0];
-
-            if (commands.ContainsKey(command))
-                return commands[command].Execute(input.Remove(0, command.Length));
-            else
-            {
-                var color = Console.ForegroundColor;
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Command '{command}' is not valid.");
-                Console.ForegroundColor = color;
-                return default(T);
-            }
+            return false;
         }
         public static bool ParseCommandSet<T>(string input, Dictionary<string, ConsoleCommand<T>> commands, out T result)
         {
@@ -241,25 +174,13 @@ namespace GameEngine
 
             if (commands.ContainsKey(command))
             {
-                result = commands[command].Execute(input.Remove(0, command.Length));
+                bool success = commands[command].Execute(input.Remove(0, command.Length), out result);
                 return true;
             }
-            else
-            {
-                var color = Console.ForegroundColor;
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Command '{command}' is not valid.");
-                Console.ForegroundColor = color;
-                result = default(T);
-                return false;
-            }
+
+            result = default(T);
+            return false;
         }
         #endregion
-
-        public static void RegisterUniversalCommand(ConsoleCommand command)
-        {
-            if (!universalCommands.ContainsKey(command.Name))
-                universalCommands.Add(command.Name, command);
-        }
     }
 }

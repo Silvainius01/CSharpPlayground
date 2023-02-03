@@ -4,12 +4,12 @@ using System.Linq;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
-using GameEngine;
+using CommandEngine;
 using Newtonsoft.Json;
 
 namespace StarbaseTesting
 {
-    public enum StarbaseResourceType { Ore, Research }
+    public enum StarbaseResourceType { Ore, Research, Refined }
     class StarbaseResource
     {
         public const int StackSize = 1728;

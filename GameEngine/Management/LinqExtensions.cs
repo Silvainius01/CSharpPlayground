@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameEngine
+namespace CommandEngine
 {
     public static class LinqExtensions
     {
@@ -12,10 +12,12 @@ namespace GameEngine
         public static T Last<T>(this T[] array) => array[array.Length - 1];
         /// <returns>Returns the last object in <paramref name="list"/>. Throws an exception if <paramref name="list"/> is null or empty</returns>
         public static T Last<T>(this IList<T> list) => list[list.Count - 1];
+        
         /// <returns>Returns the last index for <paramref name="array"/></returns>
         public static int LastIndex<T>(this T[] array) => array.Length - 1;
         /// <returns>Returns the last index for <paramref name="list"/></returns>
         public static int LastIndex<T>(this IList<T> list) => list.Count - 1;
+        
         /// <summary>Sets the last index for <paramref name="array"/> to <paramref name="value"/></summary>
         public static void SetLast<T>(this T[] array, T value)
         {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameEngine
+namespace CommandEngine
 {
     /// <summary>
     /// Enum extensions! Get an array of all the value, or even a random one!
@@ -12,6 +12,7 @@ namespace GameEngine
     /// <typeparam name="T">Enum type</typeparam>
     public class EnumExt<T> where T : struct, Enum
     {
+        public static readonly string TypeName = typeof(T).Name;
         public static readonly T[] Values = (T[])Enum.GetValues(typeof(T));
         public static readonly int[] IntegerValues = ConvertToInts();
         public static readonly string[] Names = Enum.GetNames(typeof(T));
@@ -21,7 +22,7 @@ namespace GameEngine
         public static EnumCommandModule<T> GetCommandModule(bool allowIntegerShortcuts)
         {
             if (commandModule == null)
-                commandModule = new EnumCommandModule<T>(allowIntegerShortcuts);
+                commandModule = new EnumCommandModule<T>($"Enter a value of {TypeName}: ", allowIntegerShortcuts);
             else commandModule.AllowsIntegerShortcuts = allowIntegerShortcuts;
 
             return commandModule;

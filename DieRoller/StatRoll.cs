@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace DnD_Generator
+namespace DieRoller
 {
     class StatRoll : IDiceRoll
     {
@@ -117,4 +117,28 @@ namespace DnD_Generator
             return (rolls, rolls.Sum() + Floor);
         }
     }
+
+    // Stat Roll command
+    //void StatRollWrapper(List<string> args)
+    //{
+    //    if (args.Count > 0 && args[0].ToLower() == "help")
+    //    {
+    //        Console.WriteLine("Enter dice in the following format: XdY ZdW \nExample: 4d4 2d6");
+    //        if (args.Count == 1)
+    //            return;
+    //    }
+
+    //    if (args[0][0] == 'r')
+    //    {
+    //        args.RemoveAt(0);
+    //        string[] input = args.ToArray();
+    //        do
+    //        {
+    //            DiceRoller.DiceRollPrompt<StatRoll>(input, StatRoll.TryParse);
+    //            input = Console.ReadLine().Split(' ');
+    //        } while (input[0].Length == 0 || input[0][0] != 'e');
+    //    }
+    //    else
+    //        DiceRoller.DiceRollPrompt<StatRoll>(args.ToArray(), StatRoll.TryParse);
+    //}
 }

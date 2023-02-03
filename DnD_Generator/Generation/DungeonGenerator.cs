@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
-using GameEngine;
+using CommandEngine;
 
 namespace DnD_Generator
 {
@@ -24,6 +24,8 @@ namespace DnD_Generator
         static ItemWeaponGenerator itemWeaponGenerator = new ItemWeaponGenerator();
         public static ItemWeapon GenerateWeapon(ItemWeaponGenerationParameters wParams) 
             => itemWeaponGenerator.Generate(wParams);
+        public static ItemWeapon GenerateWeaponFromSerialized(SerializedWeapon serialized)
+            => itemWeaponGenerator.FromSerializable(serialized);
 
         static DungeonRoomGenerator roomGenerator = new DungeonRoomGenerator();
         public static DungeonRoomManager CreateRoomManager(DungeonGenerationParameters dParams) 

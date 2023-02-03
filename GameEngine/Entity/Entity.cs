@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameEngine
+namespace CommandEngine
 {
     /// <summary>
     /// Base class for entities, does not contain a definition for position.

@@ -7,6 +7,7 @@ namespace DnD_Generator
     class ItemArmor : IItem
     {
         public int ID { get; set; }
+        public int Level { get; set; }
         public string Name { get; set; }
 
         public int Value { get; set; }
@@ -25,6 +26,11 @@ namespace DnD_Generator
         }
 
         public float GetRawValue()
+        {
+            throw new NotImplementedException();
+        }
+
+        public SerializedItem GetSerializable()
         {
             throw new NotImplementedException();
         }

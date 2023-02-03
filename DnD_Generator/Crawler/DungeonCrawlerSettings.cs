@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using GameEngine;
+using CommandEngine;
 
 namespace DnD_Generator
 {
@@ -29,8 +29,10 @@ namespace DnD_Generator
         #endregion
 
         #region Attribute Settings
-        /// <summary>Amount of attribute points gained per level</summary>
-        public const int AttributePointsPerLevel = 2;
+        /// <summary>Amount of attribute points a creature can have per level</summary>
+        public const int AttributePointsPerCreatureLevel = 3;
+        /// <summary>Amount of attribute points a weapon can have per level</summary>
+        public const int AttributePointsPerWeaponLevel = 2;
         /// <summary>Bonus HitPoints granted by every point of CON</summary>
         public const int HitPointsPerConstitution = 5;
         #endregion
@@ -41,7 +43,7 @@ namespace DnD_Generator
 
         #region Creature Generation Settings
         /// <summary>Minimum hitpoints a creature can have with Attribute level 0</summary>
-        public const int MinCreatureHitPoints = 5;
+        public const int MinCreatureHitPoints = 0;
         /// <summary>Maximum hitpoints a creature can have with Attribute Level 0</summary>
         public const int MaxCreatureHitPoints = 50;
         /// <summary></summary>

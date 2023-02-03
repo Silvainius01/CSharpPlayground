@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using DieRoller;
-using GameEngine;
+using CommandEngine;
 using System.Linq;
 
 namespace DnD_Generator

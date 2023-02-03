@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using GameEngine;
+using CommandEngine;
 
 namespace DnD_Generator
 {
@@ -54,18 +54,18 @@ namespace DnD_Generator
             };
 
             creature.PrimaryWeapon = GenerateCreatureWeapon(cParams, creature);
-            creature.Attributes = new CreatureAttributes((attr) =>
+            creature.Attributes = new CrawlerAttributeSet((attr) =>
             {
                 int value = Math.Max(creature.PrimaryWeapon.AttributeRequirements[attr], DungeonCrawlerSettings.MinCreatureAttributeScore);
                 if (value == 0 && attr == AttributeType.CON)
                     return 1; // Ensure CON is at least one
                 return value;
             });
-            creature.Level = Math.Max(creature.Attributes.Level, creature.Level);
+            creature.Level = Math.Max(creature.Attributes.CreatureLevel, creature.Level);
 
-            CreatureAttributes attributes = creature.Attributes;
+            CrawlerAttributeSet attributes = creature.Attributes;
             List <(AttributeType attribute, float chance)> attributeRanks = GetAttributeImportance(creature);
-            int maxAttrScore = (creature.Level * DungeonCrawlerSettings.AttributePointsPerLevel);
+            int maxAttrScore = (creature.Level * DungeonCrawlerSettings.AttributePointsPerCreatureLevel);
 
             // Allocate remaining attribute points
             for (int i = attributes.TotalScore; i < maxAttrScore; ++i)
@@ -104,10 +104,10 @@ namespace DnD_Generator
                 if (w == null)
                     return false;
 
-                ++attributeRanks[ItemWeaponGenerator.WeaponTypeData[creature.PrimaryWeapon].PrimaryAttribute];
-                ++attributeRanks[ItemWeaponGenerator.WeaponTypeData[creature.PrimaryWeapon].SecondaryAttribute];
-                ++attributeRanks[ItemWeaponGenerator.WeaponTypeData[creature.PrimaryWeapon].ToHitAttribute];
-                ++attributeRanks[ItemWeaponGenerator.WeaponTypeData[creature.PrimaryWeapon].DamageAttribute];
+                ++attributeRanks[WeaponTypeManager.WeaponTypes[creature.PrimaryWeapon.WeaponType].PrimaryAttribute];
+                ++attributeRanks[WeaponTypeManager.WeaponTypes[creature.PrimaryWeapon.WeaponType].SecondaryAttribute];
+                ++attributeRanks[WeaponTypeManager.WeaponTypes[creature.PrimaryWeapon.WeaponType].ToHitAttribute];
+                ++attributeRanks[WeaponTypeManager.WeaponTypes[creature.PrimaryWeapon.WeaponType].DamageAttribute];
                 return true;
             }
 

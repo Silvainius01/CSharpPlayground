@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameEngine
+namespace CommandEngine
 {
     public class SmartStringBuilder
     {
@@ -70,9 +70,8 @@ namespace GameEngine
         public SmartStringBuilder NewlineAppend(int tabCount, string str)
         {
             CheckCapacity(str.Length + NewString.Length, tabCount);
-            builder.Append(NewString);
             AppendTabs(tabCount);
-            builder.Append(str);
+            builder.Append($"{NewString}{str}");
             return this;
         }
 

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameEngine
+namespace CommandEngine
 {
     public interface IConsoleCommand { }
     /// <summary>
@@ -13,25 +13,26 @@ namespace GameEngine
     /// <typeparam name="T">Return type of <see cref="Execute(string)"/></typeparam>
     public class ConsoleCommand<T> : IConsoleCommand
     {
-        public delegate TReturn ExecutionDelegate<TReturn>(List<string> args);
+        public delegate bool ExecutionDelegate<TReturn>(List<string> args, out TReturn result);
 
         public string Name { get; set; }
-        ExecutionDelegate<T> ExecuteDelegate { get; set; }
         public List<string> arguments = new List<string>();
+        private ExecutionDelegate<T> ExecuteDelegate { get; set; }
 
         public ConsoleCommand(string name, ExecutionDelegate<T> executionDelegate)
         {
             Name = name;
             ExecuteDelegate = executionDelegate;
         }
+        protected ConsoleCommand(string name) { Name = name; }
 
-        public virtual T Execute(string inputStr)
+        internal virtual bool Execute(string inputStr, out T result)
         {
             ParseInput(inputStr);
-            return ExecuteDelegate(arguments);
+            return ExecuteDelegate(arguments, out result);
         }
 
-        private void ParseInput(string input)
+        protected void ParseInput(string input)
         {
             StringBuilder builder = new StringBuilder(input.Length);
             arguments.Clear();
@@ -87,14 +88,17 @@ namespace GameEngine
     public class ConsoleCommand : ConsoleCommand<object>
     {
         public delegate void ExecutionDelegate(List<string> args);
-        
-        public ConsoleCommand(string name, ExecutionDelegate d) : base(name, delegate (List<string> args) { d(args); return null; })
-        { }
+        private ExecutionDelegate ExecuteDelegate { get; set; }
 
-        // Hide the base version, so that we avoid any possible stray nulls surfacing
-        public new void Execute(string inputStr)
+        public ConsoleCommand(string name, ExecutionDelegate d) : base(name)
         {
-            base.Execute(inputStr);
+            ExecuteDelegate = d;
+        }
+
+        internal virtual void Execute(string inputStr)
+        {
+            ParseInput(inputStr);
+            ExecuteDelegate(arguments);
         }
 
         public static KeyValuePair<string, ConsoleCommand> Create(string name, ExecutionDelegate d)

@@ -1,0 +1,22 @@
+[
+  {
+    "ActionName": "fight",
+    "ActionTime": 1.0,
+    "ActionDesc":  "Attack a creature"
+  },
+  {
+    "ActionName": "fight",
+    "ActionTime": 1.0,
+    "ActionDesc": "Attack a creature"
+  },
+  {
+    "ActionName": "fight",
+    "ActionTime": 1.0,
+    "ActionDesc": "Attack a creature"
+  },
+  {
+    "ActionName": "fight",
+    "ActionTime": 1.0,
+    "ActionDesc": "Attack a creature"
+  }
+]

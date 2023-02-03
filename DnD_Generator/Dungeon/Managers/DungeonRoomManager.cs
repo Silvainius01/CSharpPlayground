@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
-using GameEngine;
+using CommandEngine;
 
 namespace DnD_Generator
 {
@@ -135,6 +135,74 @@ namespace DnD_Generator
             return foundRoom;
         }
 
+        //public bool Navigate(DungeonRoom startRoom, DungeonRoom endRoom, IEnumerable<DungeonRoom> excludedRooms, out List<DungeonRoom> path)
+        //{
+        //    if (excludedRooms.Any())
+        //        if (excludedRooms.Contains(startRoom) || excludedRooms.Contains(endRoom))
+        //        {
+        //            path = new List<DungeonRoom>();
+        //            return false;
+        //        }
+
+        //    bool foundRoom = false;
+        //    Queue<DungeonRoom> roomQueue = new Queue<DungeonRoom>(rooms.Count);
+        //    Dictionary<int, (DungeonRoom prevRoom, int distance)> navData = new Dictionary<int, (DungeonRoom prevRoom, int distance)>();
+        //    path = new List<DungeonRoom>();
+
+        //    foreach(var )
+
+        //    if (startRoom.ID == endRoom.ID)
+        //    {
+        //        path.Add(endRoom);
+        //        return false;
+        //    }
+
+        //    roomQueue.Enqueue(startRoom);
+        //    navData[startRoom.ID] = (null, 0);
+        //    while (roomQueue.Any())
+        //    {
+        //        DungeonRoom currRoom = roomQueue.Dequeue();
+        //        int distance = navData[currRoom.ID].distance + 1;
+
+        //        if (currRoom.ID == endRoom.ID)
+        //        {
+        //            foundRoom = true;
+        //            break;
+        //        }
+
+        //        foreach (var kvp in currRoom.connections)
+        //        {
+        //            var connection = kvp.Value;
+        //            DungeonRoom nextRoom = rooms[connection.index];
+
+        //            // If navData doesnt exist, or the new distance is better, update entry and queue the room.
+        //            if (!navData.ContainsKey(nextRoom.ID) || distance < navData[nextRoom.ID].distance)
+        //            {
+        //                navData[nextRoom.ID] = (currRoom, distance);
+        //                roomQueue.Enqueue(nextRoom);
+        //            }
+        //        }
+        //    }
+
+        //    if (foundRoom)
+        //    {
+        //        var nav = navData[endRoom.ID];
+        //        path.Capacity = nav.distance;
+        //        path.Add(endRoom);
+        //        while (nav.prevRoom != null)
+        //        {
+        //            path.Add(nav.prevRoom);
+        //            nav = navData[nav.prevRoom.ID];
+        //        }
+        //        path.Reverse();
+        //    }
+        //    return foundRoom;
+        //}
+
+        //private bool NavigateInternal()
+        //{
+
+        //}
     }
 }
 

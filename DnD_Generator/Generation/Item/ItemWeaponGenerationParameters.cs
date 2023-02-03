@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using GameEngine;
+using CommandEngine;
 
 namespace DnD_Generator
 {
@@ -14,7 +14,7 @@ namespace DnD_Generator
         public bool GenerateRelative { get; set; }
         public bool CapToCreatureLevel { get; set; }
         public int LargeWeaponProbability { get; set; } = 50;
-        public List<WeaponType> PossibleWeaponTypes { get; set; } = new List<WeaponType>();
+        public List<string> PossibleWeaponTypes { get; set; } = new List<string>();
 
         public ItemWeaponGenerationParameters(IEnumerable<QualityLevel> qualities) : base(qualities) { }
         public ItemWeaponGenerationParameters(params QualityLevel[] qualities) : base(qualities) { }

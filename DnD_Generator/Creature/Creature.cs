@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
-using GameEngine;
+using CommandEngine;
 
 namespace DnD_Generator
 {
-    
-    class Creature : IInspectable, IDungeonObject
+    class Creature : IInspectable, IDungeonObject, ISerializable<SerializedCreature>
     {
         public int ID { get; set; }
         public float HitPoints { get; set; }
@@ -21,7 +20,7 @@ namespace DnD_Generator
         public CreatureArmorSlots ArmorSlots;
 
         public DungeonRoom CurrentRoom { get; set; }
-        public CreatureAttributes Attributes { get; set; }
+        public CrawlerAttributeSet Attributes { get; set; }
         public CreatureProfeciencies Profeciencies { get; set; }
 
         public float MaxHitPoints
@@ -75,6 +74,48 @@ namespace DnD_Generator
         public override string ToString()
         {
             return $"[{ID}] {Name}";
+        }
+
+        public virtual SerializedCreature GetSerializable()
+        {
+            return new SerializedCreature(this);
+        }
+    }
+
+    class SerializedCreature : ISerialized<Creature>
+    {
+        public string Name { get; set; }
+        public float HitPoints { get; set; }
+        public int Level { get; set; }
+        public SerializedWeapon PrimaryWeapon { get; set; }
+        public SerializedAttributes Attributes { get; set; }
+        public Dictionary<Type, List<object>> InventoryItems { get; set; } = new Dictionary<Type, List<object>>();
+
+        public SerializedCreature() { }
+        public SerializedCreature(Creature c)
+        {
+            Name = c.Name;
+            HitPoints = c.HitPoints;
+            Level = c.Level;
+            PrimaryWeapon = (SerializedWeapon)c.PrimaryWeapon.GetSerializable();
+            Attributes = c.Attributes.GetSerializable();
+
+            foreach(var kvp in c.Inventory.Items)
+            {
+                var item = kvp.Value.Item;
+                SerializedItem sItem = item.GetSerializable();
+                Type tItem = sItem.GetType();
+                sItem.Count = kvp.Value.Count;
+
+                if (!InventoryItems.ContainsKey(tItem))
+                    InventoryItems.Add(tItem, new List<object>());
+                InventoryItems[tItem].Add(sItem);
+            }
+        }
+
+        public virtual Creature GetDeserialized()
+        {
+            return new Creature() { };
         }
     }
 }

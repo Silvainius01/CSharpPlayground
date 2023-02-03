@@ -3,21 +3,20 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
-using GameEngine;
+using CommandEngine;
+using System.Net.Http.Headers;
 
 namespace DnD_Generator
 {
-
-    class CreatureAttributes : IEnumerable<KeyValuePair<AttributeType, int>>, IInspectable
+    class CrawlerAttributeSet : IEnumerable<KeyValuePair<AttributeType, int>>, IInspectable, ISerializable<SerializedAttributes>
     {
         Dictionary<AttributeType, int> Attributes = new Dictionary<AttributeType, int>();
 
         private int totalScore = 0;
-        private int minLevel = 0;
-        
+
         public int this[AttributeType key]
         {
-            get => Attributes[key];
+            get => GetAttribute(key);
             set => SetAttribute(key, value);
         }
 
@@ -25,16 +24,13 @@ namespace DnD_Generator
         {
             get => totalScore;
         }
-        /// <summary>Minimum creature level to attain the attribute score naturally</summary>
-        public int Level
-        {
-            get => minLevel;
-        }
+        public int CreatureLevel => GetAttributeLevel(DungeonCrawlerSettings.AttributePointsPerCreatureLevel);
+        public int WeaponLevel => GetAttributeLevel(DungeonCrawlerSettings.AttributePointsPerWeaponLevel);
 
-        public CreatureAttributes() { SetAttributes(0); }
-        public CreatureAttributes(int baseValue) { SetAttributes(baseValue); }
-        public CreatureAttributes(CreatureAttributes otherAttributes) : this((attr) => otherAttributes[attr]) {}
-        public CreatureAttributes(Func<AttributeType, int> determineAttribute) { SetAttributes(determineAttribute); }
+        public CrawlerAttributeSet() { }
+        public CrawlerAttributeSet(int baseValue) { SetAttributes(baseValue); }
+        public CrawlerAttributeSet(CrawlerAttributeSet otherAttributes) : this((attr) => otherAttributes[attr]) {}
+        public CrawlerAttributeSet(Func<AttributeType, int> determineAttribute) { SetAttributes(determineAttribute); }
 
         void AddAttribute(AttributeType attr, int amt)
         {
@@ -55,24 +51,27 @@ namespace DnD_Generator
         }
         public void SetAttributes(Func<AttributeType, int> determineAttribute)
         {
-            foreach(var attr in EnumExt<AttributeType>.Values)
+            foreach (var attr in EnumExt<AttributeType>.Values)
                 Attributes.Add(attr, determineAttribute(attr));
             UpdateMetaData();
+        }
+
+        public int GetAttribute(AttributeType attribute)
+        {
+            if (Attributes.ContainsKey(attribute))
+                return Attributes[attribute];
+            return 0;
         }
 
         private void UpdateMetaData()
         {
             totalScore = Attributes.Aggregate(0, (total, kvp) => total + kvp.Value);
-            minLevel = (int)Math.Ceiling((double)totalScore / DungeonCrawlerSettings.AttributePointsPerLevel);
         }
 
         IEnumerator<KeyValuePair<AttributeType, int>> IEnumerable<KeyValuePair<AttributeType, int>>.GetEnumerator()
         {
             return Attributes.GetEnumerator();
         }
-
-        public static int GetMissingPoints(CreatureAttributes attributes)
-            => (attributes.Level * DungeonCrawlerSettings.AttributePointsPerLevel) - attributes.TotalScore;
 
         public string BriefString()
         {
@@ -116,5 +115,16 @@ namespace DnD_Generator
         {
             return Attributes.GetEnumerator();
         }
+
+        public SerializedAttributes GetSerializable()
+        {
+            return new SerializedAttributes(this);
+        }
+
+
+        public int GetAttributeLevel(int pointsPerLevel)
+            => (int)Math.Ceiling((double)totalScore / pointsPerLevel);
+        public int GetMissingPoints(int pointsPerLevel)
+            => (pointsPerLevel * GetAttributeLevel(pointsPerLevel)) - totalScore;
     }
 }

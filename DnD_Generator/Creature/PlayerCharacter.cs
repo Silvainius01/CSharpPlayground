@@ -2,7 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
-using GameEngine;
+using CommandEngine;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography;
+using System.Net.NetworkInformation;
+using System.Runtime.Serialization;
 
 namespace DnD_Generator
 {
@@ -69,6 +75,28 @@ namespace DnD_Generator
             builder.NewlineAppend(tabCount, $"Damage: {Damage}");
 
             return builder.ToString();
+        }
+
+        public override SerializedCreature GetSerializable()
+        {
+            return new SerializedCharacter(this);
+        }
+
+    }
+
+    class SerializedCharacter : SerializedCreature
+    {
+        public int Experience { get; set; }
+
+        public SerializedCharacter() : base() { }
+        public SerializedCharacter(PlayerCharacter pc) : base(pc)
+        {
+            Experience = pc.Experience;
+        }
+
+        public override Creature GetDeserialized()
+        {
+            return base.GetDeserialized();
         }
     }
 }

@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using GameEngine;
-using DieRoller;
+using CommandEngine;
 
 namespace DnD_Generator
 {
@@ -42,7 +41,6 @@ namespace DnD_Generator
         public TestSuite(DungeonCrawlerManager crawler)
         {
             crawlerGame = crawler;
-            commands.Add(ConsoleCommand.Create("roll", StatRollWrapper));
             commands.Add(ConsoleCommand.Create("weapon", WeaponTest));
             commands.Add(ConsoleCommand.Create("dungeon", DungeonTest));
             commands.Add(ConsoleCommand.Create("rand", RandomTest));
@@ -70,29 +68,6 @@ namespace DnD_Generator
                 return true;
             }
             return false;
-        }
-
-        void StatRollWrapper(List<string> args)
-        {
-            if (args.Count > 0 && args[0].ToLower() == "help")
-            {
-                Console.WriteLine("Enter dice in the following format: XdY ZdW \nExample: 4d4 2d6");
-                if (args.Count == 1)
-                    return;
-            }
-
-            if (args[0][0] == 'r')
-            {
-                args.RemoveAt(0);
-                string[] input = args.ToArray();
-                do
-                {
-                    DiceRoller.DiceRollPrompt<StatRoll>(input, StatRoll.TryParse);
-                    input = Console.ReadLine().Split(' ');
-                } while (input[0].Length == 0 || input[0][0] != 'e');
-            }
-            else
-                DiceRoller.DiceRollPrompt<StatRoll>(args.ToArray(), StatRoll.TryParse);
         }
 
         public void RandomTest(List<string> args)

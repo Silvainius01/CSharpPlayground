@@ -2,6 +2,8 @@
 Menu Commands:
 	newGame -> start new game
 	again -> Enter a new dungeon
+	save -> save your character
+	load [characterName] -> load a character
 
 Game Commands:
 	check -> reprint room info

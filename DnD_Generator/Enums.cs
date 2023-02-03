@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using GameEngine;
+using CommandEngine;
 
 namespace DnD_Generator
 {
@@ -14,5 +14,5 @@ namespace DnD_Generator
     enum QualityLevel { Low, Mid, High }
     enum ItemWeaponLargeRate { None, Low, Mid, High, All }
     enum ItemArmorSlotType { Head, Body, Legs, Feet, Ring }
-    enum WeaponType { Blade, Ranged, Axe, Blunt }
+    // enum WeaponType { Blade, Ranged, Axe, Blunt }
 }

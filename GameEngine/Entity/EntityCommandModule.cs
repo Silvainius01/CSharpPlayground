@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameEngine
+namespace CommandEngine
 {
     public class EntityCommandModule : Component
     {
@@ -12,9 +12,9 @@ namespace GameEngine
 
         public void GetNextCommand(string message, bool newline, bool allowUniversalCommands)
         {
-            if (allowUniversalCommands)
-                CommandManager.GetNextUniversalCommand(message, newline, entityCommands);
-            else CommandManager.GetNextCommand(message, newline, entityCommands);
+            //if (allowUniversalCommands)
+            //    CommandManager.GetNextUniversalCommand(message, newline, entityCommands);
+            //else CommandManager.GetNextCommand(message, newline, entityCommands);
         }
 
         public async Task GetNextCommandAsync(string message, bool newline, bool allowUniversalCommands)
@@ -26,9 +26,9 @@ namespace GameEngine
 
         public void ParseCommand(string input, bool allowUniversalCommands)
         {
-            if (allowUniversalCommands)
-                CommandManager.ParseUniversalCommand(input, entityCommands);
-            else CommandManager.ParseCommandSet(input, entityCommands);
+            //if (allowUniversalCommands)
+            //    CommandManager.ParseUniversalCommand(input, entityCommands);
+            //else CommandManager.ParseCommandSet(input, entityCommands);
         }
 
         public void RegisterCommand(ConsoleCommand command)

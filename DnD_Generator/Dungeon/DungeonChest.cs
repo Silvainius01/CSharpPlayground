@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
-using GameEngine;
+using CommandEngine;
 
 namespace DnD_Generator
 {
@@ -56,11 +56,12 @@ namespace DnD_Generator
             item = default(TItem);
             return false;
         }
-        public bool RemoveAllItems(int itemId, out (TItem item, int conut) item)
+        public bool RemoveAllItems(int itemId, out (TItem item, int count) item)
         {
             if (Items.ContainsKey(itemId))
             {
                 item = Items[itemId];
+                Items.Remove(itemId);
                 return true;
             }
             item = (default(TItem), 0);

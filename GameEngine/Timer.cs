@@ -1,6 +1,6 @@
-﻿using GameEngine;
+﻿using CommandEngine;
 
-namespace GameEngine
+namespace CommandEngine
 {
     public class Timer
     {

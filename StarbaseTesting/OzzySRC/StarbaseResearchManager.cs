@@ -1,4 +1,4 @@
-﻿using GameEngine;
+﻿using CommandEngine;
 using Microsoft.SqlServer.Server;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -22,6 +22,7 @@ namespace StarbaseTesting
     partial class StarbaseResearchManager
     {
         public static string NodeDataFileDirectory = $"{OzzySrc.JsonDirectory}\\ResearchNodes.json";
+
         public static Dictionary<string, StarbaseResearchNode> NodesByName = new Dictionary<string, StarbaseResearchNode>();
 
         public static HashSet<string> NodeTreeNames = new HashSet<string>();
@@ -164,7 +165,7 @@ namespace StarbaseTesting
                 foreach (var recipe in node.Recipes)
                     RecipesOnNodes.Add(recipe);
 
-                Console.WriteLine($"Added research node '{node.Name}'");
+                // Console.WriteLine($"Added research node '{node.Name}'");
                 return true;
             }
 
@@ -260,7 +261,12 @@ namespace StarbaseTesting
         #region Commands
         public static void AddResearchNode(List<string> args)
         {
-            AddResearchNode(ParseNode(args));
+            var node = ParseNode(args);
+            if (node != null)
+            {
+                AddResearchNode(ParseNode(args));
+                Console.WriteLine($"Added research node '{node.Name}'");
+            }
         }
 
         public static void SaveResearchNodes(List<string> args)
@@ -282,10 +288,11 @@ namespace StarbaseTesting
         {
             if (!File.Exists(NodeDataFileDirectory))
             {
-                ConsoleExt.WriteWarningLine("Recipe data file does not exist!");
+                ConsoleExt.WriteWarningLine($"Cannot load '{NodeDataFileDirectory}': File does not exist!");
                 return;
             }
 
+            Console.Write("Loading Research Nodes...");
             StreamReader reader = new StreamReader(NodeDataFileDirectory);
             string json = reader.ReadToEnd();
             reader.Close();
@@ -300,6 +307,9 @@ namespace StarbaseTesting
 
             foreach (var node in NodesByName.Values)
                 SyncDependencies(node);
+
+            Console.WriteLine("Done!");
+            Console.WriteLine($"  Loaded {NodesByName.Count} Nodes.");
         }
 
         public static void UpdateResearchNode(List<string> args)
@@ -604,6 +614,79 @@ namespace StarbaseTesting
             StarbaseResearchNode node = NodesByName[args[0]];
 
             node.DebugColorString().WriteLine(true);
+        }
+
+        public static void GetNodeTreeDepth(List<string> args)
+        {
+            if (args.Count < 1 || !NodeTreeExists(args[0]))
+            {
+                ConsoleExt.WriteErrorLine("Must provide research tree.");
+                return;
+            }
+
+            string tree = args[0];
+            HashSet<string> nodesOnTree = new HashSet<string>();
+            Queue<(string name, int depth)> nodeQueue = new Queue<(string name, int depth)>();
+            Dictionary<string, int> foundNodes = new Dictionary<string, int>();
+
+            foreach (var node in NodesByName.Values)
+            {
+                if (node.Tree == tree)
+                {
+                    // Cache name for validation down the line
+                    nodesOnTree.Add(node.Name);
+
+                    // Enqueue any root nodes at depth 0
+                    if (!node.Dependencies.Any())
+                        nodeQueue.Enqueue((node.Name, 0));
+                }
+            }
+            
+            // Traverse the tree
+            while (nodeQueue.Any())
+            {
+                (string name, int depth) nodeData = nodeQueue.Dequeue();
+
+                if (foundNodes.ContainsKey(nodeData.name))
+                {
+                    // Skip if this node is a duplicate or has been found deeper in the tree
+                    if (foundNodes[nodeData.name] >= nodeData.depth)
+                        continue;
+                    // If deeper, instead mark its new depth and move on as normal.
+                    else foundNodes[nodeData.name] = nodeData.depth;
+                }
+                else foundNodes.Add(nodeData.name, nodeData.depth);
+
+                // Failsafe to make sure the node is real
+                if (TryGetNode(nodeData.name, out var childNode))
+                {
+                    // Enqueue all children at next depth level
+                    nodeQueue.EnqueueAll(childNode.Children.Select(nodeName => (nodeName, nodeData.depth+1)));
+                }
+            }
+
+            var nodesByDepth = new List<(string name, int depth)>(foundNodes.Select(kvp => (kvp.Key, kvp.Value)));
+            nodesByDepth.Sort((node1, node2) => node1.depth.CompareTo(node2.depth));
+
+
+            int tabCount = 0;
+            ColorStringBuilder sb = new ColorStringBuilder(tabString: "  ");
+            sb.AppendNewline(tabCount, $"Nodes in tree '{tree}' by depth:");
+
+            ++tabCount;
+            int currentDepth = -1;
+            foreach (var node in nodesByDepth)
+            {
+                if (node.depth > currentDepth)
+                {
+                    currentDepth = node.depth;
+                    sb.AppendNewline(tabCount, $"{currentDepth}:");
+                }
+                sb.AppendNewline(tabCount + 1, $"{node.name}");
+            }
+            --tabCount;
+
+            sb.WriteLine(true);
         }
         #endregion
     }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using GameEngine;
+using CommandEngine;
 
 namespace DnD_Generator
 {
@@ -9,13 +9,10 @@ namespace DnD_Generator
     {
         public static Dictionary<AttributeType, string> attributeDescriptions = new Dictionary<AttributeType, string>()
         {
-            [AttributeType.STR] = "+5 carry weight. Get bonus damage for Axes and Blunt weapons.",
-            [AttributeType.DEX] = "Get bonus damage for Blades and Ranged weapons, and make it easier to hit things.",
+            [AttributeType.STR] = "+5 Carry weight. Get bonus damage for Axes and Blunt weapons.",
+            [AttributeType.DEX] = "Get bonus damage for Blades and Ranged weapons.",
             [AttributeType.CON] = $"+{DungeonCrawlerSettings.HitPointsPerConstitution} HP. Secondary stat for Blunt weapons.",
         };
-
-        static string WeaponTypePrompt = $"Pick your preferred weapon:\n\t{EnumExt<WeaponType>.Values.ToString(" | ")}\n";
-        static EnumCommandModule<WeaponType> WeaponTypeCommands { get => EnumExt<WeaponType>.GetCommandModule(false); }
 
         static string AttributeTypePrompt = $"Pick an attribute:\n\t{EnumExt<AttributeType>.Values.ToString(" | ")}\n";
         static EnumCommandModule<AttributeType> AttributeTypeCommands { get => EnumExt<AttributeType>.GetCommandModule(false); }
@@ -24,7 +21,6 @@ namespace DnD_Generator
         {
             PlayerCharacter player = new PlayerCharacter()
             {
-                Level = 2,
                 Name = "Default",
                 HitPoints = DungeonCrawlerSettings.MinCreatureHitPoints,
                 ArmorClass = 0,
@@ -32,22 +28,28 @@ namespace DnD_Generator
             
             player.Name = CommandManager.UserInputPrompt("Enter name", false);
 
+            // Generate the starting weapon
             var wParams = ItemWeaponGenerationPresets.StartWeaponItem;
-            wParams.PossibleWeaponTypes = new List<WeaponType>() { GetNextWeaponCommand(WeaponTypePrompt, $"[Invalid] Preferred Weapon", false) };
+            string WeaponTypePrompt = $"Pick your preferred weapon:\n\t{WeaponTypeManager.WeaponTypes.Keys.ToString(" | ")}\n";
+            wParams.PossibleWeaponTypes = new List<string>() { GetNextWeaponCommand(WeaponTypePrompt, $"[Invalid] Preferred Weapon", false) };
             player.PrimaryWeapon = DungeonGenerator.GenerateWeapon(wParams);
 
-            player.Attributes = new CreatureAttributes(player.PrimaryWeapon.AttributeRequirements);
-            int attrPoints = player.Attributes.Level * (DungeonCrawlerSettings.AttributePointsPerLevel) - player.Attributes.TotalScore;
-            if (attrPoints <= 0)
+            // Set the starting attributes to the start weapon requirements
+            player.Attributes = new CrawlerAttributeSet(player.PrimaryWeapon.AttributeRequirements);
+            // Always add 1 to CON.
+            player.Attributes[AttributeType.CON] += 1;
+            // Set the player to the minimum possible creature level
+            player.Level = player.Attributes.CreatureLevel;
+
+            // Allow player to apply any extra points
+            int missingPoints = player.Attributes.GetMissingPoints(DungeonCrawlerSettings.AttributePointsPerCreatureLevel);
+            if (missingPoints > 0)
             {
-                player.Level = player.Attributes.Level + 1;
-                attrPoints = 2;
+                AttributePrompt(player, 0, missingPoints, 0);
             }
-            else player.Level = player.Attributes.Level;
 
-            player.Attributes[AttributeType.CON] += attrPoints;
+            // Set player to max health (otherwise we create a dead char)
             player.HitPoints = player.MaxHitPoints;
-
             return player;
         }
 
@@ -56,7 +58,8 @@ namespace DnD_Generator
             SmartStringBuilder staticBuilder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);
 
             staticBuilder.Clear();
-            staticBuilder.Append(tabCount, $"\nYou've gained {levelsGained} levels!");
+            if(levelsGained > 0)
+                staticBuilder.Append(tabCount, $"\nYou've gained {levelsGained} levels!");
             staticBuilder.NewlineAppend(tabCount, $"You have {attrPoints} attribute points to allocate as you choose.");
 
             ++tabCount;
@@ -81,12 +84,13 @@ namespace DnD_Generator
             Console.WriteLine(player.Attributes.InspectString("All points distributed.\nNew attributes:", tabCount));
         }
 
-        public static WeaponType GetNextWeaponCommand(string firstPrompt, string failPrompt, bool newline)
+        public static string GetNextWeaponCommand(string firstPrompt, string failPrompt, bool newline)
         {
-            bool success = WeaponTypeCommands.TryGetValueFromCommand(firstPrompt, newline, out WeaponType type);
+            var WeaponTypeCommands = WeaponTypeManager.WeaponTypeCommandModule;
+            bool success = WeaponTypeCommands.TryGetValueFromCommand(firstPrompt, newline, out WeaponTypeData type);
             while (!success)
                 success = WeaponTypeCommands.TryGetValueFromCommand(failPrompt, newline, out type);
-            return type;
+            return type.WeaponType;
         }
         public static AttributeType GetNextAttributeCommand(string firstPrompt, string failPrompt, bool newline)
         {

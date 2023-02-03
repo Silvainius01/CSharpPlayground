@@ -4,20 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameEngine
+namespace CommandEngine
 {
-    public class EnumCommandModule<TEnum> where TEnum : struct, Enum
+    public class EnumCommandModule<TEnum> : CommandModule<TEnum> where TEnum : struct, Enum
     {
         public delegate void OnSuccessDelegate(List<string> args, TEnum value);
         
-        public bool AllowsIntegerShortcuts { get=> integerShortcuts; set => SetAllowIntegerShortcuts(value); }
+        public bool AllowsIntegerShortcuts { get => integerShortcuts; set => SetAllowIntegerShortcuts(value); }
 
         bool integerShortcuts = false;
         bool shortcutsCreated = false;
         OnSuccessDelegate OnSuccessCallback;
         Dictionary<string, ConsoleCommand<TEnum>> enumCommands;
 
-        public EnumCommandModule(bool allowIntegerShortcuts)
+        public EnumCommandModule(string defaultPrompt, bool allowIntegerShortcuts) : base(defaultPrompt)
         {
             var enumValues = EnumExt<TEnum>.Values;
 
@@ -29,14 +29,21 @@ namespace GameEngine
             {
                 var value = EnumExt<TEnum>.Values[i];
                 string valueString = EnumExt<TEnum>.Names[i];
-                ConsoleCommand<TEnum> command = new ConsoleCommand<TEnum>(valueString, (List<string> args) => { OnSuccessCallback(args, value); return value; });
+                ConsoleCommand<TEnum> command = new ConsoleCommand<TEnum>(
+                    valueString,
+                    (List<string> args, out TEnum result) => { 
+                        OnSuccessCallback(args, value); 
+                        result = value; 
+                        return true; 
+                    }
+                );
                 enumCommands.Add(valueString, command);
             }
 
             if (allowIntegerShortcuts)
                 CreateIntegerShortcuts();
         }
-        public EnumCommandModule(bool allowIntegerShortcuts, OnSuccessDelegate OnSuccessCallback) : this(allowIntegerShortcuts)
+        public EnumCommandModule(string defaultPrompt, bool allowIntegerShortcuts, OnSuccessDelegate OnSuccessCallback) : this(defaultPrompt, allowIntegerShortcuts)
         {
             this.OnSuccessCallback = OnSuccessCallback;
         }
@@ -64,10 +71,5 @@ namespace GameEngine
 
         // Empty to swallow the callback.
         private void OnSuccess(List<string> args, TEnum value) { }
-
-        public TEnum GetValueFromCommand(string message, bool newline) 
-            => CommandManager.GetNextCommand(message, newline, enumCommands);
-        public bool TryGetValueFromCommand(string message, bool newline, out TEnum value) 
-            => CommandManager.GetNextCommand(message, newline, enumCommands, out value);
     }
 }

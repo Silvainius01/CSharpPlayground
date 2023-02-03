@@ -6,8 +6,32 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DieRoller\DieRoller.csproj" />
-    <ProjectReference Include="..\GameEngine\GameEngine.csproj" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GameEngine\CommandEngine.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="TextDocs\CommandInfo.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="TextDocs\RogueCrawlDesignDoc.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="TextDocs\ActionMetaData.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="TextDocs\WeaponTypes.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="TextDocs\Tips.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="TextDocs\WeaponTypeDefs.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

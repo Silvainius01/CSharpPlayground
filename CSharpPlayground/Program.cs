@@ -1,6 +1,6 @@
 ﻿using System;
-using GameEngine;
-using GameEngine.AI;
+using CommandEngine;
+using CommandEngine.AI;
 using CSharpPlayground.Wumpus;
 using System.Collections;
 using System.Collections.Generic;

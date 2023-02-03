@@ -1,5 +1,6 @@
-﻿using GameEngine;
+﻿using CommandEngine;
 using System;
+using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 
@@ -7,7 +8,7 @@ namespace DnD_Generator
 {
     class WeaponTypeData
     {
-        public WeaponType Type { get; set; }
+        public string WeaponType { get; set; }
         public AttributeType PrimaryAttribute { get; set; }
         public AttributeType SecondaryAttribute { get; set; }
         public AttributeType ToHitAttribute { get; set; }
@@ -22,67 +23,17 @@ namespace DnD_Generator
 
     class ItemWeaponGenerator : BaseDungeonObjectGenerator<ItemWeapon, ItemWeaponGenerationParameters>
     {
-        public static Dictionary<WeaponType, WeaponTypeData> WeaponTypeData = new Dictionary<WeaponType, WeaponTypeData>()
-        {
-            [WeaponType.Axe] = new WeaponTypeData()
-            {
-                Type = WeaponType.Axe,
-                PrimaryAttribute = AttributeType.STR,
-                SecondaryAttribute = AttributeType.DEX,
-                ToHitAttribute = AttributeType.DEX,
-                DamageAttribute = AttributeType.STR,
-                PrimaryAttributeBaseReq = 4,
-                SecondaryAttributeBaseReq = 2,
-                BaseDamage = 1,
-                LargeWeaponDamageMult = 2.5f,
-                LargeWeaponWeightMult = 3f
-            },
-            [WeaponType.Blade] = new WeaponTypeData()
-            {
-                Type = WeaponType.Blade,
-                PrimaryAttribute = AttributeType.DEX,
-                SecondaryAttribute = AttributeType.STR,
-                ToHitAttribute = AttributeType.DEX,
-                DamageAttribute = AttributeType.DEX,
-                PrimaryAttributeBaseReq = 4,
-                SecondaryAttributeBaseReq = 2,
-                BaseDamage = 1,
-                LargeWeaponDamageMult = 2,
-                LargeWeaponWeightMult = 3
-            },
-            [WeaponType.Blunt] = new WeaponTypeData()
-            {
-                Type = WeaponType.Blunt,
-                PrimaryAttribute = AttributeType.STR,
-                SecondaryAttribute = AttributeType.CON,
-                ToHitAttribute = AttributeType.DEX,
-                DamageAttribute = AttributeType.STR,
-                PrimaryAttributeBaseReq = 4,
-                SecondaryAttributeBaseReq = 2,
-                BaseDamage = 1,
-                LargeWeaponDamageMult = 3,
-                LargeWeaponWeightMult = 4,
-            },
-            [WeaponType.Ranged] = new WeaponTypeData()
-            {
-                Type = WeaponType.Ranged,
-                PrimaryAttribute = AttributeType.DEX,
-                SecondaryAttribute = AttributeType.STR,
-                ToHitAttribute = AttributeType.STR,
-                DamageAttribute = AttributeType.DEX,
-                PrimaryAttributeBaseReq = 4,
-                SecondaryAttributeBaseReq = 2,
-                BaseDamage = 2,
-                LargeWeaponDamageMult = 2,
-                LargeWeaponWeightMult = 1.5f
-            },
-        };
+        static Dictionary<string, WeaponTypeData> WeaponTypes => WeaponTypeManager.WeaponTypes;
 
         public override ItemWeapon Generate(ItemWeaponGenerationParameters wParams)
         {
             wParams.Validate();
 
-            var weaponType = GetRandomWeaponType(wParams.PossibleWeaponTypes);
+            string weaponType = null;
+
+            if (!wParams.PossibleWeaponTypes.Any())
+                weaponType = WeaponTypeManager.RandomType;
+            else weaponType = wParams.PossibleWeaponTypes.RandomItem();
 
             ItemWeapon weapon = new ItemWeapon()
             {
@@ -90,33 +41,51 @@ namespace DnD_Generator
                 Weight = Mathc.Random.NextInt(wParams.WeightRange, true) / 10.0f,
                 IsLargeWeapon = Mathc.Random.NextInt(100) < wParams.LargeWeaponProbability,
                 WeaponType = weaponType,
-                DamageBonusAttribute = WeaponTypeData[weaponType].DamageAttribute,
-                HitBonusAttribute = WeaponTypeData[weaponType].ToHitAttribute,
-                BaseDamage = WeaponTypeData[weaponType].BaseDamage
+                DamageBonusAttribute = WeaponTypes[weaponType].DamageAttribute,
+                HitBonusAttribute = WeaponTypes[weaponType].ToHitAttribute,
+                BaseDamage = WeaponTypes[weaponType].BaseDamage
             };
             weapon.Quality = GetQuality(wParams, weapon);
-            weapon.AttributeRequirements = GenerateAttributeRequirements(weapon);
             weapon.Name = GetName(weapon);
 
             if (weapon.IsLargeWeapon)
             {
-                weapon.BaseDamage *= WeaponTypeData[weaponType].LargeWeaponDamageMult;
-                weapon.Weight *= WeaponTypeData[weaponType].LargeWeaponWeightMult;
+                weapon.BaseDamage *= WeaponTypes[weaponType].LargeWeaponDamageMult;
+                weapon.Weight *= WeaponTypes[weaponType].LargeWeaponWeightMult;
             }
+
+            weapon.AttributeRequirements = GenerateAttributeRequirements(weapon);
             weapon.Value = weapon.GetValue();
 
             return weapon;
         }
 
-        public WeaponType GetRandomWeaponType(List<WeaponType> types = null) 
-            => types != null && types.Count > 0
-                ? (types.RandomItem())
-                : EnumExt<WeaponType>.RandomValue;
-
-        CreatureAttributes GenerateAttributeRequirements(ItemWeapon weapon)
+        public ItemWeapon FromSerializable(SerializedWeapon serialized)
         {
-            var weaponTypeData = WeaponTypeData[weapon.WeaponType];
-            CreatureAttributes req = new CreatureAttributes();
+            var weaponType = serialized.WeaponType;
+            ItemWeapon weapon = new ItemWeapon()
+            {
+                ID = NextId,
+                Name = serialized.Name,
+                Weight = serialized.Weight,
+                IsLargeWeapon = serialized.IsLargeWeapon,
+                WeaponType = weaponType,
+                Quality = serialized.Quality,
+                BaseDamage = serialized.BaseDamage,
+                DamageBonusAttribute = WeaponTypes[weaponType].DamageAttribute,
+                HitBonusAttribute = WeaponTypes[weaponType].ToHitAttribute,
+            };
+
+            weapon.AttributeRequirements = GenerateAttributeRequirements(weapon);
+            weapon.Value = weapon.GetValue();
+
+            return weapon;
+        }
+
+        CrawlerAttributeSet GenerateAttributeRequirements(ItemWeapon weapon)
+        {
+            var weaponTypeData = WeaponTypes[weapon.WeaponType];
+            CrawlerAttributeSet req = new CrawlerAttributeSet();
 
             req[AttributeType.STR] = GetStrengthReq(weapon.Weight);
             req[weaponTypeData.PrimaryAttribute] += (int)Math.Ceiling(weapon.Quality * GetPrimaryStatReq(weapon));
@@ -142,18 +111,18 @@ namespace DnD_Generator
         
         /// <summary>Get the stat requirement for Quality 1.0 weapon</summary>
         int GetPrimaryStatReq(ItemWeapon weapon)
-            => WeaponTypeData[weapon].PrimaryAttributeBaseReq;
+            => WeaponTypes[weapon.WeaponType].PrimaryAttributeBaseReq;
         
         /// <summary>Get the stat requirement for Quality 1.0 weapon</summary>
         int GetSecondaryStatReq(ItemWeapon weapon)
-            => WeaponTypeData[weapon].SecondaryAttributeBaseReq;
+            => WeaponTypes[weapon.WeaponType].SecondaryAttributeBaseReq;
         
         float GetMaxQuality(int level, ItemWeapon weapon)
         {
             if (level <= 0)
                 return 0;
 
-            int maxAttrPoints = (level * DungeonCrawlerSettings.AttributePointsPerLevel) - GetStrengthReq(weapon.Weight);
+            int maxAttrPoints = (level * DungeonCrawlerSettings.AttributePointsPerWeaponLevel) - GetStrengthReq(weapon.Weight);
             float pointsPerQual = GetPrimaryStatReq(weapon) + GetSecondaryStatReq(weapon);
             return (maxAttrPoints / pointsPerQual).Truncate(1);    
         }

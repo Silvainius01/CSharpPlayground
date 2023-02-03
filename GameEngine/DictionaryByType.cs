@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameEngine
+namespace CommandEngine
 {
     /// <summary>
     /// Map from types to instances of those types, e.g. int to 10 and
