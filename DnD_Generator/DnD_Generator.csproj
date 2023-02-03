@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GameEngine\CommandEngine.csproj" />
+    <ProjectReference Include="..\CommandEngine\CommandEngine.csproj" />
   </ItemGroup>
 
   <ItemGroup>

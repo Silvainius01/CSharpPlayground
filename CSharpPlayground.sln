@@ -8,7 +8,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wumpus", "CSharpPlayground\
 		{B0FA2428-25AE-4766-83A1-B4C56137F43D} = {B0FA2428-25AE-4766-83A1-B4C56137F43D}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameEngine", "GameEngine\GameEngine.csproj", "{B0FA2428-25AE-4766-83A1-B4C56137F43D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandEngine", "CommandEngine\CommandEngine.csproj", "{B0FA2428-25AE-4766-83A1-B4C56137F43D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarbaseTesting", "StarbaseTesting\StarbaseTesting.csproj", "{EE4E60DD-86AD-4BCC-9CB7-368DA3C13053}"
 EndProject
