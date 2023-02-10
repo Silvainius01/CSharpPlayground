@@ -70,8 +70,9 @@ namespace CommandEngine
         public SmartStringBuilder NewlineAppend(int tabCount, string str)
         {
             CheckCapacity(str.Length + NewString.Length, tabCount);
+            builder.Append(NewString);
             AppendTabs(tabCount);
-            builder.Append($"{NewString}{str}");
+            builder.Append(str);
             return this;
         }
 

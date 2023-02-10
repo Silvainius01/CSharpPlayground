@@ -221,9 +221,16 @@ namespace DnD_Generator
             {
                 PlayerInspectRoom(player.CurrentRoom);
             }
-            else if (BaseNoCreatureCommand(out string errorMsg) && BaseRoomCommand(args, out DungeonRoom room, out errorMsg))
+            else if (BaseNoCreatureCommand(out string errorMsg))
             {
-                PlayerCheckRoom(room);
+                if (args[0] == "all")
+                    foreach (var connection in player.CurrentRoom.connections.Values)
+                    {
+                        DungeonRoom r = dungeon.roomManager.GetRoomByIndex(connection.index);
+                        PlayerCheckRoom(r);
+                    }
+                else if(BaseRoomCommand(args, out DungeonRoom room, out errorMsg))
+                    PlayerCheckRoom(room);
             }
             else Console.WriteLine(errorMsg);
         }

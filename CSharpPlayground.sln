@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wumpus", "CSharpPlayground\Wumpus.csproj", "{A732291A-52DD-4C2A-875C-F6D0A42F2F78}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wumpus", "Wumpus\Wumpus.csproj", "{A732291A-52DD-4C2A-875C-F6D0A42F2F78}"
 	ProjectSection(ProjectDependencies) = postProject
 		{B0FA2428-25AE-4766-83A1-B4C56137F43D} = {B0FA2428-25AE-4766-83A1-B4C56137F43D}
 	EndProjectSection
@@ -12,13 +12,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandEngine", "CommandEng
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarbaseTesting", "StarbaseTesting\StarbaseTesting.csproj", "{EE4E60DD-86AD-4BCC-9CB7-368DA3C13053}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatanSettlers", "CatanSettlers\CatanSettlers.csproj", "{7F5B4973-24F2-402E-9157-0B7E24FBD622}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DieRoller", "DieRoller\DieRoller.csproj", "{A841558C-DD19-444B-AF77-897D96285DE6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DnD_Generator", "DnD_Generator\DnD_Generator.csproj", "{430FF795-EF0B-4607-BCEC-C3DC42A4E6A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "z_UnitTests_GameEngine", "z_UnitTests\z_UnitTests_GameEngine.csproj", "{E14D6E81-F0BD-4A87-8EA4-32504C3CE8C8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "z_UnitTests_GameEngine", "z_UnitTests\z_UnitTests_GameEngine.csproj", "{E14D6E81-F0BD-4A87-8EA4-32504C3CE8C8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,10 +36,6 @@ Global
 		{EE4E60DD-86AD-4BCC-9CB7-368DA3C13053}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE4E60DD-86AD-4BCC-9CB7-368DA3C13053}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE4E60DD-86AD-4BCC-9CB7-368DA3C13053}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7F5B4973-24F2-402E-9157-0B7E24FBD622}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7F5B4973-24F2-402E-9157-0B7E24FBD622}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7F5B4973-24F2-402E-9157-0B7E24FBD622}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7F5B4973-24F2-402E-9157-0B7E24FBD622}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A841558C-DD19-444B-AF77-897D96285DE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A841558C-DD19-444B-AF77-897D96285DE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A841558C-DD19-444B-AF77-897D96285DE6}.Release|Any CPU.ActiveCfg = Release|Any CPU

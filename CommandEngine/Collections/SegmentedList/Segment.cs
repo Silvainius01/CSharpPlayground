@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace GameEngine.Collections
+namespace CommandEngine.Collections
 {
     partial class SegmentedList<TKey, TValue>
     {
@@ -39,7 +39,9 @@ namespace GameEngine.Collections
                 }
                 set
                 {
-                    if (!ValidateItem(value))
+                    if(index >= Count) 
+                        throw new IndexOutOfRangeException();
+                    else if (!ValidateItem(value))
                         throw new InvalidOperationException("Cannot set an element to a value of a different key.");
                     _parentList[index + StartIndex] = value;
                 }
@@ -59,15 +61,11 @@ namespace GameEngine.Collections
                 _parentList = parent;
                 Key = key;
             }
+            
             internal void UpdatePosition(int amount = 1)
             {
                 _start += amount;
                 _end += amount;
-            }
-            internal void Decrement(int amount = 1)
-            {
-                _start -= amount;
-                _end -= amount;
             }
 
             void UpdateCount() => _count = 1 + EndIndex - StartIndex;
@@ -138,6 +136,7 @@ namespace GameEngine.Collections
                 return new SegmentEnumerator(this);
             }
         }
+
         internal class SegmentEnumerator : IEnumerator<TValue>
         {
             Segment _segment;

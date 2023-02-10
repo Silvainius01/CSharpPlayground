@@ -110,12 +110,12 @@ namespace CSharpPlayground.Wumpus
         /// <summary> Get a random room on the game board </summary>
         public static BoardRoom GetRandomRoom()
         {
-            return instance.gameBoard.rooms[Mathc.Random.NextInt(0, instance.gameBoard.rooms.Count)];
+            return instance.gameBoard.rooms[CommandEngine.Random.NextInt(0, instance.gameBoard.rooms.Count)];
         }
         /// <summary> Get a random room from a selection </summary>
         public static BoardRoom GetRandomRoom(params BoardRoom[] rooms)
         {
-            return rooms[Mathc.Random.NextInt(0, rooms.Length)];
+            return rooms[CommandEngine.Random.NextInt(0, rooms.Length)];
         }
         /// <summary> Get a random room connected to a room </summary>
         public static BoardRoom GetRandomConnectedRoom(BoardRoom room)
@@ -188,7 +188,7 @@ namespace CSharpPlayground.Wumpus
             }
 
             // Step 4) Get the random room!
-            int rIndex = Mathc.Random.NextInt(0, effectiveCount);
+            int rIndex = CommandEngine.Random.NextInt(0, effectiveCount);
             if (indexMap.ContainsKey(rIndex))
                 rIndex = indexMap[rIndex];
 

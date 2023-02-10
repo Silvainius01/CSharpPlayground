@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace GameEngine.Collections
+namespace CommandEngine.Collections
 {
     /// <summary>
     /// Meant for large sets that may contain duplicate entries/copies of data, such as a list of instantiated prefabs. 
@@ -69,7 +69,10 @@ namespace GameEngine.Collections
             Segment segment = segmentDict[segmentKey];
             segmentDict.Remove(segmentKey);
             values.RemoveRange(segment.StartIndex, segment.Count);
-            MoveSegementsAbove(segment.StartIndex - 1, segment.Count);
+            MoveSegementsAbove(segment.StartIndex - 1, -segment.Count);
+
+            segment.StartIndex = -1;
+            segment.EndIndex = -1;
 
             return true;
         }
@@ -96,9 +99,9 @@ namespace GameEngine.Collections
 
         void InsertDirect(Segment segment, int index, TValue value)
         {
-            ++segment.EndIndex;
             values.Insert(index, value);
             MoveSegementsAbove(segment.EndIndex, 1);
+            ++segment.EndIndex;
         }
         public void Insert(int index, TValue value)
         {
@@ -137,9 +140,11 @@ namespace GameEngine.Collections
             // Remove if its the last element in the segment
             if (segment.StartIndex == segment.EndIndex)
                 segmentDict.Remove(segment.Key);
-
-            --segment.EndIndex; 
-            MoveSegementsAbove(segment.EndIndex, -1);
+            else
+            {
+                --segment.EndIndex;
+                MoveSegementsAbove(segment.EndIndex, -1);
+            }
         }
         public void RemoveAt(int index)
         {
