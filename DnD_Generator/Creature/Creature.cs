@@ -12,7 +12,7 @@ namespace DnD_Generator
         public float HitPoints { get; set; }
         public int ArmorClass { get; set; }
         public int Level { get; set; } = 1;
-        public string Name { get; set; }
+        public string WeaponName { get; set; }
 
         public ItemWeapon PrimaryWeapon { get; set; }
         public ItemWeapon SecondaryWeapon { get; set; }
@@ -33,14 +33,14 @@ namespace DnD_Generator
 
         public virtual string BriefString()
         {
-            return $"[{ID}] {Name} ({Level}) | HP: {HitPoints} | DMG: {Damage}";
+            return $"[{ID}] {WeaponName} ({Level}) | HP: {HitPoints} | DMG: {Damage}";
         }
         public virtual string InspectString(string prefix, int tabCount)
         {
             SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);;
 
             if (prefix == string.Empty)
-                prefix = $"[{ID}] {Name} (Lv.{Level}):";
+                prefix = $"[{ID}] {WeaponName} (Lv.{Level}):";
 
             builder.Append(tabCount, prefix);
 
@@ -58,7 +58,7 @@ namespace DnD_Generator
             SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);;
 
             if(prefix == string.Empty)
-                prefix = $"Creature Stats for {Name}:";
+                prefix = $"Creature Stats for {WeaponName}:";
 
             builder.Append(tabCount, prefix);
             tabCount++;
@@ -73,7 +73,7 @@ namespace DnD_Generator
         }
         public override string ToString()
         {
-            return $"[{ID}] {Name}";
+            return $"[{ID}] {WeaponName}";
         }
 
         public virtual SerializedCreature GetSerializable()
@@ -94,7 +94,7 @@ namespace DnD_Generator
         public SerializedCreature() { }
         public SerializedCreature(Creature c)
         {
-            Name = c.Name;
+            Name = c.WeaponName;
             HitPoints = c.HitPoints;
             Level = c.Level;
             PrimaryWeapon = (SerializedWeapon)c.PrimaryWeapon.GetSerializable();

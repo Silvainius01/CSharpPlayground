@@ -7,6 +7,6 @@ namespace DnD_Generator
     interface IDungeonObject
     {
         int ID { get; set; }
-        string Name { get; set; }
+        string WeaponName { get; set; }
     }
 }

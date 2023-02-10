@@ -111,7 +111,7 @@ namespace DnD_Generator
             if (c.HitPoints <= 0)
             {
                 c.Inventory.AddItem(c.PrimaryWeapon);
-                c.Inventory.Name = $"{c.Name}'s Corpse";
+                c.Inventory.WeaponName = $"{c.WeaponName}'s Corpse";
                 chestManager.AddObject(c.Inventory, c.CurrentRoom);
                 creatureManager.RemoveObject(c, c.CurrentRoom);
                 return true;
@@ -124,6 +124,14 @@ namespace DnD_Generator
                 creature.HitPoints = Mathc.Min(creature.HitPoints + hitPoints, creature.MaxHitPoints);
         }
 
+        public bool RoomContainsLoot(DungeonRoom room)
+        {
+            if (chestManager.GetObjectCount(room) > 0)
+                foreach (DungeonChest<IItem> chest in chestManager.GetObjectsInRoom(room))
+                    if (chest.ItemCount > 0)
+                        return true;
+            return false;
+        }
         public bool RoomContainsChest(DungeonRoom room)
             => chestManager.GetObjectCount(room) > 0;
         public bool RoomContainsCreature(DungeonRoom room)
@@ -223,7 +231,7 @@ namespace DnD_Generator
                     return room.ConnectedTo(player.CurrentRoom) ? ConsoleColor.Green : ConsoleColor.DarkGreen;
                 if (RoomContainsCreature(room))
                     return room.ConnectedTo(player.CurrentRoom) ? ConsoleColor.Red : ConsoleColor.DarkRed;
-                if (RoomContainsChest(room))
+                if (RoomContainsLoot(room))
                     return room.ConnectedTo(player.CurrentRoom) ? ConsoleColor.Yellow : ConsoleColor.DarkYellow;
 
                 return room.ConnectedTo(player.CurrentRoom) ? ConsoleColor.White : ConsoleColor.DarkGray;

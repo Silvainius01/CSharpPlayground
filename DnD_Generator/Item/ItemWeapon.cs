@@ -18,8 +18,9 @@ namespace DnD_Generator
         public float Weight { get; set; }
         public float Quality { get; set; }
         public int Value { get ; set; }
-        public string Name { get; set; }
+        public string WeaponName { get; set; }
         public string WeaponType { get; set; }
+        public string DisplayName { get; set; }
         public bool IsLargeWeapon { get; set; }
 
         public AttributeType HitBonusAttribute { get; set; }
@@ -51,14 +52,14 @@ namespace DnD_Generator
 
         public string BriefString()
         {
-            return $"[{ID}] Lv.{Level} {Name} | DMG: {GetWeaponDamage()} | V: {Value} | W: {Weight}";
+            return $"[{ID}] Lv.{Level} {WeaponName} | DMG: {GetWeaponDamage()} | V: {Value} | W: {Weight}";
         }
         public string InspectString(string prefix, int tabCount)
         {
             SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);;
 
             if (prefix == string.Empty)
-                prefix = $"Weapon stats for [{ID}] {Name}:";
+                prefix = $"Weapon stats for [{ID}] {WeaponName}:";
 
             builder.Append(tabCount, prefix);
             tabCount++;
@@ -76,7 +77,7 @@ namespace DnD_Generator
             SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);;
 
             if (prefix == string.Empty)
-                prefix = $"Weapon stats for {Name}:";
+                prefix = $"Weapon stats for {WeaponName}:";
 
             builder.Append(tabCount, prefix);
             tabCount++;
@@ -98,7 +99,7 @@ namespace DnD_Generator
             SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);;
 
             if (prefix == string.Empty)
-                prefix = $"Weapon stats for [{ID}] {Name}:";
+                prefix = $"Weapon stats for [{ID}] {WeaponName}:";
 
             builder.Append(tabCount, prefix);
             tabCount++;
@@ -113,14 +114,14 @@ namespace DnD_Generator
 
         public override string ToString()
         {
-            return $"[{ID}] {Name}";
+            return $"[{ID}] {WeaponName}";
         }
 
         public SerializedItem GetSerializable()
         {
             SerializedWeapon s = new SerializedWeapon()
             {
-                Name = Name,
+                Name = WeaponName,
                 Value = Value,
                 Quality = Quality,
                 Weight = Weight,

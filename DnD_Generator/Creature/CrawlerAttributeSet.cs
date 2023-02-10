@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using CommandEngine;
-using System.Net.Http.Headers;
 
 namespace DnD_Generator
 {
@@ -68,11 +66,6 @@ namespace DnD_Generator
             totalScore = Attributes.Aggregate(0, (total, kvp) => total + kvp.Value);
         }
 
-        IEnumerator<KeyValuePair<AttributeType, int>> IEnumerable<KeyValuePair<AttributeType, int>>.GetEnumerator()
-        {
-            return Attributes.GetEnumerator();
-        }
-
         public string BriefString()
         {
             return ToString();
@@ -115,12 +108,15 @@ namespace DnD_Generator
         {
             return Attributes.GetEnumerator();
         }
+        IEnumerator<KeyValuePair<AttributeType, int>> IEnumerable<KeyValuePair<AttributeType, int>>.GetEnumerator()
+        {
+            return Attributes.GetEnumerator();
+        }
 
         public SerializedAttributes GetSerializable()
         {
             return new SerializedAttributes(this);
         }
-
 
         public int GetAttributeLevel(int pointsPerLevel)
             => (int)Math.Ceiling((double)totalScore / pointsPerLevel);

@@ -21,6 +21,9 @@
     <None Update="TextDocs\CommandInfo.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="TextDocs\WeaponInfo.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="TextDocs\RogueCrawlDesignDoc.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -61,7 +61,7 @@ namespace DnD_Generator
             };
 
             // Assume a wepaons chest for now
-            chest.Name = PopulateWeaponsChest(chest, cParams);
+            chest.WeaponName = PopulateWeaponsChest(chest, cParams);
 
             return chest;
         }

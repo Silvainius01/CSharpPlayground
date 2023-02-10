@@ -41,7 +41,7 @@ namespace DnD_Generator
             DungeonSize size = (DungeonSize)Math.Min(EnumExt<DungeonSize>.Count - 1, player.Level / DungeonCrawlerSettings.LevelsPerDungeonSizeUnlock);
             dungeon = crawlerManager.GenerateDungeon(size);
 
-            Console.WriteLine(player.InspectString($"Your Stats:\n  Name: {player.Name}", 0));
+            Console.WriteLine(player.InspectString($"Your Stats:\n  Name: {player.WeaponName}", 0));
             Console.WriteLine("\nEnter To Continue...");
             Console.ReadLine();
             Console.WriteLine(dungeon.InspectString($"Entering {size} dungeon...", 0));
@@ -265,7 +265,7 @@ namespace DnD_Generator
                 if (dungeon.DamageCreature(creature, player.Damage))
                 {
                     ++player.CreaturesKilled;
-                    Console.WriteLine($"{creature.Name} died!");
+                    Console.WriteLine($"{creature.WeaponName} died!");
                 }
 
                 dungeonTurn |= fightCommands % DungeonCrawlerSettings.CommandsPerCreatureAttack == 0;

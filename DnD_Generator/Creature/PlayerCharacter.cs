@@ -48,7 +48,7 @@ namespace DnD_Generator
             SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);;
 
             if (prefix == string.Empty)
-                prefix = $"Stats for {Name}:";
+                prefix = $"Stats for {WeaponName}:";
 
             builder.Append(tabCount, prefix);
             tabCount++;
@@ -66,7 +66,7 @@ namespace DnD_Generator
             SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString); ;
 
             if (prefix == string.Empty)
-                prefix = $"Stats for {Name}:";
+                prefix = $"Stats for {WeaponName}:";
 
             builder.Append(tabCount, prefix);
             tabCount++;
@@ -81,7 +81,6 @@ namespace DnD_Generator
         {
             return new SerializedCharacter(this);
         }
-
     }
 
     class SerializedCharacter : SerializedCreature

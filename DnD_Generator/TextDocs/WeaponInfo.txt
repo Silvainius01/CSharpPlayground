@@ -1,0 +1,24 @@
+Attributes: STR DEX CON INT WIS CHA LCK
+
+Weapons have three tiers to understand: governing attribute(s), general skill, specific skill.
+
+	Each weapon has two governing attributes, major and minor. Major attributes generally preside over your ability to deal damage with that weapon, and determine your general ability to wield it.
+The minor attribute provide smaller boosts to your effectivness, usually in the form of hit chance, but can offer smaller benefits as well.
+	Beyond this, weapons also have a general skill assoiciated with them. This "general skill" reflects your overall competence at using the kind of weapon it is. 
+A master of the blade has working knowledge that can be transferred from dagger to claymore to rapier.
+	Which leads us to specific skill. Each weapon has its own skill value that represents your sepcific training and familliarity of that weapon. 
+The aforementiond master of the blade might know how blades work and the idea behind how a given weapon is meant to operate, but they will still lack the training, muscle memory, and/or conditioning to effectively weild it.
+	Specific weapons might also have additional attribute requirements to satisfy. Such weapons are typically highly specialized for certain scenarios, and generally lack versatility the normal adventurer requires.
+
+General Skills [MAJOR/MINOR]:
+	Blade	[DEX, STR]
+	Ranged	[DEX, WIS]
+	Axe		[STR, DEX]
+	Blunt	[STR, CON]
+	Spear	[DEX, CON]
+
+TO_HIT:
+	baseChance = (genSkill/2)+specSkill; // Up to 150% base chance 
+	realChance = baseChance * (majAttrPercent+(minAttrPercent/2)) * (0.5+fatiguePercent)
+	max			= 1.5*1.5*1.5 = 337.5%
+	fatiguedMax = 1.5*1.5*0.5 = 112.5%

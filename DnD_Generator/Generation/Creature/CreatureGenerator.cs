@@ -48,7 +48,7 @@ namespace DnD_Generator
             Creature creature = new Creature()
             {
                 ID = NextId,
-                Name = "Gobbo",
+                WeaponName = "Gobbo",
                 Level = CommandEngine.Random.NextInt(cParams.LevelRange),
                 HitPoints = DungeonCrawlerSettings.MinCreatureHitPoints //CommandEngine.Random.NextInt(cParams.BaseHealthRange), // Base Hitpoints
             };

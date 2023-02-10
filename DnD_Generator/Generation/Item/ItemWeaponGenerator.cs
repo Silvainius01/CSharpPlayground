@@ -46,7 +46,7 @@ namespace DnD_Generator
                 BaseDamage = WeaponTypes[weaponType].BaseDamage
             };
             weapon.Quality = GetQuality(wParams, weapon);
-            weapon.Name = GetName(weapon);
+            weapon.WeaponName = GetName(weapon);
 
             if (weapon.IsLargeWeapon)
             {
@@ -66,7 +66,7 @@ namespace DnD_Generator
             ItemWeapon weapon = new ItemWeapon()
             {
                 ID = NextId,
-                Name = serialized.Name,
+                WeaponName = serialized.Name,
                 Weight = serialized.Weight,
                 IsLargeWeapon = serialized.IsLargeWeapon,
                 WeaponType = weaponType,

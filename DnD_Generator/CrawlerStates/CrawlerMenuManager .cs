@@ -56,7 +56,7 @@ namespace DnD_Generator
 
         public void SaveCharacter(List<string> args)
         {
-            crawlerManager.SaveSerializableObject(player, $"{DungeonCrawlerManager.SavePath}\\{player.Name}");
+            crawlerManager.SaveSerializableObject(player, $"{DungeonCrawlerManager.SavePath}\\{player.WeaponName}");
         }
 
         public void LoadCharacter(List<string> args)
@@ -83,7 +83,7 @@ namespace DnD_Generator
             var serializedPlayer = (SerializedCharacter)serializer.Deserialize(new JTokenReader(jObject), typeof(SerializedCharacter));
 
             player = new PlayerCharacter();
-            player.Name = serializedPlayer.Name;
+            player.WeaponName = serializedPlayer.Name;
             player.Experience = serializedPlayer.Experience;
             player.HitPoints = serializedPlayer.HitPoints;
             player.Level = serializedPlayer.Level;

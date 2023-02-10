@@ -21,12 +21,12 @@ namespace DnD_Generator
         {
             PlayerCharacter player = new PlayerCharacter()
             {
-                Name = "Default",
+                WeaponName = "Default",
                 HitPoints = DungeonCrawlerSettings.MinCreatureHitPoints,
                 ArmorClass = 0,
             };
             
-            player.Name = CommandManager.UserInputPrompt("Enter name", false);
+            player.WeaponName = CommandManager.UserInputPrompt("Enter name", false);
 
             // Generate the starting weapon
             var wParams = ItemWeaponGenerationPresets.StartWeaponItem;
