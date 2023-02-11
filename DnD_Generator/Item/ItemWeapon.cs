@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using CommandEngine;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     class ItemWeapon : IItem
     {
@@ -18,19 +18,15 @@ namespace DnD_Generator
         public float Weight { get; set; }
         public float Quality { get; set; }
         public int Value { get ; set; }
-        public string WeaponName { get; set; }
+        public string Name { get; set; }
         public string WeaponType { get; set; }
         public string DisplayName { get; set; }
         public bool IsLargeWeapon { get; set; }
 
-        public AttributeType HitBonusAttribute { get; set; }
-        public AttributeType DamageBonusAttribute { get; set; }
+        public AttributeType MajorAttribute { get; set; }
+        public AttributeType MinorAttribute { get; set; }
         public CrawlerAttributeSet AttributeRequirements { get; set; }
 
-        public float GetCreatureDamage(CrawlerAttributeSet attributes) 
-        {
-            return GetWeaponDamage() + attributes[DamageBonusAttribute];
-        }
         public float GetWeaponDamage()
         {
             return BaseDamage * Quality + Level;
@@ -39,27 +35,19 @@ namespace DnD_Generator
             ((IsLargeWeapon ? 1 : 2) * Level * Quality) + AttributeRequirements.TotalScore;
         public int GetValue() => (int)Math.Max(GetRawValue(), 1);
 
-        public bool CanEquip(CrawlerAttributeSet attributes)
-        {
-            foreach (KeyValuePair<AttributeType, int> kvp in AttributeRequirements)
-                if (attributes[kvp.Key] < kvp.Value)
-                    return false;
-            return true;
-        }
-
         public WeaponTypeData GetWeaponData()
             => WeaponTypeManager.WeaponTypes[WeaponType];
 
         public string BriefString()
         {
-            return $"[{ID}] Lv.{Level} {WeaponName} | DMG: {GetWeaponDamage()} | V: {Value} | W: {Weight}";
+            return $"[{ID}] Lv.{Level} {Name} | DMG: {GetWeaponDamage()} | V: {Value} | W: {Weight}";
         }
         public string InspectString(string prefix, int tabCount)
         {
             SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);;
 
             if (prefix == string.Empty)
-                prefix = $"Weapon stats for [{ID}] {WeaponName}:";
+                prefix = $"Weapon stats for [{ID}] {Name}:";
 
             builder.Append(tabCount, prefix);
             tabCount++;
@@ -77,7 +65,7 @@ namespace DnD_Generator
             SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);;
 
             if (prefix == string.Empty)
-                prefix = $"Weapon stats for {WeaponName}:";
+                prefix = $"Weapon stats for {Name}:";
 
             builder.Append(tabCount, prefix);
             tabCount++;
@@ -99,7 +87,7 @@ namespace DnD_Generator
             SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);;
 
             if (prefix == string.Empty)
-                prefix = $"Weapon stats for [{ID}] {WeaponName}:";
+                prefix = $"Weapon stats for [{ID}] {Name}:";
 
             builder.Append(tabCount, prefix);
             tabCount++;
@@ -114,14 +102,14 @@ namespace DnD_Generator
 
         public override string ToString()
         {
-            return $"[{ID}] {WeaponName}";
+            return $"[{ID}] {Name}";
         }
 
         public SerializedItem GetSerializable()
         {
             SerializedWeapon s = new SerializedWeapon()
             {
-                Name = WeaponName,
+                Name = Name,
                 Value = Value,
                 Quality = Quality,
                 Weight = Weight,

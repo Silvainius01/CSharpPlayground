@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using CommandEngine;
-using static DnD_Generator.DungeonCrawlerSettings;
+using static RogueCrawler.DungeonCrawlerSettings;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     
     class ItemWeaponGenerationPresets

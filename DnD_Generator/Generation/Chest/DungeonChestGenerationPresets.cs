@@ -4,7 +4,7 @@ using System.Text;
 using CommandEngine;
 using System.Linq;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     
     static class DungeonChestGenerationPresets

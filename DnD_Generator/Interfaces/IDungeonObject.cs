@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     interface IDungeonObject
     {
         int ID { get; set; }
-        string WeaponName { get; set; }
+        string Name { get; set; }
     }
 }

@@ -1,9 +1,5 @@
 STR DEX CON INT WIS CHA
-Weapon Classes:
-	Blade 	- DEX, STR // Longsword, shortsowrd, dagger, or claymore, blades rely on dexterity first and strength second.
-	Axe		- STR, DEX // Axes, regardless of size, require strength above all, but a little dex to aim it is reccomended.
-	Blunt	- STR, CON // Blunt weapons require two things: strength to swing them, and endurance to keep swinging them.
-	Ranged	- DEX, WIS // Ranged weapons vary from longbow to sidearm, but they all require expert aim, and the strength to hold them.
+
 
 Spell Classes:
 	Element	- INT, WIS // Elemental magic deals in fundamental forces of nature. Kinetics, Electro-Magnetic, Nuclear, etc.

@@ -4,7 +4,7 @@ using System.Text;
 using System.Linq;
 using CommandEngine;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     class Dungeon : IInspectable
     {
@@ -107,11 +107,12 @@ namespace DnD_Generator
 
         public bool DamageCreature(Creature c, float damage)
         {
-            c.HitPoints = Mathc.Truncate(c.HitPoints - damage, 1);
-            if (c.HitPoints <= 0)
+            var bodyStats = c;
+            bodyStats.HitPoints = Mathc.Truncate(bodyStats.HitPoints - damage, 1);
+            if (bodyStats.HitPoints <= 0)
             {
                 c.Inventory.AddItem(c.PrimaryWeapon);
-                c.Inventory.WeaponName = $"{c.WeaponName}'s Corpse";
+                c.Inventory.Name = $"{c.Name}'s Corpse";
                 chestManager.AddObject(c.Inventory, c.CurrentRoom);
                 creatureManager.RemoveObject(c, c.CurrentRoom);
                 return true;

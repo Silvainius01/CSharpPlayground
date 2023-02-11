@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     /// <summary>
     /// Base class for <see cref="IDungeonObject"/> generators.

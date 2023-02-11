@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using CommandEngine;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     class DungeonObjectManager<TObject> where TObject : class, IDungeonObject
     {

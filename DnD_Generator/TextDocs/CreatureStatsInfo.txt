@@ -1,0 +1,3 @@
+﻿HP = STR * 2.5 + (CON+1) * 5
+FP = CON * 2.5 + (DEX+1) * 5
+MP = ((INT+CHA) * 2) + (WIS+1) * 5

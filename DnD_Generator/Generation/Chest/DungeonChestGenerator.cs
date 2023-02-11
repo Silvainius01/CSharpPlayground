@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using CommandEngine;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     /// <summary>
     /// Required Qualities:
@@ -61,7 +61,7 @@ namespace DnD_Generator
             };
 
             // Assume a wepaons chest for now
-            chest.WeaponName = PopulateWeaponsChest(chest, cParams);
+            chest.Name = PopulateWeaponsChest(chest, cParams);
 
             return chest;
         }

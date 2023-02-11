@@ -4,12 +4,12 @@ using System.Text;
 using System.Linq;
 using CommandEngine;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     class DungeonChest<TItem> : IInspectable, IDungeonObject where TItem : IItem
     {
         public int ID { get; set; }
-        public string WeaponName { get; set; }
+        public string Name { get; set; }
         public DungeonChestType Type { get; set; }
 
         public bool Inspected = false;
@@ -103,7 +103,7 @@ namespace DnD_Generator
 
         public override string ToString()
         {
-            return $"[{ID}] {WeaponName}";
+            return $"[{ID}] {Name}";
         }
         public string BriefString()
         {
@@ -116,7 +116,7 @@ namespace DnD_Generator
             SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);;
 
             if (prefix == string.Empty)
-                prefix = $"Items in {WeaponName}: ";
+                prefix = $"Items in {Name}: ";
 
             builder.Append(tabCount, prefix);
 

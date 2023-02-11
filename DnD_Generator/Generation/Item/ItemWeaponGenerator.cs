@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     class WeaponTypeData
     {
@@ -41,12 +41,12 @@ namespace DnD_Generator
                 Weight = CommandEngine.Random.NextInt(wParams.WeightRange, true) / 10.0f,
                 IsLargeWeapon = CommandEngine.Random.NextInt(100) < wParams.LargeWeaponProbability,
                 WeaponType = weaponType,
-                DamageBonusAttribute = WeaponTypes[weaponType].DamageAttribute,
-                HitBonusAttribute = WeaponTypes[weaponType].ToHitAttribute,
+                MinorAttribute = WeaponTypes[weaponType].DamageAttribute,
+                MajorAttribute = WeaponTypes[weaponType].ToHitAttribute,
                 BaseDamage = WeaponTypes[weaponType].BaseDamage
             };
             weapon.Quality = GetQuality(wParams, weapon);
-            weapon.WeaponName = GetName(weapon);
+            weapon.Name = GetName(weapon);
 
             if (weapon.IsLargeWeapon)
             {
@@ -66,14 +66,14 @@ namespace DnD_Generator
             ItemWeapon weapon = new ItemWeapon()
             {
                 ID = NextId,
-                WeaponName = serialized.Name,
+                Name = serialized.Name,
                 Weight = serialized.Weight,
                 IsLargeWeapon = serialized.IsLargeWeapon,
                 WeaponType = weaponType,
                 Quality = serialized.Quality,
                 BaseDamage = serialized.BaseDamage,
-                DamageBonusAttribute = WeaponTypes[weaponType].DamageAttribute,
-                HitBonusAttribute = WeaponTypes[weaponType].ToHitAttribute,
+                MinorAttribute = WeaponTypes[weaponType].DamageAttribute,
+                MajorAttribute = WeaponTypes[weaponType].ToHitAttribute,
             };
 
             weapon.AttributeRequirements = GenerateAttributeRequirements(weapon);

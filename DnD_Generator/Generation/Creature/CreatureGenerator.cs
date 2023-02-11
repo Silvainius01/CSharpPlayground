@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using CommandEngine;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     class CreatureGenerator : DungeonObjectGenerator<Creature, CreatureGenerationParameters, DungeonCreatureManager>
     {
@@ -48,22 +48,21 @@ namespace DnD_Generator
             Creature creature = new Creature()
             {
                 ID = NextId,
-                WeaponName = "Gobbo",
-                Level = CommandEngine.Random.NextInt(cParams.LevelRange),
-                HitPoints = DungeonCrawlerSettings.MinCreatureHitPoints //CommandEngine.Random.NextInt(cParams.BaseHealthRange), // Base Hitpoints
+                Name = "Gobbo",
+                Level = CommandEngine.Random.NextInt(cParams.LevelRange)
             };
 
             creature.PrimaryWeapon = GenerateCreatureWeapon(cParams, creature);
-            creature.Attributes = new CrawlerAttributeSet((attr) =>
+            creature.MaxAttributes = new CrawlerAttributeSet((attr) =>
             {
                 int value = Math.Max(creature.PrimaryWeapon.AttributeRequirements[attr], DungeonCrawlerSettings.MinCreatureAttributeScore);
                 if (value == 0 && attr == AttributeType.CON)
                     return 1; // Ensure CON is at least one
                 return value;
             });
-            creature.Level = Math.Max(creature.Attributes.CreatureLevel, creature.Level);
+            creature.Level = Math.Max(creature.MaxAttributes.CreatureLevel, creature.Level);
 
-            CrawlerAttributeSet attributes = creature.Attributes;
+            CrawlerAttributeSet attributes = creature.MaxAttributes;
             List <(AttributeType attribute, float chance)> attributeRanks = GetAttributeImportance(creature);
             int maxAttrScore = (creature.Level * DungeonCrawlerSettings.AttributePointsPerCreatureLevel);
 

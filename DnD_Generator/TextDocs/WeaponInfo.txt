@@ -10,6 +10,8 @@ A master of the blade has working knowledge that can be transferred from dagger 
 The aforementiond master of the blade might know how blades work and the idea behind how a given weapon is meant to operate, but they will still lack the training, muscle memory, and/or conditioning to effectively weild it.
 	Specific weapons might also have additional attribute requirements to satisfy. Such weapons are typically highly specialized for certain scenarios, and generally lack versatility the normal adventurer requires.
 
+Whenever you gain a point in a weapon skill, you also gain a point in that general skill as well.
+
 General Skills [MAJOR/MINOR]:
 	Blade	[DEX, STR]
 	Ranged	[DEX, WIS]
@@ -18,7 +20,9 @@ General Skills [MAJOR/MINOR]:
 	Spear	[DEX, CON]
 
 TO_HIT:
-	baseChance = (genSkill/2)+specSkill; // Up to 150% base chance 
+	baseChance = ((genSkill/2)+specSkill)*.01; // Up to 150% base chance 
 	realChance = baseChance * (majAttrPercent+(minAttrPercent/2)) * (0.5+fatiguePercent)
-	max			= 1.5*1.5*1.5 = 337.5%
-	fatiguedMax = 1.5*1.5*0.5 = 112.5%
+	max				= 1.5 * 1.5 * 1.5 = 337.5%
+	fatiguedMax		= 1.5 * 1.5 * 0.5 = 112.5%
+	minSkill100		= 0.45 * 1.5 * 1.5 = 101.25 (30 general, 30 specific)
+	minFatigue100	= 1.34 * 1.5 * 0.5 = 100.5% (90 general, 90 specific)

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
-    interface IItem : IInspectable, IDungeonObject, ISerializable<SerializedItem>
+    interface IItem : IInspectable, IDungeonObject, ISerializable<SerializedItem, IItem>
     {
         int Level { get; set; }
         int Value { get; set; }

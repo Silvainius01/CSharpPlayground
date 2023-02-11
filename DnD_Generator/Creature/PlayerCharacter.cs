@@ -10,7 +10,7 @@ using System.Security.Cryptography;
 using System.Net.NetworkInformation;
 using System.Runtime.Serialization;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     class PlayerCharacter : Creature
     {
@@ -48,15 +48,15 @@ namespace DnD_Generator
             SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);;
 
             if (prefix == string.Empty)
-                prefix = $"Stats for {WeaponName}:";
+                prefix = $"Stats for {Name}:";
 
             builder.Append(tabCount, prefix);
             tabCount++;
             builder.NewlineAppend(tabCount, $"HP: {HitPoints}/{MaxHitPoints}");
             builder.NewlineAppend(tabCount, $"Level: {Level}");
-            builder.NewlineAppend(tabCount, $"Damage: {Damage}");
+            builder.NewlineAppend(tabCount, $"Damage: {GetCreatureDamage()}");
             builder.NewlineAppend(PrimaryWeapon.InspectString($"Weapon Stats:", tabCount));
-            builder.NewlineAppend(Attributes.InspectString("Attributes:", tabCount));
+            builder.NewlineAppend(MaxAttributes.InspectString("Attributes:", tabCount));
 
             return builder.ToString();
         }
@@ -66,13 +66,13 @@ namespace DnD_Generator
             SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString); ;
 
             if (prefix == string.Empty)
-                prefix = $"Stats for {WeaponName}:";
+                prefix = $"Stats for {Name}:";
 
             builder.Append(tabCount, prefix);
             tabCount++;
             builder.NewlineAppend(tabCount, $"HP: {HitPoints}/{MaxHitPoints}");
             builder.NewlineAppend(tabCount, $"Level: {Level}");
-            builder.NewlineAppend(tabCount, $"Damage: {Damage}");
+            builder.NewlineAppend(tabCount, $"Damage: {GetCreatureDamage()}");
 
             return builder.ToString();
         }

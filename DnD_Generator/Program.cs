@@ -4,7 +4,7 @@ using System.ComponentModel;
 using CommandEngine;
 using System.Linq;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     class Program
     {
@@ -15,8 +15,8 @@ namespace DnD_Generator
 
             while (true)
             {
-                crawlerGame.UpdateLoop();
-                //testSuite.NextTestCommand();
+                //crawlerGame.UpdateLoop();
+                testSuite.NextTestCommand();
             }
         }
     }

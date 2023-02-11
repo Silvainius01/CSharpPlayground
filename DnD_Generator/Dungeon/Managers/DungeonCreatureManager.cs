@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using CommandEngine;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     enum PathingType { Patrol, Loop, Random }
     class DungeonCreatureManager : DungeonObjectManager<Creature>

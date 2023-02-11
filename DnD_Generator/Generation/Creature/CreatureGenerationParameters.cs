@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using CommandEngine;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     /// <summary>
     /// Required Qualities:

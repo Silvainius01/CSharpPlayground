@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using CommandEngine;
-using System.Net.Http.Headers;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     class SerializedAttributes : ISerialized<CrawlerAttributeSet>
     {

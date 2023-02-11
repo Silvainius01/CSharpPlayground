@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     struct DungeonRoomConnection
     {
@@ -24,7 +24,7 @@ namespace DnD_Generator
         public int Height { get; set; }
         public int Width { get; set; }
         public int DistanceToEntrace = -1;
-        public string WeaponName { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
 
         public bool IsEntrance;
         public bool IsBossRoom;

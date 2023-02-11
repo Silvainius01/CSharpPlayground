@@ -4,7 +4,7 @@ using System.Text;
 using System.Linq;
 using CommandEngine;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     class DungeonRoomManager
     {

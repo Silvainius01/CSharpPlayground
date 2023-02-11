@@ -7,7 +7,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     enum CrawlerState { Menu, Game }
     partial class DungeonCrawlerManager
@@ -78,7 +78,7 @@ namespace DnD_Generator
             return DungeonGenerator.GenerateDungeon(dParams);
         }
 
-        public void SaveSerializableObject<T>(ISerializable<T> serializable, string path)
+        public void SaveSerializableObject<T, U>(ISerializable<T, U> serializable, string path) where T : ISerialized<U>
         {
             if (!path.EndsWith(".json"))
                 path = $"{path}.json";

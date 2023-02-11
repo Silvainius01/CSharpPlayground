@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Runtime.Serialization;
+using System.Runtime.CompilerServices;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
-    interface ISerializable<TSerialized>
+    interface ISerializable<TSerialized, TBase> where TSerialized : ISerialized<TBase>
     {
         public TSerialized GetSerializable();
     }

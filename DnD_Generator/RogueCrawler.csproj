@@ -21,6 +21,9 @@
     <None Update="TextDocs\CommandInfo.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="TextDocs\CreatureStatsInfo.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="TextDocs\WeaponInfo.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -34,9 +37,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="TextDocs\Tips.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="TextDocs\WeaponTypeDefs.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

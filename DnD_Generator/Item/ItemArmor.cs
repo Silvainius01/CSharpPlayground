@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     class ItemArmor : IItem
     {
         public int ID { get; set; }
         public int Level { get; set; }
-        public string WeaponName { get; set; }
+        public string Name { get; set; }
 
         public int Value { get; set; }
         public float Weight { get; set; }

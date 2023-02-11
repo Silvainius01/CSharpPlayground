@@ -5,7 +5,7 @@ using System.Linq;
 using System.Xml.Linq;
 using CommandEngine;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     class CreatureSkill
     {
@@ -79,6 +79,8 @@ namespace DnD_Generator
             }
             return Skills[skillName];
         }
+        public int GetSkillLevel(string skillName) => GetSkill(skillName).SkillLevel;
+        public float GetSkillProgress(string skillName) => GetSkill(skillName).SkillProgress;
 
         public void SetSkill(string skillName, int level, float progress)
         {

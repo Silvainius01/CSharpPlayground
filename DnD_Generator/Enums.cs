@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using CommandEngine;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     enum DungeonSize { Small, Medium, Large, Huge }
     enum CreatureType { Humanoid, Goblinoid, Beast, Fey }

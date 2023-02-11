@@ -7,7 +7,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     class CrawlerMenuManager : BaseCrawlerStateManager
     {
@@ -56,7 +56,7 @@ namespace DnD_Generator
 
         public void SaveCharacter(List<string> args)
         {
-            crawlerManager.SaveSerializableObject(player, $"{DungeonCrawlerManager.SavePath}\\{player.WeaponName}");
+            crawlerManager.SaveSerializableObject(player, $"{DungeonCrawlerManager.SavePath}\\{player.Name}");
         }
 
         public void LoadCharacter(List<string> args)
@@ -83,12 +83,12 @@ namespace DnD_Generator
             var serializedPlayer = (SerializedCharacter)serializer.Deserialize(new JTokenReader(jObject), typeof(SerializedCharacter));
 
             player = new PlayerCharacter();
-            player.WeaponName = serializedPlayer.Name;
+            player.Name = serializedPlayer.Name;
             player.Experience = serializedPlayer.Experience;
             player.HitPoints = serializedPlayer.HitPoints;
             player.Level = serializedPlayer.Level;
             player.PrimaryWeapon = DungeonGenerator.GenerateWeaponFromSerialized(serializedPlayer.PrimaryWeapon);
-            player.Attributes = serializedPlayer.Attributes.GetDeserialized();
+            player.MaxAttributes = serializedPlayer.Attributes.GetDeserialized();
 
             foreach (var kvp in serializedPlayer.InventoryItems)
             {

@@ -3,7 +3,7 @@ using CommandEngine;
 using System.Collections.Generic;
 using System.Text;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     class CrawlerGameManager : BaseCrawlerStateManager
     {
@@ -41,7 +41,7 @@ namespace DnD_Generator
             DungeonSize size = (DungeonSize)Math.Min(EnumExt<DungeonSize>.Count - 1, player.Level / DungeonCrawlerSettings.LevelsPerDungeonSizeUnlock);
             dungeon = crawlerManager.GenerateDungeon(size);
 
-            Console.WriteLine(player.InspectString($"Your Stats:\n  Name: {player.WeaponName}", 0));
+            Console.WriteLine(player.InspectString($"Your Stats:\n  Name: {player.Name}", 0));
             Console.WriteLine("\nEnter To Continue...");
             Console.ReadLine();
             Console.WriteLine(dungeon.InspectString($"Entering {size} dungeon...", 0));
@@ -189,12 +189,12 @@ namespace DnD_Generator
             if (dungeonTurn && dungeon.creatureManager.GetObjectCount(player.CurrentRoom) > 0)
             {
                 Creature c = dungeon.creatureManager.GetRandomObject(player.CurrentRoom);
-                float damage = c.Damage;
+                float damage = c.GetCreatureDamage();
 
                 staticBuilder.Clear();
                 staticBuilder.NewlineAppend($"{c.ToString()} attacks for {damage} damage!");
 
-                if (dungeon.DamageCreature(player, c.Damage))
+                if (dungeon.DamageCreature(player, c.GetCreatureDamage()))
                 {
                     staticBuilder.NewlineAppend(1, "----------  YOU DIED  ----------");
                     staticBuilder.NewlineAppend(1, "Enter 'newGame' for a new game.");
@@ -262,10 +262,10 @@ namespace DnD_Generator
             if (BaseCreatureCommand(args, out var creature, out string errorMsg))
             {
                 ++fightCommands;
-                if (dungeon.DamageCreature(creature, player.Damage))
+                if (dungeon.DamageCreature(creature, player.GetCreatureDamage()))
                 {
                     ++player.CreaturesKilled;
-                    Console.WriteLine($"{creature.WeaponName} died!");
+                    Console.WriteLine($"{creature.Name} died!");
                 }
 
                 dungeonTurn |= fightCommands % DungeonCrawlerSettings.CommandsPerCreatureAttack == 0;
@@ -368,7 +368,7 @@ namespace DnD_Generator
                     Console.WriteLine("Item is not a weapon!");
                     return;
                 }
-                if (!weapon.CanEquip(player.Attributes))
+                if (!player.CanEquipWeapon(weapon))
                 {
                     Console.WriteLine("You dont meet the attribute requirements.");
                     return;
@@ -406,7 +406,7 @@ namespace DnD_Generator
             if (levelsGained > 0)
             {
                 int attrPoints = levelsGained * DungeonCrawlerSettings.AttributePointsPerCreatureLevel;
-                attrPoints += player.Attributes.CreatureLevel;
+                attrPoints += player.MaxAttributes.CreatureLevel;
                 CharacterCreator.AttributePrompt(player, levelsGained, attrPoints, tabCount);
             }
             dungeonExit = true;
@@ -424,7 +424,7 @@ namespace DnD_Generator
                         return;
                     case "a":
                     case "attr":
-                        Console.WriteLine(player.Attributes.InspectString("Your Attributes:", 0));
+                        Console.WriteLine(player.MaxAttributes.InspectString("Your Attributes:", 0));
                         return;
                     case "w":
                     case "weapon":

@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using CommandEngine;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
-    class CrawlerAttributeSet : IEnumerable<KeyValuePair<AttributeType, int>>, IInspectable, ISerializable<SerializedAttributes>
+    class CrawlerAttributeSet : IEnumerable<KeyValuePair<AttributeType, int>>, IInspectable, ISerializable<SerializedAttributes, CrawlerAttributeSet>
     {
         Dictionary<AttributeType, int> Attributes = new Dictionary<AttributeType, int>();
 

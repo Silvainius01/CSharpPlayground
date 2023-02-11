@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using CommandEngine;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     static class DungeonCrawlerSettings
     {
@@ -43,7 +43,7 @@ namespace DnD_Generator
 
         #region Creature Generation Settings
         /// <summary>Minimum hitpoints a creature can have with Attribute level 0</summary>
-        public const int MinCreatureHitPoints = 0;
+        public const int MinCreatureHitPoints = 5;
         /// <summary>Maximum hitpoints a creature can have with Attribute Level 0</summary>
         public const int MaxCreatureHitPoints = 50;
         /// <summary></summary>

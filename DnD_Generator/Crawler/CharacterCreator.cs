@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using CommandEngine;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     class CharacterCreator
     {
@@ -21,12 +21,12 @@ namespace DnD_Generator
         {
             PlayerCharacter player = new PlayerCharacter()
             {
-                WeaponName = "Default",
+                Name = "Default",
                 HitPoints = DungeonCrawlerSettings.MinCreatureHitPoints,
                 ArmorClass = 0,
             };
             
-            player.WeaponName = CommandManager.UserInputPrompt("Enter name", false);
+            player.Name = CommandManager.UserInputPrompt("Enter name", false);
 
             // Generate the starting weapon
             var wParams = ItemWeaponGenerationPresets.StartWeaponItem;
@@ -35,14 +35,14 @@ namespace DnD_Generator
             player.PrimaryWeapon = DungeonGenerator.GenerateWeapon(wParams);
 
             // Set the starting attributes to the start weapon requirements
-            player.Attributes = new CrawlerAttributeSet(player.PrimaryWeapon.AttributeRequirements);
+            player.MaxAttributes = new CrawlerAttributeSet(player.PrimaryWeapon.AttributeRequirements);
             // Always add 1 to CON.
-            player.Attributes[AttributeType.CON] += 1;
+            player.MaxAttributes[AttributeType.CON] += 1;
             // Set the player to the minimum possible creature level
-            player.Level = player.Attributes.CreatureLevel;
+            player.Level = player.MaxAttributes.CreatureLevel;
 
             // Allow player to apply any extra points
-            int missingPoints = player.Attributes.GetMissingPoints(DungeonCrawlerSettings.AttributePointsPerCreatureLevel);
+            int missingPoints = player.MaxAttributes.GetMissingPoints(DungeonCrawlerSettings.AttributePointsPerCreatureLevel);
             if (missingPoints > 0)
             {
                 AttributePrompt(player, 0, missingPoints, 0);
@@ -72,16 +72,16 @@ namespace DnD_Generator
             Console.WriteLine(staticBuilder.ToString());
             staticBuilder.Clear();
 
-            Console.WriteLine(player.Attributes.DebugString("Your Current Attributes:", tabCount));
+            Console.WriteLine(player.MaxAttributes.DebugString("Your Current Attributes:", tabCount));
             while (attrPoints > 0)
             {
                 AttributeType attr = GetNextAttributeCommand("Add point to: ", "[INVALID] Add point to: ", false);
-                ++player.Attributes[attr];
+                ++player.MaxAttributes[attr];
                 --attrPoints;
-                Console.WriteLine($"{attr} {player.Attributes[attr] - 1} -> {player.Attributes[attr]}");
+                Console.WriteLine($"{attr} {player.MaxAttributes[attr] - 1} -> {player.MaxAttributes[attr]}");
             }
 
-            Console.WriteLine(player.Attributes.InspectString("All points distributed.\nNew attributes:", tabCount));
+            Console.WriteLine(player.MaxAttributes.InspectString("All points distributed.\nNew attributes:", tabCount));
         }
 
         public static string GetNextWeaponCommand(string firstPrompt, string failPrompt, bool newline)

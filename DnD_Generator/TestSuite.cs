@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using CommandEngine;
 
-namespace DnD_Generator
+namespace RogueCrawler
 {
     class TestSuite
     {
@@ -38,6 +38,19 @@ namespace DnD_Generator
         Dictionary<string, ConsoleCommand> commands = new Dictionary<string, ConsoleCommand>();
         DungeonCrawlerManager crawlerGame;
 
+        class SeriliazableTest
+        {
+            int testIntField = 0;
+            int testIntProperty { get; set; }
+            int testIntReadonly { get; }
+            int dontSerialize = 0;
+
+            float testFloatField = 0.0f;
+
+            List<int> testList = new List<int>() { 0, 1, 2, 3, 4 };
+            Dictionary<int, int> testDict = new Dictionary<int, int>() { [0] = 0, [1] = 1, [2] = 2 };
+        }
+
         public TestSuite(DungeonCrawlerManager crawler)
         {
             crawlerGame = crawler;
@@ -50,6 +63,7 @@ namespace DnD_Generator
             commands.Add(ConsoleCommand.Create("map", MapTest));
             commands.Add(ConsoleCommand.Create("xp", ExpTest));
             commands.Add(ConsoleCommand.Create("nav", NavTest));
+            commands.Add(ConsoleCommand.Create("testSerialize", SerializeTest));
         }
         public void NextTestCommand()
         {
@@ -305,6 +319,11 @@ namespace DnD_Generator
                 }
                 else Console.WriteLine($"Cannot navigate from {player.CurrentRoom.Index} to {room2.Index}");
             } while (BaseRepeatableCommand(args.Count - 1, args));
+        }
+
+        public void SerializeTest(List<string> args)
+        {
+            SeriliazableTest test = new SeriliazableTest();
         }
     }
 }
