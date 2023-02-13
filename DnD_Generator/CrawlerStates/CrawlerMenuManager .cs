@@ -46,7 +46,7 @@ namespace RogueCrawler
 
         public void NewDungeon(List<string> args)
         {
-            if (player == null || player.Health <= 0)
+            if (player == null || player.Health.Value <= 0)
             {
                 Console.WriteLine("Cannot enter a new dungeon, YOU'RE DEAD.");
                 return;
@@ -82,25 +82,7 @@ namespace RogueCrawler
             var jObject = JsonConvert.DeserializeObject<JObject>(json);
             var serializedPlayer = (SerializedCharacter)serializer.Deserialize(new JTokenReader(jObject), typeof(SerializedCharacter));
 
-            player = new PlayerCharacter();
-            player.Name = serializedPlayer.Name;
-            player.Experience = serializedPlayer.Experience;
-            player.HitPoints = serializedPlayer.HitPoints;
-            player.Level = serializedPlayer.Level;
-            player.PrimaryWeapon = DungeonGenerator.GenerateWeaponFromSerialized(serializedPlayer.PrimaryWeapon);
-            player.MaxAttributes = serializedPlayer.Attributes.GetDeserialized();
-            player.Afflictions = serializedPlayer.Afflictions.GetDeserialized();
-            player.Profeciencies = serializedPlayer.Profeciencies.GetDeserialized();
-
-            foreach (var kvp in serializedPlayer.InventoryItems)
-            {
-                Type type = kvp.Key;
-                foreach (JObject obj in kvp.Value)
-                {
-                    SerializedItem converted = (SerializedItem)serializer.Deserialize(new JTokenReader(obj), type);
-                    player.Inventory.AddItem(converted.GetDeserialized());
-                }
-            }
+            player = serializedPlayer.GetDeserialized();
         }
 
         public void TestCommand(List<string> args)

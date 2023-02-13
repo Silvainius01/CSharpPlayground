@@ -9,6 +9,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
 using System.Net.NetworkInformation;
 using System.Runtime.Serialization;
+using System.Numerics;
 
 namespace RogueCrawler
 {
@@ -93,9 +94,16 @@ namespace RogueCrawler
             Experience = pc.Experience;
         }
 
-        public override Creature GetDeserialized()
+        public override PlayerCharacter GetDeserialized()
         {
-            return base.GetDeserialized();
+            PlayerCharacter player = new PlayerCharacter();
+            var serializer = JsonSerializer.CreateDefault();
+
+            DeserializeCreatureInto(player);
+
+            player.Experience = Experience;
+
+            return player;
         }
     }
 }

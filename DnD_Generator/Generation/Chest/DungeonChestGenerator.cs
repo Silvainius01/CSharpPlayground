@@ -43,6 +43,7 @@ namespace RogueCrawler
                 {
                     DungeonChestGenerationParamerters cParams = new DungeonChestGenerationParamerters(2, () => EnumExt<QualityLevel>.RandomValue)
                     {
+                        CreatureLevel = dParams.PlayerLevel,
                         ChestType = DungeonChestType.Weapon,
                         ItemRange = new Vector2Int(2, 5)
                     };

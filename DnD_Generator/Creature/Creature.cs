@@ -5,6 +5,11 @@ using System.Linq;
 using CommandEngine;
 using RogueCrawler;
 using System.ComponentModel.DataAnnotations;
+using System.Data.Common;
+using System.Xml.Linq;
+using System.Numerics;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace RogueCrawler
 {
@@ -72,7 +77,7 @@ namespace RogueCrawler
         public List<CreatureStat> Stats { get; private set; }
         public CrawlerAttributeSet MaxAttributes { get; private set; }
         public CrawlerAttributeSet Afflictions { get; private set; }
-        public CreatureProfeciencies Profeciencies { get; private set; }
+        public CreatureProfeciencies Profeciencies { get; set; }
 
         public Creature()
         {
@@ -94,7 +99,7 @@ namespace RogueCrawler
             {
                 new CreatureStat(this, maxHealthFunc, AttributeType.STR, AttributeType.CON),
                 new CreatureStat(this, maxFatigueFunc, AttributeType.DEX, AttributeType.CON),
-                new CreatureStat(this, maxManaFunc, AttributeType.INT, AttributeType.WIS, AttributeType.CON)
+                new CreatureStat(this, maxManaFunc, AttributeType.INT, AttributeType.WIS, AttributeType.CHA)
             };
         }
 
@@ -131,25 +136,45 @@ namespace RogueCrawler
             return true;
         }
 
-        public void AddAttributePoints(AttributeType attr, int amount)
+        void UpdateStats()
         {
-            MaxAttributes[attr] += amount;
+            foreach (var stat in Stats)
+                stat.Update();
+        }
+        void UpdateStats(AttributeType attr)
+        {
             foreach (var stat in Stats)
                 if (stat.LinkedAttributes.Contains(attr))
                     stat.Update();
+        }
+
+        public void AddAttributePoints(AttributeType attr, int amount)
+        {
+            MaxAttributes[attr] += amount;
+            UpdateStats(attr);
         }
         public void AddAttributePoints(CrawlerAttributeSet attributes)
         {
             foreach (var kvp in attributes)
                 MaxAttributes[kvp.Key] += kvp.Value;
+            UpdateStats();
+        }
 
-            foreach (var stat in Stats)
-                stat.Update();
+        public void AddAffliction(AttributeType attr, int amount)
+        {
+            Afflictions[attr] += amount;
+            UpdateStats(attr);
+        }
+        public void AddAffliction(CrawlerAttributeSet afflictions)
+        {
+            foreach (var kvp in afflictions)
+                Afflictions[kvp.Key] += kvp.Value;
+            UpdateStats();
         }
 
         public virtual string BriefString()
         {
-            return $"[{ID}] {Name} ({Level}) | HP: {Health} | DMG: {GetCreatureDamage()}";
+            return $"[{ID}] {Name} ({Level}) | HP: {Health.Value} | DMG: {GetCreatureDamage()}";
         }
         public virtual string InspectString(string prefix, int tabCount)
         {
@@ -161,7 +186,7 @@ namespace RogueCrawler
             builder.Append(tabCount, prefix);
 
             tabCount++;
-            builder.NewlineAppend(tabCount, $"HP: {Health}");
+            builder.NewlineAppend(tabCount, $"HP: {Health.Value}");
             builder.NewlineAppend(tabCount, $"DMG: {GetCreatureDamage()}");
             builder.NewlineAppend(tabCount, $"Weapon:");
             builder.NewlineAppend(tabCount + 1, PrimaryWeapon.BriefString());
@@ -221,7 +246,7 @@ namespace RogueCrawler
             Profeciencies = c.Profeciencies.GetSerializable();
 
             for (int i = 0; i < c.Stats.Count; ++i)
-                CurrentStats[i] = c.Stats[i].Value;
+                CurrentStats.Add(c.Stats[i].Value);
 
             foreach (var kvp in c.Inventory.Items)
             {
@@ -238,7 +263,33 @@ namespace RogueCrawler
 
         public virtual Creature GetDeserialized()
         {
-            return new Creature() { };
+            Creature c = new Creature();
+            DeserializeCreatureInto(c);
+            return c;
+        }
+        protected void DeserializeCreatureInto(Creature c)
+        {
+            var serializer = JsonSerializer.CreateDefault();
+
+            c.Name = Name;
+            c.Level = Level;
+            c.PrimaryWeapon = DungeonGenerator.GenerateWeaponFromSerialized(PrimaryWeapon);
+            c.AddAttributePoints(Attributes.GetDeserialized());
+            c.AddAffliction(Afflictions.GetDeserialized());
+            c.Profeciencies = Profeciencies.GetDeserialized();
+
+            for (int i = 0; i < c.Stats.Count; ++i)
+                c.Stats[i].SetValue(CurrentStats[i]);
+
+            foreach (var kvp in InventoryItems)
+            {
+                Type type = kvp.Key;
+                foreach (JObject obj in kvp.Value)
+                {
+                    SerializedItem converted = (SerializedItem)serializer.Deserialize(new JTokenReader(obj), type);
+                    c.Inventory.AddItem(converted.GetDeserialized());
+                }
+            }
         }
     }
 }
