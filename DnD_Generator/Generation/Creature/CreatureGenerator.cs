@@ -53,21 +53,21 @@ namespace RogueCrawler
             };
 
             creature.PrimaryWeapon = GenerateCreatureWeapon(cParams, creature);
-            creature.MaxAttributes = new CrawlerAttributeSet((attr) =>
+            creature.AddAttributePoints(new CrawlerAttributeSet((attr) =>
             {
                 int value = Math.Max(creature.PrimaryWeapon.AttributeRequirements[attr], DungeonCrawlerSettings.MinCreatureAttributeScore);
                 if (value == 0 && attr == AttributeType.CON)
                     return 1; // Ensure CON is at least one
                 return value;
-            });
+            }));
             creature.Level = Math.Max(creature.MaxAttributes.CreatureLevel, creature.Level);
 
-            CrawlerAttributeSet attributes = creature.MaxAttributes;
+            //CrawlerAttributeSet attributes = creature.MaxAttributes;
             List <(AttributeType attribute, float chance)> attributeRanks = GetAttributeImportance(creature);
             int maxAttrScore = (creature.Level * DungeonCrawlerSettings.AttributePointsPerCreatureLevel);
 
             // Allocate remaining attribute points
-            for (int i = attributes.TotalScore; i < maxAttrScore; ++i)
+            for (int i = creature.MaxAttributes.TotalScore; i < maxAttrScore; ++i)
             {
                 bool applied = false;
                 float rFloat = CommandEngine.Random.NextFloat();
@@ -80,17 +80,19 @@ namespace RogueCrawler
                     if (rFloat < currChance)
                     {
                         applied = true;
-                        ++attributes[kvp.attribute];
+                        creature.AddAttributePoints(kvp.attribute, 1);
                         break;
                     }
                 }
 
-                // Apply to the last attribute in the list if no other was selected.
-                // Here in case floating point errors give rize to <1.0f totalChance
+                // If for any reason no point was applied, apply it a completly random one.
                 if (!applied)
-                    ++attributes[attributeRanks.Last().attribute];
+                    creature.AddAttributePoints(EnumExt<AttributeType>.RandomValue, 1);
             }
-            creature.HitPoints += attributes[AttributeType.CON] * DungeonCrawlerSettings.HitPointsPerConstitution;
+
+            // Make sure all stats are full before spawning
+            foreach (var stat in creature.Stats)
+                stat.SetPercent(1.0f);
 
             return creature;
         }

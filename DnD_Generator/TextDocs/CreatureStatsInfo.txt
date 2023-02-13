@@ -1,3 +1,13 @@
 ﻿HP = STR * 2.5 + (CON+1) * 5
 FP = CON * 2.5 + (DEX+1) * 5
 MP = ((INT+CHA) * 2) + (WIS+1) * 5
+
+Speed = 1 + (DEX * 2 + CHA) / 10)
+	Your attacks per round is equal to the floor of your speed value.
+	Anything above the floor becomes a % chance to get an additonal attack.
+
+Exp Need Per level: 100 + ((Level - 1) * 200)
+	1 -> 100
+	2 -> 300
+	3 -> 500
+	4 -> 700

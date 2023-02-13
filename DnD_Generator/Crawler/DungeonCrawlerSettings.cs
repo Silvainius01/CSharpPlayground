@@ -68,7 +68,7 @@ namespace RogueCrawler
         /// <summary>Loot level multiplier for Mid Quality loot</summary>
         public const float MidQualityLootBias = 1.0f;
         /// <summary>Loot level multiplier for High Quality loot</summary>
-        public const float HighQualityLootBias = 1.5f;
+        public const float HighQualityLootBias = 2.0f;
         #endregion
 
         #region Weapon Generation Settings

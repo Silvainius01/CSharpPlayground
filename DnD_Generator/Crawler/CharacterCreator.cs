@@ -22,8 +22,7 @@ namespace RogueCrawler
             PlayerCharacter player = new PlayerCharacter()
             {
                 Name = "Default",
-                HitPoints = DungeonCrawlerSettings.MinCreatureHitPoints,
-                ArmorClass = 0,
+                ArmorClass = 0
             };
             
             player.Name = CommandManager.UserInputPrompt("Enter name", false);
@@ -35,9 +34,9 @@ namespace RogueCrawler
             player.PrimaryWeapon = DungeonGenerator.GenerateWeapon(wParams);
 
             // Set the starting attributes to the start weapon requirements
-            player.MaxAttributes = new CrawlerAttributeSet(player.PrimaryWeapon.AttributeRequirements);
+            player.AddAttributePoints(player.PrimaryWeapon.AttributeRequirements);
             // Always add 1 to CON.
-            player.MaxAttributes[AttributeType.CON] += 1;
+            player.AddAttributePoints(AttributeType.CON, 1);
             // Set the player to the minimum possible creature level
             player.Level = player.MaxAttributes.CreatureLevel;
 
@@ -49,7 +48,7 @@ namespace RogueCrawler
             }
 
             // Set player to max health (otherwise we create a dead char)
-            player.HitPoints = player.MaxHitPoints;
+            player.Health.SetPercent(1.0f);
             return player;
         }
 
@@ -76,7 +75,7 @@ namespace RogueCrawler
             while (attrPoints > 0)
             {
                 AttributeType attr = GetNextAttributeCommand("Add point to: ", "[INVALID] Add point to: ", false);
-                ++player.MaxAttributes[attr];
+                player.AddAttributePoints(attr, 1);
                 --attrPoints;
                 Console.WriteLine($"{attr} {player.MaxAttributes[attr] - 1} -> {player.MaxAttributes[attr]}");
             }

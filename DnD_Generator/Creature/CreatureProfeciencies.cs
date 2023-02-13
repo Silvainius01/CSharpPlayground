@@ -19,7 +19,7 @@ namespace RogueCrawler
         }
     }
 
-    class CreatureProfeciencies : IInspectable
+    class CreatureProfeciencies : IInspectable, ISerializable<SerializedProfeciencies, CreatureProfeciencies>
     {
         Dictionary<string, CreatureSkill> Skills = new Dictionary<string, CreatureSkill>();
 
@@ -99,5 +99,28 @@ namespace RogueCrawler
         }
         public void AddSkillLevel(string skillName, int level) => AddSkill(skillName, level, 0);
         public void AddSkillProgress(string skillName, float progress) => AddSkill(skillName, 0, progress);
+
+        public SerializedProfeciencies GetSerializable()
+        {
+            return new SerializedProfeciencies()
+            {
+                Skills = this.Skills
+            };
+        }
+    }
+
+    class SerializedProfeciencies : ISerialized<CreatureProfeciencies>
+    {
+        public Dictionary<string, CreatureSkill> Skills { get; set; }
+
+        public CreatureProfeciencies GetDeserialized()
+        {
+            CreatureProfeciencies skills = new CreatureProfeciencies();
+
+            foreach (var skill in Skills.Values)
+                skills.SetSkill(skill.SkillName, skill.SkillLevel, skill.SkillProgress);
+
+            return skills;
+        }
     }
 }

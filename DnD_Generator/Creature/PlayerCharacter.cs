@@ -52,7 +52,7 @@ namespace RogueCrawler
 
             builder.Append(tabCount, prefix);
             tabCount++;
-            builder.NewlineAppend(tabCount, $"HP: {HitPoints}/{MaxHitPoints}");
+            builder.NewlineAppend(tabCount, $"HP: {Health.Value}/{Health.MaxValue}");
             builder.NewlineAppend(tabCount, $"Level: {Level}");
             builder.NewlineAppend(tabCount, $"Damage: {GetCreatureDamage()}");
             builder.NewlineAppend(PrimaryWeapon.InspectString($"Weapon Stats:", tabCount));
@@ -70,7 +70,7 @@ namespace RogueCrawler
 
             builder.Append(tabCount, prefix);
             tabCount++;
-            builder.NewlineAppend(tabCount, $"HP: {HitPoints}/{MaxHitPoints}");
+            builder.NewlineAppend(tabCount, $"HP: {Health.Value}/{Health.MaxValue}");
             builder.NewlineAppend(tabCount, $"Level: {Level}");
             builder.NewlineAppend(tabCount, $"Damage: {GetCreatureDamage()}");
 

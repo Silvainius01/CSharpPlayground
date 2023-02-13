@@ -104,15 +104,6 @@ namespace RogueCrawler
             return Attributes.ToString((kvp) => $"{kvp.Key}:{kvp.Value}", " ");
         }
 
-        public IEnumerator GetEnumerator()
-        {
-            return Attributes.GetEnumerator();
-        }
-        IEnumerator<KeyValuePair<AttributeType, int>> IEnumerable<KeyValuePair<AttributeType, int>>.GetEnumerator()
-        {
-            return Attributes.GetEnumerator();
-        }
-
         public SerializedAttributes GetSerializable()
         {
             return new SerializedAttributes(this);
@@ -122,5 +113,14 @@ namespace RogueCrawler
             => (int)Math.Ceiling((double)totalScore / pointsPerLevel);
         public int GetMissingPoints(int pointsPerLevel)
             => (pointsPerLevel * GetAttributeLevel(pointsPerLevel)) - totalScore;
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return Attributes.GetEnumerator();
+        }
+        public IEnumerator<KeyValuePair<AttributeType, int>> GetEnumerator()
+        {
+            return Attributes.GetEnumerator();
+        }
     }
 }

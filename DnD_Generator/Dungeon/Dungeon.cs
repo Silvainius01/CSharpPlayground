@@ -107,9 +107,9 @@ namespace RogueCrawler
 
         public bool DamageCreature(Creature c, float damage)
         {
-            var bodyStats = c;
-            bodyStats.HitPoints = Mathc.Truncate(bodyStats.HitPoints - damage, 1);
-            if (bodyStats.HitPoints <= 0)
+            damage = Mathc.Truncate(damage, 1);
+            c.Health.AddValue(-damage);
+            if (c.Health.Value <= 0)
             {
                 c.Inventory.AddItem(c.PrimaryWeapon);
                 c.Inventory.Name = $"{c.Name}'s Corpse";
@@ -122,7 +122,7 @@ namespace RogueCrawler
         public void HealAllCreatures(float hitPoints)
         {
             foreach (var creature in creatureManager.GetAllObjects())
-                creature.HitPoints = Mathc.Min(creature.HitPoints + hitPoints, creature.MaxHitPoints);
+                creature.Health.AddValue(hitPoints);
         }
 
         public bool RoomContainsLoot(DungeonRoom room)

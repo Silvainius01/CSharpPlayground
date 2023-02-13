@@ -47,6 +47,7 @@ namespace RogueCrawler
             Console.WriteLine(dungeon.InspectString($"Entering {size} dungeon...", 0));
             Console.WriteLine();
 
+            dungeonExit = false;
             player.ResetDungeonStats();
             player.CurrentRoom = dungeon.roomManager.EntranceRoom; // Fix for new character having null as their start room
             PlayerMoveToRoom(dungeon.roomManager.EntranceRoom);
@@ -202,7 +203,7 @@ namespace RogueCrawler
                     return true;
                 }
 
-                staticBuilder.NewlineAppend(1, $"HP Left: {player.HitPoints}/{player.MaxHitPoints}");
+                staticBuilder.NewlineAppend(1, $"HP Left: {player.Health.Value}/{player.Health.MaxValue}");
                 Console.WriteLine(staticBuilder.ToString());
             }
             dungeonTurn = false;
@@ -248,10 +249,8 @@ namespace RogueCrawler
         {
             if (BaseNoCreatureCommand(out string errorMsg) && BaseIntCommand(args, out int hitPoints, out errorMsg))
             {
-                float maxHp = player.MaxHitPoints;
-                float gainedHp = Mathc.Min(hitPoints, maxHp - player.HitPoints);
-                player.HitPoints = Mathc.Min(player.HitPoints + gainedHp, maxHp);
-                dungeon.HealAllCreatures(gainedHp);
+                player.Health.AddValue(hitPoints);
+                dungeon.HealAllCreatures(hitPoints);
                 Console.WriteLine("You've rested up, but so has the dungeon...");
             }
             else Console.WriteLine(errorMsg);
@@ -406,7 +405,7 @@ namespace RogueCrawler
             if (levelsGained > 0)
             {
                 int attrPoints = levelsGained * DungeonCrawlerSettings.AttributePointsPerCreatureLevel;
-                attrPoints += player.MaxAttributes.CreatureLevel;
+                // attrPoints += player.MaxAttributes.CreatureLevel;
                 CharacterCreator.AttributePrompt(player, levelsGained, attrPoints, tabCount);
             }
             dungeonExit = true;

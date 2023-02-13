@@ -46,7 +46,7 @@ namespace RogueCrawler
 
         public void NewDungeon(List<string> args)
         {
-            if (player == null || player.HitPoints <= 0)
+            if (player == null || player.Health <= 0)
             {
                 Console.WriteLine("Cannot enter a new dungeon, YOU'RE DEAD.");
                 return;
@@ -89,6 +89,8 @@ namespace RogueCrawler
             player.Level = serializedPlayer.Level;
             player.PrimaryWeapon = DungeonGenerator.GenerateWeaponFromSerialized(serializedPlayer.PrimaryWeapon);
             player.MaxAttributes = serializedPlayer.Attributes.GetDeserialized();
+            player.Afflictions = serializedPlayer.Afflictions.GetDeserialized();
+            player.Profeciencies = serializedPlayer.Profeciencies.GetDeserialized();
 
             foreach (var kvp in serializedPlayer.InventoryItems)
             {
