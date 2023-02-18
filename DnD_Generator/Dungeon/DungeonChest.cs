@@ -9,7 +9,7 @@ namespace RogueCrawler
     class DungeonChest<TItem> : IInspectable, IDungeonObject where TItem : IItem
     {
         public int ID { get; set; }
-        public string Name { get; set; }
+        public string ObjectName { get; set; }
         public DungeonChestType Type { get; set; }
 
         public bool Inspected = false;
@@ -103,7 +103,7 @@ namespace RogueCrawler
 
         public override string ToString()
         {
-            return $"[{ID}] {Name}";
+            return $"[{ID}] {ObjectName}";
         }
         public string BriefString()
         {
@@ -116,7 +116,7 @@ namespace RogueCrawler
             SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);;
 
             if (prefix == string.Empty)
-                prefix = $"Items in {Name}: ";
+                prefix = $"Items in {ObjectName}: ";
 
             builder.Append(tabCount, prefix);
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CommandEngine;
+using RogueCrawler.Item.Weapon;
 
 namespace RogueCrawler
 {
@@ -48,7 +49,7 @@ namespace RogueCrawler
             Creature creature = new Creature()
             {
                 ID = NextId,
-                Name = "Gobbo",
+                ObjectName = "Gobbo",
                 Level = CommandEngine.Random.NextInt(cParams.LevelRange)
             };
 
@@ -105,10 +106,9 @@ namespace RogueCrawler
                 if (w == null)
                     return false;
 
-                ++attributeRanks[WeaponTypeManager.WeaponTypes[creature.PrimaryWeapon.WeaponType].PrimaryAttribute];
-                ++attributeRanks[WeaponTypeManager.WeaponTypes[creature.PrimaryWeapon.WeaponType].SecondaryAttribute];
-                ++attributeRanks[WeaponTypeManager.WeaponTypes[creature.PrimaryWeapon.WeaponType].ToHitAttribute];
-                ++attributeRanks[WeaponTypeManager.WeaponTypes[creature.PrimaryWeapon.WeaponType].DamageAttribute];
+                var weaponTypeData = WeaponTypeManager.WeaponTypes[w.WeaponType];
+                attributeRanks[weaponTypeData.MajorAttribute] += 3;
+                attributeRanks[weaponTypeData.MajorAttribute] += 2;
                 return true;
             }
 

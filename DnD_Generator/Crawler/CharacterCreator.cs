@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using CommandEngine;
+using RogueCrawler.Item.Weapon;
 
 namespace RogueCrawler
 {
@@ -21,11 +22,11 @@ namespace RogueCrawler
         {
             PlayerCharacter player = new PlayerCharacter()
             {
-                Name = "Default",
+                ObjectName = "Default",
                 ArmorClass = 0
             };
             
-            player.Name = CommandManager.UserInputPrompt("Enter name", false);
+            player.ObjectName = CommandManager.UserInputPrompt("Enter name", false);
 
             // Generate the starting weapon
             var wParams = ItemWeaponGenerationPresets.StartWeaponItem;

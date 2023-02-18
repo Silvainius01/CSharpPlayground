@@ -10,6 +10,8 @@ namespace RogueCrawler
         int Value { get; set; }
         float Weight { get; set; }
         float Quality { get; set; }
+        string ItemName { get; set; }
+        ItemMaterial Material { get; set; }
 
         int GetValue();
         float GetRawValue();
@@ -17,11 +19,13 @@ namespace RogueCrawler
 
     abstract class SerializedItem : ISerialized<IItem>
     {
-        public string Name { get; set; }
+        public int Count { get; set; }
         public int Value { get; set; }
         public float Weight { get; set; }
         public float Quality { get; set; }
-        public int Count { get; set; }
+        public string ItemName { get; set; }
+        public string ObjectName { get; set; }
+        public string MaterialName { get; set; }
 
         public abstract IItem GetDeserialized();
     }

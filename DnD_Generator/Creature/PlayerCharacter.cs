@@ -49,13 +49,13 @@ namespace RogueCrawler
             SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);;
 
             if (prefix == string.Empty)
-                prefix = $"Stats for {Name}:";
+                prefix = $"Stats for {ObjectName}:";
 
             builder.Append(tabCount, prefix);
             tabCount++;
             builder.NewlineAppend(tabCount, $"HP: {Health.Value}/{Health.MaxValue}");
             builder.NewlineAppend(tabCount, $"Level: {Level}");
-            builder.NewlineAppend(tabCount, $"Damage: {GetCreatureDamage()}");
+            builder.NewlineAppend(tabCount, $"Damage: {GetCombatDamage()}");
             builder.NewlineAppend(PrimaryWeapon.InspectString($"Weapon Stats:", tabCount));
             builder.NewlineAppend(MaxAttributes.InspectString("Attributes:", tabCount));
 
@@ -67,13 +67,13 @@ namespace RogueCrawler
             SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString); ;
 
             if (prefix == string.Empty)
-                prefix = $"Stats for {Name}:";
+                prefix = $"Stats for {ObjectName}:";
 
             builder.Append(tabCount, prefix);
             tabCount++;
             builder.NewlineAppend(tabCount, $"HP: {Health.Value}/{Health.MaxValue}");
             builder.NewlineAppend(tabCount, $"Level: {Level}");
-            builder.NewlineAppend(tabCount, $"Damage: {GetCreatureDamage()}");
+            builder.NewlineAppend(tabCount, $"Damage: {GetCombatDamage()}");
 
             return builder.ToString();
         }

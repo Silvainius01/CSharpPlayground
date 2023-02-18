@@ -24,7 +24,7 @@ namespace RogueCrawler
         public int Height { get; set; }
         public int Width { get; set; }
         public int DistanceToEntrace = -1;
-        public string Name { get; set; } = string.Empty;
+        public string ObjectName { get; set; } = string.Empty;
 
         public bool IsEntrance;
         public bool IsBossRoom;

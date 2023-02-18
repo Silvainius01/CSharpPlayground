@@ -112,7 +112,7 @@ namespace RogueCrawler
             if (c.Health.Value <= 0)
             {
                 c.Inventory.AddItem(c.PrimaryWeapon);
-                c.Inventory.Name = $"{c.Name}'s Corpse";
+                c.Inventory.ObjectName = $"{c.ObjectName}'s Corpse";
                 chestManager.AddObject(c.Inventory, c.CurrentRoom);
                 creatureManager.RemoveObject(c, c.CurrentRoom);
                 return true;

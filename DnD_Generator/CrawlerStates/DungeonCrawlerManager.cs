@@ -6,6 +6,7 @@ using CommandEngine;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using RogueCrawler.Item.Weapon;
 
 namespace RogueCrawler
 {
@@ -30,12 +31,13 @@ namespace RogueCrawler
                 Directory.CreateDirectory(SavePath);
 
             Instance = this;
+            WeaponTypeManager.LoadWeaponTypes();
+            MaterialTypeManager.LoadMaterials();
 
             stateManagers.Add(CrawlerState.Menu, new CrawlerMenuManager(this));
             stateManagers.Add(CrawlerState.Game, new CrawlerGameManager(this));
-
             player = new PlayerCharacter();
-            WeaponTypeManager.LoadWeaponTypes();
+
         }
 
         public void UpdateLoop()

@@ -7,6 +7,6 @@ namespace RogueCrawler
     interface IDungeonObject
     {
         int ID { get; set; }
-        string Name { get; set; }
+        string ObjectName { get; set; }
     }
 }

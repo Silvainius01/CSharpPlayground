@@ -18,25 +18,25 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="TextDocs\CommandInfo.txt">
+    <None Update="TextDocs\Data\ItemMaterials.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="TextDocs\CreatureStatsInfo.txt">
+    <None Update="TextDocs\Info\CommandInfo.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="TextDocs\WeaponInfo.txt">
+    <None Update="TextDocs\Info\CreatureStatsInfo.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="TextDocs\RogueCrawlDesignDoc.txt">
+    <None Update="TextDocs\Info\WeaponInfo.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="TextDocs\ActionMetaData.json">
+    <None Update="TextDocs\Info\RogueCrawlDesignDoc.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="TextDocs\WeaponTypes.json">
+    <None Update="TextDocs\Data\WeaponTypes.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="TextDocs\Tips.txt">
+    <None Update="TextDocs\Info\Tips.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -53,20 +53,15 @@ namespace RogueCrawler
     class Creature : IInspectable, IDungeonObject, ISerializable<SerializedCreature, Creature>
     {
         public int ID { get; set; }
-        public string Name { get; set; }
+        public string ObjectName { get; set; }
         public int ArmorClass { get; set; }
         public int Level { get; set; } = 1;
 
         public CreatureStat Health { get => Stats[0]; }
         public CreatureStat Fatigue { get => Stats[1]; }
         public CreatureStat Mana { get => Stats[2]; }
-
-        public float CombatSpeed
-        {
-            get => 1 + (
-                GetAttribute(AttributeType.DEX) * 2 +
-                GetAttribute(AttributeType.CHA) / 10);
-        }
+        public CreatureStat CombatSpeed { get=> Stats[3]; }
+        public CreatureStat CombatEvasion { get => Stats[4]; }
 
         public DungeonRoom CurrentRoom { get; set; }
         public ItemWeapon PrimaryWeapon { get; set; }
@@ -79,6 +74,8 @@ namespace RogueCrawler
         public CrawlerAttributeSet Afflictions { get; private set; }
         public CreatureProfeciencies Profeciencies { get; set; }
 
+        private ItemWeapon UnarmedWeapon;
+
         public Creature()
         {
             var maxHealthFunc = (Creature c) =>
@@ -90,6 +87,10 @@ namespace RogueCrawler
             var maxManaFunc = (Creature c) =>
                 (c.GetAttribute(AttributeType.INT) + c.GetAttribute(AttributeType.CHA)) * 2 +
                 (c.GetAttribute(AttributeType.WIS) + 1) * 5.0f;
+            var combatSpeedFunc = (Creature c) => 1.0f + (
+                c.GetAttribute(AttributeType.DEX) * 2 +
+                c.GetAttribute(AttributeType.CHA) / 10);
+            
 
             Afflictions = new CrawlerAttributeSet(0);
             MaxAttributes = new CrawlerAttributeSet(0);
@@ -99,8 +100,11 @@ namespace RogueCrawler
             {
                 new CreatureStat(this, maxHealthFunc, AttributeType.STR, AttributeType.CON),
                 new CreatureStat(this, maxFatigueFunc, AttributeType.DEX, AttributeType.CON),
-                new CreatureStat(this, maxManaFunc, AttributeType.INT, AttributeType.WIS, AttributeType.CHA)
+                new CreatureStat(this, maxManaFunc, AttributeType.INT, AttributeType.WIS, AttributeType.CHA),
+                new CreatureStat(this, combatSpeedFunc, AttributeType.DEX, AttributeType.CHA)
             };
+
+            UnarmedWeapon = DungeonGenerator.GenerateUnarmedWeapon(this);
         }
 
         public int GetAttribute(AttributeType attr)
@@ -112,20 +116,28 @@ namespace RogueCrawler
             return GetAttribute(attr) / (float)MaxAttributes[attr];
         }
 
-        public float GetHitChance()
-        {
-            float chance = 0.01f;
-            chance *= Profeciencies.GetSkillLevel(PrimaryWeapon.WeaponType) / 2 + Profeciencies.GetSkillLevel(PrimaryWeapon.Name);
-            chance *= GetAttributePercent(PrimaryWeapon.MajorAttribute) + (GetAttributePercent(PrimaryWeapon.MinorAttribute) / 2);
-            chance *= 0.5f + Fatigue.Percent;
-            return chance;
-        }
-
-        public float GetCreatureDamage()
+        public float GetCombatDamage()
         {
             return PrimaryWeapon is not null
                 ? PrimaryWeapon.GetWeaponDamage() + GetAttribute(PrimaryWeapon.MinorAttribute)
                 : GetAttribute(AttributeType.STR);
+        }
+        public float GetCombatHitChance()
+        {
+            ItemWeapon weapon = PrimaryWeapon;
+            if(PrimaryWeapon is null)
+            {
+                weapon = UnarmedWeapon;
+                weapon.AttributeRequirements[AttributeType.STR] = GetAttribute(AttributeType.STR);
+                weapon.AttributeRequirements[AttributeType.DEX] = GetAttribute(AttributeType.DEX);
+                weapon.AttributeRequirements[AttributeType.WIS] = GetAttribute(AttributeType.WIS);
+            }
+
+            float chance = 0.01f;
+            chance *= Profeciencies.GetSkillLevel(weapon.WeaponType) / 2 + Profeciencies.GetSkillLevel(weapon.ObjectName);
+            chance *= GetAttributePercent(weapon.MajorAttribute) + (GetAttributePercent(weapon.MinorAttribute) / 2);
+            chance *= 0.5f + Fatigue.Percent;
+            return chance;
         }
 
         public bool CanEquipWeapon(ItemWeapon weapon)
@@ -174,20 +186,20 @@ namespace RogueCrawler
 
         public virtual string BriefString()
         {
-            return $"[{ID}] {Name} ({Level}) | HP: {Health.Value} | DMG: {GetCreatureDamage()}";
+            return $"[{ID}] {ObjectName} ({Level}) | HP: {Health.Value} | DMG: {GetCombatDamage()}";
         }
         public virtual string InspectString(string prefix, int tabCount)
         {
             SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString); ;
 
             if (prefix == string.Empty)
-                prefix = $"[{ID}] {Name} (Lv.{Level}):";
+                prefix = $"[{ID}] {ObjectName} (Lv.{Level}):";
 
             builder.Append(tabCount, prefix);
 
             tabCount++;
             builder.NewlineAppend(tabCount, $"HP: {Health.Value}");
-            builder.NewlineAppend(tabCount, $"DMG: {GetCreatureDamage()}");
+            builder.NewlineAppend(tabCount, $"DMG: {GetCombatDamage()}");
             builder.NewlineAppend(tabCount, $"Weapon:");
             builder.NewlineAppend(tabCount + 1, PrimaryWeapon.BriefString());
             --tabCount;
@@ -199,14 +211,14 @@ namespace RogueCrawler
             SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString); ;
 
             if (prefix == string.Empty)
-                prefix = $"Creature Stats for {Name}:";
+                prefix = $"Creature Stats for {ObjectName}:";
 
             builder.Append(tabCount, prefix);
             tabCount++;
             builder.NewlineAppend(tabCount, $"ID: {ID}");
             builder.NewlineAppend(tabCount, $"HP: {Health.Value}/{Health.MaxValue}");
             builder.NewlineAppend(tabCount, $"Level: {Level}");
-            builder.NewlineAppend(tabCount, $"Damage: {GetCreatureDamage()}");
+            builder.NewlineAppend(tabCount, $"Damage: {GetCombatDamage()}");
             builder.NewlineAppend(MaxAttributes.DebugString("Atributes:", tabCount));
             builder.NewlineAppend(PrimaryWeapon.DebugString($"Weapon Stats:", tabCount));
 
@@ -214,7 +226,7 @@ namespace RogueCrawler
         }
         public override string ToString()
         {
-            return $"[{ID}] {Name}";
+            return $"[{ID}] {ObjectName}";
         }
 
         public virtual SerializedCreature GetSerializable()
@@ -237,7 +249,7 @@ namespace RogueCrawler
         public SerializedCreature() { }
         public SerializedCreature(Creature c)
         {
-            Name = c.Name;
+            Name = c.ObjectName;
             Level = c.Level;
             CurrentStats = new List<float>(c.Stats.Count);
             PrimaryWeapon = (SerializedWeapon)c.PrimaryWeapon.GetSerializable();
@@ -271,7 +283,7 @@ namespace RogueCrawler
         {
             var serializer = JsonSerializer.CreateDefault();
 
-            c.Name = Name;
+            c.ObjectName = Name;
             c.Level = Level;
             c.PrimaryWeapon = DungeonGenerator.GenerateWeaponFromSerialized(PrimaryWeapon);
             c.AddAttributePoints(Attributes.GetDeserialized());
@@ -279,7 +291,11 @@ namespace RogueCrawler
             c.Profeciencies = Profeciencies.GetDeserialized();
 
             for (int i = 0; i < c.Stats.Count; ++i)
-                c.Stats[i].SetValue(CurrentStats[i]);
+            {
+                if (i < CurrentStats.Count)
+                    c.Stats[i].SetValue(CurrentStats[i]);
+                else c.Stats[i].SetPercent(1.0f);
+            }
 
             foreach (var kvp in InventoryItems)
             {

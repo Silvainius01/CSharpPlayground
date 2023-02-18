@@ -1,0 +1,104 @@
+[
+  {
+    "WeaponType": "Axe",
+    "MajorAttribute": 0,
+    "MinorAttribute": 1,
+    "Handedness":  0,
+    "BaseDamage": 1,
+    "PrimaryAttributeBaseReq": 4,
+    "SecondaryAttributeBaseReq": 2,
+    "LargeWeaponDamageMult": 2.5,
+    "LargeWeaponWeightMult": 3.0,
+    "OneHandedWeaponNames": [
+      "WarAxe",
+      "Tomahawk",
+      "Ono"
+    ],
+    "TwoHandedWeaponNames": [
+      "BattleAxe",
+      "Panabas",
+      "Tabar"
+    ]
+  },
+  {
+    "WeaponType": "Blade",
+    "MajorAttribute": 1,
+    "MinorAttribute": 0,
+    "Handedness": 0,
+    "BaseDamage": 1,
+    "PrimaryAttributeBaseReq": 4,
+    "SecondaryAttributeBaseReq": 2,
+    "LargeWeaponDamageMult": 2.0,
+    "LargeWeaponWeightMult": 3.0,
+    "OneHandedWeaponNames": [
+      "Longsword",
+      "Shortsword",
+      "Dagger"
+    ],
+    "TwoHandedWeaponNames": [
+      "Claymore",
+      "Katana",
+      "Zweihander"
+    ]
+  },
+  {
+    "WeaponType": "Blunt",
+    "MajorAttribute": 0,
+    "MinorAttribute": 2,
+    "Handedness": 0,
+    "BaseDamage": 1,
+    "PrimaryAttributeBaseReq": 4,
+    "SecondaryAttributeBaseReq": 2,
+    "LargeWeaponDamageMult": 3.0,
+    "LargeWeaponWeightMult": 4.0,
+    "OneHandedWeaponNames": [
+      "Club",
+      "Mace",
+      "Maul"
+    ],
+    "TwoHandedWeaponNames": [
+      "WarHammer"
+    ]
+  },
+  {
+    "WeaponType": "Ranged",
+    "MajorAttribute": 1,
+    "MinorAttribute": 5,
+    "Handedness": 2,
+    "BaseDamage": 2,
+    "PrimaryAttributeBaseReq": 4,
+    "SecondaryAttributeBaseReq": 2,
+    "LargeWeaponDamageMult": 2.0,
+    "LargeWeaponWeightMult": 1.5,
+    "OneHandedWeaponNames": [
+      "Sling",
+      "Kunai"
+    ],
+    "TwoHandedWeaponNames": [
+      "Shortbow",
+      "Longbow",
+      "Crossbow"
+    ]
+  },
+  {
+    "WeaponType": "Spear",
+    "MajorAttribute": 1,
+    "MinorAttribute": 2,
+    "Handedness": 2,
+    "BaseDamage": 2,
+    "PrimaryAttributeBaseReq": 4,
+    "SecondaryAttributeBaseReq": 2,
+    "LargeWeaponDamageMult": 2.0,
+    "LargeWeaponWeightMult": 1.5,
+    "OneHandedWeaponNames": [
+      "OneHandSpear1",
+      "OneHandSpear2",
+      "OneHandSpear3"
+    ],
+    "TwoHandedWeaponNames": [
+      "Spear",
+      "Halberd",
+      "Polearm"
+    ]
+  }
+]

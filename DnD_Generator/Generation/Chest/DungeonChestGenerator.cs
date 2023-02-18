@@ -62,7 +62,7 @@ namespace RogueCrawler
             };
 
             // Assume a wepaons chest for now
-            chest.Name = PopulateWeaponsChest(chest, cParams);
+            chest.ObjectName = PopulateWeaponsChest(chest, cParams);
 
             return chest;
         }

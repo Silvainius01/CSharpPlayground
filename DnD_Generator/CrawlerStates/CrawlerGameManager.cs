@@ -41,7 +41,7 @@ namespace RogueCrawler
             DungeonSize size = (DungeonSize)Math.Min(EnumExt<DungeonSize>.Count - 1, player.Level / DungeonCrawlerSettings.LevelsPerDungeonSizeUnlock);
             dungeon = crawlerManager.GenerateDungeon(size);
 
-            Console.WriteLine(player.InspectString($"Your Stats:\n  Name: {player.Name}", 0));
+            Console.WriteLine(player.InspectString($"Your Stats:\n  Name: {player.ObjectName}", 0));
             Console.WriteLine("\nEnter To Continue...");
             Console.ReadLine();
             Console.WriteLine(dungeon.InspectString($"Entering {size} dungeon...", 0));
@@ -190,12 +190,12 @@ namespace RogueCrawler
             if (dungeonTurn && dungeon.creatureManager.GetObjectCount(player.CurrentRoom) > 0)
             {
                 Creature c = dungeon.creatureManager.GetRandomObject(player.CurrentRoom);
-                float damage = c.GetCreatureDamage();
+                float damage = c.GetCombatDamage();
 
                 staticBuilder.Clear();
                 staticBuilder.NewlineAppend($"{c.ToString()} attacks for {damage} damage!");
 
-                if (dungeon.DamageCreature(player, c.GetCreatureDamage()))
+                if (dungeon.DamageCreature(player, c.GetCombatDamage()))
                 {
                     staticBuilder.NewlineAppend(1, "----------  YOU DIED  ----------");
                     staticBuilder.NewlineAppend(1, "Enter 'newGame' for a new game.");
@@ -261,10 +261,10 @@ namespace RogueCrawler
             if (BaseCreatureCommand(args, out var creature, out string errorMsg))
             {
                 ++fightCommands;
-                if (dungeon.DamageCreature(creature, player.GetCreatureDamage()))
+                if (dungeon.DamageCreature(creature, player.GetCombatDamage()))
                 {
                     ++player.CreaturesKilled;
-                    Console.WriteLine($"{creature.Name} died!");
+                    Console.WriteLine($"{creature.ObjectName} died!");
                 }
 
                 dungeonTurn |= fightCommands % DungeonCrawlerSettings.CommandsPerCreatureAttack == 0;

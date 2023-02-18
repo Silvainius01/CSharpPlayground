@@ -14,5 +14,6 @@ namespace RogueCrawler
     enum QualityLevel { Low, Mid, High }
     enum ItemWeaponLargeRate { None, Low, Mid, High, All }
     enum ItemArmorSlotType { Head, Body, Legs, Feet, Ring }
+    enum ItemWeaponHandedness { Both, One, Two }
     // enum WeaponType { Blade, Ranged, Axe, Blunt }
 }

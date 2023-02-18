@@ -3,22 +3,26 @@ using System;
 using System.Linq;
 using System.Text;
 using System.Collections.Generic;
+using RogueCrawler.Item.Weapon;
+using System.Runtime.Serialization;
 
 namespace RogueCrawler
 {
     class WeaponTypeData
     {
         public string WeaponType { get; set; }
-        public AttributeType PrimaryAttribute { get; set; }
-        public AttributeType SecondaryAttribute { get; set; }
-        public AttributeType ToHitAttribute { get; set; }
+        public AttributeType MajorAttribute { get; set; }
+        public AttributeType MinorAttribute { get; set; }
         public AttributeType DamageAttribute { get; set; }
+        public ItemWeaponHandedness Handedness { get; set; }
 
         public int BaseDamage { get; set; }
         public int PrimaryAttributeBaseReq { get; set; }
         public int SecondaryAttributeBaseReq { get; set; }
         public float LargeWeaponDamageMult { get; set; } = 2;
         public float LargeWeaponWeightMult { get; set; } = 3;
+        public string[] OneHandedWeaponNames { get; set; }
+        public string[] TwoHandedWeaponNames { get; set; }
     }
 
     class ItemWeaponGenerator : BaseDungeonObjectGenerator<ItemWeapon, ItemWeaponGenerationParameters>
@@ -35,23 +39,26 @@ namespace RogueCrawler
                 weaponType = WeaponTypeManager.RandomType;
             else weaponType = wParams.PossibleWeaponTypes.RandomItem();
 
+            WeaponTypeData weaponTypeData = WeaponTypes[weaponType];
             ItemWeapon weapon = new ItemWeapon()
             {
                 ID = NextId,
                 Weight = CommandEngine.Random.NextInt(wParams.WeightRange, true) / 10.0f,
-                IsLargeWeapon = CommandEngine.Random.NextInt(100) < wParams.LargeWeaponProbability,
+                IsLargeWeapon = IsLargeWeapon(weaponTypeData, wParams),
                 WeaponType = weaponType,
-                MinorAttribute = WeaponTypes[weaponType].DamageAttribute,
-                MajorAttribute = WeaponTypes[weaponType].ToHitAttribute,
-                BaseDamage = WeaponTypes[weaponType].BaseDamage
+                MajorAttribute = weaponTypeData.MajorAttribute,
+                MinorAttribute = weaponTypeData.MinorAttribute,
+                BaseDamage = weaponTypeData.BaseDamage,
+                Material = MaterialTypeManager.Materials.Values.RandomItem()
             };
             weapon.Quality = GetQuality(wParams, weapon);
-            weapon.Name = GetName(weapon);
+            weapon.ObjectName = GetWeaponName(weaponTypeData, weapon.IsLargeWeapon);
+            weapon.ItemName = GetDisplayName(weapon);
 
             if (weapon.IsLargeWeapon)
             {
-                weapon.BaseDamage *= WeaponTypes[weaponType].LargeWeaponDamageMult;
-                weapon.Weight *= WeaponTypes[weaponType].LargeWeaponWeightMult;
+                weapon.BaseDamage *= weaponTypeData.LargeWeaponDamageMult;
+                weapon.Weight *= weaponTypeData.LargeWeaponWeightMult;
             }
 
             weapon.AttributeRequirements = GenerateAttributeRequirements(weapon);
@@ -66,14 +73,16 @@ namespace RogueCrawler
             ItemWeapon weapon = new ItemWeapon()
             {
                 ID = NextId,
-                Name = serialized.Name,
+                ItemName = serialized.ItemName,
+                ObjectName = serialized.ObjectName,
                 Weight = serialized.Weight,
                 IsLargeWeapon = serialized.IsLargeWeapon,
                 WeaponType = weaponType,
                 Quality = serialized.Quality,
                 BaseDamage = serialized.BaseDamage,
-                MinorAttribute = WeaponTypes[weaponType].DamageAttribute,
-                MajorAttribute = WeaponTypes[weaponType].ToHitAttribute,
+                MinorAttribute = WeaponTypes[weaponType].MinorAttribute,
+                MajorAttribute = WeaponTypes[weaponType].MajorAttribute,
+                Material = MaterialTypeManager.GetMaterialFromName(serialized.MaterialName)
             };
 
             weapon.AttributeRequirements = GenerateAttributeRequirements(weapon);
@@ -82,27 +91,54 @@ namespace RogueCrawler
             return weapon;
         }
 
+        public ItemWeapon GenerateUnarmed(Creature c)
+        {
+            return new ItemWeapon()
+            {
+                ID = -1,
+                BaseDamage = 1,
+                Weight = 0.0f,
+                Quality = 2.0f,
+                Value = 0,
+                ObjectName = "Unarmed",
+                WeaponType = "Blunt",
+                ItemName = "Bare Fists",
+                IsLargeWeapon = false,
+                MajorAttribute = AttributeType.DEX,
+                MinorAttribute = AttributeType.STR,
+                AttributeRequirements = new CrawlerAttributeSet(0),
+                Material = MaterialTypeManager.DefaultMaterial
+            };
+        }
+
         CrawlerAttributeSet GenerateAttributeRequirements(ItemWeapon weapon)
         {
             var weaponTypeData = WeaponTypes[weapon.WeaponType];
             CrawlerAttributeSet req = new CrawlerAttributeSet();
 
             req[AttributeType.STR] = GetStrengthReq(weapon.Weight);
-            req[weaponTypeData.PrimaryAttribute] += (int)Math.Ceiling(weapon.Quality * GetPrimaryStatReq(weapon));
-            req[weaponTypeData.SecondaryAttribute] += (int)Math.Ceiling(weapon.Quality * GetSecondaryStatReq(weapon));
+            req[weaponTypeData.MajorAttribute] += (int)Math.Ceiling(weapon.Quality * GetPrimaryStatReq(weapon));
+            req[weaponTypeData.MinorAttribute] += (int)Math.Ceiling(weapon.Quality * GetSecondaryStatReq(weapon));
 
             return req;
         }
 
-        string GetName(ItemWeapon weapon)
+        string GetWeaponName(WeaponTypeData typeData, bool isLarge)
+        {
+            return isLarge
+                ? typeData.TwoHandedWeaponNames.RandomItem()
+                : typeData.OneHandedWeaponNames.RandomItem();
+        }
+        string GetDisplayName(ItemWeapon weapon)
         {
             StringBuilder builder = new StringBuilder();
 
-            if (weapon.IsLargeWeapon)
-                builder.Append("Large");
+            //if (weapon.IsLargeWeapon)
+            //    builder.Append("Large");
             if (weapon.Quality <= 0.0f)
                 builder.Append("Broken");
-            builder.Append(weapon.WeaponType);
+            builder.Append(weapon.Material.Name);
+            builder.Append(weapon.ObjectName);
             return builder.ToString();
         }
 
@@ -138,6 +174,14 @@ namespace RogueCrawler
                 return GetMaxQuality(level, weapon);
             }
             return GetMaxQuality(wParams.CreatureLevel, weapon);
+        }
+
+        bool IsLargeWeapon(WeaponTypeData weaponType, ItemWeaponGenerationParameters wParams)
+        {
+            return 
+                weaponType.Handedness != ItemWeaponHandedness.One && (
+                weaponType.Handedness == ItemWeaponHandedness.Two ||
+                CommandEngine.Random.NextInt(100) < wParams.LargeWeaponProbability);
         }
     }
 }

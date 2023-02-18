@@ -26,6 +26,8 @@ namespace RogueCrawler
             => itemWeaponGenerator.Generate(wParams);
         public static ItemWeapon GenerateWeaponFromSerialized(SerializedWeapon serialized)
             => itemWeaponGenerator.FromSerializable(serialized);
+        public static ItemWeapon GenerateUnarmedWeapon(Creature c)
+            => itemWeaponGenerator.GenerateUnarmed(c);
 
         static DungeonRoomGenerator roomGenerator = new DungeonRoomGenerator();
         public static DungeonRoomManager CreateRoomManager(DungeonGenerationParameters dParams) 

@@ -1,0 +1,44 @@
+[
+  {
+    "Name": "Wood",
+    "ValueModifier": 0.25,
+    "WeightModifier": 0.75,
+    "QualityModifier": 0.8,
+    "DamageModifier": 0.9
+  },
+  {
+    "Name": "Iron",
+    "ValueModifier": 1.0,
+    "WeightModifier": 1.0,
+    "QualityModifier": 1.0,
+    "DamageModifier": 1.0
+  },
+  {
+    "Name": "Steel",
+    "ValueModifier": 1.5,
+    "WeightModifier": 1.0,
+    "QualityModifier": 1.25,
+    "DamageModifier": 1.25
+  },
+  {
+    "Name": "Mythryl",
+    "ValueModifier": 2.0,
+    "WeightModifier": 0.75,
+    "QualityModifier": 2.0,
+    "DamageModifier": 1.75
+  },
+  {
+    "Name": "Obsidian",
+    "ValueModifier": 1.7,
+    "WeightModifier": 1.0,
+    "QualityModifier": 1.0,
+    "DamageModifier": 1.5
+  },
+  {
+    "Name": "Adamantite",
+    "ValueModifier": 3.0,
+    "WeightModifier": 1.5,
+    "QualityModifier": 2.5,
+    "DamageModifier": 2
+  }
+]

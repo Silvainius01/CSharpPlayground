@@ -6,15 +6,15 @@ using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace RogueCrawler
+namespace RogueCrawler.Item.Weapon
 {
     class WeaponTypeManager
     {
-        public static string TypePath = $"{DungeonCrawlerManager.TextPath}\\WeaponTypes.json";
+        public static string DataPath = $"{DungeonCrawlerManager.TextPath}\\Data\\WeaponTypes.json";
 
         public static bool TypesLoaded = false;
         public static Dictionary<string, WeaponTypeData> WeaponTypes = new Dictionary<string, WeaponTypeData>();
-        
+
         public static string RandomType
         {
             get
@@ -34,14 +34,14 @@ namespace RogueCrawler
 
         public static void LoadWeaponTypes()
         {
-            StreamReader reader = new StreamReader(TypePath);
+            StreamReader reader = new StreamReader(DataPath);
             string json = reader.ReadToEnd();
             reader.Close();
 
             var serializer = JsonSerializer.CreateDefault();
             var jArray = JsonConvert.DeserializeObject<JArray>(json);
 
-            foreach(var obj in jArray)
+            foreach (var obj in jArray)
             {
                 WeaponTypeData data = (WeaponTypeData)serializer.Deserialize(new JTokenReader(obj), typeof(WeaponTypeData));
                 WeaponTypes.Add(data.WeaponType, data);

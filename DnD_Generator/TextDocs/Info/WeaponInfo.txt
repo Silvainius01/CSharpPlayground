@@ -13,16 +13,29 @@ The aforementiond master of the blade might know how blades work and the idea be
 Whenever you gain a point in a weapon skill, you also gain a point in that general skill as well.
 
 General Skills [MAJOR/MINOR]:
-	Blade	[DEX, STR]
-	Ranged	[DEX, WIS]
 	Axe		[STR, DEX]
+	Blade	[DEX, STR]
 	Blunt	[STR, CON]
+	Ranged	[DEX, WIS]
 	Spear	[DEX, CON]
 
 TO_HIT:
-	baseChance = ((genSkill/2)+specSkill)*.01; // Up to 150% base chance 
+	baseChance = 0.01 * ((genSkill/2)+specSkill); // Up to 150% base chance 
 	realChance = baseChance * (majAttrPercent+(minAttrPercent/2)) * (0.5+fatiguePercent)
 	max				= 1.5 * 1.5 * 1.5 = 337.5%
 	fatiguedMax		= 1.5 * 1.5 * 0.5 = 112.5%
 	minSkill100		= 0.45 * 1.5 * 1.5 = 101.25 (30 general, 30 specific)
 	minFatigue100	= 1.34 * 1.5 * 0.5 = 100.5% (90 general, 90 specific)
+
+Unarmed
+	For hand-to-hand giga-chads, fists are linked to the Blunt general weapon skill.
+	There do exist "fist weapons" that count toward unarmed, but your bare fists can be just as deadly.
+
+Damage
+	Every weapon gets a damage bonus based on their major attribute.
+	The two exceptions are Ranged weapons, and hand-to-hand, which get bonus damage from WIS instead. 
+
+Evasion
+	baseChance = 0.01 * ( (evasion/4*3) + (unarmored/4) )
+	realChance = baseChance * (pDEX+(pWIS/2)) * (0.25+fatiguePercent)
+	

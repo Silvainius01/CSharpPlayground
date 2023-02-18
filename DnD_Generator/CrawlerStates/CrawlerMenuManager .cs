@@ -56,7 +56,7 @@ namespace RogueCrawler
 
         public void SaveCharacter(List<string> args)
         {
-            crawlerManager.SaveSerializableObject(player, $"{DungeonCrawlerManager.SavePath}\\{player.Name}");
+            crawlerManager.SaveSerializableObject(player, $"{DungeonCrawlerManager.SavePath}\\{player.ObjectName}");
         }
 
         public void LoadCharacter(List<string> args)
