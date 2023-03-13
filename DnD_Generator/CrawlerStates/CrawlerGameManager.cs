@@ -2,6 +2,7 @@
 using CommandEngine;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace RogueCrawler
 {
@@ -10,10 +11,10 @@ namespace RogueCrawler
         CommandModule commands = new CommandModule("\nEnter next game command");
 
         int fightCommands = 0;
-        bool dungeonTurn = false;
         bool dungeonExit = false;
         string firstDungeonMessage = "Entering first dungeon:";
         SmartStringBuilder staticBuilder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);
+        List<Creature> creatureTurnOrder = new List<Creature>();
 
         public CrawlerGameManager(DungeonCrawlerManager manager) : base(manager)
         {
@@ -49,12 +50,49 @@ namespace RogueCrawler
 
             dungeonExit = false;
             player.ResetDungeonStats();
+            player.HealAllStatsAndAfflictions();
             player.CurrentRoom = dungeon.roomManager.EntranceRoom; // Fix for new character having null as their start room
             PlayerMoveToRoom(dungeon.roomManager.EntranceRoom);
         }
         public override CrawlerState UpdateCrawlerState()
         {
-            commands.NextCommand(true);
+            if (creatureTurnOrder.Count > 1)
+            {
+                bool isPlayerDead = false;
+                foreach (var creature in creatureTurnOrder)
+                {
+                    float speed = creature.CombatSpeed.Value;
+
+                    do
+                    {
+                        if (creature.ID != player.ID)
+                        {
+                            isPlayerDead = CreatureTurn(creature);
+                            speed -= 1.0f;
+                        }
+                        else
+                        {
+                            commands.NextCommand(true);
+
+                            // Only subtract from speed if a combat action took place.
+                            speed -= fightCommands;
+                            fightCommands = 0;
+                        }
+
+                        if (Mathc.ValueIsBetween(speed, 0.0f, 1.0f, true) && CommandEngine.Random.NextFloat() <= speed)
+                            speed = 1.0f;
+                    }
+                    while (speed > 1 && !isPlayerDead);
+
+                    if (isPlayerDead)
+                    {
+                        OnPlayerDeath();
+                        dungeonExit = true;
+                    }
+                }
+            }
+            else commands.NextCommand(true);
+
             if (ExitGameState())
                 return CrawlerState.Menu;
             return CrawlerState.Game;
@@ -63,11 +101,13 @@ namespace RogueCrawler
 
         private void PlayerMoveToRoom(DungeonRoom room)
         {
-            if (DungeonTurn())
-                return;
+            //if (DungeonTurn())
+            //    return;
 
             dungeon.MovePlayerToRoom(player, room);
-            ResetOnMove();
+
+            fightCommands = 0;
+            BuildCreatureTurnOrder();
 
             int tabCount = 0;
             staticBuilder.Clear();
@@ -182,37 +222,57 @@ namespace RogueCrawler
 
         private bool ExitGameState()
         {
-            return DungeonTurn() || dungeonExit;
+            return dungeonExit;
         }
 
-        private bool DungeonTurn()
+        private bool CreatureTurn(Creature c)
         {
-            if (dungeonTurn && dungeon.creatureManager.GetObjectCount(player.CurrentRoom) > 0)
+            float damage = c.GetCombatDamage();
+            bool playerDied = dungeon.DamageCreature(player, c.GetCombatDamage());
+
+            staticBuilder.Clear();
+            staticBuilder.NewlineAppend($"{c.ToString()} attacks for {damage} damage!");
+            staticBuilder.NewlineAppend($"HP Left: {player.Health.Value}/{player.Health.MaxValue}");
+            Console.WriteLine(staticBuilder.ToString());
+
+            return playerDied;
+        }
+        private void OnPlayerDeath()
+        {
+            staticBuilder.NewlineAppend(1, "----------  YOU DIED  ----------");
+            staticBuilder.NewlineAppend(1, "Enter 'newGame' for a new game.");
+            Console.WriteLine(staticBuilder.ToString());
+        }
+
+        private void BuildCreatureTurnOrder()
+        {
+            // Sort combatants by combat speed;
+            if (dungeon.creatureManager.GetObjectCount(player.CurrentRoom) > 0)
             {
-                Creature c = dungeon.creatureManager.GetRandomObject(player.CurrentRoom);
-                float damage = c.GetCombatDamage();
-
-                staticBuilder.Clear();
-                staticBuilder.NewlineAppend($"{c.ToString()} attacks for {damage} damage!");
-
-                if (dungeon.DamageCreature(player, c.GetCombatDamage()))
-                {
-                    staticBuilder.NewlineAppend(1, "----------  YOU DIED  ----------");
-                    staticBuilder.NewlineAppend(1, "Enter 'newGame' for a new game.");
-                    Console.WriteLine(staticBuilder.ToString());
-                    return true;
-                }
-
-                staticBuilder.NewlineAppend(1, $"HP Left: {player.Health.Value}/{player.Health.MaxValue}");
-                Console.WriteLine(staticBuilder.ToString());
+                creatureTurnOrder = dungeon.creatureManager.GetObjectsInRoom(player.CurrentRoom);
+                creatureTurnOrder.Add(player);
+                creatureTurnOrder.Sort((a, b) => a.CombatSpeed.Value.CompareTo(b.CombatSpeed.Value));
+                PrintEnteredCombatMessage();
             }
-            dungeonTurn = false;
-            return false;
+            else
+            {
+                creatureTurnOrder.Clear();
+                creatureTurnOrder.Add(player);
+            }
         }
-
-        private void ResetOnMove()
+        private void PrintEnteredCombatMessage()
         {
-            fightCommands = 0;
+            int tabCount = 0;
+            staticBuilder.Clear();
+            staticBuilder.NewlineAppend(tabCount, "You've entered combat! Turn order: ");
+
+            ++tabCount;
+            foreach(var creature in creatureTurnOrder)
+                staticBuilder.NewlineAppend(tabCount, creature.BriefString());
+            --tabCount;
+            staticBuilder.NewlineAppend(tabCount, "\nPress Enter to continue");
+            Console.WriteLine(staticBuilder.ToString());
+            Console.ReadLine();
         }
 
         #region Commands
@@ -250,6 +310,9 @@ namespace RogueCrawler
             if (BaseNoCreatureCommand(out string errorMsg) && BaseIntCommand(args, out int hitPoints, out errorMsg))
             {
                 player.Health.AddValue(hitPoints);
+                player.Mana.AddValue(hitPoints * 2);
+                player.Fatigue.AddValue(hitPoints * 3);
+
                 dungeon.HealAllCreatures(hitPoints);
                 Console.WriteLine("You've rested up, but so has the dungeon...");
             }
@@ -266,8 +329,6 @@ namespace RogueCrawler
                     ++player.CreaturesKilled;
                     Console.WriteLine($"{creature.ObjectName} died!");
                 }
-
-                dungeonTurn |= fightCommands % DungeonCrawlerSettings.CommandsPerCreatureAttack == 0;
             }
             else Console.WriteLine(errorMsg);
         }

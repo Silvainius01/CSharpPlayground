@@ -1,10 +1,14 @@
-﻿HP = STR * 2.5 + (CON+1) * 5
+﻿Attributes: STR DEX CON INT WIS CHA
+
+HP = STR * 2.5 + (CON+1) * 5
 FP = CON * 2.5 + (DEX+1) * 5
 MP = ((INT+CHA) * 2) + (WIS+1) * 5
 
-Speed = 1 + (DEX * 2 + CHA) / 10
+Combat Speed = 1 + (DEX * 2 + CHA) / 10
 	Your attacks per round is equal to the floor of your speed value.
 	Anything above the floor becomes a % chance to get an additonal attack.
+	In battle, combat order is determined by DESCENDING speed order. 
+	A creature with 2.5 speed goes before one with 2.4 speed, and so on.
 
 Exp Need Per level: 100 + ((Level - 1) * 200)
 	1 -> 100

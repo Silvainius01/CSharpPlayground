@@ -37,6 +37,8 @@ namespace RogueCrawler
         public const int HitPointsPerConstitution = 5;
         #endregion
 
+        public const int MaxSkillLevel = 100;
+
         #region Global Generation Settings
         public const float QualityLevelShiftChance = 0.1f;
         #endregion

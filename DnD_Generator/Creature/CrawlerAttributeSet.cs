@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using CommandEngine;
+using Newtonsoft.Json.Linq;
 
 namespace RogueCrawler
 {
@@ -25,10 +26,13 @@ namespace RogueCrawler
         public int CreatureLevel => GetAttributeLevel(DungeonCrawlerSettings.AttributePointsPerCreatureLevel);
         public int WeaponLevel => GetAttributeLevel(DungeonCrawlerSettings.AttributePointsPerWeaponLevel);
 
-        public CrawlerAttributeSet() { }
-        public CrawlerAttributeSet(int baseValue) { SetAttributes(baseValue); }
-        public CrawlerAttributeSet(CrawlerAttributeSet otherAttributes) : this((attr) => otherAttributes[attr]) {}
-        public CrawlerAttributeSet(Func<AttributeType, int> determineAttribute) { SetAttributes(determineAttribute); }
+        public CrawlerAttributeSet(int baseValue = 0)
+        {
+            for (int i = 0; i < EnumExt<AttributeType>.Count; ++i)
+                Attributes.Add(EnumExt<AttributeType>.Values[i], 0);
+        }
+        public CrawlerAttributeSet(CrawlerAttributeSet otherAttributes) : this((attr) => otherAttributes[attr]) { }
+        public CrawlerAttributeSet(Func<AttributeType, int> determineAttribute) : this() { SetAttributes(determineAttribute); }
 
         void AddAttribute(AttributeType attr, int amt)
         {
@@ -43,14 +47,14 @@ namespace RogueCrawler
 
         public void SetAttributes(int value)
         {
-            for (int i = 0; i < EnumExt<AttributeType>.Count; ++i)
-                Attributes.Add(EnumExt<AttributeType>.Values[i], value);
+            foreach (AttributeType attr in EnumExt<AttributeType>.Values)
+                Attributes[attr] = value;
             UpdateMetaData();
         }
         public void SetAttributes(Func<AttributeType, int> determineAttribute)
         {
-            foreach (var attr in EnumExt<AttributeType>.Values)
-                Attributes.Add(attr, determineAttribute(attr));
+            foreach (AttributeType attr in EnumExt<AttributeType>.Values)
+                Attributes[attr] = determineAttribute(attr);
             UpdateMetaData();
         }
 
@@ -72,7 +76,7 @@ namespace RogueCrawler
         }
         public string InspectString(string prefix, int tabCount)
         {
-            SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);;
+            SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString); ;
 
             if (prefix == string.Empty)
                 prefix = "Attributes:";
@@ -87,7 +91,7 @@ namespace RogueCrawler
         }
         public string DebugString(string prefix, int tabCount)
         {
-            SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);;
+            SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString); ;
 
             if (prefix == string.Empty)
                 prefix = "Attributes:";
@@ -95,7 +99,7 @@ namespace RogueCrawler
 
             tabCount++;
             foreach (var kvp in Attributes)
-                    builder.NewlineAppend(tabCount, $"{kvp.Key}: {kvp.Value}");
+                builder.NewlineAppend(tabCount, $"{kvp.Key}: {kvp.Value}");
             tabCount--;
             return builder.ToString();
         }

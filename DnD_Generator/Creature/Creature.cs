@@ -10,6 +10,7 @@ using System.Xml.Linq;
 using System.Numerics;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Reflection.Metadata.Ecma335;
 
 namespace RogueCrawler
 {
@@ -60,8 +61,7 @@ namespace RogueCrawler
         public CreatureStat Health { get => Stats[0]; }
         public CreatureStat Fatigue { get => Stats[1]; }
         public CreatureStat Mana { get => Stats[2]; }
-        public CreatureStat CombatSpeed { get=> Stats[3]; }
-        public CreatureStat CombatEvasion { get => Stats[4]; }
+        public CreatureStat CombatSpeed { get => Stats[3]; }
 
         public DungeonRoom CurrentRoom { get; set; }
         public ItemWeapon PrimaryWeapon { get; set; }
@@ -89,8 +89,7 @@ namespace RogueCrawler
                 (c.GetAttribute(AttributeType.WIS) + 1) * 5.0f;
             var combatSpeedFunc = (Creature c) => 1.0f + (
                 c.GetAttribute(AttributeType.DEX) * 2 +
-                c.GetAttribute(AttributeType.CHA) / 10);
-            
+                c.GetAttribute(AttributeType.CHA)) / 10;
 
             Afflictions = new CrawlerAttributeSet(0);
             MaxAttributes = new CrawlerAttributeSet(0);
@@ -111,33 +110,62 @@ namespace RogueCrawler
         {
             return MaxAttributes[attr] + Afflictions[attr];
         }
-        public float GetAttributePercent(AttributeType attr)
+        public float GetAttributePercent(AttributeType attr, float mult=1.0f)
         {
             return GetAttribute(attr) / (float)MaxAttributes[attr];
         }
 
-        public float GetCombatDamage()
+        public void HealAllStatsAndAfflictions()
+        {
+            Afflictions.SetAttributes(0);
+
+            UpdateStats();
+            foreach (var stat in Stats)
+                stat.SetPercent(1);
+        }
+
+        public ItemWeapon GetCombatWeapon()
         {
             return PrimaryWeapon is not null
-                ? PrimaryWeapon.GetWeaponDamage() + GetAttribute(PrimaryWeapon.MinorAttribute)
-                : GetAttribute(AttributeType.STR);
+                ? PrimaryWeapon
+                : UnarmedWeapon;
+        }
+        public float GetCombatDamage()
+        {
+            ItemWeapon weapon = GetCombatWeapon();
+            float damage = weapon.BaseDamage
+                + GetAttribute(weapon.MajorAttribute) / 2
+                + GetAttribute(weapon.MinorAttribute) / 4;
+            float qualityMod = weapon.Quality / (1.4f - CreatureSkillUtility.GetWeaponSkillBonus(weapon, Profeciencies));
+            return damage
+                * weapon.Material.DamageModifier
+                * qualityMod;
         }
         public float GetCombatHitChance()
         {
-            ItemWeapon weapon = PrimaryWeapon;
-            if(PrimaryWeapon is null)
-            {
-                weapon = UnarmedWeapon;
-                weapon.AttributeRequirements[AttributeType.STR] = GetAttribute(AttributeType.STR);
-                weapon.AttributeRequirements[AttributeType.DEX] = GetAttribute(AttributeType.DEX);
-                weapon.AttributeRequirements[AttributeType.WIS] = GetAttribute(AttributeType.WIS);
-            }
+            ItemWeapon weapon = GetCombatWeapon();
 
             float chance = 0.01f;
             chance *= Profeciencies.GetSkillLevel(weapon.WeaponType) / 2 + Profeciencies.GetSkillLevel(weapon.ObjectName);
             chance *= GetAttributePercent(weapon.MajorAttribute) + (GetAttributePercent(weapon.MinorAttribute) / 2);
             chance *= 0.5f + Fatigue.Percent;
             return chance;
+        }
+        public float GetCombatEvasion()
+        {
+            float chance = 0.01f;
+            chance *= (Profeciencies.GetSkillLevel(CreatureSkill.Evasion) / 4 * 3) + (Profeciencies.GetSkillLevel(CreatureSkill.Unarmored) / 4);
+            chance *= GetAttributePercent(AttributeType.DEX) + (GetAttributePercent(AttributeType.WIS) / 2);
+            chance *= 0.25f + Fatigue.Percent;
+            return chance;
+        }
+        public float GetAttackFatigueCost()
+        {
+            ItemWeapon weapon = GetCombatWeapon();
+            float attrDiv =
+                GetAttributePercent(weapon.MajorAttribute) * 1.5f +
+                GetAttributePercent(weapon.MinorAttribute) * 0.5f;
+            return weapon.GetFatigueCost() / MathF.Max(attrDiv, 0.001f);
         }
 
         public bool CanEquipWeapon(ItemWeapon weapon)
@@ -152,12 +180,20 @@ namespace RogueCrawler
         {
             foreach (var stat in Stats)
                 stat.Update();
+            UpdateUnarmedWeapon();
         }
         void UpdateStats(AttributeType attr)
         {
             foreach (var stat in Stats)
                 if (stat.LinkedAttributes.Contains(attr))
                     stat.Update();
+            UpdateUnarmedWeapon();
+        }
+        void UpdateUnarmedWeapon()
+        {
+            UnarmedWeapon.AttributeRequirements[AttributeType.STR] = GetAttribute(AttributeType.STR);
+            UnarmedWeapon.AttributeRequirements[AttributeType.DEX] = GetAttribute(AttributeType.DEX);
+            UnarmedWeapon.AttributeRequirements[AttributeType.WIS] = GetAttribute(AttributeType.WIS);
         }
 
         public void AddAttributePoints(AttributeType attr, int amount)
@@ -186,7 +222,7 @@ namespace RogueCrawler
 
         public virtual string BriefString()
         {
-            return $"[{ID}] {ObjectName} ({Level}) | HP: {Health.Value} | DMG: {GetCombatDamage()}";
+            return $"[{ID}] {ObjectName} ({Level}) | HP: {Health.Value} | DMG: {GetCombatDamage()} | SPD: {CombatSpeed.Value}";
         }
         public virtual string InspectString(string prefix, int tabCount)
         {

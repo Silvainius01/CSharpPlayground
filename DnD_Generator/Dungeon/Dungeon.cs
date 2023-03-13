@@ -122,7 +122,11 @@ namespace RogueCrawler
         public void HealAllCreatures(float hitPoints)
         {
             foreach (var creature in creatureManager.GetAllObjects())
+            {
                 creature.Health.AddValue(hitPoints);
+                creature.Mana.AddValue(hitPoints * 2);
+                creature.Fatigue.AddValue(hitPoints * 3);
+            }
         }
 
         public bool RoomContainsLoot(DungeonRoom room)

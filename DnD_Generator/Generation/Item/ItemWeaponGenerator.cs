@@ -97,8 +97,8 @@ namespace RogueCrawler
             {
                 ID = -1,
                 BaseDamage = 1,
-                Weight = 0.0f,
-                Quality = 2.0f,
+                Weight = 1.0f,
+                Quality = 1.0f,
                 Value = 0,
                 ObjectName = "Unarmed",
                 WeaponType = "Blunt",

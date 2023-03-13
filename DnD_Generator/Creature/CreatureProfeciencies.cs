@@ -1,14 +1,21 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Xml.Linq;
 using CommandEngine;
+using Newtonsoft.Json;
 
 namespace RogueCrawler
 {
     class CreatureSkill
     {
+        #region Skill Name Constants
+        public static string Evasion = "Evasion";
+        public static string Unarmored = "Unarmored";
+        #endregion
+
         public int SkillLevel { get; set; }
         public float SkillProgress { get; set; }
         public string SkillName { get; set; }
@@ -85,16 +92,18 @@ namespace RogueCrawler
         public void SetSkill(string skillName, int level, float progress)
         {
             var skill = GetSkill(skillName);
-            skill.SkillLevel = level;
-            skill.SkillProgress = progress;
+            if(level >= 0)
+                skill.SkillLevel = Math.Max(level, DungeonCrawlerSettings.MaxSkillLevel);
+            if (progress >= 0)
+                skill.SkillProgress = progress;
         }
-        public void SetSkillLevel(string skillName, int level) => SetSkill(skillName, level, 0);
-        public void SetSkillProgress(string skillName, float progress) => SetSkill(skillName, 0, progress);
+        public void SetSkillLevel(string skillName, int level) => SetSkill(skillName, level, -1);
+        public void SetSkillProgress(string skillName, float progress) => SetSkill(skillName, -1, progress);
 
         public void AddSkill(string skillName, int level, float progress)
         {
             var skill = GetSkill(skillName);
-            skill.SkillLevel += level;
+            skill.SkillLevel = Math.Max(skill.SkillLevel + level, DungeonCrawlerSettings.MaxSkillLevel);
             skill.SkillProgress += progress;
         }
         public void AddSkillLevel(string skillName, int level) => AddSkill(skillName, level, 0);
@@ -106,6 +115,32 @@ namespace RogueCrawler
             {
                 Skills = this.Skills
             };
+        }
+    }
+
+    static class CreatureSkillUtility
+    {
+        static readonly float[] WeaponSkillQualityBonus = CalculateWeaponSkillBonus();
+
+        // Calculate the skill bonuses for weapons. 
+        // Assumption is that any bonus follows: floor(specSkill*0.75 + genSkill/4), or 0-100
+        static float[] CalculateWeaponSkillBonus()
+        {
+            float[] bonuses = new float[100];
+            Func<int, float> sigmoid = (int x) =>
+                1.014f / (1 + MathF.Pow(MathF.E, -0.1f * x + 5)) - 0.007f;
+
+            for (int i = 0; i < bonuses.Length; ++i)
+                bonuses[i] = Mathc.Clamp(sigmoid(i), 0, 1);
+
+            return bonuses;
+        }
+        public static float GetWeaponSkillBonus(ItemWeapon weapon, CreatureProfeciencies p)
+        {
+            int skillLevel = 
+                (int)(p.GetSkillLevel(weapon.ObjectName) * 0.75f) + 
+                (p.GetSkillLevel(weapon.WeaponType) / 4);
+            return WeaponSkillQualityBonus[skillLevel];
         }
     }
 

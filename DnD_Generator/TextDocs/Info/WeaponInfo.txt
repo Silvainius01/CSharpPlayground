@@ -1,4 +1,3 @@
-Attributes: STR DEX CON INT WIS CHA LCK
 
 Weapons have three tiers to understand: governing attribute(s), general skill, specific skill.
 
@@ -27,6 +26,17 @@ TO_HIT:
 	minSkill100		= 0.45 * 1.5 * 1.5 = 101.25 (30 general, 30 specific)
 	minFatigue100	= 1.34 * 1.5 * 0.5 = 100.5% (90 general, 90 specific)
 
+Fatigue Cost
+	Weapons cost fatigue to swing, the exact amount depends on how much they weigh.
+	If you meet the stat requirements, cost = weight. More stats means less fatigue, less stats means more. Up to 1000x more.
+	Cost = (weight * 2) / Max(pMajAttr*1.5 + pMinAttr*0.5, 0.001);
+
+Skill Bonus
+	The skill bonus is complex, but here is the formula:
+		(1.014 / 1+e^(-.1x+5)) - 0.007
+		Where x = Floor(specSkill*0.75 + genSkill/4)
+	This provides 0-100% bonus depending on overall competence with the weapon.
+
 Unarmed
 	For hand-to-hand giga-chads, fists are linked to the Blunt general weapon skill.
 	There do exist "fist weapons" that count toward unarmed, but your bare fists can be just as deadly.
@@ -34,8 +44,30 @@ Unarmed
 Damage
 	Every weapon gets a damage bonus based on their major attribute.
 	The two exceptions are Ranged weapons, and hand-to-hand, which get bonus damage from WIS instead. 
+	(baseDamage+(majAttr/2)+(minAttr/4)) 
+	* materialBonus 
+	* (quality / (1.4-skillBonus)) // Ski
+
 
 Evasion
-	baseChance = 0.01 * ( (evasion/4*3) + (unarmored/4) )
-	realChance = baseChance * (pDEX+(pWIS/2)) * (0.25+fatiguePercent)
-	
+	baseChance = 0.01 * ( (evasion * 0.75) + (unarmored/4) ) // Max 100
+	realChance = baseChance * (pDEX+(pWIS/2)) * (0.25+fatiguePercent) // 1*1.5*1.25 = 187.5% at max skill
+
+Weapon Quality
+	Weapon Quality is a subtle but extremely important stat that affects its performance in indirect ways.
+	High quality weapons deal more damage the higher your skill with it is.
+	High quality weapons are easier to enchant, and can hold more powerful enchantments.
+	High quality weapons have better durablity, and can withstand more abuse.
+
+Weapon Durability
+	Weapons have a durablity stat, which decreases with use.
+	A weapon will deal less damage as it degrades. This decline isnt notable at first, but once a certain threshold is crossed it'll plummit very quickly.
+	When a weapon breaks, it *cannot* be repaired, only metled down to reclaim some material.
+
+Weapon Enchantments
+	Enchantments come in three flavors: Passive, Active, and Hybrid
+	Like all magic, enchantments consume mana. Just like creatures, enchanted weapon has an internal mana pool that it can draw from.
+	A weapon's mana pool slowly regenerates over time as it absorbs it from the enviornment, but can be manually infused from any source if you have the means to tap it.
+	Passive enchantments are generally weak, as they drain mana at a constant rate. This typically, but not neccessarily, limits them to the natual absorbtion rate of the weapon.
+	Active enchantments operate much like spells, they consume X amount of mana all at once to produce an effect.
+	Hybrid enchantments are the most common, and blend the two types, a typical example being a damage enchantment that has a passive base effect, and an active burst.

@@ -34,8 +34,14 @@ namespace RogueCrawler
 
         public float GetWeaponDamage()
         {
-            return BaseDamage * Quality + Level;
+            float damage = BaseDamage
+                + AttributeRequirements.GetAttribute(MajorAttribute) / 2
+                + AttributeRequirements.GetAttribute(MinorAttribute) / 4;
+            return damage * Material.DamageModifier * Quality;
         }
+
+        public float GetFatigueCost() => Weight * 2;
+
         public float GetRawValue() =>
             ((IsLargeWeapon ? 1 : 2) * Level * Quality) + AttributeRequirements.TotalScore;
         public int GetValue() => (int)Math.Max(GetRawValue(), 1);
