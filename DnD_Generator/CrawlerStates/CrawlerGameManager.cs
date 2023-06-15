@@ -59,9 +59,17 @@ namespace RogueCrawler
             if (creatureTurnOrder.Count > 1)
             {
                 bool isPlayerDead = false;
-                foreach (var creature in creatureTurnOrder)
+                for (int i = 0; i < creatureTurnOrder.Count; i++)
                 {
+                    Creature creature = creatureTurnOrder[i];
                     float speed = creature.CombatSpeed.Value;
+
+                    // Remove dead creatures from combat.
+                    if (!creature.IsAlive)
+                    {
+                        creatureTurnOrder.RemoveAt(i--);
+                        continue;
+                    }
 
                     do
                     {
@@ -82,12 +90,13 @@ namespace RogueCrawler
                         if (Mathc.ValueIsBetween(speed, 0.0f, 1.0f, true) && CommandEngine.Random.NextFloat() <= speed)
                             speed = 1.0f;
                     }
-                    while (speed > 1 && !isPlayerDead);
+                    while (speed >= 1 && !isPlayerDead);
 
                     if (isPlayerDead)
                     {
                         OnPlayerDeath();
                         dungeonExit = true;
+                        break;
                     }
                 }
             }
@@ -101,9 +110,6 @@ namespace RogueCrawler
 
         private void PlayerMoveToRoom(DungeonRoom room)
         {
-            //if (DungeonTurn())
-            //    return;
-
             dungeon.MovePlayerToRoom(player, room);
 
             fightCommands = 0;
@@ -329,6 +335,7 @@ namespace RogueCrawler
                     ++player.CreaturesKilled;
                     Console.WriteLine($"{creature.ObjectName} died!");
                 }
+                else Console.WriteLine($"{creature.ObjectName} HP Left: {creature.Health.Value}");
             }
             else Console.WriteLine(errorMsg);
         }

@@ -58,6 +58,8 @@ namespace RogueCrawler
         public int ArmorClass { get; set; }
         public int Level { get; set; } = 1;
 
+        public bool IsAlive => Health.Value > 0;
+
         public CreatureStat Health { get => Stats[0]; }
         public CreatureStat Fatigue { get => Stats[1]; }
         public CreatureStat Mana { get => Stats[2]; }
@@ -134,8 +136,8 @@ namespace RogueCrawler
         {
             ItemWeapon weapon = GetCombatWeapon();
             float damage = weapon.BaseDamage
-                + GetAttribute(weapon.MajorAttribute) / 2
-                + GetAttribute(weapon.MinorAttribute) / 4;
+                + GetAttribute(weapon.MajorAttribute) / 4
+                + GetAttribute(weapon.MinorAttribute) / 8;
             float qualityMod = weapon.Quality / (1.4f - CreatureSkillUtility.GetWeaponSkillBonus(weapon, Profeciencies));
             return damage
                 * weapon.Material.DamageModifier
