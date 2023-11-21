@@ -120,27 +120,35 @@ namespace RogueCrawler
 
     static class CreatureSkillUtility
     {
-        static readonly float[] WeaponSkillQualityBonus = CalculateWeaponSkillBonus();
+        static readonly float[] WeaponSkillQualityBonus = CacheWeaponSkillBonuses();
 
         // Calculate the skill bonuses for weapons. 
         // Assumption is that any bonus follows: floor(specSkill*0.75 + genSkill/4), or 0-100
-        static float[] CalculateWeaponSkillBonus()
+        static float[] CacheWeaponSkillBonuses()
         {
-            float[] bonuses = new float[100];
-            Func<int, float> sigmoid = (int x) =>
-                1.014f / (1 + MathF.Pow(MathF.E, -0.1f * x + 5)) - 0.007f;
+            float[] bonuses = new float[256];
 
             for (int i = 0; i < bonuses.Length; ++i)
-                bonuses[i] = Mathc.Clamp(sigmoid(i), 0, 1);
+                bonuses[i] = CalcWeaponSkillBonus(i);
 
             return bonuses;
         }
+        static float CalcWeaponSkillBonus(int level)
+        {
+            float sigmoid (int x) =>
+                1.014f / (1 + MathF.Pow(MathF.E, -0.1f * x + 5)) - 0.007f;
+
+            return Mathc.Clamp(sigmoid(level), 0, 1);
+        }
+
         public static float GetWeaponSkillBonus(ItemWeapon weapon, CreatureProfeciencies p)
         {
             int skillLevel = 
                 (int)(p.GetSkillLevel(weapon.ObjectName) * 0.75f) + 
                 (p.GetSkillLevel(weapon.WeaponType) / 4);
-            return WeaponSkillQualityBonus[skillLevel];
+            return skillLevel < WeaponSkillQualityBonus.Length
+                ? WeaponSkillQualityBonus[skillLevel]
+                : CalcWeaponSkillBonus(skillLevel);
         }
     }
 

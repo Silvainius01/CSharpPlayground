@@ -12,8 +12,7 @@ Armor Classes:
 	Medium	- STR, CON // Medium armor's modus operandi is versatility. Can take hits and doesnt weigh you down, but maintenance is expensive and demanding.
 	Heavy	- STR, CON // Heavy armor dont care. Heavy armor strong. Heavy armor take hit, heavy armor SMASH
 Tool Classes:
-	Armorer	- STR, CON // Make and Repair weapons and armor
+	Smithy	- STR, CON // Make and Repair weapons and armor
 	Thief	- DEX, INT // Unlock objects and disarm traps, or vice versa
 	Mage	- INT, WIS // Create spells and empower objects
 	Alchemy - WIS, DEX // Create and Identify potions
-

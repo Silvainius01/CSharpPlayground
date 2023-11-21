@@ -133,10 +133,20 @@ namespace RogueCrawler
         {
             StringBuilder builder = new StringBuilder();
 
+            string QualityPrefix(float quality) => quality switch
+            {
+                 < 0 => "Broken",
+                 < 1 => "PoorQuality",
+                 < 2 => string.Empty,
+                 < 3 => "HighQuality",
+                 < 4 => "Renowned",
+                >= 4 => "Legendary",
+                _ => "Anomalous"
+            };
+
             //if (weapon.IsLargeWeapon)
             //    builder.Append("Large");
-            if (weapon.Quality <= 0.0f)
-                builder.Append("Broken");
+            builder.Append(QualityPrefix(weapon.Quality));
             builder.Append(weapon.Material.Name);
             builder.Append(weapon.ObjectName);
             return builder.ToString();
@@ -168,7 +178,9 @@ namespace RogueCrawler
             if (wParams.GenerateRelative)
             {
                 var levelRange = DungeonGenerator.GetRelativeLootRange(wParams.CreatureLevel);
-                int level = (int)CommandEngine.Random.GetMarsagliaBetween(levelRange, DungeonGenerator.GetQualityBias(wParams.QualityBias));
+                int level = (int)(
+                    CommandEngine.Random.GetMarsagliaBetween(levelRange) +
+                    DungeonGenerator.GetLevelBias(wParams.QualityBias));
                 if (wParams.CapToCreatureLevel && level > wParams.CreatureLevel)
                     level = wParams.CreatureLevel;
                 return GetMaxQuality(level, weapon);

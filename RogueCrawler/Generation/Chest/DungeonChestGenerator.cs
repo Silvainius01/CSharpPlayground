@@ -41,7 +41,9 @@ namespace RogueCrawler
             {
                 if (room.Index != roomManager.EntranceRoom.Index && CommandEngine.Random.NextFloat() < dParams.ChestProbability)
                 {
-                    DungeonChestGenerationParamerters cParams = new DungeonChestGenerationParamerters(2, () => EnumExt<QualityLevel>.RandomValue)
+                    DungeonChestGenerationParamerters cParams = new DungeonChestGenerationParamerters(
+                        GetChestItemQuality(),
+                        EnumExt<QualityLevel>.RandomValue) // Weight quality
                     {
                         CreatureLevel = dParams.PlayerLevel,
                         ChestType = DungeonChestType.Weapon,
@@ -61,7 +63,7 @@ namespace RogueCrawler
                 Type = DungeonChestType.Weapon
             };
 
-            // Assume a wepaons chest for now
+            // Assume a weapons chest for now
             chest.ObjectName = PopulateWeaponsChest(chest, cParams);
 
             return chest;
@@ -79,6 +81,21 @@ namespace RogueCrawler
                 chest.AddItem(DungeonGenerator.GenerateWeapon(weaponProperties));
             }
             return $"{cParams.ItemQuality}Quality {cParams.ItemWeight}Weight WeaponChest";
+        }
+
+        static QualityLevel GetChestItemQuality()
+        {
+            double r = CommandEngine.Random.NormalDouble;
+
+            if (r < 0.5) // 50%
+                return QualityLevel.Mid;
+            if (r < 0.75) // 25% 
+                return QualityLevel.Low;
+            if (r < 0.9) // 15%
+                return QualityLevel.High;
+            if (r < 0.98) // 8%
+                return QualityLevel.Renowned;
+            return QualityLevel.Legendary; // 2%
         }
     }
 }

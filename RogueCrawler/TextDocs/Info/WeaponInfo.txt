@@ -58,6 +58,12 @@ Weapon Quality
 	High quality weapons deal more damage the higher your skill with it is.
 	High quality weapons are easier to enchant, and can hold more powerful enchantments.
 	High quality weapons have better durablity, and can withstand more abuse.
+	Quality Levels:
+		x < 1.0 = Low
+		1 <= x < 2 = Average
+		2 <= x < 3 = High
+		3 <= x < 4 = Renowned
+		x > 4 = Legendary
 
 Weapon Durability
 	Weapons have a durablity stat, which decreases with use.
@@ -71,3 +77,8 @@ Weapon Enchantments
 	Passive enchantments are generally weak, as they drain mana at a constant rate. This typically, but not neccessarily, limits them to the natual absorbtion rate of the weapon.
 	Active enchantments operate much like spells, they consume X amount of mana all at once to produce an effect.
 	Hybrid enchantments are the most common, and blend the two types, a typical example being a damage enchantment that has a passive base effect, and an active burst.
+
+Divine Weapons
+	Divine weapons are artifacts created, forged, blessed, or inhabited by a god.
+	These weapons can be of any quality, but are generally more powerful than even the best mortal blades.
+	Their divine nature causes them to attune to their weilder in ways mortal magics cannot, allowing them to scale over time.
