@@ -126,30 +126,22 @@ namespace CommandEngine
             return (float)Marsaglia(false) * range;
         }
 
-        /// <summary>Get a normal distribution between two numbers</summary>
+        /// <summary>Get a normal distribution centered between two numbers</summary>
         public static double GetMarsagliaBetween(double min, double max)
         {
             Mathc.Swap(ref min, ref max);
             double mid = Mathc.GetMidValue(min, max);
-            return MarsagliaRange(mid, true) + mid;
+            return MarsagliaRange(mid / 2, true) + mid;
         }
-        /// <summary>Get a normal distribution between two numbers</summary>
+        /// <summary>Get a normal distribution centered between two numbers</summary>
         public static float GetMarsagliaBetween(float min, float max)
         {
             Mathc.Swap(ref min, ref max);
             float mid = Mathc.GetMidValue(min, max);
             return MarsagliaRange(mid, true) + mid;
         }
-        /// <summary>Get a normal distribution between two numbers</summary>
-        /// <param name="bias">Bias multiplier. >1.0f biases towards <paramref name="min"/>, <1.0f biases toward <paramref name="max"/></param>
-        /// <returns></returns>
-        public static float GetMarsagliaBetween(float min, float max, float bias)
-        {
-            Mathc.Swap(ref min, ref max);
-            float mid = Mathc.GetMidValue(min, max);
-            return Mathc.Clamp((float)MarsagliaRange(mid, true) + (bias * mid), min, max);
-        }
-        public static float GetMarsagliaBetween(Vector2Int range, float bias)
-            => GetMarsagliaBetween(range.X, range.Y, bias);
+
+        public static float GetMarsagliaBetween(Vector2Int range)
+            => GetMarsagliaBetween(range.X, range.Y);
     }
 }

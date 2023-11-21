@@ -55,7 +55,7 @@ namespace RogueCrawler
         }
         public string InspectString(string prefix, int tabCount)
         {
-            SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString); ;
+            ColorStringBuilder builder = new ColorStringBuilder(DungeonCrawlerSettings.TabString);
 
             if (prefix == string.Empty)
                 prefix = $"Weapon stats for [{ID}] {ItemName}:";
@@ -65,6 +65,7 @@ namespace RogueCrawler
             builder.NewlineAppend(tabCount, $"Type: Lv.{Level} {WeaponType}, {ObjectName}");
             builder.NewlineAppend(tabCount, $"Damage: {GetWeaponDamage()}");
             builder.NewlineAppend(tabCount, $"Value: {GetValue()}");
+            builder.NewlineAppend(tabCount, $"Quality: {Quality}");
             builder.NewlineAppend(tabCount, $"Weight: {Weight}");
             builder.NewlineAppend(tabCount, $"Material: {Material.Name}");
             builder.NewlineAppend(AttributeRequirements.InspectString("Requirements:", tabCount));

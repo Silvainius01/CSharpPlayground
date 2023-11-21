@@ -15,7 +15,7 @@ namespace RogueCrawler
 
             DungeonCreatureManager creatureManager = new DungeonCreatureManager(roomManager);
             HashSet<DungeonRoom> validRooms = new HashSet<DungeonRoom>(roomManager.rooms, DungeonRoomGenerator.DungeonRoomEquality);
-            CreatureGenerationParameters cParams = new CreatureGenerationParameters(dParams.AverageItemQuality, dParams.AverageItemWeight)
+            CreatureGenerationParameters cParams = new CreatureGenerationParameters(dParams.Qualities)
             {
                 LevelRange = DungeonGenerator.GetRelativeLootRange(dParams.PlayerLevel),
                 WeaponChance = 1.0f,
@@ -62,6 +62,9 @@ namespace RogueCrawler
                 return value;
             }));
             creature.Level = Math.Max(creature.MaxAttributes.CreatureLevel, creature.Level);
+
+            creature.Profeciencies.AddSkillLevel(creature.PrimaryWeapon.WeaponType, 30);
+            creature.Profeciencies.AddSkillLevel(creature.PrimaryWeapon.ObjectName, 30);
 
             //CrawlerAttributeSet attributes = creature.MaxAttributes;
             List <(AttributeType attribute, float chance)> attributeRanks = GetAttributeImportance(creature);

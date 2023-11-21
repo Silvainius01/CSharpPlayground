@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using CommandEngine;
 
 namespace DieRoller
 {
@@ -12,7 +13,7 @@ namespace DieRoller
     {
         public delegate TResult TryParseDelegate<TInput, TOutParam, TResult>(TInput input, out TOutParam output);
 
-        static Random rng = new Random();
+        static System.Random rng = new System.Random();
 
         public static int RollDice(int numDice, int numSides)
         {
@@ -83,6 +84,46 @@ namespace DieRoller
 
             return (result, msg.ToString());
         }
+        public static (int Result, string Message) RollDice2(DiceRollSet diceSet, DiceRollerMessageOptions options)
+        {
+            int result = 0;
+            StringBuilder msg = new StringBuilder();
+            StringBuilder rollStr = new StringBuilder();
+
+            foreach (var dice in diceSet)
+            {
+                var rolls = RollSeperate(dice);
+
+                result += rolls.Result;
+
+                if (options.RollSeperate)
+                {
+                    msg.Append($"\n{dice.NumDice}d{dice.NumSides}: ");
+                    msg.Append($"{rolls.Result}");
+                    if (options.DisplayIndividualRolls)
+                        msg.Append($" [{rolls.Message}]");
+                }
+                else if (options.DisplayIndividualRolls)
+                    rollStr.Append(rolls.Message);
+
+                if (options.DisplaySeperateStats)
+                    msg.Append($"\n{dice.GetStats()}\n");
+            }
+
+            if (options.DisplayFullStats)
+                msg.Append($"\n{GetFullRollStats(diceSet)}");
+
+            if (options.DisplayTotalStats)
+                msg.Append($"\n{diceSet.GetStats()}");
+
+
+            if (rollStr.Length > 0)
+                msg.Append($"\nTotal: {result} [{rollStr}]");
+            msg.Append($"\nTotal: {result}");
+            
+            return (result, msg.ToString());
+        }
+
         static (int Result, string Message) RollSeperate(IDiceRoll diceRoll)
         {
             (IList<int> Rolls, int Total) rolls = diceRoll.RollSeperate();
@@ -151,6 +192,16 @@ namespace DieRoller
             msg.Append($"Avg: {average}");
             return msg.ToString();
         }
+        
+        public static string GetFullRollStatsPolynomial(IEnumerable<IDiceRoll> diceRolls)
+        {
+            double Generator(int n)
+            {
+
+                return 0.0;
+            }
+            return null;
+        }
 
         static IEnumerable<int> GetDiceSides(IDiceRoll diceRoll)
         {
@@ -216,23 +267,57 @@ namespace DieRoller
                 bool success = TryParse(diceRollsRaw[i], out var diceRoll);
                 if (success)
                     rollSet.Add(diceRoll);
-                else ParseDiceRollOption(diceRollsRaw[i], ref options);
+                else if (ParseBasicDiceRollOption(diceRollsRaw[i], ref options))
+                    continue;
+                else
+                {
+                    int num = 0;
+                    switch(diceRollsRaw[i])
+                    {
+                        case "-h":
+                            if (int.TryParse(diceRollsRaw[++i], out num))
+                                options.NumHighest = num;
+                            options.TakeHighest = num > 0;
+                            break;
+                        case "-l":
+                            if (int.TryParse(diceRollsRaw[++i], out num))
+                                options.NumLowest = num;
+                            options.TakeLowest = num > 0;
+                            break;
+                        case "-r":
+                            if (!int.TryParse(diceRollsRaw[++i], out num))
+                            {
+                                ConsoleExt.WriteWarningLine("-r Requires a valid value, command skipped.");
+                                break;
+                            }
+                            else options.RerollValue = num;
+
+                            if (int.TryParse(diceRollsRaw[i + 1], out num))
+                            {
+                                ++i; // Only increment if the next entry is a valid number, otherwise process it normally next iter.
+                                options.RerollAttempts = num;
+                            }
+                            options.AllowReroll = true;
+                            break;
+                    }
+                }
             }
 
             var roll = DiceRoller.RollDice(rollSet, options);
             Console.WriteLine(roll.Message);
         }
 
-        static void ParseDiceRollOption(string input, ref DiceRollerMessageOptions options)
+        static bool ParseBasicDiceRollOption(string input, ref DiceRollerMessageOptions options)
         {
             switch (input)
             {
-                case "s": options.RollSeperate ^= true; break;
-                case "i": options.DisplayIndividualRolls ^= true; break;
-                case "st": options.DisplaySeperateStats ^= true; break;
-                case "t": options.DisplayTotalStats ^= true; break;
-                case "f": options.DisplayFullStats ^= true; break;
+                case "s": options.RollSeperate ^= true; return true;
+                case "i": options.DisplayIndividualRolls ^= true; return true;
+                case "st": options.DisplaySeperateStats ^= true; return true;
+                case "t": options.DisplayTotalStats ^= true; return true;
+                case "f": options.DisplayFullStats ^= true; return true;
             }
+            return false;
         }
     }
 }

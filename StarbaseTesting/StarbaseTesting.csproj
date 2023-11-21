@@ -10,6 +10,30 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="CrawlerStates\**" />
+    <Compile Remove="Crawler\**" />
+    <Compile Remove="Creature\**" />
+    <Compile Remove="Dungeon\**" />
+    <Compile Remove="Generation\**" />
+    <Compile Remove="Interfaces\**" />
+    <Compile Remove="Item\**" />
+    <EmbeddedResource Remove="CrawlerStates\**" />
+    <EmbeddedResource Remove="Crawler\**" />
+    <EmbeddedResource Remove="Creature\**" />
+    <EmbeddedResource Remove="Dungeon\**" />
+    <EmbeddedResource Remove="Generation\**" />
+    <EmbeddedResource Remove="Interfaces\**" />
+    <EmbeddedResource Remove="Item\**" />
+    <None Remove="CrawlerStates\**" />
+    <None Remove="Crawler\**" />
+    <None Remove="Creature\**" />
+    <None Remove="Dungeon\**" />
+    <None Remove="Generation\**" />
+    <None Remove="Interfaces\**" />
+    <None Remove="Item\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 

@@ -32,5 +32,15 @@ namespace DieRoller
         /// If true, desiplays results for each set of dice seperately.
         /// </summary>
         public bool RollSeperate { get; set; } = false;
+
+        public bool TakeHighest { get; set; } = false;
+        public int NumHighest { get; set; } = 0;
+
+        public bool TakeLowest { get; set; } = false;
+        public int NumLowest { get; set; } = 0;
+
+        public bool AllowReroll { get; set;} = false;
+        public int RerollValue { get; set;} = 0;
+        public int RerollAttempts { get; set; } = 0;
     }
 }

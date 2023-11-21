@@ -66,11 +66,15 @@ namespace RogueCrawler
 
         #region Chest Generation Settings
         /// <summary>Loot level multiplier for Low Quality loot</summary>
-        public const float LowQualityLootBias = 0.5f;
+        public const float LowQualityLootLevelBias = -1f;
         /// <summary>Loot level multiplier for Mid Quality loot</summary>
-        public const float MidQualityLootBias = 1.0f;
+        public const float MidQualityLootLevelBias = 0.5f;
         /// <summary>Loot level multiplier for High Quality loot</summary>
-        public const float HighQualityLootBias = 2.0f;
+        public const float HighQualityLootLevelBias = 1.5f;
+        /// <summary>Loot level multiplier for Renowned Quality loot</summary>
+        public const float RenownedQualityLootLevelBias = 2.5f;
+        /// <summary>Loot level multiplier for Legendary Quality loot</summary>
+        public const float LegendaryQualityLootLevelBias = 3.0f;
         #endregion
 
         #region Weapon Generation Settings
@@ -85,7 +89,7 @@ namespace RogueCrawler
 
         /// <summary>The most a weapon can weigh</summary>
         public const int MaxWeaponWeight = 100;
-        /// <summary>The least a weapon can weight</summary>
+        /// <summary>The least a weapon can weigh</summary>
         public const int MinWeaponWeight = 25;
         /// <summary>The most a mid-range weapon can weigh</summary>
         public const int MidWeaponWeight = (int)((MaxWeaponWeight - MinWeaponWeight) * (2.0 / 3.0)) + MinWeaponWeight;

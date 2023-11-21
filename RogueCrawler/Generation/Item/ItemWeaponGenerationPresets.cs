@@ -63,9 +63,9 @@ namespace RogueCrawler
             float bias = 1.0f;
             switch(q)
             {
-                case QualityLevel.Low: bias = LowQualityLootBias; break;
-                case QualityLevel.Mid: bias = MidQualityLootBias; break;
-                case QualityLevel.High: bias = HighQualityLootBias; break;
+                case QualityLevel.Low: bias = LowQualityLootLevelBias; break;
+                case QualityLevel.Mid: bias = MidQualityLootLevelBias; break;
+                case QualityLevel.High: bias = HighQualityLootLevelBias; break;
             }
             return bias;
         }
