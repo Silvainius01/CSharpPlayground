@@ -34,6 +34,9 @@ namespace RogueCrawler
             wParams.PossibleWeaponTypes = new List<string>() { GetNextWeaponCommand(WeaponTypePrompt, $"[Invalid] Preferred Weapon", false) };
             player.PrimaryWeapon = DungeonGenerator.GenerateWeapon(wParams);
 
+            player.Profeciencies.AddSkillLevel(player.PrimaryWeapon.WeaponType, 30);
+            player.Profeciencies.AddSkillLevel(player.PrimaryWeapon.ObjectName, 30);
+
             // Set the starting attributes to the start weapon requirements
             player.AddAttributePoints(player.PrimaryWeapon.AttributeRequirements);
             // Always add 1 to CON.

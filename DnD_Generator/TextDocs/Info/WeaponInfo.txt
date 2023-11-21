@@ -23,8 +23,8 @@ TO_HIT:
 	realChance = baseChance * (majAttrPercent+(minAttrPercent/2)) * (0.5+fatiguePercent)
 	max				= 1.5 * 1.5 * 1.5 = 337.5%
 	fatiguedMax		= 1.5 * 1.5 * 0.5 = 112.5%
-	minSkill100		= 0.45 * 1.5 * 1.5 = 101.25 (30 general, 30 specific)
-	minFatigue100	= 1.34 * 1.5 * 0.5 = 100.5% (90 general, 90 specific)
+	minSkill100		= 0.45 * 1.5 * 1.5 = 101.25% (30 general, 30 specific)
+	minFatigue100	= 1.34 * 1.5 * 0.5 = 100.5%  (90 general, 90 specific)
 
 Fatigue Cost
 	Weapons cost fatigue to swing, the exact amount depends on how much they weigh.
