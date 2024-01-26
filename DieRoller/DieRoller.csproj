@@ -10,6 +10,9 @@
     <FileVersion>1.0.0.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\CommandEngine\CommandEngine.csproj" />
   </ItemGroup>
   <ItemGroup>
