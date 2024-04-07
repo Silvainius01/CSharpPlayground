@@ -1,0 +1,42 @@
+[
+    {
+        "amount": "6",
+        "character_id": "5429383392948786321",
+        "event_name": "GainExperience",
+        "experience_id": "99",
+        "loadout_id": "31",
+        "other_id": "8631422002",
+        "team_id": "3",
+        "timestamp": "1704256963",
+        "world_id": "17",
+        "zone_id": "2"
+    },
+    {
+        "attacker_character_id": "5428998138674828609",
+        "attacker_fire_mode_id": "352",
+        "attacker_loadout_id": "19",
+        "attacker_vehicle_id": "7",
+        "attacker_weapon_id": "4302",
+        "character_id": "5428936604143819057",
+        "character_loadout_id": "13",
+        "event_name": "Death",
+        "is_headshot": "0",
+        "timestamp": "1589678664",
+        "world_id": "17",
+        "zone_id": "196969"
+    },
+    {
+        "attacker_character_id": "5428297992012007729",
+        "attacker_loadout_id": "6",
+        "attacker_vehicle_id": "8",
+        "attacker_weapon_id": "0",
+        "character_id": "5428297992012007729",
+        "event_name": "VehicleDestroy",
+        "facility_id": "0",
+        "faction_id": "2",
+        "timestamp": "1589678673",
+        "vehicle_id": "8",
+        "world_id": "17",
+        "zone_id": "262505"
+    }
+]

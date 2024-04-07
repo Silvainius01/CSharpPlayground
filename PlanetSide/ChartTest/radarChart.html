@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chart with Hexagon Labels</title>
+    <style>
+        #chart-container {
+            position: relative;
+            background: linear-gradient(to bottom, rgba(16, 17, 18, 0.7) 0%, rgba(16, 17, 18, 0.45) 100%);
+            width: 600px;
+            height: 600px;
+        }
+
+        #myChart {
+            width: 500px;
+            height: 500px;
+        }
+
+        .chart-label {
+            position: absolute;
+            color: white;
+            transform: translate(-50%, -50%);
+            white-space: nowrap;
+            font-size: 25px;
+            /* Adjust font size as needed */
+            font-family: Roboto;
+            -webkit-text-stroke: 0.3px #141719;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="chart-container">
+        <canvas id="myChart"></canvas>
+        <div id="chart-labels">
+        </div>
+    </div>
+
+    <script src="./TeamStats.json"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const radius = 270; // The distance from the center of the hexagon to each point
+
+        const labels = ['HOLDS', 'COHESION', 'INFANTRY', 'ARMOR', 'CHEESE', 'A2A'];
+        const labelRotations = [0, 40, -40, 0, 40, -40]; // Degrees to rotate each label
+
+        const labelPositions = labels.map((label, i) => {
+            // Calculate the angle for hexagon points (starting from the top point)
+            const angle = (Math.PI / 3 * i) - Math.PI / 2;
+            // Calculate the label's x and y position
+            const x = radius * Math.cos(angle);
+            const y = radius * Math.sin(angle);
+            return {
+                label,
+                x,
+                y,
+                rotation: labelRotations[i]
+            };
+        });
+
+        labelPositions.forEach((position) => {
+            const labelDiv = document.createElement('div');
+            labelDiv.textContent = position.label;
+            labelDiv.classList.add('chart-label');
+            labelDiv.style.transform =
+                `translate(-50%, -50%) translate(${position.x}px, ${position.y}px) rotate(${position.rotation}deg)`;
+            labelDiv.style.left = '50%'; // Start from the center
+            labelDiv.style.top = '50%'; // Start from the center
+
+            // Append to the chart labels container
+            document.getElementById('chart-labels').appendChild(labelDiv);
+        });
+
+        const ctx = document.getElementById('myChart').getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Outfit1',
+                    data: [1, 1, 1, 1, 1, 1],
+                    fill: true,
+                    backgroundColor: 'rgba(37, 196, 217, 0.6)',
+                    borderColor: 'rgb(3, 127, 129)',
+                    pointHitRadius: 0,
+                    pointRadius: 0
+                }, {
+                    label: 'Outfit2',
+                    data: [1, 1, 1, 1, 1, 1],
+                    fill: true,
+                    backgroundColor: 'rgba(250, 38, 60, 0.6)',
+                    borderColor: 'rgb(200, 1, 1)',
+                    pointHitRadius: 0,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                },
+                layout: {
+                    padding: 50
+                },
+                scales: {
+                    r: {
+                        ticks: {
+                            stepSize: 1,
+                            count: 5,
+                            display: false
+                        },
+                        angleLines: {
+                            display: false
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 7,
+                        grid: {
+                            color: 'white',
+                            lineWidth: [0.7, 2, 3, 4.5, 6]
+                        },
+                        pointLabels: {
+                            display: false,
+                            color: 'white',
+                            font: {
+                                size: 20
+                            }
+                        },
+                        pointHitRadius: 0
+                    },
+                },
+            },
+        });
+
+        function UpdateChart(teamStats) {
+            for (let i = 0; i < chart.data.datasets.length; i++) {
+                chart.data.datasets[i].label = teamStats[i].TeamName;
+                chart.data.datasets[i].data = [
+                    teamStats[i].KDR, 0.5,
+                    teamStats[i].HSR, 0.5,
+                    teamStats[i].vKDR, 0.5
+                ];
+            }
+            chart.update()
+        }
+
+        setInterval(() => {
+            fetch("TeamStats.json")
+                .then(response => response.json())
+                .then(teamStats => UpdateChart(teamStats));
+        }, 5000);
+    </script>
+</body>
+
+</html>

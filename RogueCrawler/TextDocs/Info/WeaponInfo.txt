@@ -74,9 +74,14 @@ Weapon Enchantments
 	Enchantments come in three flavors: Passive, Active, and Hybrid
 	Like all magic, enchantments consume mana. Just like creatures, enchanted weapon has an internal mana pool that it can draw from.
 	A weapon's mana pool slowly regenerates over time as it absorbs it from the enviornment, but can be manually infused from any source if you have the means to tap it.
-	Passive enchantments are generally weak, as they drain mana at a constant rate. This typically, but not neccessarily, limits them to the natual absorbtion rate of the weapon.
-	Active enchantments operate much like spells, they consume X amount of mana all at once to produce an effect.
-	Hybrid enchantments are the most common, and blend the two types, a typical example being a damage enchantment that has a passive base effect, and an active burst.
+	Enchantment Types:
+		- Passive enchantments are generally weak, and drain mana at a constant rate. This typically, but not neccessarily, limits them to the natual absorbtion rate of the weapon.
+		- Innate ecchantments are a special class of passive enchantment. They are enchantments that are imbued into a weapon as a part of the forging process, and are poorly understood.
+		  These enchantments are often benign, producing largely cosmetic effects that dont affect the effectiveness of the weapon, but due to their nature, can still provide practical use.
+		  An example of an innate enchantment would be Sting and Glamdring from LotR, where the a specific elven kingdom of old hated Orcs so vehemetly that their weapons shine blue when they are nearby. 
+		- Active enchantments operate much like spells, they consume X amount of mana all at once to produce an effect.
+		- Hybrid enchantments are the most common, and blend the two types, a typical example being a damage enchantment that has a passive base effect, and an active burst.
+			- In world, hybrid enchantments are explained as a "weave", where two enchantments are woven together into a more effiecient, bonded pair. But as a mechanic, it is functionally a third type.
 
 Divine Weapons
 	Divine weapons are artifacts created, forged, blessed, or inhabited by a god.
