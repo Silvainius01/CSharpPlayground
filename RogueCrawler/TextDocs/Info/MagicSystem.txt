@@ -1,0 +1,104 @@
+Desires:
+
+Player chooses a theme, and the game enforces that choice. 
+	- Follow a skill tree
+	- The PC can still grind out all skills, but specialization bonuses are limited are better used in a single area.
+Player should be slowly exposed to the magic overtime, limitng information overload. 
+	- Add an option to reveal everything for advanced/experienced players.
+Spell Creation ala Morrowind
+	- Can create new spells from a list of known effects.
+All spells belong to a school:
+	- Kinomancy (needs better name?)
+		- Elemental magic. Often deals with the manipulation of physical objects or forces.
+		- Telekinesis, lightning bolt, fireball, water manipulation, active camo (lesser invisibility), sound manipulation, etc.
+		- Kineticists subdivide into elemets:
+			- Fire, Water, Earth, Air
+	- Biomancy
+		- The magic of the living. Deals with diseases, toxins, and body manipulation. Both good and ill. 
+		- Healing spells, poison spells, breaking or twisting limbs. Limited illusion capabilites by directly affecting the mind's structure or chemistry. Half of the necromancy equation
+	- Astromancy
+		- Space and time manipulation, astral magic often accomplishes its goals indirectly.
+		- Slow down or speed up time, speed manipulation, teleportation, create true vacuums, gravity manipulation, etc.
+	- Arcomancy
+		- True magic, the power of the gods themselves. 
+		- Mage armor, clairvoyance, eldritch blast, external illusions, object creation, the other half of necromancy etc.
+		- Becoming knowledgable in Arcomancy will unlock more powerful spells and abilities in the other schools (doesnt require spec points)
+
+Effects
+	- Biomancy (Only affects biological targets unless stated otherwise)
+		- Restore HP
+			- Restore HP by X points for Y seconds
+		- Restore FP 
+			- Restore FP by X points for Y seconds
+		- Damage HP (Poison Dmg)
+			- Damage HP by X points for Y seconds
+		- Damage FP (Poison Dmg)
+			- Damage FP by X points for Y seconds
+		- Damage MP (Poison Dmg)
+			- Damage MP by X points for Y seconds
+		- Resist Poison Damage
+			- Reduce damage by X%
+		- Resist Disease
+			- Reduces symptoms by X%
+			- Further breaks down by strain.
+		- Resist Toxin
+			- Reduces symptoms by X%
+			- Further divides by toxin.
+		- Convert HP to FP (Self: True Dmg, Other: Physical)
+			- Damage HP by X points, Restore FP by Y points
+		- Convert HP to MP (Self: True Dmg, Other: Physical)
+			- Damage HP by X points, Restore MP by Y points
+		- Absorb HP (Physical dmg)
+			- Target loses X hp, and you gain an equal amount.
+		- Absorb FP
+			- Target loses X fp, and you gain an equal amount.
+		- Absorb MP
+			- Target loses X mp, and you gain an equal amount.
+		- Absorb Attribute
+			- Target loses X points of Y attribute for Z seconds, and you gain an equal amount for the same time. 
+			- Dispelled if the target dies.
+		- Consume Dead
+			- Destroys the target body.
+			- Restore X% of the targets orginal max HP, FP, and MP pools.
+			- Gain Y% of the targets attributes for Z seconds.
+		- Animate Dead
+			- Raise a creature of X levels or lower from the dead for Y seconds.
+		- Dominate Dead
+			- Raise a creature of X levels or lower from the dead permanently.
+		- Passify Creature
+			- Force a creature of X levels or lower to be neutral towards you for Y seconds
+			- Performing an action on the creature will dispel the effect. Less effective on intelligent targets.
+		- Fear
+			- Creatures of X levels or lower will run up to Y feet from the caster.
+			- This spell will alert the target of the casters location on succesful cast.
+		- Weakness
+			- Actions taken by the creature will cost X% more FP
+		- Paralysis
+			- Creature cannot make physical actions for X seconds.
+			- Less effective on stronger targets.
+		- Damage Attribute
+			- Reduce X attribute by Y points for Z seconds
+		- Madness
+			- Creatures of X levels or lower will attack the closest creature they detect
+		- Hallucination: Sound
+			- Causes target to hallucinate rustling sounds for X seconds.
+			- The target will investigate the hallucination, wandering in a random direction behind them.
+		- Hallucination: Deafen
+			- Causes target to hallucinate deafening, painful sounds for X seconds.
+			- Target will collapse and scream, disabling them but alerting others.
+		- Hallucination: Vision
+			- Target will hallucinate lights or other movements for X seconds.
+			- Target will investigate, and wander in a random direction in front of them.
+		- Hallucination: Monstrosity
+			- Target will hallucinate a horrifying threat for X seconds.
+			- Target will scream and flee in a random direction behind them, alerting others.
+		- Deafen
+			- Target will lose hearing for X seconds.
+		- Blind
+			- Target will lose vision for X seconds
+			- People tend to panic, chance to alert others
+		- Inflict Disease
+			- Infects the target with a random local disease. 
+			- Multiple casts will either extend the duration/potency of an infection, or cause a new one.
+		
+		

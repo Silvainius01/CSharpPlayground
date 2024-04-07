@@ -1,0 +1,48 @@
+Enchantments
+	Enchantments come in three flavors: Passive, Active, and Hybrid
+	Like all magic, enchantments consume mana. Just like creatures, enchanted weapon has an internal mana pool that it can draw from.
+	A weapon's mana pool slowly regenerates over time as it absorbs it from the enviornment, but can be manually infused from any source if you have the means to tap it.
+	Enchantment Types:
+		- Passive enchantments are generally weak, and drain mana at a constant rate. This typically, but not neccessarily, limits them to the natual absorbtion rate of the weapon.
+		- Innate ecchantments are a special class of passive enchantment. They are enchantments that are imbued into a weapon as a part of the forging process, and are poorly understood.
+		  These enchantments are often benign, producing largely cosmetic effects that dont affect the effectiveness of the weapon, but due to their nature, can still provide practical use.
+		  An example of an innate enchantment would be Sting and Glamdring from LotR, where the a specific elven kingdom of old hated Orcs so vehemetly that their weapons shine blue when they are nearby. 
+		- Active enchantments operate much like spells, they consume X amount of mana all at once to produce an effect.
+		- Hybrid enchantments are the most common, and blend the two types, a typical example being a damage enchantment that has a passive base effect, and an active burst.
+			- In world, hybrid enchantments are explained as a "weave", where two enchantments are woven together into a more effiecient, bonded pair. But as a mechanic, it is functionally a third type.
+
+
+Innate Enchantments
+	Innate enchantments are imbued into an item by the forger automatically as long as they meet specific conditions. A blacksmith cannot choose to imbue it, nor can they can choose not to. It is a fundamental part of life. 
+	Innate enchantments can be found at the end of any physical and creative process, most commonly forging or blacksmiting, but can include weaving, leatherworking, sewing, carpentry, carving, etc.
+	Innate enchantments *require* physical proxymity with the items creator. Designing something on blue prints and then having it made by machines even a few meters away will nullify this phenomena. 
+	Since innate enchanments are derived from proxmity, a famed engineer can design the most perfect tool for a given purpose, but the enchantment imbued onto it will come from the person who actually brings builds it.
+	Innate enchantments also require a significant amount of time invested into brining the item to life. This is why simple nails are rarely imbued, while intricate, complex weapons are commonly imbued.
+	Innate enchantments are more powerful when the creator is alone with it. This is why collaborative creations, regardless of intensity or duration, are rarely imbued; everyone's mana and conflicting passions, opinions, expereinces, and mana properties cancel out.
+	
+	Known innate enchantments:
+	- Hatred
+		Imbued when a persons hatred level for something is high enough, and actively channeled during creation.
+		Hatred enchantments always result in glowing while in proximity to the thing it relates to. 
+		If strong enough, hatred enchantments that deal with physical things can cause physical or magical effects. Creatures can experience emotional effects when close enough, and living things in general can even be poisoned or harmed through contact.
+		The trigger be a type of object, creature, plant, place, or concept. It can also be a *specific* object, creature, person, etc.
+		Famous examples:
+			Sting and Glamdring shining blue in the presence of Orcs
+			A holy pendant glowing in the presence of sin (as understood by its creator)
+			A ring that glows in ultraviolet and causes spiders within a few feet to scitter away in fear
+			Clothes who's seams glow a cool seafom color when its hot outside
+			A mansion that causes members of the ruling class to feel uneasy and naeusous while inside.
+
+Natural Enchantment
+	Natural enchantments are enchantments that are derived from the properties of the materials themselves.
+	Iron is the most easily enchanted material, and as a result, most natural enchantments are found in iron ores and other compounds.
+	Natural enchantments take up lots of "bandwidth" in items made from them, making additional enchantments harder to add, or limiting their potency.
+		- This means the most powerful enchantments are found on items made from mundane materials, as they have more room imbuement.
+
+	Examples:
+		- Mythryl is actaully just naturally occuring, enchanted iron, and can be up to half its weight, and create alloys such as steel that are twice as strong. 
+		  Since its just normal iron, you can do anything with it that you would with mundane iron, and get similar results.
+		- Adamantine, similar to Mythryl, is enchanted titanium, and is the strongest known natural enchantment. It is effectively impossible to forge, and is typically casted before being refined using reductive techniques
+		- Scarlet Ore inherits the magical properties of the sun, and as a result is used to forge weapons to fight vampires, undead, and other fiends adverse to daylight. (Demon Slayer reference)
+		- Aether is enchanted mist, most often found around waterfalls in specific locations. This water can infuse the consumers with a variety of neurologic effects, such as faster learning, reflexes, and mental capacity. A downside is it makes one more sensitive to electricity.
+		
