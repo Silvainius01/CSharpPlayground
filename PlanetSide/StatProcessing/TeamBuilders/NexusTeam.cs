@@ -18,9 +18,18 @@ namespace PlanetSide
 {
     public class NexusTeam : PlanetSideTeam
     {
-        public NexusTeam(int teamSize, string teamName, string faction, string world) : base(teamSize, teamName, faction, world)
+        Dictionary<string, JsonElement> nexusTeamPlayers;
+
+        public NexusTeam(int teamSize, string teamName, string faction, string world, CensusHandler handler) 
+            : base(teamSize, teamName, faction, world, handler)
         {
             streamKey = $"NexusTeam_{teamName}_PlayerEventStream";
+        }
+
+        protected override IDictionary<string, JsonElement> GetTeamDict()
+        {
+            nexusTeamPlayers = new Dictionary<string, JsonElement>();
+            return nexusTeamPlayers;
         }
 
         public async Task GenerateRandomTeam(string streamKey, CensusHandler handler)
@@ -41,9 +50,9 @@ namespace PlanetSide
                 {
                     filled = true;
 
-                    teamPlayers.Clear();
+                    nexusTeamPlayers.Clear();
                     foreach (var kvp in playersConcurrent)
-                        teamPlayers.Add(kvp.Key, kvp.Value);
+                        nexusTeamPlayers.Add(kvp.Key, kvp.Value);
 
                     Logger.LogInformation("Genrated NexusTeam {0} with {1} players", TeamName, TeamSize);
                 }
@@ -124,7 +133,7 @@ namespace PlanetSide
         {
             return new CensusStreamSubscription()
             {
-                Characters = teamPlayers.Keys,
+                Characters = nexusTeamPlayers.Keys,
                 Worlds = new[] { World },
                 EventNames = new[] { "Death", "GainExperience", "VehicleDestroy" },
                 LogicalAndCharactersWithWorlds = true
@@ -132,12 +141,16 @@ namespace PlanetSide
         }
 
 
-        protected override void OnStreamStart(CensusHandler handler) { }
-        protected override void OnStreamStop(CensusHandler handler) { }
-        protected override bool IsEventValid(CensusHandler handler, ICensusEvent censusEvent)
+        protected override void OnStreamStart() { }
+        protected override void OnStreamStop() { }
+        protected override void OnEventProcessed(ICensusEvent payload) { }
+
+        protected override bool IsEventValid(ICensusEvent censusEvent)
         {
-            return teamPlayers.ContainsKey(censusEvent.CharacterId) 
-                || teamPlayers.ContainsKey(censusEvent.OtherId);
+            return TeamPlayers.ContainsKey(censusEvent.CharacterId) 
+                || TeamPlayers.ContainsKey(censusEvent.OtherId);
         }
+
+        
     }
 }

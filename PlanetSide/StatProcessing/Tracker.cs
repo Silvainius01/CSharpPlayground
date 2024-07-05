@@ -12,31 +12,36 @@ namespace PlanetSide
 {
     public class Tracker
     {
-        static string TeamStatsJsonPath = $"./ChartTest/TeamStats.json";
+        public static CensusHandler Handler = new CensusHandler();
+        private static string TeamStatsJsonPath = $"./ChartTest/TeamStats.json";
         private static readonly ILogger<Tracker> Logger = Program.LoggerFactory.CreateLogger<Tracker>();
 
         public static void StartTracker()
         {
             Logger.LogInformation("Creating Handler");
-            CensusHandler handler = new CensusHandler();
-            List<PlanetStats> teamStats = new List<PlanetStats>();
             StringBuilder teamReportBuilder = new StringBuilder();
+            List<PlanetStats> teamStats = new List<PlanetStats>();
+            List<PlanetSideTeam> activeTeams = new List<PlanetSideTeam>();
 
-            PopulateTables(handler);
-            var teams = GetNexusTeams(handler);
+            PopulateTables(Handler);
 
-            foreach (var team in teams)
+            //activeTeams.AddRange(GetNexusTeams(handler));
+            activeTeams.Add(new FactionTeam("Vanu Sovereignty", "1", "17", Handler));
+            activeTeams.Add(new FactionTeam("New Conglomerate", "2", "17", Handler));
+            activeTeams.Add(new FactionTeam("Terran Republic", "3", "17", Handler));
+
+            foreach (var team in activeTeams)
             {
-                team.StartStream(handler);
-                teamStats.Add(team.teamStats);
+                team.StartStream();
+                teamStats.Add(team.TeamStats);
             }
 
             while (true)
             {
                 teamReportBuilder.Clear();
-                foreach (var team in teams)
+                foreach (var team in activeTeams)
                 {
-                    var stats = team.teamStats;
+                    var stats = team.TeamStats;
 
                     teamReportBuilder.AppendLine($"Team: {team.TeamName}");
                     teamReportBuilder.AppendLine($"\tInfantry: ");
@@ -74,9 +79,9 @@ namespace PlanetSide
 
             string world = "all";
             string key = "OutfitWars_CharacterEvents";
-            NexusTeam vs = new NexusTeam(48, "Vanu Sovereignty", "1", world);
-            NexusTeam tr = new NexusTeam(48, "Terran Republic", "2", world);
-            NexusTeam nc = new NexusTeam(48, "New Conglomerate", "3", world);
+            NexusTeam vs = new NexusTeam(48, "Vanu Sovereignty", "1", world, handler);
+            NexusTeam nc = new NexusTeam(48, "New Conglomerate", "2", world, handler);
+            NexusTeam tr = new NexusTeam(48, "Terran Republic", "3", world, handler);
             CensusWebsocket socket = handler.AddSubscription(key, new CensusStreamSubscription()
             {
                 Characters = new[] { "all" },
@@ -108,8 +113,6 @@ namespace PlanetSide
                     writer.WriteLine(json);
                 }
             }
-
-
         }
     }
 }

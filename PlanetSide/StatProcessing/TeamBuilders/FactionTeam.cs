@@ -13,136 +13,83 @@ using System.Threading;
 using System.Reflection.PortableExecutable;
 using System.Xml;
 using DaybreakGames.Census.Operators;
+using System.Collections.ObjectModel;
+using System.Reactive.Joins;
 
 namespace PlanetSide
 {
     public class FactionTeam : PlanetSideTeam
     {
-        HashSet<string> nonFactionPlayers = new HashSet<string>();
+        ConcurrentDictionary<string, byte> nonFactionPlayers = new ConcurrentDictionary<string, byte>();
+        ConcurrentDictionary<string, JsonElement> playersConcurrent = new ConcurrentDictionary<string, JsonElement>();
+        static Dictionary<string, CensusStreamSubscription> WorldSubscriptions = new Dictionary<string, CensusStreamSubscription>();
 
-        public FactionTeam(string teamName, string faction, string world) : base(-1, teamName, faction, world)
+        public FactionTeam(string teamName, string faction, string world, CensusHandler handler)
+            : base(-1, teamName, faction, world, handler)
         {
-            streamKey = $"NexusTeam_{teamName}_PlayerEventStream";
-        }
-
-        public async Task GenerateRandomTeam(string streamKey, CensusHandler handler)
-        {
-            bool filled = false;
-            object fillLock = new object();
-            object charLock = new object();
-            ConcurrentDictionary<string, JsonElement> playersConcurrent = new ConcurrentDictionary<string, JsonElement>(4, TeamSize);
-
-            Logger.LogInformation("Genrating NexusTeam {0}...", TeamName);
-
-            void OnTeamFilled()
-            {
-                if (filled)
-                    return;
-
-                lock (fillLock)
-                {
-                    filled = true;
-
-                    teamPlayers.Clear();
-                    foreach (var kvp in playersConcurrent)
-                        teamPlayers.Add(kvp.Key, kvp.Value);
-
-                    Logger.LogInformation("Genrated NexusTeam {0} with {1} players", TeamName, TeamSize);
-                }
-            }
-            bool AddPlayer(string characterId, JsonElement characterData)
-            {
-                if (playersConcurrent.TryAdd(characterId, characterData) && playersConcurrent.Count >= TeamSize)
-                {
-                    OnTeamFilled();
-                    return true;
-                }
-
-                return false;
-            }
-
-            // Add a callback to generate the team. Returns true when the team is full.
-            handler.AddActionToSubscription(streamKey, response =>
-            {
-                string eventType;
-                JsonElement payload;
-
-                // Skip if malformed or team full
-                if (!response.Message.RootElement.TryGetProperty("payload", out payload)
-                || !payload.TryGetStringElement("event_name", out eventType))
-                    return false;
-                if (playersConcurrent.Count >= TeamSize)
-                {
-                    OnTeamFilled();
-                    return true;
-                }
-
-
-                if (eventType == "Death" || eventType == "VehicleDestroy")
-                {
-                    string[] characterIds = new string[2];
-
-                    // Skip if malformed
-                    if (!payload.TryGetStringElement("character_id", out characterIds[0])
-                    || !payload.TryGetStringElement("attacker_character_id", out characterIds[1]))
-                        return false;
-
-                    Array.Sort(characterIds); // List always returns sorted ascending
-                    var query = handler.GetCharactersQuery(characterIds).ShowFields("faction_id", "character_id");
-                    var charTask = query.GetListAsync();
-                    charTask.Wait();
-
-                    int i = 0;
-                    var characters = charTask.Result;
-                    foreach (var c in characters)
-                    {
-                        if (c.TryGetStringElement("faction_id", out string cFaction)
-                        && cFaction == Faction
-                        && AddPlayer(characterIds[i], c)) // We wont know the order 
-                            return true;
-                        ++i;
-                    }
-                }
-                else
-                {
-                    string characterId;
-                    bool isCharacterValid = payload.TryGetStringElement("character_id", out characterId)
-                        && !playersConcurrent.ContainsKey(characterId);
-
-                    if (isCharacterValid)
-                    {
-                        var cData = handler.GetCharacter(characterId);
-                        return AddPlayer(characterId, cData);
-                    }
-                }
-
-                return false;
-            });
-
-            await Task.Run(() => { while (!filled) ; return true; });
+            streamKey = $"World{world}_CharacterEventStream";
         }
 
         protected override CensusStreamSubscription GetStreamSubscription()
         {
-            return new CensusStreamSubscription()
-            {
-                Characters = teamPlayers.Keys,
-                Worlds = new[] { World },
-                EventNames = new[] { "Death", "GainExperience", "VehicleDestroy" },
-                LogicalAndCharactersWithWorlds = true
-            };
+            if (!WorldSubscriptions.ContainsKey(World))
+                WorldSubscriptions.Add(World, new CensusStreamSubscription()
+                {
+                    Characters = new[] { "all" },
+                    Worlds = new[] { World },
+                    EventNames = new[] { "Death", "GainExperience", "VehicleDestroy" },
+                    LogicalAndCharactersWithWorlds = true
+                });
+            return WorldSubscriptions[World];
         }
 
-        protected override void OnStreamStart(CensusHandler handler) { }
-        protected override void OnStreamStop(CensusHandler handler) { }
-        protected override bool IsEventValid(CensusHandler handler, ICensusEvent payload)
+        protected override IDictionary<string, JsonElement> GetTeamDict()
+        {
+            return playersConcurrent;
+        }
+
+        protected override void OnStreamStart() { }
+        protected override void OnStreamStop() { }
+        protected override void OnEventProcessed(ICensusEvent payload)
+        {
+            // Syncronize dicts
+            //if (addedPlayers.Count > 0)
+            //    while(addedPlayers.TryDequeue(out var kvp))
+            //        _teamPlayers.Add(kvp.Key, kvp.Value);
+        }
+
+        protected override bool IsEventValid(ICensusEvent payload)
         {
             // Valid if it concerns our players.
-            if (teamPlayers.ContainsKey(payload.CharacterId) || teamPlayers.ContainsKey(payload.OtherId))
+            if (playersConcurrent.ContainsKey(payload.CharacterId)
+            || playersConcurrent.ContainsKey(payload.OtherId))
                 return true;
 
-            bool playerOneKnown = nonFactionPlayers.Contains(payload.CharacterId);
-            bool playerTwoKnown = nonFactionPlayers.Contains(payload.OtherId);
+            return UnknownCharTable(payload);
+        }
+
+        bool UnknownCharTable(ICensusEvent payload)
+        {
+            bool teamPlayerFound = false;
+
+            if (PlayerTable.TryGetOrAddCharacter(payload.CharacterId, out var cData1) && cData1.Faction == Faction)
+            {
+                teamPlayerFound = true;
+                playersConcurrent.TryAdd(payload.CharacterId, default(JsonElement));
+            }
+            if (PlayerTable.TryGetOrAddCharacter(payload.CharacterId, out var cData2) && cData2.Faction == Faction)
+            {
+                teamPlayerFound = true;
+                playersConcurrent.TryAdd(payload.CharacterId, default(JsonElement));
+            }
+
+            return true;
+        }
+
+        bool UnknownCharQuery(ICensusEvent payload)
+        {
+            bool playerOneKnown = nonFactionPlayers.ContainsKey(payload.CharacterId);
+            bool playerTwoKnown = nonFactionPlayers.ContainsKey(payload.OtherId);
             CensusQuery query = null;
 
             if (!playerOneKnown)
@@ -170,14 +117,14 @@ namespace PlanetSide
             {
                 // We dont know the returned order, so gotta extract the ID.
                 if (character.TryGetStringElement("character_id", out string id)
-                &&  character.TryGetStringElement("faction_id", out string faction))
+                && character.TryGetStringElement("faction_id", out string faction))
                 {
                     if (faction == Faction)
                     {
-                        teamPlayers.Add(id, character);
+                        playersConcurrent.TryAdd(id, character);
                         factionPlayerFound = true;
                     }
-                    else nonFactionPlayers.Add(id);
+                    else nonFactionPlayers.TryAdd(id, 0);
                 }
             }
 

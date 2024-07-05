@@ -4,8 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
+using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,24 +18,28 @@ namespace PlanetSide
         public string Faction { get; private set; }
         public string World { get; private set; }
         public string Zone { get; private set; } = string.Empty;
-        public Dictionary<string, JsonElement> teamPlayers;
-        public PlanetStats teamStats;
+        public ReadOnlyDictionary<string, JsonElement> TeamPlayers { get; private set; }
+        public PlanetStats TeamStats { get; private set; }
+
+        public bool IsStreaming { get; private set; }
         public bool IsProccessing { get; private set; }
 
-        protected readonly ILogger<PlanetSideTeam> Logger;
-        protected ConcurrentQueue<ICensusEvent> events;
-
         protected string streamKey = string.Empty;
-        protected CancellationTokenSource tokenSource;
+        protected readonly ILogger<PlanetSideTeam> Logger;
+        protected CensusHandler handler;
 
-        public PlanetSideTeam(int teamSize, string teamName, string faction, string world)
+        private ConcurrentQueue<ICensusEvent> events;
+        private CancellationTokenSource tokenSource;
+
+        public PlanetSideTeam(int teamSize, string teamName, string faction, string world, CensusHandler handler)
         {
             this.Faction = faction;
             this.TeamName = teamName;
             this.TeamSize = teamSize;
             this.World = world;
-            teamPlayers = new Dictionary<string, JsonElement>(teamSize);
-            teamStats = new PlanetStats();
+            this.handler = handler;
+            TeamPlayers = new ReadOnlyDictionary<string, JsonElement>(GetTeamDict());
+            TeamStats = new PlanetStats();
 
             events = new ConcurrentQueue<ICensusEvent>();
             Logger = Program.LoggerFactory.CreateLogger<PlanetSideTeam>();
@@ -45,18 +48,20 @@ namespace PlanetSide
             tokenSource = new CancellationTokenSource();
         }
 
-        public void StartStream(CensusHandler handler)
+        public void StartStream()
         {
             handler.AddSubscription(streamKey, GetStreamSubscription());
             handler.AddActionToSubscription(streamKey, ProcessCensusEvent);
             handler.ConnectClientAsync(streamKey).Wait();
             Task.Run(() => ProcessQueue(tokenSource.Token), tokenSource.Token);
             Logger.LogInformation("Team {0} Began processing player events", TeamName);
+            IsStreaming = true;
         }
-        public void StopStream(CensusHandler handler)
+        public void StopStream()
         {
             tokenSource.Cancel();
             handler.DisconnectSocketAsync(streamKey).Wait();
+            IsStreaming = false;
         }
 
         private bool ProcessCensusEvent(SocketResponse response)
@@ -140,7 +145,6 @@ namespace PlanetSide
             if (censusEvent is not null && IsEventValid(censusEvent))
                 events.Enqueue(censusEvent);
 
-
             return false;
         }
 
@@ -154,31 +158,33 @@ namespace PlanetSide
                 // Yield if we burn through the queue or fail a dequeue
                 if (events.Count == 0 || !events.TryDequeue(out var payload))
                 {
-                    // Using a periodic timer is WAY MORE cpu effiecient. Usage down from 65% to 
+                    // Using a periodic timer is WAY MORE cpu effiecient. Usage down from 65% idle to like 0.3% 
                     // await Task.Yield();
                     await pTimer.WaitForNextTickAsync(ct);
                     continue;
                 }
 
+                OnEventProcessed(payload);
+
                 switch (payload.EventType)
                 {
                     case CensusEventType.GainExperience:
                         var expEvent = (ExperiencePayload)payload;
-                        teamStats.AddExperience(ref expEvent);
+                        TeamStats.AddExperience(ref expEvent);
                         break;
                     case CensusEventType.Death:
                         var deathEvent = (DeathPayload)payload;
-                        if (teamPlayers.ContainsKey(deathEvent.CharacterId))
-                            teamStats.AddDeath(ref deathEvent, teamPlayers.ContainsKey(deathEvent.OtherId));
-                        else if (teamPlayers.ContainsKey(deathEvent.OtherId))
-                            teamStats.AddKill(ref deathEvent);
+                        if (TeamPlayers.ContainsKey(deathEvent.CharacterId))
+                            TeamStats.AddDeath(ref deathEvent, TeamPlayers.ContainsKey(deathEvent.OtherId));
+                        else if (TeamPlayers.ContainsKey(deathEvent.OtherId))
+                            TeamStats.AddKill(ref deathEvent);
                         break;
                     case CensusEventType.VehicleDestroy:
                         var destroyEvent = (VehicleDestroyPayload)payload;
-                        if (teamPlayers.ContainsKey(destroyEvent.CharacterId))
-                            teamStats.AddVehicleDeath(ref destroyEvent, teamPlayers.ContainsKey(destroyEvent.OtherId));
-                        else if (teamPlayers.ContainsKey(destroyEvent.OtherId))
-                            teamStats.AddVehicleKill(ref destroyEvent);
+                        if (TeamPlayers.ContainsKey(destroyEvent.CharacterId))
+                            TeamStats.AddVehicleDeath(ref destroyEvent, TeamPlayers.ContainsKey(destroyEvent.OtherId));
+                        else if (TeamPlayers.ContainsKey(destroyEvent.OtherId))
+                            TeamStats.AddVehicleKill(ref destroyEvent);
                         break;
                 }
             }
@@ -186,15 +192,16 @@ namespace PlanetSide
             IsProccessing = false;
         }
 
-
-        protected abstract void OnStreamStart(CensusHandler handler);
-        protected abstract void OnStreamStop(CensusHandler handler);
-        protected abstract bool IsEventValid(CensusHandler handler, ICensusEvent payload);
+        protected abstract IDictionary<string, JsonElement> GetTeamDict();
+        protected abstract void OnStreamStart();
+        protected abstract void OnStreamStop();
+        protected abstract void OnEventProcessed(ICensusEvent payload);
+        protected abstract bool IsEventValid(ICensusEvent payload);
         protected abstract CensusStreamSubscription GetStreamSubscription();
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            tokenSource.Dispose();
         }
     }
 }
