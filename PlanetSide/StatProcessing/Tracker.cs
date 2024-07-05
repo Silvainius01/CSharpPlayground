@@ -19,7 +19,7 @@ namespace PlanetSide
         {
             Logger.LogInformation("Creating Handler");
             CensusHandler handler = new CensusHandler();
-            List<TeamStats> teamStats = new List<TeamStats>();
+            List<PlanetStats> teamStats = new List<PlanetStats>();
             StringBuilder teamReportBuilder = new StringBuilder();
 
             PopulateTables(handler);
@@ -38,7 +38,7 @@ namespace PlanetSide
                 {
                     var stats = team.teamStats;
 
-                    teamReportBuilder.AppendLine($"Team: {team.teamName}");
+                    teamReportBuilder.AppendLine($"Team: {team.TeamName}");
                     teamReportBuilder.AppendLine($"\tInfantry: ");
                     teamReportBuilder.AppendLine($"\t\t KDR: {stats.Kills} / {stats.Deaths} = {stats.KDR}");
                     teamReportBuilder.AppendLine($"\t\t HSR: {stats.Headshots} / {stats.Kills} = {stats.HSR}");
@@ -72,14 +72,15 @@ namespace PlanetSide
         {
             Logger.LogInformation("Generating Nexus Teams");
 
+            string world = "all";
             string key = "OutfitWars_CharacterEvents";
-            NexusTeam vs = new NexusTeam(48, "Vanu Sovereignty", "1");
-            NexusTeam tr = new NexusTeam(48, "Terran Republic", "2");
-            NexusTeam nc = new NexusTeam(48, "New Conglomerate", "3");
+            NexusTeam vs = new NexusTeam(48, "Vanu Sovereignty", "1", world);
+            NexusTeam tr = new NexusTeam(48, "Terran Republic", "2", world);
+            NexusTeam nc = new NexusTeam(48, "New Conglomerate", "3", world);
             CensusWebsocket socket = handler.AddSubscription(key, new CensusStreamSubscription()
             {
                 Characters = new[] { "all" },
-                Worlds = new[] { "17" },
+                Worlds = new[] { world },
                 EventNames = new[] { "Death", "GainExperience", "VehicleDestroy" },
                 LogicalAndCharactersWithWorlds = true
             });
@@ -97,7 +98,7 @@ namespace PlanetSide
             return new List<NexusTeam>() { vs, tr, nc };
         }
 
-        static async void SendTeamStatsJson(List<TeamStats> teamStats)
+        static async void SendTeamStatsJson(List<PlanetStats> teamStats)
         {
             string json = JsonSerializer.Serialize(teamStats);
             using (FileStream fstream = File.Create(TeamStatsJsonPath))

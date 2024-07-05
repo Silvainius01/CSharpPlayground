@@ -2,7 +2,7 @@
 
 namespace PlanetSide
 {
-    public struct ExperiencePayload : ICensusPayload
+    public struct ExperiencePayload : ICensusEvent
     {
         public string CharacterId { get; set; }
         public string OtherId { get; set; }

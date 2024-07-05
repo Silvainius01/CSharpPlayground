@@ -1,7 +1,7 @@
 ﻿
 namespace PlanetSide
 {
-    public struct DeathPayload : ICensusPayload
+    public struct DeathPayload : ICensusEvent
     {
         /// <summary> The Character who died </summary>
         public string CharacterId { get; set; }
