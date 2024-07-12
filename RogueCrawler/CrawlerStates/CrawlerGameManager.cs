@@ -78,7 +78,7 @@ namespace RogueCrawler
             if (creatureTurnOrder.Count > 1)
             {
                 bool isPlayerDead = false;
-                for (turnIndex = 0; turnIndex < creatureTurnOrder.Count; i++)
+                for (turnIndex = 0; turnIndex < creatureTurnOrder.Count; ++turnIndex)
                 {
                     Creature creature = CurrentTurn.Creature;
 
@@ -491,9 +491,9 @@ namespace RogueCrawler
 
         private void InspectChest(List<string> args)
         {
-            if (BaseActionCommand(CurrentTurn, out string errorMsg)
-            && BaseChestCommand(args, out var chest, out errorMsg))
+            if (BaseChestCommand(args, out var chest, out string errorMsg))
             {
+                ++actionCommands;
                 chest.MarkInspected();
                 Console.WriteLine(chest.InspectString(string.Empty, 0));
             }
@@ -502,8 +502,7 @@ namespace RogueCrawler
 
         private void FightCreature(List<string> args)
         {
-            if (BaseActionCommand(CurrentTurn, out string errorMsg)
-            && BaseCreatureCommand(args, out var creature, out errorMsg))
+            if (BaseCreatureCommand(args, out var creature, out string errorMsg))
             {
                 ++actionCommands;
                 player.Fatigue.AddValue(-player.GetAttackFatigueCost());
@@ -519,9 +518,9 @@ namespace RogueCrawler
 
         private void MoveToRoom(List<string> args)
         {
-            if (BaseActionCommand(CurrentTurn, out string errorMsg) 
-            && BaseRoomCommand(args, out DungeonRoom room, out errorMsg))
+            if (BaseRoomCommand(args, out DungeonRoom room, out string errorMsg))
             {
+                ++actionCommands;
                 PlayerMoveToRoom(room);
             }
             else Console.WriteLine(errorMsg);
@@ -529,12 +528,6 @@ namespace RogueCrawler
 
         public void ExitDungeon(List<string> args)
         {
-            if (!BaseActionCommand(CurrentTurn, out string errorMsg))
-            {
-                Console.WriteLine(errorMsg);
-                return;
-            }
-
             int tabCount = 0;
             int roomExp = player.ExploredRooms.Count * DungeonCrawlerSettings.ExperiencePerExploredRoom;
             int killExp = player.CreaturesKilled * DungeonCrawlerSettings.ExperiencePerCreatureKilled;
@@ -557,6 +550,7 @@ namespace RogueCrawler
                 // attrPoints += player.MaxAttributes.CreatureLevel;
                 CharacterCreator.AttributePrompt(player, levelsGained, attrPoints, tabCount);
             }
+            ++actionCommands;
             dungeonExit = true;
         }
         #endregion
