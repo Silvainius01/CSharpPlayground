@@ -127,6 +127,7 @@ namespace CommandEngine
         {
             strings.Clear();
             builder.Clear();
+            Console.ResetColor();
         }
 
         public int TotalLength()

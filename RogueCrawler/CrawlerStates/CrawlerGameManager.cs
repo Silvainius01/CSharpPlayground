@@ -14,6 +14,7 @@ namespace RogueCrawler
         bool dungeonExit = false;
         string firstDungeonMessage = "Entering first dungeon:";
         SmartStringBuilder staticBuilder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);
+        ColorStringBuilder colorBuilder = new ColorStringBuilder(DungeonCrawlerSettings.TabString);
         List<Creature> creatureTurnOrder = new List<Creature>();
 
         public CrawlerGameManager(DungeonCrawlerManager manager) : base(manager)
@@ -106,7 +107,7 @@ namespace RogueCrawler
                 return CrawlerState.Menu;
             return CrawlerState.Game;
         }
-        public override void EndCrawlerState() { }
+        public override void EndCrawlerState() { colorBuilder.Clear(); }
 
         private void PlayerMoveToRoom(DungeonRoom room)
         {
@@ -134,6 +135,25 @@ namespace RogueCrawler
             else prefix = $"Inside Room {room.Index}: ";
 
             Console.WriteLine(dungeon.InspectRoomString(room, prefix, 0));
+        }
+
+        private void PlayerUpdateFatigue(int tabCount, float amount)
+        {
+            player.Fatigue.AddValue(amount);
+
+            ConsoleColor percentColor = ConsoleColor.Red;
+
+            if (player.Fatigue.Percent > 0.66f)
+                percentColor = ConsoleColor.Green;
+            else if(player.Fatigue.Percent > 0.33f)
+                percentColor = ConsoleColor.Yellow;
+
+            colorBuilder.Clear();
+            colorBuilder.Append(tabCount, $" Current ");
+            colorBuilder.Append("Fatigue", ConsoleColor.Green);
+            colorBuilder.Append(": ", ConsoleColor.Gray);
+            colorBuilder.Append(player.Fatigue.Value.ToString(), percentColor);
+            colorBuilder.AppendLine(player.Fatigue.MaxValue.ToString(), ConsoleColor.Green);
         }
 
         private int PlayerSellLootMenu(int tabCount, out int soldItemCount)
@@ -330,6 +350,7 @@ namespace RogueCrawler
             if (BaseCreatureCommand(args, out var creature, out string errorMsg))
             {
                 ++fightCommands;
+                player.Fatigue.AddValue(-player.GetAttackFatigueCost());
                 if (dungeon.DamageCreature(creature, player.GetCombatDamage()))
                 {
                     ++player.CreaturesKilled;
