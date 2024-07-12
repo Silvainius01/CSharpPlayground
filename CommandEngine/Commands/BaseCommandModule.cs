@@ -12,14 +12,15 @@ namespace CommandEngine
     {
         public string HelpString { get; private set; } = string.Empty;
 
-        protected string DefaultPrompt { get; set; }
-        protected string InvalidCommandMessage = "Not a recognized command!";
-        protected Dictionary<string, TCommand> commands;
+        protected string DefaultPrompt { get; set; } = "Enter next command: ";
+        protected string InvalidCommandMessage { get; set; } = "Not a recognized command!";
+
+        internal Dictionary<string, TCommand> commands = new Dictionary<string, TCommand>();
         protected Dictionary<string, List<TCommand>> commandsByCategory = new Dictionary<string, List<TCommand>>();
 
         private bool helpStringGenerated = false;
 
-        public void Add(string name, TCommand command) 
+        public void Add(TCommand command) 
         {
             if (command.Category is null)
                 throw new ArgumentNullException("A command's category cannot be null!");

@@ -337,7 +337,6 @@ namespace RogueCrawler
         #region Free Commands
         private void PrintHelp(List<string> args)
         {
-            staticBuilder.
         }
 
         private void LookToRoom(List<string> args)

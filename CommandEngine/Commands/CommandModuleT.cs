@@ -20,13 +20,9 @@ namespace CommandEngine
             commands.Add(name, new ConsoleCommand<T>(name, executionDelegate));
         }
 
-        public bool NextCommand(out T result)
-        {
-            return CommandManager.GetNextCommand(DefaultPrompt, true, commands, out result);
-        }
-        public bool NextCommand(string prompt, bool newline, out T result)
-        {
-            return CommandManager.GetNextCommand(prompt, newline, commands, out result);
-        }
+        public override bool NextCommand(bool newline, out T result)
+            => CommandManager.GetNextCommand(DefaultPrompt, newline, commands, out result);
+        public override bool NextCommand(string prompt, bool newline, out T result)
+            => CommandManager.GetNextCommand(prompt, newline, commands, out result);
     }
 }
