@@ -77,7 +77,9 @@ namespace RogueCrawler
         {
             if (creatureTurnOrder.Count > 1)
             {
+                actionCommands = 0;
                 bool isPlayerDead = false;
+
                 for (turnIndex = 0; turnIndex < creatureTurnOrder.Count; ++turnIndex)
                 {
                     Creature creature = CurrentTurn.Creature;
@@ -333,6 +335,11 @@ namespace RogueCrawler
         }
 
         #region Free Commands
+        private void PrintHelp(List<string> args)
+        {
+            staticBuilder.
+        }
+
         private void LookToRoom(List<string> args)
         {
             if (args.Count == 0)
