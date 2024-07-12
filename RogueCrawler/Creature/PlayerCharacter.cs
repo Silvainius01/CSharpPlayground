@@ -22,7 +22,7 @@ namespace RogueCrawler
         public HashSet<int> BorderRooms = new HashSet<int>();
         public HashSet<int> CheckedRooms = new HashSet<int>();
         public HashSet<int> ExploredRooms = new HashSet<int>();
-
+        
         public bool RoomIsExplorable(DungeonRoom room)
         {
             return ExploredRooms.Contains(room.Index) || RoomBordersExploredRoom(room);
@@ -61,7 +61,6 @@ namespace RogueCrawler
 
             return builder.ToString();
         }
-
         public string BriefInspectString(string prefix, int tabCount)
         {
             SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString); ;

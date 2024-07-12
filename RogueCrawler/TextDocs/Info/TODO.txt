@@ -2,6 +2,7 @@
 - Finish Martial Weapon System!!
 	- Implement remaining character systems
 		- Fatigue
+			- Figure out costs
 	- Add weapon durability
 		- Durability determined by material and quality.
 			- Base * material * quality?
