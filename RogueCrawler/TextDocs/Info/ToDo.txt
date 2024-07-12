@@ -1,0 +1,45 @@
+﻿
+- Finish Martial Weapon System!!
+	- Implement remaining character systems
+		- Fatigue
+			- Figure out costs
+	- Add weapon durability
+		- Durability determined by material and quality.
+			- Base * material * quality?
+		- Durability decreases as you use weapon
+			- Being skilled adds minor multiplier that slows wear (proper use and all that)
+			- Hits reduce faster than misses
+				- Hitting certain materials will damage the weapon faster
+					- Blades hitting armor will dull them faster, for example.
+			- Add way to repair
+				- Spending money at a blacksmith after a dungeon probs
+	- Review weapon damage formula. Starting to look a bit wack.
+	- Review how attributes affect weapons
+		- Current system that gives levels to weapons is fun, but prevents character experimentation.
+
+- Update dungeon generation
+	- Allow inaccessible rooms to make the layout more interesting.
+
+- Implement magic (oh god this will be hard af)
+	- Implement character systems
+		- Mana
+	- First, gotta fkn design the damn system. 
+		- Based on/Inspired by Morrowind's spell system. Because imo it was the pinnacle of spellcrafting.
+		- Spells have levels just like weapons?
+			- More powerful spells require more attribute points to cast.
+			- Spells below or equal to your ability always cast successfully at their displayed power.
+			- Spells above your level have a chance to fail and:
+				- Be cast at x% less power
+				- Fail completely
+				- Backfire
+		- Spell power determined by stats?
+			- A fire spell will do X fire damage, a more powerful mage can pump more power into the spell.
+			- Can also affect magnitude of the spell by how much MP you pump into it
+
+- Probably gonna end up porting most of this to Unity. Or something.
+	- this will mean doing the procedural generation from scratch. Time to rewrite my tile system.
+
+
+
+
+	

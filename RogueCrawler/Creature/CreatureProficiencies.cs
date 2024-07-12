@@ -26,7 +26,7 @@ namespace RogueCrawler
         }
     }
 
-    class CreatureProfeciencies : IInspectable, ISerializable<SerializedProfeciencies, CreatureProfeciencies>
+    class CreatureProficiencies : IInspectable, ISerializable<SerializedProfeciencies, CreatureProficiencies>
     {
         Dictionary<string, CreatureSkill> Skills = new Dictionary<string, CreatureSkill>();
 
@@ -141,7 +141,7 @@ namespace RogueCrawler
             return Mathc.Clamp(sigmoid(level), 0, 1);
         }
 
-        public static float GetWeaponSkillBonus(ItemWeapon weapon, CreatureProfeciencies p)
+        public static float GetWeaponSkillBonus(ItemWeapon weapon, CreatureProficiencies p)
         {
             int skillLevel = 
                 (int)(p.GetSkillLevel(weapon.ObjectName) * 0.75f) + 
@@ -152,13 +152,13 @@ namespace RogueCrawler
         }
     }
 
-    class SerializedProfeciencies : ISerialized<CreatureProfeciencies>
+    class SerializedProfeciencies : ISerialized<CreatureProficiencies>
     {
         public Dictionary<string, CreatureSkill> Skills { get; set; }
 
-        public CreatureProfeciencies GetDeserialized()
+        public CreatureProficiencies GetDeserialized()
         {
-            CreatureProfeciencies skills = new CreatureProfeciencies();
+            CreatureProficiencies skills = new CreatureProficiencies();
 
             foreach (var skill in Skills.Values)
                 skills.SetSkill(skill.SkillName, skill.SkillLevel, skill.SkillProgress);

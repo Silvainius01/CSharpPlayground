@@ -63,8 +63,8 @@ namespace RogueCrawler
             }));
             creature.Level = Math.Max(creature.MaxAttributes.CreatureLevel, creature.Level);
 
-            creature.Profeciencies.AddSkillLevel(creature.PrimaryWeapon.WeaponType, 30);
-            creature.Profeciencies.AddSkillLevel(creature.PrimaryWeapon.ObjectName, 30);
+            creature.Proficiencies.AddSkillLevel(creature.PrimaryWeapon.WeaponType, 30);
+            creature.Proficiencies.AddSkillLevel(creature.PrimaryWeapon.ObjectName, 30);
 
             //CrawlerAttributeSet attributes = creature.MaxAttributes;
             List <(AttributeType attribute, float chance)> attributeRanks = GetAttributeImportance(creature);

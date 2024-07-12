@@ -27,7 +27,7 @@
     <None Update="TextDocs\Info\CreatureStatsInfo.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="TextDocs\Info\WeaponInfo.txt">
+    <None Update="TextDocs\Info\CombatSystem.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="TextDocs\Info\RogueCrawlDesignDoc.txt">

@@ -74,7 +74,7 @@ namespace RogueCrawler
         public List<CreatureStat> Stats { get; private set; }
         public CrawlerAttributeSet MaxAttributes { get; private set; }
         public CrawlerAttributeSet Afflictions { get; private set; }
-        public CreatureProfeciencies Profeciencies { get; set; }
+        public CreatureProficiencies Proficiencies { get; set; }
 
         private ItemWeapon UnarmedWeapon;
 
@@ -95,7 +95,7 @@ namespace RogueCrawler
 
             Afflictions = new CrawlerAttributeSet(0);
             MaxAttributes = new CrawlerAttributeSet(0);
-            Profeciencies = new CreatureProfeciencies();
+            Proficiencies = new CreatureProficiencies();
 
             Stats = new List<CreatureStat>()
             {
@@ -138,7 +138,7 @@ namespace RogueCrawler
             float damage = weapon.BaseDamage
                 + GetAttribute(weapon.MajorAttribute) / 4
                 + GetAttribute(weapon.MinorAttribute) / 8;
-            float qualityMod = weapon.Quality / (1.4f - CreatureSkillUtility.GetWeaponSkillBonus(weapon, Profeciencies));
+            float qualityMod = weapon.Quality / (1.4f - CreatureSkillUtility.GetWeaponSkillBonus(weapon, Proficiencies));
             return damage
                 * weapon.Material.DamageModifier
                 * qualityMod;
@@ -148,7 +148,7 @@ namespace RogueCrawler
             ItemWeapon weapon = GetCombatWeapon();
 
             float chance = 0.01f;
-            chance *= Profeciencies.GetSkillLevel(weapon.WeaponType) / 2 + Profeciencies.GetSkillLevel(weapon.ObjectName);
+            chance *= Proficiencies.GetSkillLevel(weapon.WeaponType) / 2 + Proficiencies.GetSkillLevel(weapon.ObjectName);
             chance *= GetAttributePercent(weapon.MajorAttribute) + (GetAttributePercent(weapon.MinorAttribute) / 2);
             chance *= 0.5f + Fatigue.Percent;
             return chance;
@@ -156,7 +156,7 @@ namespace RogueCrawler
         public float GetCombatEvasion()
         {
             float chance = 0.01f;
-            chance *= (Profeciencies.GetSkillLevel(CreatureSkill.Evasion) / 4 * 3) + (Profeciencies.GetSkillLevel(CreatureSkill.Unarmored) / 4);
+            chance *= (Proficiencies.GetSkillLevel(CreatureSkill.Evasion) / 4 * 3) + (Proficiencies.GetSkillLevel(CreatureSkill.Unarmored) / 4);
             chance *= GetAttributePercent(AttributeType.DEX) + (GetAttributePercent(AttributeType.WIS) / 2);
             chance *= 0.25f + Fatigue.Percent;
             return chance;
@@ -271,6 +271,11 @@ namespace RogueCrawler
         {
             return new SerializedCreature(this);
         }
+
+        #region Overloads
+        public static bool operator ==(Creature a, Creature b) => a.ID == b.ID;
+        public static bool operator !=(Creature a, Creature b) => a.ID != b.ID;
+        #endregion
     }
 
     class SerializedCreature : ISerialized<Creature>
@@ -293,7 +298,7 @@ namespace RogueCrawler
             PrimaryWeapon = (SerializedWeapon)c.PrimaryWeapon.GetSerializable();
             Attributes = c.MaxAttributes.GetSerializable();
             Afflictions = c.Afflictions.GetSerializable();
-            Profeciencies = c.Profeciencies.GetSerializable();
+            Profeciencies = c.Proficiencies.GetSerializable();
 
             for (int i = 0; i < c.Stats.Count; ++i)
                 CurrentStats.Add(c.Stats[i].Value);
@@ -326,7 +331,7 @@ namespace RogueCrawler
             c.PrimaryWeapon = DungeonGenerator.GenerateWeaponFromSerialized(PrimaryWeapon);
             c.AddAttributePoints(Attributes.GetDeserialized());
             c.AddAffliction(Afflictions.GetDeserialized());
-            c.Profeciencies = Profeciencies.GetDeserialized();
+            c.Proficiencies = Profeciencies.GetDeserialized();
 
             for (int i = 0; i < c.Stats.Count; ++i)
             {

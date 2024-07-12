@@ -3,39 +3,57 @@ using CommandEngine;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Numerics;
 
 namespace RogueCrawler
 {
     class CrawlerGameManager : BaseCrawlerStateManager
     {
+        struct CreatureTurn
+        {
+            public Creature Creature { get; set; }
+            public int MaxActions { get; set; }
+        }
+
         CommandModule commands = new CommandModule("\nEnter next game command");
 
-        int fightCommands = 0;
+        int turnIndex = 0;
+        int actionCommands = 0;
         bool dungeonExit = false;
         string firstDungeonMessage = "Entering first dungeon:";
         SmartStringBuilder staticBuilder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);
         ColorStringBuilder colorBuilder = new ColorStringBuilder(DungeonCrawlerSettings.TabString);
-        List<Creature> creatureTurnOrder = new List<Creature>();
+        List<CreatureTurn> creatureTurnOrder = new List<CreatureTurn>();
+
+        CreatureTurn CurrentTurn => creatureTurnOrder[turnIndex];
+        CreatureTurn NextTurn => turnIndex < creatureTurnOrder.LastIndex()
+            ? creatureTurnOrder[turnIndex + 1]
+            : creatureTurnOrder[0];
 
         public CrawlerGameManager(DungeonCrawlerManager manager) : base(manager)
         {
+            // Free Commands
             commands.Add(new ConsoleCommand("check", LookToRoom));
-            commands.Add(new ConsoleCommand("chest", InspectChest));
             commands.Add(new ConsoleCommand("creature", InspectCreature));
             commands.Add(new ConsoleCommand("cr", InspectCreature));
-            commands.Add(new ConsoleCommand("equip", Equip));
-            commands.Add(new ConsoleCommand("exit", ExitDungeon));
-            commands.Add(new ConsoleCommand("fight", FightCreature));
             commands.Add(new ConsoleCommand("item", InspectItem));
             commands.Add(new ConsoleCommand("inventory", Inventory));
             commands.Add(new ConsoleCommand("inv", Inventory));
             commands.Add(new ConsoleCommand("map", PrintPlayerMap));
-            commands.Add(new ConsoleCommand("move", MoveToRoom));
             commands.Add(new ConsoleCommand("path", PathToRoom));
-            commands.Add(new ConsoleCommand("rest", Rest));
-            commands.Add(new ConsoleCommand("take", TakeItem));
-            commands.Add(new ConsoleCommand("takeall", TakeAllItems));
             commands.Add(new ConsoleCommand("self", CheckSelf));
+
+            // Action Commands
+            commands.Add(new ConsoleCommand("chest", InspectChest));
+            commands.Add(new ConsoleCommand("equip", Equip));
+            commands.Add(new ConsoleCommand("exit", ExitDungeon));
+            commands.Add(new ConsoleCommand("fight", FightCreature));
+            commands.Add(new ConsoleCommand("move", MoveToRoom));
+            commands.Add(new ConsoleCommand("take", TakeItem));
+
+            // No Creature Commands
+            commands.Add(new ConsoleCommand("rest", Rest));
+            commands.Add(new ConsoleCommand("takeall", TakeAllItems));
         }
 
         public override void StartCrawlerState()
@@ -60,38 +78,32 @@ namespace RogueCrawler
             if (creatureTurnOrder.Count > 1)
             {
                 bool isPlayerDead = false;
-                for (int i = 0; i < creatureTurnOrder.Count; i++)
+                for (turnIndex = 0; turnIndex < creatureTurnOrder.Count; i++)
                 {
-                    Creature creature = creatureTurnOrder[i];
-                    float speed = creature.CombatSpeed.Value;
+                    Creature creature = CurrentTurn.Creature;
 
                     // Remove dead creatures from combat.
                     if (!creature.IsAlive)
                     {
-                        creatureTurnOrder.RemoveAt(i--);
+                        creatureTurnOrder.RemoveAt(turnIndex--);
                         continue;
                     }
 
-                    do
+                    // Take all creature turns.
+                    for (int i = 0; i < CurrentTurn.MaxActions && !isPlayerDead; ++i)
                     {
                         if (creature.ID != player.ID)
                         {
-                            isPlayerDead = CreatureTurn(creature);
-                            speed -= 1.0f;
+                            // Sleep here to prevent dumping all creature turns at once.
+                            System.Threading.Thread.Sleep(500);
+                            isPlayerDead = TakeCreatureTurn(creature);
                         }
                         else
                         {
                             commands.NextCommand(true);
-
-                            // Only subtract from speed if a combat action took place.
-                            speed -= fightCommands;
-                            fightCommands = 0;
+                            i = actionCommands - 1;
                         }
-
-                        if (Mathc.ValueIsBetween(speed, 0.0f, 1.0f, true) && CommandEngine.Random.NextFloat() <= speed)
-                            speed = 1.0f;
                     }
-                    while (speed >= 1 && !isPlayerDead);
 
                     if (isPlayerDead)
                     {
@@ -113,7 +125,8 @@ namespace RogueCrawler
         {
             dungeon.MovePlayerToRoom(player, room);
 
-            fightCommands = 0;
+            turnIndex = 0;
+            actionCommands = 0;
             BuildCreatureTurnOrder();
 
             int tabCount = 0;
@@ -145,7 +158,7 @@ namespace RogueCrawler
 
             if (player.Fatigue.Percent > 0.66f)
                 percentColor = ConsoleColor.Green;
-            else if(player.Fatigue.Percent > 0.33f)
+            else if (player.Fatigue.Percent > 0.33f)
                 percentColor = ConsoleColor.Yellow;
 
             colorBuilder.Clear();
@@ -251,7 +264,7 @@ namespace RogueCrawler
             return dungeonExit;
         }
 
-        private bool CreatureTurn(Creature c)
+        private bool TakeCreatureTurn(Creature c)
         {
             float damage = c.GetCombatDamage();
             bool playerDied = dungeon.DamageCreature(player, c.GetCombatDamage());
@@ -272,18 +285,36 @@ namespace RogueCrawler
 
         private void BuildCreatureTurnOrder()
         {
+            creatureTurnOrder.Clear();
+
             // Sort combatants by combat speed;
             if (dungeon.creatureManager.GetObjectCount(player.CurrentRoom) > 0)
             {
-                creatureTurnOrder = dungeon.creatureManager.GetObjectsInRoom(player.CurrentRoom);
-                creatureTurnOrder.Add(player);
-                creatureTurnOrder.Sort((a, b) => a.CombatSpeed.Value.CompareTo(b.CombatSpeed.Value));
+                var roomCreatures = dungeon.creatureManager.GetObjectsInRoom(player.CurrentRoom);
+                roomCreatures.Add(player);
+                roomCreatures.Sort((a, b) => a.CombatSpeed.Value.CompareTo(b.CombatSpeed.Value));
+
+                creatureTurnOrder.Clear();
+                foreach (var creature in roomCreatures)
+                {
+                    float speed = creature.CombatSpeed.Value;
+                    creatureTurnOrder.Add(
+                        new CreatureTurn()
+                        {
+                            Creature = creature,
+                            MaxActions = (int)MathF.Floor(speed) + (CommandEngine.Random.NextFloat() < speed % 1 ? 1 : 0)
+                        }
+                    );
+                }
                 PrintEnteredCombatMessage();
             }
             else
             {
-                creatureTurnOrder.Clear();
-                creatureTurnOrder.Add(player);
+                creatureTurnOrder.Add(new CreatureTurn()
+                {
+                    Creature = player,
+                    MaxActions = int.MaxValue
+                });
             }
         }
         private void PrintEnteredCombatMessage()
@@ -293,15 +324,15 @@ namespace RogueCrawler
             staticBuilder.NewlineAppend(tabCount, "You've entered combat! Turn order: ");
 
             ++tabCount;
-            foreach(var creature in creatureTurnOrder)
-                staticBuilder.NewlineAppend(tabCount, creature.BriefString());
+            foreach (var creatureTurn in creatureTurnOrder)
+                staticBuilder.NewlineAppend(tabCount, $"{creatureTurn.Creature.BriefString()} x{creatureTurn.MaxActions}");
             --tabCount;
             staticBuilder.NewlineAppend(tabCount, "\nPress Enter to continue");
             Console.WriteLine(staticBuilder.ToString());
             Console.ReadLine();
         }
 
-        #region Commands
+        #region Free Commands
         private void LookToRoom(List<string> args)
         {
             if (args.Count == 0)
@@ -316,47 +347,8 @@ namespace RogueCrawler
                         DungeonRoom r = dungeon.roomManager.GetRoomByIndex(connection.index);
                         PlayerCheckRoom(r);
                     }
-                else if(BaseRoomCommand(args, out DungeonRoom room, out errorMsg))
+                else if (BaseRoomCommand(args, out DungeonRoom room, out errorMsg))
                     PlayerCheckRoom(room);
-            }
-            else Console.WriteLine(errorMsg);
-        }
-
-        private void MoveToRoom(List<string> args)
-        {
-            if (BaseRoomCommand(args, out DungeonRoom room, out string errorMsg) && player.CurrentRoom.ConnectedTo(room))
-            {
-                PlayerMoveToRoom(room);
-            }
-            else Console.WriteLine(errorMsg);
-        }
-
-        private void Rest(List<string> args)
-        {
-            if (BaseNoCreatureCommand(out string errorMsg) && BaseIntCommand(args, out int hitPoints, out errorMsg))
-            {
-                player.Health.AddValue(hitPoints);
-                player.Mana.AddValue(hitPoints * 2);
-                player.Fatigue.AddValue(hitPoints * 3);
-
-                dungeon.HealAllCreatures(hitPoints);
-                Console.WriteLine("You've rested up, but so has the dungeon...");
-            }
-            else Console.WriteLine(errorMsg);
-        }
-
-        private void FightCreature(List<string> args)
-        {
-            if (BaseCreatureCommand(args, out var creature, out string errorMsg))
-            {
-                ++fightCommands;
-                player.Fatigue.AddValue(-player.GetAttackFatigueCost());
-                if (dungeon.DamageCreature(creature, player.GetCombatDamage()))
-                {
-                    ++player.CreaturesKilled;
-                    Console.WriteLine($"{creature.ObjectName} died!");
-                }
-                else Console.WriteLine($"{creature.ObjectName} HP Left: {creature.Health.Value}");
             }
             else Console.WriteLine(errorMsg);
         }
@@ -370,16 +362,6 @@ namespace RogueCrawler
             else Console.WriteLine(errorMsg);
         }
 
-        private void InspectChest(List<string> args)
-        {
-            if (BaseChestCommand(args, out var chest, out string errorMsg))
-            {
-                chest.MarkInspected();
-                Console.WriteLine(chest.InspectString(string.Empty, 0));
-            }
-            else Console.WriteLine(errorMsg);
-        }
-
         private void InspectItem(List<string> args)
         {
             if (BaseItemCommand(args, out IItem item, out string msg))
@@ -387,41 +369,6 @@ namespace RogueCrawler
                 Console.WriteLine(item.InspectString(string.Empty, 0));
             }
             else Console.WriteLine(msg);
-        }
-
-        private void TakeItem(List<string> args)
-        {
-            if (BaseItemCommand(args, out IItem item, out DungeonChest<IItem> chest, out string errorMsg))
-            {
-                chest.RemoveItem(item.ID, out item);
-                player.Inventory.AddItem(item, 1);
-            }
-            else Console.WriteLine(errorMsg);
-        }
-
-        private void TakeAllItems(List<string> args)
-        {
-            DungeonRoom room = player.CurrentRoom;
-
-            if (dungeon.chestManager.GetObjectCount(room) == 0)
-                Console.WriteLine("There aren't any objects in the room.");
-
-            int tabCount = 0;
-            staticBuilder.Clear();
-            staticBuilder.Append(tabCount, "Added following items to Inventory:");
-
-            tabCount++;
-            foreach (var chest in dungeon.chestManager.GetObjectsInRoom(room))
-            {
-                foreach (var item in chest.RemoveAllItems())
-                {
-                    player.Inventory.AddItem(item);
-                    staticBuilder.NewlineAppend(tabCount, item.BriefString());
-                }
-                chest.MarkInspected();
-            }
-            tabCount--;
-            Console.WriteLine(staticBuilder.ToString());
         }
 
         public void PrintPlayerMap(List<string> args)
@@ -443,61 +390,6 @@ namespace RogueCrawler
                 Console.WriteLine(item.InspectString(string.Empty, 0));
             }
             else Console.WriteLine(errorMsg);
-        }
-
-        public void Equip(List<string> args)
-        {
-            if (BaseInventoryItemCommand(args, out IItem item, out string errorMsg))
-            {
-                ItemWeapon weapon = item as ItemWeapon;
-
-                if (weapon == null)
-                {
-                    Console.WriteLine("Item is not a weapon!");
-                    return;
-                }
-                if (!player.CanEquipWeapon(weapon))
-                {
-                    Console.WriteLine("You dont meet the attribute requirements.");
-                    return;
-                }
-                if (player.Inventory.RemoveItem(item.ID, out item))
-                {
-                    player.Inventory.AddItem(player.PrimaryWeapon);
-                    player.PrimaryWeapon = weapon;
-                    Console.WriteLine(weapon.InspectString("Equipped Weapon:", 0));
-                    return;
-                }
-                else Console.WriteLine("ERROR: failed to find weapon in inventory. This'll be a nasty debug.");
-            }
-            else Console.WriteLine(errorMsg);
-        }
-
-        public void ExitDungeon(List<string> args)
-        {
-            int tabCount = 0;
-            int roomExp = player.ExploredRooms.Count * DungeonCrawlerSettings.ExperiencePerExploredRoom;
-            int killExp = player.CreaturesKilled * DungeonCrawlerSettings.ExperiencePerCreatureKilled;
-            int lootExp = PlayerSellLootMenu(tabCount, out int soldItemCount);
-
-            PlayerExperienceMenu(tabCount, roomExp, killExp, lootExp, soldItemCount);
-
-            int levelsGained = player.Level;
-            int expNeeded = player.ExperienceNeeded;
-            while (player.Experience > expNeeded)
-            {
-                ++player.Level;
-                player.Experience -= expNeeded;
-                expNeeded = player.ExperienceNeeded;
-            }
-            levelsGained = player.Level - levelsGained;
-            if (levelsGained > 0)
-            {
-                int attrPoints = levelsGained * DungeonCrawlerSettings.AttributePointsPerCreatureLevel;
-                // attrPoints += player.MaxAttributes.CreatureLevel;
-                CharacterCreator.AttributePrompt(player, levelsGained, attrPoints, tabCount);
-            }
-            dungeonExit = true;
         }
 
         public void CheckSelf(List<string> args)
@@ -553,6 +445,166 @@ namespace RogueCrawler
                 dungeon.ClearPath();
                 Console.WriteLine($"Cleared path to room {room.Index} from the map.");
             }
+        }
+        #endregion
+
+        #region Action Commands
+        public void Equip(List<string> args)
+        {
+            if (BaseInventoryItemCommand(args, out IItem item, out string errorMsg))
+            {
+                ItemWeapon weapon = item as ItemWeapon;
+
+                if (weapon == null)
+                {
+                    Console.WriteLine("Item is not a weapon!");
+                    return;
+                }
+                if (!player.CanEquipWeapon(weapon))
+                {
+                    Console.WriteLine("You dont meet the attribute requirements.");
+                    return;
+                }
+                if (player.Inventory.RemoveItem(item.ID, out item))
+                {
+                    player.Inventory.AddItem(player.PrimaryWeapon);
+                    player.PrimaryWeapon = weapon;
+                    Console.WriteLine(weapon.InspectString("Equipped Weapon:", 0));
+                    ++actionCommands;
+                    return;
+                }
+                else Console.WriteLine("ERROR: failed to find weapon in inventory. This'll be a nasty debug.");
+            }
+            else Console.WriteLine(errorMsg);
+        }
+
+        private void TakeItem(List<string> args)
+        {
+            if (BaseItemCommand(args, out IItem item, out DungeonChest<IItem> chest, out string errorMsg))
+            {
+                chest.RemoveItem(item.ID, out item);
+                player.Inventory.AddItem(item, 1);
+                ++actionCommands;
+            }
+            else Console.WriteLine(errorMsg);
+        }
+
+        private void InspectChest(List<string> args)
+        {
+            if (BaseActionCommand(CurrentTurn, out string errorMsg)
+            && BaseChestCommand(args, out var chest, out errorMsg))
+            {
+                chest.MarkInspected();
+                Console.WriteLine(chest.InspectString(string.Empty, 0));
+            }
+            else Console.WriteLine(errorMsg);
+        }
+
+        private void FightCreature(List<string> args)
+        {
+            if (BaseActionCommand(CurrentTurn, out string errorMsg)
+            && BaseCreatureCommand(args, out var creature, out errorMsg))
+            {
+                ++actionCommands;
+                player.Fatigue.AddValue(-player.GetAttackFatigueCost());
+                if (dungeon.DamageCreature(creature, player.GetCombatDamage()))
+                {
+                    ++player.CreaturesKilled;
+                    Console.WriteLine($"{creature.ObjectName} died!");
+                }
+                else Console.WriteLine($"{creature.ObjectName} HP Left: {creature.Health.Value}");
+            }
+            else Console.WriteLine(errorMsg);
+        }
+
+        private void MoveToRoom(List<string> args)
+        {
+            if (BaseActionCommand(CurrentTurn, out string errorMsg) 
+            && BaseRoomCommand(args, out DungeonRoom room, out errorMsg))
+            {
+                PlayerMoveToRoom(room);
+            }
+            else Console.WriteLine(errorMsg);
+        }
+
+        public void ExitDungeon(List<string> args)
+        {
+            if (!BaseActionCommand(CurrentTurn, out string errorMsg))
+            {
+                Console.WriteLine(errorMsg);
+                return;
+            }
+
+            int tabCount = 0;
+            int roomExp = player.ExploredRooms.Count * DungeonCrawlerSettings.ExperiencePerExploredRoom;
+            int killExp = player.CreaturesKilled * DungeonCrawlerSettings.ExperiencePerCreatureKilled;
+            int lootExp = PlayerSellLootMenu(tabCount, out int soldItemCount);
+
+            PlayerExperienceMenu(tabCount, roomExp, killExp, lootExp, soldItemCount);
+
+            int levelsGained = player.Level;
+            int expNeeded = player.ExperienceNeeded;
+            while (player.Experience > expNeeded)
+            {
+                ++player.Level;
+                player.Experience -= expNeeded;
+                expNeeded = player.ExperienceNeeded;
+            }
+            levelsGained = player.Level - levelsGained;
+            if (levelsGained > 0)
+            {
+                int attrPoints = levelsGained * DungeonCrawlerSettings.AttributePointsPerCreatureLevel;
+                // attrPoints += player.MaxAttributes.CreatureLevel;
+                CharacterCreator.AttributePrompt(player, levelsGained, attrPoints, tabCount);
+            }
+            dungeonExit = true;
+        }
+        #endregion
+
+        #region NoCreature Commands
+        private void Rest(List<string> args)
+        {
+            if (BaseNoCreatureCommand(out string errorMsg) && BaseIntCommand(args, out int hitPoints, out errorMsg))
+            {
+                player.Health.AddValue(hitPoints);
+                player.Mana.AddValue(hitPoints * 2);
+                player.Fatigue.AddValue(hitPoints * 3);
+
+                dungeon.HealAllCreatures(hitPoints);
+                Console.WriteLine("You've rested up, but so has the dungeon...");
+            }
+            else Console.WriteLine(errorMsg);
+        }
+
+        private void TakeAllItems(List<string> args)
+        {
+            if(BaseNoCreatureCommand(out string errorMsg))
+            {
+                Console.WriteLine(errorMsg);
+                return;
+            }
+
+            DungeonRoom room = player.CurrentRoom;
+
+            if (dungeon.chestManager.GetObjectCount(room) == 0)
+                Console.WriteLine("There aren't any objects in the room.");
+
+            int tabCount = 0;
+            staticBuilder.Clear();
+            staticBuilder.Append(tabCount, "Added following items to Inventory:");
+
+            tabCount++;
+            foreach (var chest in dungeon.chestManager.GetObjectsInRoom(room))
+            {
+                foreach (var item in chest.RemoveAllItems())
+                {
+                    player.Inventory.AddItem(item);
+                    staticBuilder.NewlineAppend(tabCount, item.BriefString());
+                }
+                chest.MarkInspected();
+            }
+            tabCount--;
+            Console.WriteLine(staticBuilder.ToString());
         }
         #endregion
     }

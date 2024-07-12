@@ -54,7 +54,7 @@ namespace RogueCrawler
 
         protected bool BaseChestCommand(List<string> args, out DungeonChest<IItem> chest, out string errorMsg)
         {
-            if (args.Count > 0 && int.TryParse(args[0], out int creatureId))
+            if (BaseIntCommand(args, out int chestId, out errorMsg))
             {
                 if (dungeon.chestManager.GetObjectCount(player.CurrentRoom) == 0)
                 {
@@ -63,7 +63,7 @@ namespace RogueCrawler
                     return false;
                 }
 
-                chest = dungeon.chestManager.GetObjectInRoom(player.CurrentRoom, creatureId);
+                chest = dungeon.chestManager.GetObjectInRoom(player.CurrentRoom, chestId);
                 if (chest != null)
                 {
                     errorMsg = string.Empty;
@@ -81,7 +81,7 @@ namespace RogueCrawler
             item = default(IItem);
             containingChest = null;
 
-            if (args.Count > 0 && int.TryParse(args[0], out int itemId))
+            if (BaseIntCommand(args, out int itemId, out errorMsg))
             {
                 var chests = dungeon.chestManager.GetObjectsInRoom(player.CurrentRoom);
 
@@ -110,11 +110,21 @@ namespace RogueCrawler
         protected bool BaseRoomCommand(List<string> args, out DungeonRoom room, out string errorMsg)
         {
             room = null;
-            if (args.Count > 0 && int.TryParse(args[0], out int index))
+            if (BaseIntCommand(args, out int index, out errorMsg))
             {
                 room = dungeon.roomManager.GetRoomByIndex(index);
-                errorMsg = "Not a valid room index.";
-                return room != null;
+                if (room == null)
+                {
+                    errorMsg = "Not a valid room index.";
+                    return false;
+                }
+                else if(!player.CurrentRoom.ConnectedTo(room))
+                {
+                    errorMsg = "No connection to this room!";
+                    return false;
+                }
+
+                return true;
             }
             errorMsg = ("Not a valid room index.");
             return false;
