@@ -54,7 +54,7 @@ namespace PlanetSide
                 websockets.Add(key, socket);
                 return socket;
             }
-            return null;
+            return websockets[key];
         }
         public bool AddActionToSubscription(string key, Func<SocketResponse, bool> action)
         {

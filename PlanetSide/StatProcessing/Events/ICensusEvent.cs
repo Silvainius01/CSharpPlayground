@@ -9,7 +9,7 @@ namespace PlanetSide
         VehicleDestroy
     }
 
-    public interface ICensusPayload
+    public interface ICensusEvent
     {
         string CharacterId { get; set; }
         string OtherId { get; set; }

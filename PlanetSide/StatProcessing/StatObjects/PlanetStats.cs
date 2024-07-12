@@ -10,12 +10,10 @@ using Newtonsoft.Json;
 
 namespace PlanetSide
 {
-    public class TeamStats
+    public class PlanetStats
     {
-        public int TeamSize { get; set; }
-        public string TeamName { get; set; }
-
         public int Kills { get; set; }
+        public int Assists { get; set; }
         public int Deaths { get; set; }
         public int TeamKills { get; set; }
         public int Headshots { get; set; }
@@ -28,26 +26,23 @@ namespace PlanetSide
         public float HSR => (float)Headshots / (Kills > 0 ? Kills : 1);
         public float vKDR => (float)VehicleKills / (VehicleDeaths > 0 ? VehicleDeaths : 1);
 
-        public float CheeseScore { get; set; }
-        public float InfantryScore { get; set; }
-        public float AirScore { get; set; }
-        public float ArmorScore { get; set; }
-        public float CohesionScore { get; set; }
-        public float LogisticScore { get; set; }
+        //public float CheeseScore { get; set; }
+        //public float InfantryScore { get; set; }
+        //public float AirScore { get; set; }
+        //public float ArmorScore { get; set; }
+        //public float CohesionScore { get; set; }
+        //public float LogisticScore { get; set; }
 
-        Dictionary<int, CumulativeExperience> _teamExperience { get; set; }
+        Dictionary<int, CumulativeExperience> _allExperience { get; set; }
 
         [JsonIgnore]
         public ReadOnlyDictionary<int, CumulativeExperience> TeamExperience;
 
 
-        public TeamStats(int teamSize, string teamName)
+        public PlanetStats()
         {
-            TeamSize = teamSize;
-            TeamName = teamName;
-
-            _teamExperience = new Dictionary<int, CumulativeExperience>();
-            TeamExperience = new ReadOnlyDictionary<int, CumulativeExperience>(_teamExperience);
+            _allExperience = new Dictionary<int, CumulativeExperience>();
+            TeamExperience = new ReadOnlyDictionary<int, CumulativeExperience>(_allExperience);
         }
 
         public void AddExperience(ref ExperiencePayload expEvent)
@@ -55,12 +50,12 @@ namespace PlanetSide
             int experienceId = expEvent.ExperienceId;
             float score = expEvent.ScoreAmount;
 
-            if (_teamExperience.ContainsKey(experienceId))
+            if (_allExperience.ContainsKey(experienceId))
             {
-                _teamExperience[experienceId].NumEvents += 1;
-                _teamExperience[experienceId].CumulativeScore += score;
+                _allExperience[experienceId].NumEvents += 1;
+                _allExperience[experienceId].CumulativeScore += score;
             }
-            else _teamExperience.Add(experienceId, new CumulativeExperience()
+            else _allExperience.Add(experienceId, new CumulativeExperience()
             {
                 NumEvents = 1,
                 CumulativeScore = score,
@@ -87,7 +82,7 @@ namespace PlanetSide
                 ++Headshots;
         }
 
-        public void AddVehicleDeath(ref VehicleDesroyPayload destroyEvent, bool isTeamKill)
+        public void AddVehicleDeath(ref VehicleDestroyPayload destroyEvent, bool isTeamKill)
         {
             if (isTeamKill)
             {
@@ -98,7 +93,7 @@ namespace PlanetSide
             // Only count deaths from the enemy
             ++VehicleDeaths;
         }
-        public void AddVehicleKill(ref VehicleDesroyPayload destrpyEvent)
+        public void AddVehicleKill(ref VehicleDestroyPayload destroyEvent)
         {
             ++VehicleKills;
         }
