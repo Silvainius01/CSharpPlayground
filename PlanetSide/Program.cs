@@ -21,6 +21,7 @@ namespace PlanetSide
         {
             module.Add(new ConsoleCommand("tracker", StartTracker));
             module.Add(new ConsoleCommand("server", StartSocketServer));
+            module.Add(new ConsoleCommand("client", StartSocketClient));
             module.NextCommand(false);
         }
 
@@ -32,6 +33,10 @@ namespace PlanetSide
         private static void StartSocketServer(List<string> args)
         {
             Server.Start();
+        }
+        private static void StartSocketClient(List<string> args)
+        {
+            Client.Start();
         }
     }
 }

@@ -33,6 +33,7 @@ namespace PlanetSide
         //public float CohesionScore { get; set; }
         //public float LogisticScore { get; set; }
 
+        [JsonIgnore]
         Dictionary<int, CumulativeExperience> _allExperience { get; set; }
 
         [JsonIgnore]
