@@ -335,10 +335,6 @@ namespace RogueCrawler
         }
 
         #region Free Commands
-        private void PrintHelp(List<string> args)
-        {
-        }
-
         private void LookToRoom(List<string> args)
         {
             if (args.Count == 0)

@@ -136,8 +136,8 @@ namespace RogueCrawler
         {
             ItemWeapon weapon = GetCombatWeapon();
             float damage = weapon.BaseDamage
-                + GetAttribute(weapon.MajorAttribute) / 4
-                + GetAttribute(weapon.MinorAttribute) / 8;
+                + GetAttribute(weapon.MajorAttribute) / 2
+                + GetAttribute(weapon.MinorAttribute) / 4;
             float qualityMod = weapon.Quality / (1.4f - CreatureSkillUtility.GetWeaponSkillBonus(weapon, Proficiencies));
             return damage
                 * weapon.Material.DamageModifier

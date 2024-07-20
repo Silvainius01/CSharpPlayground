@@ -1,18 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Net.WebSockets;
-using System.Text;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using DaybreakGames.Census.Stream;
+using System.Diagnostics;
+using CommandEngine;
 using Microsoft.Extensions.Logging;
+using PlanetSide.WebsocketServer;
 
 namespace PlanetSide
 {
@@ -23,13 +15,23 @@ namespace PlanetSide
 
         private static readonly ILogger<Program> Logger = LoggerFactory.CreateLogger<Program>();
 
-        
+        static CommandModule module = new CommandModule("Enter Start Up Command");
 
         private static void Main(string[] args)
         {
+            module.Add(new ConsoleCommand("tracker", StartTracker));
+            module.Add(new ConsoleCommand("server", StartSocketServer));
+            module.NextCommand(false);
+        }
+
+        private static void StartTracker(List<string> args)
+        {
             Tracker.StartTracker();
         }
-        
-       
+
+        private static void StartSocketServer(List<string> args)
+        {
+            Server.Start();
+        }
     }
 }

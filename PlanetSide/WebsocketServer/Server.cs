@@ -1,53 +1,55 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using SocketIOSharp.Common;
+using SocketIOSharp.Server;
 
 namespace PlanetSide.WebsocketServer
 {
-    public class Server : IDisposable
+    public class Server
     {
-        private Process _consoleProcess;
-        private TcpListener _tcpListner;
-        private StreamWriter _consoleWriter;
-        private StreamReader _consoleReader;
-
-        private TcpClient _localClient;
-
-        public void Start(string ip)
+        public static void Start()
         {
-            ProcessStartInfo psi = new ProcessStartInfo("cmd.exe")
+            using (SocketIOServer server = new SocketIOServer(new SocketIOServerOption(9001)))
             {
-                RedirectStandardError = true,
-                RedirectStandardOutput = true,
-                RedirectStandardInput = true,
-                UseShellExecute = false
-            };
+                Console.WriteLine("Listening on " + server.Option.Port);
 
-            _consoleProcess = Process.Start(psi);
-            _consoleWriter = _consoleProcess.StandardInput;
-            _consoleReader = _consoleProcess.StandardOutput;
+                server.OnConnection((socket) =>
+                {
+                    Console.WriteLine("Client connected!");
 
-            _tcpListner = new TcpListener(IPAddress.Parse("127.0.0.1"), 80);
-            _tcpListner.Start();
-            _consoleWriter.WriteLine("Started server on 127.0.0.1:80.");
+                    socket.On("input", (data) =>
+                    {
+                        foreach (JToken token in data)
+                        {
+                            Console.Write(token + " ");
+                        }
 
-            _localClient = _tcpListner.AcceptTcpClient();
+                        Console.WriteLine();
+                        socket.Emit("echo", data);
+                    });
 
+                    socket.On(SocketIOEvent.DISCONNECT, () =>
+                    {
+                        Console.WriteLine("Client disconnected!");
+                    });
+
+                    socket.Emit("echo", new byte[] { 0, 1, 2, 3, 4, 5 });
+                });
+
+                server.Start();
+
+                Console.WriteLine("Input /exit to exit program.");
+                string line;
+
+                while (!(line = Console.ReadLine())?.Trim()?.ToLower()?.Equals("/exit") ?? false)
+                {
+                    server.Emit("echo", line);
+                }
+            }
+
+            Console.WriteLine("Press enter to continue...");
+            Console.Read();
         }
-
-        public void Dispose()
-        {
-            _consoleProcess.Close();
-            _consoleWriter.Close();
-            _consoleReader.Close();
-            _tcpListner.Stop();
-        }
-
     }
 }

@@ -1,2 +1,3 @@
 [x] Implement turn orders properly
-[ ] Rewrite the combat state to its own manager function.
+[ ] Test new combat turns implementation
+[ ] Implement basic fatigue system
