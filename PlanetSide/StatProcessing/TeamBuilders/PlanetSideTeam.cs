@@ -46,6 +46,8 @@ namespace PlanetSide
 
             streamKey = $"PlanetSideTeam_{teamName}_PlayerEventStream";
             tokenSource = new CancellationTokenSource();
+
+            TeamStats.LinkedTeam = this;
         }
 
         public void StartStream()

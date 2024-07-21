@@ -1,55 +1,80 @@
 ﻿using System;
 using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
-using SocketIOSharp.Common;
-using SocketIOSharp.Server;
+using System.Text;
+using System.Threading;
+using NetMQ;
+using NetMQ.Sockets;
+using Newtonsoft.Json;
+using PlanetSide.Websocket;
 
 namespace PlanetSide.WebsocketServer
 {
     public class Server
     {
-        public static void Start()
+        static List<PlanetSideTeam> activeTeams = new List<PlanetSideTeam>();
+
+        public static void StartPublishingServer()
         {
-            using (SocketIOServer server = new SocketIOServer(new SocketIOServerOption(9001)))
+            StartTeamTracking();
+            var statsDict = new Dictionary<string, PlanetStats>();
+
+            using (var publisher = new PublisherSocket())
             {
-                Console.WriteLine("Listening on " + server.Option.Port);
+                publisher.Bind("tcp://*:56854");
 
-                server.OnConnection((socket) =>
+                int i = 0;
+
+                while (true)
                 {
-                    Console.WriteLine("Client connected!");
+                    string data = JsonConvert.SerializeObject(GenerateReport());
 
-                    socket.On("input", (data) =>
-                    {
-                        foreach (JToken token in data)
-                        {
-                            Console.Write(token + " ");
-                        }
+                    publisher
+                        .SendMoreFrame("net_stats") // Topic
+                        .SendFrame(data); // Message
 
-                        Console.WriteLine();
-                        socket.Emit("echo", data);
-                    });
-
-                    socket.On(SocketIOEvent.DISCONNECT, () =>
-                    {
-                        Console.WriteLine("Client disconnected!");
-                    });
-
-                    socket.Emit("echo", new byte[] { 0, 1, 2, 3, 4, 5 });
-                });
-
-                server.Start();
-
-                Console.WriteLine("Input /exit to exit program.");
-                string line;
-
-                while (!(line = Console.ReadLine())?.Trim()?.ToLower()?.Equals("/exit") ?? false)
-                {
-                    server.Emit("echo", line);
+                    Console.WriteLine(data);
+                    Thread.Sleep(1000);
                 }
             }
+        }
 
-            Console.WriteLine("Press enter to continue...");
-            Console.Read();
+        static void StartTeamTracking()
+        {
+            var handler = Tracker.Handler;
+
+            Tracker.PopulateTables(handler);
+            //activeTeams.Add(new FactionTeam("Vanu Sovereignty", "1", "17", handler));
+            activeTeams.Add(new FactionTeam("New Conglomerate", "2", "10", handler));
+            activeTeams.Add(new FactionTeam("Terran Republic", "3", "10", handler));
+
+            foreach (var team in activeTeams)
+            {
+                team.StartStream();
+            }
+        }
+
+        static CommSmashReport GenerateReport()
+        {
+            return new CommSmashReport()
+            {
+                kills_net_t1 = activeTeams[0].TeamStats.Kills,
+                kills_net_t2 = activeTeams[1].TeamStats.Kills,
+
+                kills_vehicle_t1 = activeTeams[0].TeamStats.VehicleKills,
+                kills_vehicle_t2 = activeTeams[1].TeamStats.VehicleKills,
+
+                kills_air_t1 = activeTeams[0].TeamStats.TeamKills,
+                kills_air_t2 = activeTeams[1].TeamStats.TeamKills,
+
+                revives_t1 = activeTeams[0].TeamStats.GetExp(7).NumEvents,
+                revives_t2 = activeTeams[1].TeamStats.GetExp(7).NumEvents,
+
+                captures_t1 = activeTeams[0].TeamStats.GetExp(272).NumEvents,
+                captures_t2 = activeTeams[1].TeamStats.GetExp(272).NumEvents,
+
+                defenses_t1 = activeTeams[0].TeamStats.GetExp(6).NumEvents,
+                defenses_t2 = activeTeams[1].TeamStats.GetExp(6).NumEvents
+            };
         }
     }
 }

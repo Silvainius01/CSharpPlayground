@@ -77,13 +77,13 @@ namespace PlanetSide
                 teamPlayerFound = true;
                 playersConcurrent.TryAdd(payload.CharacterId, default(JsonElement));
             }
-            if (PlayerTable.TryGetOrAddCharacter(payload.CharacterId, out var cData2) && cData2.Faction == Faction)
+            if (PlayerTable.TryGetOrAddCharacter(payload.OtherId, out var cData2) && cData2.Faction == Faction)
             {
                 teamPlayerFound = true;
-                playersConcurrent.TryAdd(payload.CharacterId, default(JsonElement));
+                playersConcurrent.TryAdd(payload.OtherId, default(JsonElement));
             }
 
-            return true;
+            return teamPlayerFound;
         }
 
         bool UnknownCharQuery(ICensusEvent payload)

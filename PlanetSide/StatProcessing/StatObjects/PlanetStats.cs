@@ -7,6 +7,8 @@ using System.Text.Json;
 using System.Collections.ObjectModel;
 using System.Reactive.Disposables;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Bson;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace PlanetSide
 {
@@ -37,7 +39,10 @@ namespace PlanetSide
         Dictionary<int, CumulativeExperience> _allExperience { get; set; }
 
         [JsonIgnore]
-        public ReadOnlyDictionary<int, CumulativeExperience> TeamExperience;
+        ReadOnlyDictionary<int, CumulativeExperience> TeamExperience;
+
+        [JsonIgnore]
+        public PlanetSideTeam LinkedTeam;
 
 
         public PlanetStats()
@@ -62,6 +67,19 @@ namespace PlanetSide
                 CumulativeScore = score,
                 Id = experienceId
             });
+        }
+        public CumulativeExperience GetExp(int id)
+        {
+            if (TeamExperience.TryGetValue(id, out var exp))
+                return exp;
+
+            _allExperience[id] = new CumulativeExperience()
+            {
+                NumEvents = 0,
+                CumulativeScore = 0,
+                Id = id
+            };
+            return _allExperience[id];
         }
 
         public void AddDeath(ref DeathPayload deathEvent, bool isTeamKill)

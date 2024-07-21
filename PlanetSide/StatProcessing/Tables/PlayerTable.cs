@@ -32,11 +32,24 @@ namespace PlanetSide
             else
             {
                 var query = Tracker.Handler.GetCharacterQuery(id).ShowFields("faction_id", "name.first");
-                var queryTask = query.GetAsync();
+                JsonElement result = default(JsonElement);
 
-                queryTask.Wait();
+                try
+                {
+                    var queryTask = query.GetAsync();
 
-                var result = queryTask.Result;
+                    queryTask.Wait();
+                    result = queryTask.Result;
+                }
+                catch (Exception ex)
+                {
+                    int x = 0; 
+                }
+
+
+
+                if (result.Equals(default(JsonElement)))
+                    return false;
 
                 if (!result.TryGetProperty("name", out var nameParent)
                 || !nameParent.TryGetStringElement("first", out string name)

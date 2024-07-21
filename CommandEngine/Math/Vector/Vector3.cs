@@ -112,9 +112,16 @@ namespace CommandEngine
         }
         #endregion
 
+        #region Statics
+
+        public static Vector3 Direction(Vector3 to, Vector3 from)
+            => (to - from).Normal();
+
+        #endregion
+
         public override string ToString()
         {
-            return $"({X}, {Y})";
+            return $"({X}, {Y}, {Z})";
         }
     }
 }

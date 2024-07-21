@@ -7,6 +7,11 @@ namespace PlanetSide
         public int Id;
         public string Name;
         public float ScoreAmount;
+
+        public override string ToString()
+        {
+            return $"{Name} ({ScoreAmount})";
+        }
     }
 
     public class CumulativeExperience
@@ -15,5 +20,10 @@ namespace PlanetSide
         public int NumEvents;
         public float CumulativeScore;
         public string Name;
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

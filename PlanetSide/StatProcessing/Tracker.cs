@@ -16,7 +16,7 @@ namespace PlanetSide
         private static string TeamStatsJsonPath = $"./ChartTest/TeamStats.json";
         private static readonly ILogger<Tracker> Logger = Program.LoggerFactory.CreateLogger<Tracker>();
 
-        public static void StartTracker()
+        public static void StartTrackerDebug()
         {
             Logger.LogInformation("Creating Handler");
             StringBuilder teamReportBuilder = new StringBuilder();
@@ -60,7 +60,7 @@ namespace PlanetSide
             }
         }
 
-        static void PopulateTables(CensusHandler handler)
+        public static void PopulateTables(CensusHandler handler)
         {
             Logger.LogInformation("Populating Tables");
             List<Task> tableTasks = new List<Task>()

@@ -5,6 +5,8 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using Microsoft.Extensions.Logging;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace PlanetSide
 {
@@ -39,6 +41,14 @@ namespace PlanetSide
                     : 0;
 
                 experienceMap.Add(_event.Id, _event);
+            }
+
+            if (!Directory.Exists("./CensusData"))
+                Directory.CreateDirectory("./CensusData");
+            using (StreamWriter writer = new StreamWriter("./CensusData/Experience.json"))
+            {
+                writer.Write(JsonConvert.SerializeObject(experienceMap));
+                writer.Close();
             }
 
             Logger.LogInformation("Experience Table Populated");
