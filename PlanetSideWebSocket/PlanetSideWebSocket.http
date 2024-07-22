@@ -1,6 +1,0 @@
-@PlanetSideWebSocket_HostAddress = http://localhost:5273
-
-GET {{PlanetSideWebSocket_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

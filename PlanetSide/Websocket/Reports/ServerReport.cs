@@ -11,5 +11,7 @@ namespace PlanetSide.Websocket
     {
         public string Topic { get; set; }
         public string Data { get; set; }
+
+        public bool DontPublish { get; set; }
     }
 }

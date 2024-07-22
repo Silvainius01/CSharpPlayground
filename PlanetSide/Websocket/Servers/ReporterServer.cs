@@ -31,10 +31,11 @@ namespace PlanetSide.Websocket
 
                 while (true)
                 {
-                    ServerReport[] reports = GenerateReports();
-
-                    foreach (var report in reports)
+                    foreach (var report in GenerateReports())
                     {
+                        if (report.DontPublish)
+                            continue;
+
                         publisher
                             .SendMoreFrame(report.Topic) // Topic
                             .SendFrame(report.Data); // Message
@@ -47,7 +48,7 @@ namespace PlanetSide.Websocket
         }
 
         protected abstract bool OnServerStart();
-        protected abstract ServerReport[] GenerateReports();
+        protected abstract IEnumerable<ServerReport> GenerateReports();
 
     }
 }

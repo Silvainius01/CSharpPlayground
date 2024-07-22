@@ -8,26 +8,47 @@ namespace PlanetSide.Websocket
     public class CommSmashReporter : ReportServer
     {
         string world;
+        CommSmashLeaderboard leaderboard;
         List<PlanetSideTeam> activeTeams;
+        List<LeaderboardRequest> leaderboardRequests;
         Dictionary<string, PlanetStats> statsDict;
 
         PeriodicTimer leaderboardTimer = new PeriodicTimer(TimeSpan.FromSeconds(5));
 
 
-        public CommSmashReporter(string port, string world) : base(port, ServerType.Publisher) 
+        public CommSmashReporter(string port, string world) : base(port, ServerType.Publisher)
         {
             this.world = world;
             activeTeams = new List<PlanetSideTeam>();
             statsDict = new Dictionary<string, PlanetStats>();
+
+            leaderboardRequests = new List<LeaderboardRequest>()
+            {
+                new LeaderboardRequest() { Name = "leaderboard-kills-infantry", GetStat= stats => stats.Kills },
+                new LeaderboardRequest() { Name = "leaderboard-kills-vehilce", GetStat= stats => stats.VehicleKills },
+                new LeaderboardRequest() { Name = "leaderboard-kills-air", GetStat= stats => stats.AirKills },
+                new LeaderboardRequest() { Name = "leaderboard-kills-max", GetStat= stats => stats.GetExp(29).NumEvents },
+                new LeaderboardRequest() { Name = "leaderboard-revives", GetStat= stats => stats.GetExp(7).NumEvents },
+                new LeaderboardRequest() { Name = "leaderboard-resupplies", GetStat = stats =>
+                {
+                    int count = 0;
+                    foreach(var id in ExperienceTable.ResupplyIds)
+                        count += stats.GetExp(id).NumEvents;
+                    return count;
+                }},
+            };
         }
 
         protected override bool OnServerStart()
         {
             Tracker.PopulateTables();
 
-            //activeTeams.Add(new FactionTeam("Vanu Sovereignty", 1, "17"));
-            activeTeams.Add(new FactionTeam("New Conglomerate", 2, world));
-            activeTeams.Add(new FactionTeam("Terran Republic", 3, world));
+            var teamOne = new FactionTeam("New Conglomerate", 2, world);
+            var teamTwo = new FactionTeam("New Conglomerate", 2, world);
+
+            activeTeams.Add(teamOne);
+            activeTeams.Add(teamTwo);
+            leaderboard = new CommSmashLeaderboard(teamOne, teamTwo);
 
             foreach (var team in activeTeams)
             {
@@ -37,12 +58,26 @@ namespace PlanetSide.Websocket
             return true;
         }
 
-        protected override ServerReport[] GenerateReports()
+        List<ServerReport> _reportList = new List<ServerReport>();
+        protected override IEnumerable<ServerReport> GenerateReports()
         {
-            return new []
-            {
-                GetCommsSmashReport()
-            };
+            _reportList.Clear();
+            _reportList.Add(GetCommsSmashReport());
+
+            int numPlayers = activeTeams[0].TeamPlayers.Count + activeTeams[1].TeamPlayers.Count;
+
+            if (activeTeams[0].TeamPlayers.Count + activeTeams[1].TeamPlayers.Count < 10)
+                foreach (var request in leaderboardRequests)
+                {
+                    GenerateLeaderboard(request);
+                    var board = leaderboard.Boards[request.Name];
+                    _reportList.Add(new ServerReport()
+                    {
+                        Data = JsonConvert.SerializeObject(board),
+                        Topic = request.Name
+                    });
+                }
+            return _reportList.ToArray();
         }
 
         ServerReport GetCommsSmashReport()
@@ -73,6 +108,16 @@ namespace PlanetSide.Websocket
                 Topic = "net_stats",
                 Data = JsonConvert.SerializeObject(csReport)
             };
+        }
+
+        ServerReport GenerateLeaderboard(LeaderboardRequest reqeust)
+        {
+            
+
+            foreach (var request in leaderboardRequests)
+            {
+                leaderboard.GenerateLeaderboard(request);
+            }
         }
     }
 }

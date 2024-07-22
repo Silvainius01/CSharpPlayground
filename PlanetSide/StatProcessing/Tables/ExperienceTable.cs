@@ -7,13 +7,22 @@ using System.Collections.ObjectModel;
 using Microsoft.Extensions.Logging;
 using System.IO;
 using Newtonsoft.Json;
+using System.Collections.Concurrent;
 
 namespace PlanetSide
 {
     public static class ExperienceTable
     {
-        static Dictionary<int, ExperienceTick> experienceMap = new Dictionary<int, ExperienceTick>();
-        public static ReadOnlyDictionary<int, ExperienceTick> ExperienceMap = new ReadOnlyDictionary<int, ExperienceTick>(experienceMap);
+        public static int Revive = 7;
+        public static int KillMAX = 29;
+        public static int RepairMAX = 6;
+        public static ReadOnlyCollection<int> ResupplyIds;
+        public static ReadOnlyCollection<int> VehicleRepairIds;
+        public static ReadOnlyDictionary<int, ExperienceTick> ExperienceMap;
+
+        static List<int> _resupplyIds = new List<int>();
+        static List<int> _vehicleRepairIds = new List<int>();
+        static ConcurrentDictionary<int, ExperienceTick> _experienceMap;
 
         static ILogger Logger = Program.LoggerFactory.CreateLogger(typeof(ExperienceTable));
 
@@ -25,30 +34,39 @@ namespace PlanetSide
             await queryTask;
 
             IEnumerable<JsonElement> eData = queryTask.Result;
-            experienceMap.EnsureCapacity(eData.Count());
+            ResupplyIds = new ReadOnlyCollection<int>(_resupplyIds);
+            VehicleRepairIds = new ReadOnlyCollection<int>(_vehicleRepairIds);
+            _experienceMap = new ConcurrentDictionary<int, ExperienceTick>(8, eData.Count());
+            ExperienceMap = new ReadOnlyDictionary<int, ExperienceTick>(_experienceMap);
 
             foreach (var expType in eData)
             {
-                var _event = new ExperienceTick();
+                var exp = new ExperienceTick();
 
-                _event.Id = expType.TryGetProperty("experience_id", out var idProp)
+                exp.Id = expType.TryGetProperty("experience_id", out var idProp)
                     ? int.Parse(idProp.GetString())
                     : -1;
-                _event.Name = expType.TryGetProperty("description", out var descProp)
+                exp.Name = expType.TryGetProperty("description", out var descProp)
                     ? (descProp.GetString() ?? "Invalid Description")
                     : "Invalid Description";
-                _event.ScoreAmount = expType.TryGetProperty("xp", out var expProp)
+                exp.ScoreAmount = expType.TryGetProperty("xp", out var expProp)
                     ? float.Parse(expProp.GetString())
                     : 0;
 
-                experienceMap.Add(_event.Id, _event);
+                if(_experienceMap.TryAdd(exp.Id, exp) && !exp.Name.Contains("HIVE"))
+                {
+                    if(exp.Id != RepairMAX && exp.Name.Contains("Repair"))
+                        _vehicleRepairIds.Add(exp.Id);
+                    if(exp.Name.Contains("Resupply"))
+                        _resupplyIds.Add(exp.Id);
+                }
             }
 
             if (!Directory.Exists("./CensusData"))
                 Directory.CreateDirectory("./CensusData");
             using (StreamWriter writer = new StreamWriter("./CensusData/Experience.json"))
             {
-                writer.Write(JsonConvert.SerializeObject(experienceMap));
+                writer.Write(JsonConvert.SerializeObject(_experienceMap));
                 writer.Close();
             }
 
