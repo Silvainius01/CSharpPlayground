@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
 using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace PlanetSide.Websocket
@@ -12,8 +14,7 @@ namespace PlanetSide.Websocket
         List<PlanetSideTeam> activeTeams;
         List<LeaderboardRequest> leaderboardRequests;
         Dictionary<string, PlanetStats> statsDict;
-
-        PeriodicTimer leaderboardTimer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+        CancellationTokenSource ctLeaderboardLoop;
 
 
         public CommSmashReporter(string port, string world) : base(port, ServerType.Publisher)
@@ -24,18 +25,84 @@ namespace PlanetSide.Websocket
 
             leaderboardRequests = new List<LeaderboardRequest>()
             {
-                new LeaderboardRequest() { Name = "leaderboard-kills-infantry", GetStat = stats => stats.Kills },
-                new LeaderboardRequest() { Name = "leaderboard-kills-vehilce", GetStat= stats => stats.VehicleKills },
-                new LeaderboardRequest() { Name = "leaderboard-kills-air", GetStat= stats => stats.AirKills },
-                new LeaderboardRequest() { Name = "leaderboard-kills-max", GetStat= stats => stats.GetExp(29).NumEvents },
-                new LeaderboardRequest() { Name = "leaderboard-revives", GetStat = stats => stats.GetExp(7).NumEvents },
-                new LeaderboardRequest() { Name = "leaderboard-resupplies", GetStat = stats =>
+                new LeaderboardRequest()
                 {
-                    int count = 0;
-                    foreach(var id in ExperienceTable.ResupplyIds)
-                        count += stats.GetExp(id).NumEvents;
-                    return count;
-                }},
+                    Name = "leaderboard-kills-infantry",
+                    LeaderboardType = LeaderboardType.Player,
+                    GetStat = stats => stats.Kills
+                },
+                new LeaderboardRequest()
+                {
+                    Name = "leaderboard-kills-vehilce",
+                    LeaderboardType = LeaderboardType.Player,
+                    GetStat = stats => stats.VehicleKills
+                },
+                new LeaderboardRequest()
+                {
+                    Name = "leaderboard-kills-air",
+                    LeaderboardType = LeaderboardType.Player,
+                    GetStat = stats => stats.AirKills
+                },
+                new LeaderboardRequest()
+                {
+                    Name = "leaderboard-kills-max",
+                    LeaderboardType = LeaderboardType.Player,
+                    GetStat = stats => stats.GetExp(ExperienceTable.KillMAX).NumEvents,
+                },
+                new LeaderboardRequest()
+                {
+                    Name = "leaderboard-revives",
+                    LeaderboardType = LeaderboardType.Player,
+                    GetStat = stats =>
+                    {
+                        int count = 0;
+                        foreach(var id in ExperienceTable.ReviveIds)
+                            count += stats.GetExp(id).NumEvents;
+                        return count;
+                    }
+                },
+                new LeaderboardRequest()
+                {
+                    Name = "leaderboard-resupplies",
+                    LeaderboardType = LeaderboardType.Player,
+                    GetStat = stats =>
+                    {
+                        int count = 0;
+                        foreach(var id in ExperienceTable.ResupplyIds)
+                            count += stats.GetExp(id).NumEvents;
+                        return count;
+                    }
+                },
+                new LeaderboardRequest()
+                {
+                    Name = "leaderboard-repair-vehicle",
+                    LeaderboardType = LeaderboardType.Player,
+                    GetStat = stats =>
+                    {
+                        float count = 0;
+                        foreach(var id in ExperienceTable.VehicleRepairIds)
+                            count += stats.GetExp(id).CumulativeScore;
+                        return count;
+                    }
+                },
+                new LeaderboardRequest() 
+                {
+                    Name = "leaderboard-repair-max",
+                    LeaderboardType = LeaderboardType.Player, 
+                    GetStat = stats =>
+                    {
+                        float count = 0;
+                        foreach(var id in ExperienceTable.MaxRepairIds)
+                            count += stats.GetExp(id).CumulativeScore;
+                        return count;
+                    }
+                },
+                new LeaderboardRequest()
+                {
+                    Name = "leaderboard-weapons",
+                    LeaderboardType = LeaderboardType.Weapon,
+                    GetStat = stats => stats.Kills
+                }
             };
         }
 
@@ -45,6 +112,7 @@ namespace PlanetSide.Websocket
 
             var teamOne = new FactionTeam("New Conglomerate", 2, world);
             var teamTwo = new FactionTeam("Terran Republic", 3, world);
+            ctLeaderboardLoop = new CancellationTokenSource();
 
             activeTeams.Add(teamOne);
             activeTeams.Add(teamTwo);
@@ -54,6 +122,9 @@ namespace PlanetSide.Websocket
             {
                 team.StartStream();
             }
+
+            // Start calculating leaderboards in the back ground.
+            Task.Run(() => LeaderboardCalcLoop(ctLeaderboardLoop.Token));
 
             return true;
         }
@@ -69,8 +140,7 @@ namespace PlanetSide.Websocket
             if (numPlayers >= 10)
                 foreach (var request in leaderboardRequests)
                 {
-                    leaderboard.GenerateLeaderboard(request);
-                    var board = leaderboard.Boards[request.Name];
+                    var board = leaderboard.GetLeaderboard(request);
                     _reportList.Add(new ServerReport()
                     {
                         Data = JsonConvert.SerializeObject(board),
@@ -109,6 +179,21 @@ namespace PlanetSide.Websocket
                 Topic = "net_stats",
                 Data = JsonConvert.SerializeObject(csReport)
             };
+        }
+
+        private async Task LeaderboardCalcLoop(CancellationToken ct)
+        {
+            float waitTime = 5.0f / leaderboardRequests.Count;
+            PeriodicTimer boardtimer = new PeriodicTimer(TimeSpan.FromSeconds(waitTime));
+
+            while (!ct.IsCancellationRequested)
+            {
+                foreach (var request in leaderboardRequests)
+                {
+                    leaderboard.GenerateLeaderboard(request);
+                    await boardtimer.WaitForNextTickAsync(ct);
+                }
+            }
         }
     }
 }

@@ -13,5 +13,6 @@ namespace PlanetSide.Websocket
         public string Data { get; set; }
 
         public bool DontPublish { get; set; }
+        public bool DebugData { get; set; }
     }
 }

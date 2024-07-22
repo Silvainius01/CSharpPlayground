@@ -13,9 +13,9 @@ namespace PlanetSide
 {
     public static class WeaponTable
     {
-        static ConcurrentDictionary<int, int> itemToWeapon;
-        static ConcurrentDictionary<int, int> weaponToItem;
-        static ConcurrentDictionary<int, WeaponData> weaponMap;
+        static ConcurrentDictionary<int, int> _itemToWeapon;
+        static ConcurrentDictionary<int, int> _weaponToItem;
+        static ConcurrentDictionary<int, WeaponData> _weaponMap;
         public static ReadOnlyDictionary<int, WeaponData> WeaponMap;
 
         static ILogger Logger = Program.LoggerFactory.CreateLogger(typeof(WeaponTable));
@@ -26,15 +26,15 @@ namespace PlanetSide
             var handler = Tracker.Handler;
 
             var itemToWeaponQuery = handler.GetClientQuery("item_to_weapon").SetLimit(5000);
-            itemToWeaponQuery.JoinService("item").ShowFields("name.en", "is_vehicle_weapon");
+            itemToWeaponQuery.JoinService("item").ShowFields("name.en", "is_vehicle_weapon", "faction_id");
             
             IEnumerable<JsonElement> itemToWeaponData = await itemToWeaponQuery.GetListAsync();
             int itemToWeaponCount = itemToWeaponData.Count();
 
-            weaponMap = new ConcurrentDictionary<int, WeaponData>(8, itemToWeaponCount);
-            itemToWeapon = new ConcurrentDictionary<int, int>(8, itemToWeaponCount);
-            weaponToItem = new ConcurrentDictionary<int, int>(8, itemToWeaponCount);
-            WeaponMap = new ReadOnlyDictionary<int, WeaponData>(weaponMap);
+            _weaponMap = new ConcurrentDictionary<int, WeaponData>(8, itemToWeaponCount);
+            _itemToWeapon = new ConcurrentDictionary<int, int>(8, itemToWeaponCount);
+            _weaponToItem = new ConcurrentDictionary<int, int>(8, itemToWeaponCount);
+            WeaponMap = new ReadOnlyDictionary<int, WeaponData>(_weaponMap);
 
             int i = 0;
             foreach (var element in itemToWeaponData)
@@ -58,15 +58,27 @@ namespace PlanetSide
                         : "Unknown Weapon!",
 
                     IsVehicleWeapon = (joinedItemProperty.ValueKind != JsonValueKind.Undefined) && joinedItemProperty.TryGetProperty("is_vehicle_weapon", out var vehicleWeaponProp)
-                        ? vehicleWeaponProp.GetString().Equals("1") // bool.Parse() only allows successfully converts 'true' and 'false'
+                        ? vehicleWeaponProp.GetString().Equals("1") // bool.Parse() only successfully converts 'true' and 'false'
                         : false,
+
+                    FactionId = (joinedItemProperty.ValueKind != JsonValueKind.Undefined) && joinedItemProperty.TryGetCensusInteger("faction_id", out int factionId)
+                    ? factionId
+                    : 0,
                 };
 
-                if(!weaponMap.TryAdd(weaponData.ItemId, weaponData))
+                if(!_weaponMap.TryAdd(weaponData.ItemId, weaponData))
                     Logger.LogError($"Failed to add weapon to table: {weaponData}");
             }
 
             Logger.LogInformation("Weapon Table Populated");
+        }
+        public static bool TryGetWeapon(int itemId, out WeaponData weaponData)
+        {
+            if (WeaponMap.TryGetValue(itemId, out weaponData))
+                return true;
+
+            Logger.LogWarning($"Tried to get an unknown weapon item ID: {itemId}");
+            return false;
         }
     }
 
@@ -74,6 +86,7 @@ namespace PlanetSide
     {
         public int ItemId;
         public int WeaponId;
+        public int FactionId;
         public string WeaponName;
         public bool IsVehicleWeapon;
 

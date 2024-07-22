@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Bson;
 using static System.Formats.Asn1.AsnWriter;
 using Microsoft.Extensions.Logging;
+using System.Reflection.Metadata.Ecma335;
 
 namespace PlanetSide
 {
@@ -33,6 +34,14 @@ namespace PlanetSide
         public float HSR => (float)Headshots / (Kills > 0 ? Kills : 1);
         public float vKDR => (float)VehicleKills / (VehicleDeaths > 0 ? VehicleDeaths : 1);
         public float aKDR => (float)AirKills / (AirDeaths > 0 ? AirDeaths : 1);
+        public float ReviveScore
+        {
+            get
+            {
+                float rezCount = GetExp(ExperienceTable.Revive).NumEvents;
+                return (float)Deaths / (rezCount > 0 ? rezCount : 1);
+            }
+        }
 
         //public float CheeseScore { get; set; }
         //public float InfantryScore { get; set; }
@@ -85,21 +94,23 @@ namespace PlanetSide
 
         public void AddKill(ref DeathPayload deathEvent)
         {
-            ++Kills;
-            if (deathEvent.IsHeadshot)
-                ++Headshots;
-        }
-        public void AddDeath(ref DeathPayload deathEvent)
-        {
             if (deathEvent.TeamId == deathEvent.AttackerTeamId)
             {
                 ++TeamKills;
                 return;
             }
-
+            else
+            {
+                ++Kills;
+                if (deathEvent.IsHeadshot)
+                    ++Headshots;
+            }
+        }
+        public void AddDeath(ref DeathPayload deathEvent)
+        {
             // Only count deaths from the enemy
-            ++Deaths;
-            
+            if (deathEvent.TeamId != deathEvent.AttackerTeamId)
+                ++Deaths;
         }
 
         public void AddVehicleKill(ref VehicleDestroyPayload destroyEvent)

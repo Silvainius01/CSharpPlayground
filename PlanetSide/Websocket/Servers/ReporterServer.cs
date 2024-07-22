@@ -39,7 +39,10 @@ namespace PlanetSide.Websocket
                         publisher
                             .SendMoreFrame(report.Topic) // Topic
                             .SendFrame(report.Data); // Message
-                        Console.WriteLine($"Sent report '{report.Topic}': {report.Data}");
+
+                        if (report.DebugData)
+                            Console.WriteLine($"Sent report '{report.Topic}': {report.Data}");
+                        else Console.WriteLine($"Sent report '{report.Topic}'");
                     }
 
                     Thread.Sleep(5000);

@@ -8,20 +8,25 @@ using Microsoft.Extensions.Logging;
 using System.IO;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace PlanetSide
 {
     public static class ExperienceTable
     {
-        public static int Revive = 7;
-        public static int KillMAX = 29;
-        public static int RepairMAX = 6;
+        public const int Revive = 7;
+        public const int KillMAX = 29;
+        public const int InfantryKillAssist = 2;
         public static ReadOnlyCollection<int> ResupplyIds;
+        public static ReadOnlyCollection<int> MaxRepairIds;
         public static ReadOnlyCollection<int> VehicleRepairIds;
+        public static ReadOnlyCollection<int> ReviveIds;
         public static ReadOnlyDictionary<int, ExperienceTick> ExperienceMap;
 
         static List<int> _resupplyIds = new List<int>();
         static List<int> _vehicleRepairIds = new List<int>();
+        static List<int> _maxRepairIds = new List<int>() { 6, 142 };
+        static List<int> _reviveIds = new List<int> { 7, 53 };
         static ConcurrentDictionary<int, ExperienceTick> _experienceMap;
 
         static ILogger Logger = Program.LoggerFactory.CreateLogger(typeof(ExperienceTable));
@@ -29,17 +34,16 @@ namespace PlanetSide
         public static async Task Populate()
         {
             var handler = Tracker.Handler;
-            var queryTask = handler.GetClientQuery("experience").SetLimit(5000).GetListAsync();
-            
-            await queryTask;
+            var queryData = await handler.GetClientQuery("experience").SetLimit(5000).GetListAsync();
 
-            IEnumerable<JsonElement> eData = queryTask.Result;
             ResupplyIds = new ReadOnlyCollection<int>(_resupplyIds);
+            MaxRepairIds = new ReadOnlyCollection<int>(_maxRepairIds);
             VehicleRepairIds = new ReadOnlyCollection<int>(_vehicleRepairIds);
-            _experienceMap = new ConcurrentDictionary<int, ExperienceTick>(8, eData.Count());
+
+            _experienceMap = new ConcurrentDictionary<int, ExperienceTick>(8, queryData.Count());
             ExperienceMap = new ReadOnlyDictionary<int, ExperienceTick>(_experienceMap);
 
-            foreach (var expType in eData)
+            foreach (var expType in queryData)
             {
                 var exp = new ExperienceTick();
 
@@ -55,7 +59,7 @@ namespace PlanetSide
 
                 if(_experienceMap.TryAdd(exp.Id, exp) && !exp.Name.Contains("HIVE"))
                 {
-                    if(exp.Id != RepairMAX && exp.Name.Contains("Repair"))
+                    if(!_maxRepairIds.Contains(exp.Id) && exp.Name.Contains("Repair"))
                         _vehicleRepairIds.Add(exp.Id);
                     if(exp.Name.Contains("Resupply"))
                         _resupplyIds.Add(exp.Id);
