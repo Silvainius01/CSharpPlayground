@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 namespace PlanetSide
 {
@@ -53,6 +54,9 @@ namespace PlanetSide
 
         public void StartStream()
         {
+            if (IsStreaming)
+                return;
+
             var handler = Tracker.Handler;
             handler.AddSubscription(streamKey, GetStreamSubscription());
             handler.AddActionToSubscription(streamKey, ProcessCensusEvent);
@@ -63,6 +67,9 @@ namespace PlanetSide
         }
         public void StopStream()
         {
+            if (!IsStreaming)
+                return;
+
             tokenSource.Cancel();
             Tracker.Handler.DisconnectSocketAsync(streamKey).Wait();
             IsStreaming = false;
