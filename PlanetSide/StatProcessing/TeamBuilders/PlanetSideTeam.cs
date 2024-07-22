@@ -101,21 +101,37 @@ namespace PlanetSide
                 {
                     case CensusEventType.GainExperience:
                         var expEvent = (ExperiencePayload)payload;
-                        TeamStats.AddExperience(ref expEvent);
+                        if (TeamPlayers.ContainsKey(expEvent.CharacterId))
+                        {
+                            TeamStats.AddExperience(ref expEvent);
+                            TeamPlayers[expEvent.CharacterId].EventStats.AddExperience(ref expEvent);
+                        }
                         break;
                     case CensusEventType.Death:
                         var deathEvent = (DeathPayload)payload;
                         if (TeamPlayers.ContainsKey(deathEvent.CharacterId))
-                            TeamStats.AddDeath(ref deathEvent, deathEvent.TeamId == deathEvent.AttackerTeamId);
+                        {
+                            TeamStats.AddDeath(ref deathEvent);
+                            TeamPlayers[deathEvent.CharacterId].EventStats.AddDeath(ref deathEvent);
+                        }
                         else if (TeamPlayers.ContainsKey(deathEvent.OtherId))
+                        {
                             TeamStats.AddKill(ref deathEvent);
+                            TeamPlayers[deathEvent.CharacterId].EventStats.AddKill(ref deathEvent);
+                        }
                         break;
                     case CensusEventType.VehicleDestroy:
                         var destroyEvent = (VehicleDestroyPayload)payload;
                         if (TeamPlayers.ContainsKey(destroyEvent.CharacterId))
-                            TeamStats.AddVehicleDeath(ref destroyEvent, destroyEvent.TeamId == destroyEvent.AttackerTeamId);
+                        {
+                            TeamStats.AddVehicleDeath(ref destroyEvent);
+                            TeamPlayers[destroyEvent.CharacterId].EventStats.AddVehicleDeath(ref destroyEvent);
+                        }
                         else if (TeamPlayers.ContainsKey(destroyEvent.OtherId))
+                        {
                             TeamStats.AddVehicleKill(ref destroyEvent);
+                            TeamPlayers[destroyEvent.CharacterId].EventStats.AddVehicleKill(ref destroyEvent);
+                        }
                         break;
                 }
             }

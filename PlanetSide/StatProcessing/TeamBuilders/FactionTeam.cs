@@ -70,10 +70,10 @@ namespace PlanetSide
             || playersConcurrent.ContainsKey(charEvent.OtherId))
                 return true;
 
-            return UnknownCharTable(charEvent);
+            return IsEventFromTeam(charEvent);
         }
 
-        bool UnknownCharTable(ICensusCharacterEvent payload)
+        bool IsEventFromTeam(ICensusCharacterEvent payload)
         {
             bool teamPlayerFound = false;
 

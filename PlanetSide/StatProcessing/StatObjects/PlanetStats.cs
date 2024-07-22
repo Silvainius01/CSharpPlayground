@@ -50,6 +50,20 @@ namespace PlanetSide
             TeamExperience = new ReadOnlyDictionary<int, CumulativeExperience>(_allExperience);
         }
 
+        public CumulativeExperience GetExp(int id)
+        {
+            if (TeamExperience.TryGetValue(id, out var exp))
+                return exp;
+
+            _allExperience[id] = new CumulativeExperience()
+            {
+                NumEvents = 0,
+                CumulativeScore = 0,
+                Id = id
+            };
+            return _allExperience[id];
+        }
+
         public void AddExperience(ref ExperiencePayload expEvent)
         {
             int experienceId = expEvent.ExperienceId;
@@ -67,23 +81,16 @@ namespace PlanetSide
                 Id = experienceId
             });
         }
-        public CumulativeExperience GetExp(int id)
-        {
-            if (TeamExperience.TryGetValue(id, out var exp))
-                return exp;
 
-            _allExperience[id] = new CumulativeExperience()
-            {
-                NumEvents = 0,
-                CumulativeScore = 0,
-                Id = id
-            };
-            return _allExperience[id];
+        public void AddKill(ref DeathPayload deathEvent)
+        {
+            ++Kills;
+            if (deathEvent.IsHeadshot)
+                ++Headshots;
         }
-
-        public void AddDeath(ref DeathPayload deathEvent, bool isTeamKill)
+        public void AddDeath(ref DeathPayload deathEvent)
         {
-            if (isTeamKill)
+            if (deathEvent.TeamId == deathEvent.AttackerTeamId)
             {
                 ++TeamKills;
                 return;
@@ -93,16 +100,24 @@ namespace PlanetSide
             ++Deaths;
             
         }
-        public void AddKill(ref DeathPayload deathEvent)
-        {
-            ++Kills;
-            if (deathEvent.IsHeadshot)
-                ++Headshots;
-        }
 
-        public void AddVehicleDeath(ref VehicleDestroyPayload destroyEvent, bool isTeamKill)
+        public void AddVehicleKill(ref VehicleDestroyPayload destroyEvent)
         {
-            if(isTeamKill)
+            switch (VehicleTable.VehicleData[destroyEvent.VehicleId].Type)
+            {
+                case VehicleType.Air:
+                    ++AirKills;
+                    break;
+                case VehicleType.Ground:
+                    ++VehicleKills;
+                    break;
+                case VehicleType.Unknown:
+                    break;
+            }
+        }
+        public void AddVehicleDeath(ref VehicleDestroyPayload destroyEvent)
+        {
+            if(destroyEvent.TeamId == destroyEvent.AttackerTeamId)
             {
                 AddVehicleTeamKill(ref destroyEvent);
                 return;
@@ -130,20 +145,6 @@ namespace PlanetSide
                     break;
                 case VehicleType.Ground:
                     ++VehicleTeamKills; 
-                    break;
-                case VehicleType.Unknown:
-                    break;
-            }
-        }
-        public void AddVehicleKill(ref VehicleDestroyPayload destroyEvent)
-        {
-            switch (VehicleTable.VehicleData[destroyEvent.VehicleId].Type)
-            {
-                case VehicleType.Air:
-                    ++AirKills;
-                    break;
-                case VehicleType.Ground:
-                    ++VehicleKills;
                     break;
                 case VehicleType.Unknown:
                     break;
