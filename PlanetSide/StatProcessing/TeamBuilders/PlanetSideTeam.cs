@@ -49,8 +49,6 @@ namespace PlanetSide
             if (int.TryParse(worldString, out int worldId))
                 this.WorldId = worldId;
             else WorldId = -1;
-
-            TeamStats.LinkedTeam = this;
         }
 
         public void StartStream()

@@ -25,9 +25,9 @@ namespace PlanetSide.Websocket
         {
             Tracker.PopulateTables();
 
-            //activeTeams.Add(new FactionTeam("Vanu Sovereignty", "1", "17"));
-            activeTeams.Add(new FactionTeam("New Conglomerate", "2", world));
-            activeTeams.Add(new FactionTeam("Terran Republic", "3", world));
+            //activeTeams.Add(new FactionTeam("Vanu Sovereignty", 1, "17"));
+            activeTeams.Add(new FactionTeam("New Conglomerate", 2, world));
+            activeTeams.Add(new FactionTeam("Terran Republic", 3, world));
 
             foreach (var team in activeTeams)
             {

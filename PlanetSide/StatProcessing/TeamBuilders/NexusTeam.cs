@@ -103,12 +103,11 @@ namespace PlanetSide
             return new CensusStreamSubscription()
             {
                 Characters = nexusTeamPlayers.Keys,
-                Worlds = new[] { World },
+                Worlds = new[] { worldString },
                 EventNames = new[] { "Death", "GainExperience", "VehicleDestroy" },
                 LogicalAndCharactersWithWorlds = true
             };
         }
-
 
         protected override void OnStreamStart() { }
         protected override void OnStreamStop() { }
@@ -124,7 +123,5 @@ namespace PlanetSide
             return TeamPlayers.ContainsKey(charEvent.CharacterId)
                 || TeamPlayers.ContainsKey(charEvent.OtherId);
         }
-
-
     }
 }
