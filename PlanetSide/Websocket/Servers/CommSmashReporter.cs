@@ -22,7 +22,7 @@ namespace PlanetSide.Websocket
         {
             var handler = Tracker.Handler;
 
-            Tracker.PopulateTables(handler);
+            Tracker.PopulateTables();
             //activeTeams.Add(new FactionTeam("Vanu Sovereignty", "1", "17", handler));
             activeTeams.Add(new FactionTeam("New Conglomerate", "2", world, handler));
             activeTeams.Add(new FactionTeam("Terran Republic", "3", world, handler));

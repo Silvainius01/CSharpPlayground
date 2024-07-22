@@ -28,7 +28,7 @@ namespace PlanetSide
         protected readonly ILogger<PlanetSideTeam> Logger;
         protected CensusHandler handler;
 
-        private ConcurrentQueue<ICensusCharacterEvent> events;
+        private ConcurrentQueue<ICensusEvent> events;
         private CancellationTokenSource tokenSource;
 
         public PlanetSideTeam(int teamSize, string teamName, string faction, string world, CensusHandler handler)
@@ -41,7 +41,7 @@ namespace PlanetSide
             TeamPlayers = new ReadOnlyDictionary<string, JsonElement>(GetTeamDict());
             TeamStats = new PlanetStats();
 
-            events = new ConcurrentQueue<ICensusCharacterEvent>();
+            events = new ConcurrentQueue<ICensusEvent>();
             Logger = Program.LoggerFactory.CreateLogger<PlanetSideTeam>();
 
             streamKey = $"PlanetSideTeam_{teamName}_PlayerEventStream";
@@ -68,80 +68,7 @@ namespace PlanetSide
 
         private bool ProcessCensusEvent(SocketResponse response)
         {
-            string eventType;
-            string characterId;
-            JsonElement payload;
-            ICensusCharacterEvent censusEvent = null;
-
-            // Skip if malformed
-            if (!response.Message.RootElement.TryGetProperty("payload", out payload)
-            || !payload.TryGetStringElement("event_name", out eventType)
-            || !payload.TryGetStringElement("character_id", out characterId))
-                return false;
-
-            switch (eventType)
-            {
-                case "GainExperience":
-                    {
-                        // Skip if malformed
-                        if (!payload.TryGetStringElement("other_id", out string otherId)
-                        || !payload.TryGetCensusInteger("experience_id", out int experienceId)
-                        || !payload.TryGetCensusFloat("amount", out float scoreAmount))
-                            break;
-
-                        censusEvent = new ExperiencePayload()
-                        {
-                            CharacterId = characterId,
-                            EventType = CensusEventType.GainExperience,
-                            OtherId = otherId,
-                            ExperienceId = experienceId,
-                            ScoreAmount = scoreAmount
-                        };
-                    }
-                    break;
-                case "Death":
-                    {
-                        // Skip if malformed
-                        if (!payload.TryGetStringElement("attacker_character_id", out string attackerId)
-                        || !payload.TryGetCensusInteger("attacker_weapon_id", out int attackerWeaponId)
-                        || !payload.TryGetCensusInteger("attacker_vehicle_id", out int attackerVehicleId)
-                        || !payload.TryGetCensusInteger("attacker_loadout_id", out int attackerLoadoutId)
-                        || !payload.TryGetCensusBool("is_headshot", out bool isHeadshot))
-                            break;
-
-                        censusEvent = new DeathPayload()
-                        {
-                            CharacterId = characterId,
-                            EventType = CensusEventType.Death,
-                            OtherId = attackerId,
-                            AttackerWeaponId = attackerWeaponId,
-                            AttackerVehicleId = attackerVehicleId,
-                            AttackerLoadoutId = attackerLoadoutId,
-                            IsHeadshot = isHeadshot
-                        };
-                    }
-                    break;
-                case "VehicleDestroy":
-                    {
-                        // Skip if malformed
-                        if (!payload.TryGetStringElement("attacker_character_id", out string attackerId)
-                        || !payload.TryGetCensusInteger("attacker_weapon_id", out int attackerWeaponId)
-                        || !payload.TryGetCensusInteger("attacker_vehicle_id", out int attackerVehicleId)
-                        || !payload.TryGetCensusInteger("attacker_loadout_id", out int attackerLoadoutId))
-                            break;
-
-                        censusEvent = new VehicleDestroyPayload()
-                        {
-                            CharacterId = characterId,
-                            EventType = CensusEventType.VehicleDestroy,
-                            OtherId = attackerId,
-                            AttackerWeaponId = attackerWeaponId,
-                            AttackerVehicleId = attackerVehicleId,
-                            AttackerLoadoutId = attackerLoadoutId
-                        };
-                    }
-                    break;
-            }
+            ICensusEvent? censusEvent = Tracker.ProcessCensusEvent(response);
 
             // Only queue event if it is considered valid by the child class.
             if (censusEvent is not null && IsEventValid(censusEvent))
@@ -197,8 +124,8 @@ namespace PlanetSide
         protected abstract IDictionary<string, JsonElement> GetTeamDict();
         protected abstract void OnStreamStart();
         protected abstract void OnStreamStop();
-        protected abstract void OnEventProcessed(ICensusCharacterEvent payload);
-        protected abstract bool IsEventValid(ICensusCharacterEvent payload);
+        protected abstract void OnEventProcessed(ICensusEvent payload);
+        protected abstract bool IsEventValid(ICensusEvent payload);
         protected abstract CensusStreamSubscription GetStreamSubscription();
 
         public void Dispose()
