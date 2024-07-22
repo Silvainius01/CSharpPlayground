@@ -21,51 +21,56 @@ namespace PlanetSide
     public class FactionTeam : PlanetSideTeam
     {
         ConcurrentDictionary<string, byte> nonFactionPlayers = new ConcurrentDictionary<string, byte>();
-        ConcurrentDictionary<string, JsonElement> playersConcurrent = new ConcurrentDictionary<string, JsonElement>();
+        ConcurrentDictionary<string, PlayerStats> playersConcurrent = new ConcurrentDictionary<string, PlayerStats>();
         static Dictionary<string, CensusStreamSubscription> WorldSubscriptions = new Dictionary<string, CensusStreamSubscription>();
 
-        public FactionTeam(string teamName, string faction, string world, CensusHandler handler)
-            : base(-1, teamName, faction, world, handler)
+        public FactionTeam(string teamName, int faction, string world)
+            : base(-1, teamName, faction, world)
         {
             streamKey = $"World{world}_CharacterEventStream";
         }
 
         protected override CensusStreamSubscription GetStreamSubscription()
         {
-            if (!WorldSubscriptions.ContainsKey(World))
-                WorldSubscriptions.Add(World, new CensusStreamSubscription()
+            if (!WorldSubscriptions.ContainsKey(worldString))
+                WorldSubscriptions.Add(worldString, new CensusStreamSubscription()
                 {
                     Characters = new[] { "all" },
-                    Worlds = new[] { World },
+                    Worlds = new[] { worldString },
                     EventNames = new[] { "Death", "GainExperience", "VehicleDestroy" },
                     LogicalAndCharactersWithWorlds = true
                 });
-            return WorldSubscriptions[World];
+            return WorldSubscriptions[worldString];
         }
 
-        protected override IDictionary<string, JsonElement> GetTeamDict()
+        protected override IDictionary<string, PlayerStats> GetTeamDict()
         {
             return playersConcurrent;
         }
 
         protected override void OnStreamStart() { }
         protected override void OnStreamStop() { }
-        protected override void OnEventProcessed(ICensusCharacterEvent payload)
-        {
-            // Syncronize dicts
-            //if (addedPlayers.Count > 0)
-            //    while(addedPlayers.TryDequeue(out var kvp))
-            //        _teamPlayers.Add(kvp.Key, kvp.Value);
-        }
+        protected override void OnEventProcessed(ICensusEvent payload){ }
 
-        protected override bool IsEventValid(ICensusCharacterEvent payload)
+        protected override bool IsEventValid(ICensusEvent payload)
         {
-            // Valid if it concerns our players.
-            if (playersConcurrent.ContainsKey(payload.CharacterId)
-            || playersConcurrent.ContainsKey(payload.OtherId))
+            switch(payload.EventType)
+            {
+                case CensusEventType.Death:
+                case CensusEventType.GainExperience:
+                case CensusEventType.VehicleDestroy:
+                    break;
+                default:
+                    return false;
+            }
+
+            ICensusCharacterEvent charEvent = payload as ICensusCharacterEvent;
+
+            if (playersConcurrent.ContainsKey(charEvent.CharacterId)
+            || playersConcurrent.ContainsKey(charEvent.OtherId))
                 return true;
 
-            return UnknownCharTable(payload);
+            return UnknownCharTable(charEvent);
         }
 
         bool UnknownCharTable(ICensusCharacterEvent payload)
@@ -75,61 +80,23 @@ namespace PlanetSide
             if (PlayerTable.TryGetOrAddCharacter(payload.CharacterId, out var cData1) && cData1.Faction == Faction)
             {
                 teamPlayerFound = true;
-                playersConcurrent.TryAdd(payload.CharacterId, default(JsonElement));
+                playersConcurrent.TryAdd(payload.CharacterId, new PlayerStats()
+                {
+                    CharacterData= cData1,
+                    EventStats = new PlanetStats()
+                });
             }
             if (PlayerTable.TryGetOrAddCharacter(payload.OtherId, out var cData2) && cData2.Faction == Faction)
             {
                 teamPlayerFound = true;
-                playersConcurrent.TryAdd(payload.OtherId, default(JsonElement));
+                playersConcurrent.TryAdd(payload.OtherId, new PlayerStats()
+                {
+                    CharacterData = cData1,
+                    EventStats = new PlanetStats()
+                });
             }
 
             return teamPlayerFound;
-        }
-
-        bool UnknownCharQuery(ICensusCharacterEvent payload)
-        {
-            bool playerOneKnown = nonFactionPlayers.ContainsKey(payload.CharacterId);
-            bool playerTwoKnown = nonFactionPlayers.ContainsKey(payload.OtherId);
-            CensusQuery query = null;
-
-            if (!playerOneKnown)
-            {
-                if (!playerTwoKnown)
-                    query = handler.GetCharactersQuery(payload.CharacterId, payload.OtherId).ShowFields("faction_id", "character_id");
-                else query = handler.GetCharacterQuery(payload.CharacterId).ShowFields("faction_id", "character_id");
-            }
-            else if (!playerTwoKnown)
-            {
-                query = handler.GetCharacterQuery(payload.OtherId);
-            }
-            else // Both characters known, skip this event.
-                return false;
-
-            var queryTask = query.GetListAsync();
-            queryTask.Wait();
-
-            // TODO:
-            //  Add the bit filter to know if it's an NPC id, or a character id.
-            //  Mango mentioned it in the community developer discord.
-
-            bool factionPlayerFound = false;
-            foreach (var character in queryTask.Result)
-            {
-                // We dont know the returned order, so gotta extract the ID.
-                if (character.TryGetStringElement("character_id", out string id)
-                && character.TryGetStringElement("faction_id", out string faction))
-                {
-                    if (faction == Faction)
-                    {
-                        playersConcurrent.TryAdd(id, character);
-                        factionPlayerFound = true;
-                    }
-                    else nonFactionPlayers.TryAdd(id, 0);
-                }
-            }
-
-            // Return true if we found a player on our faction. False otherwise.
-            return factionPlayerFound;
         }
     }
 }

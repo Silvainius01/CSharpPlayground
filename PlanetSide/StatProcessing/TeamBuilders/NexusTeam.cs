@@ -18,17 +18,17 @@ namespace PlanetSide
 {
     public class NexusTeam : PlanetSideTeam
     {
-        Dictionary<string, JsonElement> nexusTeamPlayers;
+        Dictionary<string, PlayerStats> nexusTeamPlayers;
 
-        public NexusTeam(int teamSize, string teamName, string faction, string world, CensusHandler handler) 
-            : base(teamSize, teamName, faction, world, handler)
+        public NexusTeam(int teamSize, string teamName, int faction, string world)
+            : base(teamSize, teamName, faction, world)
         {
             streamKey = $"NexusTeam_{teamName}_PlayerEventStream";
         }
 
-        protected override IDictionary<string, JsonElement> GetTeamDict()
+        protected override IDictionary<string, PlayerStats> GetTeamDict()
         {
-            nexusTeamPlayers = new Dictionary<string, JsonElement>();
+            nexusTeamPlayers = new Dictionary<string, PlayerStats>();
             return nexusTeamPlayers;
         }
 
@@ -37,90 +37,59 @@ namespace PlanetSide
             bool filled = false;
             object fillLock = new object();
             object charLock = new object();
-            ConcurrentDictionary<string, JsonElement> playersConcurrent = new ConcurrentDictionary<string, JsonElement>(4, TeamSize);
+            ConcurrentDictionary<string, PlayerStats> playersConcurrent = new ConcurrentDictionary<string, PlayerStats>(4, TeamSize);
 
-            Logger.LogInformation("Genrating NexusTeam {0}...", TeamName);
-
-            void OnTeamFilled()
-            {
-                if (filled)
-                    return;
-
-                lock (fillLock)
-                {
-                    filled = true;
-
-                    nexusTeamPlayers.Clear();
-                    foreach (var kvp in playersConcurrent)
-                        nexusTeamPlayers.Add(kvp.Key, kvp.Value);
-
-                    Logger.LogInformation("Genrated NexusTeam {0} with {1} players", TeamName, TeamSize);
-                }
-            }
-            bool AddPlayer(string characterId, JsonElement characterData)
-            {
-                if (playersConcurrent.TryAdd(characterId, characterData) && playersConcurrent.Count >= TeamSize)
-                { 
-                    OnTeamFilled();
-                    return true;
-                }
-
-                return false;
-            }
+            Logger.LogInformation("Genrating NexusTeam {0}...", TeamName);           
 
             // Add a callback to generate the team. Returns true when the team is full.
             handler.AddActionToSubscription(streamKey, response =>
             {
-                string eventType;
-                JsonElement payload;
-
-                // Skip if malformed or team full
-                if (!response.Message.RootElement.TryGetProperty("payload", out payload)
-                || !payload.TryGetStringElement("event_name", out eventType))
-                    return false;
-                if (playersConcurrent.Count >= TeamSize)
-                {
-                    OnTeamFilled();
+                if (filled)
                     return true;
-                }
 
+                ICensusEvent censusEvent = Tracker.ProcessCensusEvent(response);
 
-                if (eventType == "Death" || eventType == "VehicleDestroy")
+                if (censusEvent is not null)
                 {
-                    string[] characterIds = new string[2];
-
-                    // Skip if malformed
-                    if (!payload.TryGetStringElement("character_id", out characterIds[0])
-                    || !payload.TryGetStringElement("attacker_character_id", out characterIds[1]))
-                        return false;
-
-                    Array.Sort(characterIds); // List always returns sorted ascending
-                    var query = handler.GetCharactersQuery(characterIds).ShowFields("faction_id", "character_id");
-                    var charTask = query.GetListAsync();
-                    charTask.Wait();
-
-                    int i = 0;
-                    var characters = charTask.Result;
-                    foreach (var c in characters)
+                    switch (censusEvent.EventType)
                     {
-                        if (c.TryGetStringElement("faction_id", out string cFaction)
-                        && cFaction == Faction
-                        && AddPlayer(characterIds[i], c)) // We wont know the order 
-                            return true;
-                        ++i;
+                        case CensusEventType.Death:
+                        case CensusEventType.VehicleDestroy:
+                            {
+                                ICensusDeathEvent deathEvent = censusEvent as ICensusDeathEvent;
+
+                                if (deathEvent.TeamId == this.Faction)
+                                    playersConcurrent.TryAdd(deathEvent.CharacterId, new PlayerStats());
+
+                                if (deathEvent.AttackerTeamId == this.Faction)
+                                    playersConcurrent.TryAdd(deathEvent.OtherId, new PlayerStats());
+                            }
+                            break;
+                        case CensusEventType.GainExperience:
+                            {
+                                ICensusCharacterEvent charEvent = censusEvent as ICensusCharacterEvent;
+
+                                if (charEvent is not null)
+                                    playersConcurrent.TryAdd(charEvent.CharacterId, new PlayerStats());
+                            }
+                            break;
                     }
                 }
-                else
-                {
-                    string characterId;
-                    bool isCharacterValid = payload.TryGetStringElement("character_id", out characterId)
-                        && !playersConcurrent.ContainsKey(characterId);
 
-                    if (isCharacterValid)
+                if(playersConcurrent.Count >= TeamSize)
+                {
+                    lock (fillLock)
                     {
-                        var cData = handler.GetCharacter(characterId);
-                        return AddPlayer(characterId, cData);
+                        filled = true;
+
+                        nexusTeamPlayers.Clear();
+                        foreach (var kvp in playersConcurrent)
+                            nexusTeamPlayers.Add(kvp.Key, kvp.Value);
+
+                        Logger.LogInformation("Genrated NexusTeam {0} with {1} players", TeamName, TeamSize);
                     }
+
+                    return true;
                 }
 
                 return false;
@@ -143,14 +112,19 @@ namespace PlanetSide
 
         protected override void OnStreamStart() { }
         protected override void OnStreamStop() { }
-        protected override void OnEventProcessed(ICensusCharacterEvent payload) { }
+        protected override void OnEventProcessed(ICensusEvent payload) { }
 
-        protected override bool IsEventValid(ICensusCharacterEvent censusEvent)
+        protected override bool IsEventValid(ICensusEvent censusEvent)
         {
-            return TeamPlayers.ContainsKey(censusEvent.CharacterId) 
-                || TeamPlayers.ContainsKey(censusEvent.OtherId);
+            ICensusCharacterEvent charEvent = censusEvent as ICensusCharacterEvent;
+
+            if (charEvent is null)
+                return false;
+
+            return TeamPlayers.ContainsKey(charEvent.CharacterId)
+                || TeamPlayers.ContainsKey(charEvent.OtherId);
         }
 
-        
+
     }
 }

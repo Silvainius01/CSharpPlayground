@@ -43,9 +43,6 @@ namespace PlanetSide
         [JsonIgnore] Dictionary<int, CumulativeExperience> _allExperience;
         [JsonIgnore] ReadOnlyDictionary<int, CumulativeExperience> TeamExperience;
 
-        [JsonIgnore]
-        public PlanetSideTeam LinkedTeam;
-
 
         public PlanetStats()
         {
@@ -111,19 +108,22 @@ namespace PlanetSide
                 return;
             }
 
-            switch(VehicleTable.VehicleData[destroyEvent.AttackerVehicleId].Type)
+            switch(VehicleTable.VehicleData[destroyEvent.VehicleId].Type)
             {
-                case VehicleType.Air:
+                case VehicleType.Air: // Note: includes bastions
                     ++AirDeaths;
                     break;
-                case VehicleType.Ground:
+                case VehicleType.Hover: // Magriders, Javelins.
+                case VehicleType.Ground: // Corsairs, hilariously.
                     ++VehicleDeaths; 
+                    break;
+                case VehicleType.Unknown:
                     break;
             }
         }
         public void AddVehicleTeamKill(ref VehicleDestroyPayload destroyEvent)
         {
-            switch (VehicleTable.VehicleData[destroyEvent.AttackerVehicleId].Type)
+            switch (VehicleTable.VehicleData[destroyEvent.VehicleId].Type)
             {
                 case VehicleType.Air:
                     ++AirTeamKills; 
@@ -131,17 +131,21 @@ namespace PlanetSide
                 case VehicleType.Ground:
                     ++VehicleTeamKills; 
                     break;
+                case VehicleType.Unknown:
+                    break;
             }
         }
         public void AddVehicleKill(ref VehicleDestroyPayload destroyEvent)
         {
-            switch (VehicleTable.VehicleData[destroyEvent.AttackerVehicleId].Type)
+            switch (VehicleTable.VehicleData[destroyEvent.VehicleId].Type)
             {
                 case VehicleType.Air:
                     ++AirKills;
                     break;
                 case VehicleType.Ground:
                     ++VehicleKills;
+                    break;
+                case VehicleType.Unknown:
                     break;
             }
         }

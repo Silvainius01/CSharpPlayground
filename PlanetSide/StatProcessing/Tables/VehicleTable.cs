@@ -11,7 +11,7 @@ namespace PlanetSide
 {
     public static class VehicleTable
     {
-        static ConcurrentDictionary<int, VehicleData> vehicleData;
+        static ConcurrentDictionary<int, VehicleData> _vehicleData;
         public static ReadOnlyDictionary<int, VehicleData> VehicleData;
 
         static ILogger Logger = Program.LoggerFactory.CreateLogger(typeof(VehicleTable));
@@ -24,18 +24,34 @@ namespace PlanetSide
             var vehicleQuery = handler.GetClientQuery("vehicle").SetLimit(5000).ShowFields("name.en", "vehicle_id", "type_id");
             var vehicleDataRaw = await vehicleQuery.GetListAsync();
 
-            vehicleData = new ConcurrentDictionary<int, VehicleData>(8, vehicleDataRaw.Count());
+            _vehicleData = new ConcurrentDictionary<int, VehicleData>(8, vehicleDataRaw.Count());
+            VehicleData = new ReadOnlyDictionary<int, VehicleData>(_vehicleData);
+
+            _vehicleData.TryAdd(0, new VehicleData()
+            {
+                Name = "Suicide",
+                Type = VehicleType.Unknown,
+                VehicleId = 0
+            });
 
             foreach (var element in vehicleDataRaw)
             {
+                if (!element.TryGetCensusInteger("vehicle_id", out int vehicleId)
+                || !element.TryGetCensusInteger("type_id", out int typeId))
+                {
+                    Logger.LogWarning($"Failed to add vehicle to table: {element.ToString()}");
+                    continue;
+                }
+
+
                 var vData = new VehicleData()
                 {
-                    VehicleId = element.GetProperty("vehicle_id").GetInt32(),
-                    Type = (VehicleType)element.GetProperty("type_id").GetInt32(),
+                    VehicleId = vehicleId,
+                    Type = (VehicleType)typeId,
                     Name = element.GetProperty("name").GetProperty("en").GetString()
                 };
 
-                if (!vehicleData.TryAdd(vData.VehicleId, vData))
+                if (!_vehicleData.TryAdd(vData.VehicleId, vData))
                     Logger.LogError($"Failed to add vehicle to table: {vData}");
             }
         }

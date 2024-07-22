@@ -45,4 +45,26 @@ namespace PlanetSide.Websocket
         //public int online_t1 { get; set; }
         //public int online_t2 { get; set; }
     }
+
+    public struct CommSmashTeamReport
+    {
+        [JsonProperty("kills-net")]
+        public int kills_net { get; set; }
+
+        [JsonProperty("kills-vehicle")]
+        public int kills_vehicle { get; set; }
+
+        [JsonProperty("kills-air")]
+        public int kills_air { get; set; }
+
+        //public int deaths_net { get; set; }
+
+        public int revives{ get; set; }
+
+        public int captures { get; set; }
+
+        public int defenses { get; set; }
+
+        //public int online { get; set; }
+    }
 }

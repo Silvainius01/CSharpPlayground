@@ -46,9 +46,9 @@ namespace PlanetSide
             || (eventType = GetEventType(eventTypeStr)) == CensusEventType.Unknown)
                 return null;
 
-            switch (eventTypeStr)
+            switch (eventType)
             {
-                case "GainExperience":
+                case CensusEventType.GainExperience:
                     {
                         // Skip if malformed
                         if (!payload.TryGetStringElement("other_id", out string otherId)
@@ -59,13 +59,13 @@ namespace PlanetSide
                         return new ExperiencePayload()
                         {
                             CharacterId = characterId,
-                            EventType = CensusEventType.GainExperience,
+                            EventType = eventType,
                             OtherId = otherId,
                             ExperienceId = experienceId,
                             ScoreAmount = scoreAmount
                         };
                     }
-                case "Death":
+                case CensusEventType.Death:
                     {
                         if (!payload.TryGetCensusBool("is_headshot", out bool isHeadshot)
                         || !TryProcessDeathEvent(payload, eventType, out DeathPayload deathEvent))
@@ -74,12 +74,12 @@ namespace PlanetSide
                         deathEvent.IsHeadshot = isHeadshot;
                         return deathEvent;
                     }
-                case "VehicleDestroy":
+                case CensusEventType.VehicleDestroy:
                     {
                         // Skip if malformed
                         if (!payload.TryGetCensusInteger("faction_id", out int factionId)
                         || !payload.TryGetCensusInteger("vehicle_id", out int vehicleId)
-                        || !!TryProcessDeathEvent(payload, eventType, out VehicleDestroyPayload vKillEvent))
+                        || !TryProcessDeathEvent(payload, eventType, out VehicleDestroyPayload vKillEvent))
                             break;
 
                         vKillEvent.FactionId = factionId;
@@ -129,7 +129,7 @@ namespace PlanetSide
                 AttackerWeaponId = attackerWeaponId,
                 AttackerVehicleId = attackerVehicleId,
                 AttackerLoadoutId = attackerLoadoutId,
-                AttackerTeamId = teamId,
+                AttackerTeamId = attackerTeamId,
 
                 ZoneId = zoneId,
                 WorldId = worldId

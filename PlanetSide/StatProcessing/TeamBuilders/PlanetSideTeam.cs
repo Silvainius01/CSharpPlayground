@@ -14,31 +14,30 @@ namespace PlanetSide
     public abstract class PlanetSideTeam : IDisposable
     {
         public int TeamSize { get; private set; }
+        public int WorldId { get; private set; }
+        public int ZoneId { get; private set; }
+        public int Faction { get; private set; }
         public string TeamName { get; private set; }
-        public string Faction { get; private set; }
-        public string World { get; private set; }
-        public string Zone { get; private set; } = string.Empty;
-        public ReadOnlyDictionary<string, JsonElement> TeamPlayers { get; private set; }
+        public ReadOnlyDictionary<string, PlayerStats> TeamPlayers { get; private set; }
         public PlanetStats TeamStats { get; private set; }
 
         public bool IsStreaming { get; private set; }
         public bool IsProccessing { get; private set; }
 
+        protected string worldString;
         protected string streamKey = string.Empty;
         protected readonly ILogger<PlanetSideTeam> Logger;
-        protected CensusHandler handler;
 
         private ConcurrentQueue<ICensusEvent> events;
         private CancellationTokenSource tokenSource;
 
-        public PlanetSideTeam(int teamSize, string teamName, string faction, string world, CensusHandler handler)
+        public PlanetSideTeam(int teamSize, string teamName, int faction, string world)
         {
             this.Faction = faction;
             this.TeamName = teamName;
             this.TeamSize = teamSize;
-            this.World = world;
-            this.handler = handler;
-            TeamPlayers = new ReadOnlyDictionary<string, JsonElement>(GetTeamDict());
+            worldString = world;
+            TeamPlayers = new ReadOnlyDictionary<string, PlayerStats>(GetTeamDict());
             TeamStats = new PlanetStats();
 
             events = new ConcurrentQueue<ICensusEvent>();
@@ -47,11 +46,16 @@ namespace PlanetSide
             streamKey = $"PlanetSideTeam_{teamName}_PlayerEventStream";
             tokenSource = new CancellationTokenSource();
 
+            if (int.TryParse(worldString, out int worldId))
+                this.WorldId = worldId;
+            else WorldId = -1;
+
             TeamStats.LinkedTeam = this;
         }
 
         public void StartStream()
         {
+            var handler = Tracker.Handler;
             handler.AddSubscription(streamKey, GetStreamSubscription());
             handler.AddActionToSubscription(streamKey, ProcessCensusEvent);
             handler.ConnectClientAsync(streamKey).Wait();
@@ -62,7 +66,7 @@ namespace PlanetSide
         public void StopStream()
         {
             tokenSource.Cancel();
-            handler.DisconnectSocketAsync(streamKey).Wait();
+            Tracker.Handler.DisconnectSocketAsync(streamKey).Wait();
             IsStreaming = false;
         }
 
@@ -121,7 +125,7 @@ namespace PlanetSide
             IsProccessing = false;
         }
 
-        protected abstract IDictionary<string, JsonElement> GetTeamDict();
+        protected abstract IDictionary<string, PlayerStats> GetTeamDict();
         protected abstract void OnStreamStart();
         protected abstract void OnStreamStop();
         protected abstract void OnEventProcessed(ICensusEvent payload);

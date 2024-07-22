@@ -23,6 +23,8 @@ namespace PlanetSide.Websocket
 
         public void StartServer()
         {
+            OnServerStart();
+
             using (var publisher = new PublisherSocket())
             {
                 publisher.Bind($"tcp://*:{port}");
@@ -36,10 +38,10 @@ namespace PlanetSide.Websocket
                         publisher
                             .SendMoreFrame(report.Topic) // Topic
                             .SendFrame(report.Data); // Message
-                        Console.WriteLine($"Sent report '{report.Topic}'");
+                        Console.WriteLine($"Sent report '{report.Topic}': {report.Data}");
                     }
 
-                    Thread.Sleep(1000);
+                    Thread.Sleep(5000);
                 }
             }
         }

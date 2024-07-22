@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using Newtonsoft.Json;
 
 namespace PlanetSide.Websocket
@@ -9,6 +10,8 @@ namespace PlanetSide.Websocket
         string world;
         List<PlanetSideTeam> activeTeams;
         Dictionary<string, PlanetStats> statsDict;
+
+        PeriodicTimer leaderboardTimer = new PeriodicTimer(TimeSpan.FromSeconds(5));
 
 
         public CommSmashReporter(string port, string world) : base(port, ServerType.Publisher) 
@@ -20,12 +23,11 @@ namespace PlanetSide.Websocket
 
         protected override bool OnServerStart()
         {
-            var handler = Tracker.Handler;
-
             Tracker.PopulateTables();
-            //activeTeams.Add(new FactionTeam("Vanu Sovereignty", "1", "17", handler));
-            activeTeams.Add(new FactionTeam("New Conglomerate", "2", world, handler));
-            activeTeams.Add(new FactionTeam("Terran Republic", "3", world, handler));
+
+            //activeTeams.Add(new FactionTeam("Vanu Sovereignty", "1", "17"));
+            activeTeams.Add(new FactionTeam("New Conglomerate", "2", world));
+            activeTeams.Add(new FactionTeam("Terran Republic", "3", world));
 
             foreach (var team in activeTeams)
             {
@@ -59,11 +61,11 @@ namespace PlanetSide.Websocket
                 revives_t1 = activeTeams[0].TeamStats.GetExp(7).NumEvents,
                 revives_t2 = activeTeams[1].TeamStats.GetExp(7).NumEvents,
 
-                captures_t1 = activeTeams[0].TeamStats.GetExp(272).NumEvents,
-                captures_t2 = activeTeams[1].TeamStats.GetExp(272).NumEvents,
+                captures_t1 = 0,
+                captures_t2 = 0,
 
-                defenses_t1 = activeTeams[0].TeamStats.GetExp(6).NumEvents,
-                defenses_t2 = activeTeams[1].TeamStats.GetExp(6).NumEvents
+                defenses_t1 = 0,
+                defenses_t2 = 0
             };
 
             return new ServerReport()

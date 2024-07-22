@@ -44,9 +44,9 @@ namespace PlanetSide
             Tracker.PopulateTables();
 
             //activeTeams.AddRange(GetNexusTeams(handler));
-            activeTeams.Add(new FactionTeam("Vanu Sovereignty", "1", "17", Handler));
-            activeTeams.Add(new FactionTeam("New Conglomerate", "2", "17", Handler));
-            activeTeams.Add(new FactionTeam("Terran Republic", "3", "17", Handler));
+            activeTeams.Add(new FactionTeam("Vanu Sovereignty", 1, "17"));
+            activeTeams.Add(new FactionTeam("New Conglomerate", 2, "17"));
+            activeTeams.Add(new FactionTeam("Terran Republic", 3, "17"));
 
             foreach (var team in activeTeams)
             {
@@ -78,7 +78,9 @@ namespace PlanetSide
 
         private static void StartSocketServer(List<string> args)
         {
-            //ReportServer.StartPublishingServer();
+            CommSmashReporter csReporter = new CommSmashReporter("56854", "all");
+
+            csReporter.StartServer();
         }
         private static void StartSocketClient(List<string> args)
         {

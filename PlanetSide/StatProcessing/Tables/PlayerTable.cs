@@ -55,7 +55,7 @@ namespace PlanetSide
 
                 if (!result.TryGetProperty("name", out var nameParent)
                 || !nameParent.TryGetStringElement("first", out string name)
-                || !result.TryGetStringElement("faction_id", out string faction))
+                || !result.TryGetCensusInteger("faction_id", out int faction))
                     return false;
 
                 cData = new CharacterData()
@@ -85,6 +85,6 @@ namespace PlanetSide
     {
         public string Id { get; set; }
         public string Name { get; set; }
-        public string Faction { get; set; }
+        public int Faction { get; set; }
     }
 }
