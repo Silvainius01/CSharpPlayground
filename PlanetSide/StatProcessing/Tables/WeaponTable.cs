@@ -7,33 +7,34 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 
 namespace PlanetSide
 {
     public static class WeaponTable
     {
-        static Dictionary<int, int> itemToWeapon = new Dictionary<int, int>();
-        static Dictionary<int, int> weaponToItem = new Dictionary<int, int>();
-        static Dictionary<int, WeaponData> weaponMap = new Dictionary<int, WeaponData>();
-        public static ReadOnlyDictionary<int, WeaponData> WeaponMap = new ReadOnlyDictionary<int, WeaponData>(weaponMap);
+        static ConcurrentDictionary<int, int> itemToWeapon;
+        static ConcurrentDictionary<int, int> weaponToItem;
+        static ConcurrentDictionary<int, WeaponData> weaponMap;
+        public static ReadOnlyDictionary<int, WeaponData> WeaponMap;
 
         static ILogger Logger = Program.LoggerFactory.CreateLogger(typeof(WeaponTable));
 
 
-        public static async Task Populate(CensusHandler handler)
+        public static async Task Populate()
         {
+            var handler = Tracker.Handler;
+
             var itemToWeaponQuery = handler.GetClientQuery("item_to_weapon").SetLimit(5000);
             itemToWeaponQuery.JoinService("item").ShowFields("name.en", "is_vehicle_weapon");
-            var itemToWeaponTask = itemToWeaponQuery.GetListAsync();
             
-            await itemToWeaponTask;
-
-            IEnumerable<JsonElement> itemToWeaponData = itemToWeaponTask.Result;
+            IEnumerable<JsonElement> itemToWeaponData = await itemToWeaponQuery.GetListAsync();
             int itemToWeaponCount = itemToWeaponData.Count();
 
-            weaponMap.EnsureCapacity(itemToWeaponCount);
-            itemToWeapon.EnsureCapacity(itemToWeaponCount);
-            weaponToItem.EnsureCapacity(itemToWeaponCount);
+            weaponMap = new ConcurrentDictionary<int, WeaponData>(8, itemToWeaponCount);
+            itemToWeapon = new ConcurrentDictionary<int, int>(8, itemToWeaponCount);
+            weaponToItem = new ConcurrentDictionary<int, int>(8, itemToWeaponCount);
+            WeaponMap = new ReadOnlyDictionary<int, WeaponData>(weaponMap);
 
             int i = 0;
             foreach (var element in itemToWeaponData)
@@ -61,7 +62,8 @@ namespace PlanetSide
                         : false,
                 };
 
-                weaponMap.Add(weaponData.ItemId, weaponData);
+                if(!weaponMap.TryAdd(weaponData.ItemId, weaponData))
+                    Logger.LogError($"Failed to add weapon to table: {weaponData}");
             }
 
             Logger.LogInformation("Weapon Table Populated");
@@ -74,5 +76,8 @@ namespace PlanetSide
         public int WeaponId;
         public string WeaponName;
         public bool IsVehicleWeapon;
+
+        public override string ToString()
+            => $"[{ItemId}][{WeaponId}] {WeaponName}";
     }
 }

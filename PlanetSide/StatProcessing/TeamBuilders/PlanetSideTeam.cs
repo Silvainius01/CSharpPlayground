@@ -28,7 +28,7 @@ namespace PlanetSide
         protected readonly ILogger<PlanetSideTeam> Logger;
         protected CensusHandler handler;
 
-        private ConcurrentQueue<ICensusEvent> events;
+        private ConcurrentQueue<ICensusCharacterEvent> events;
         private CancellationTokenSource tokenSource;
 
         public PlanetSideTeam(int teamSize, string teamName, string faction, string world, CensusHandler handler)
@@ -41,7 +41,7 @@ namespace PlanetSide
             TeamPlayers = new ReadOnlyDictionary<string, JsonElement>(GetTeamDict());
             TeamStats = new PlanetStats();
 
-            events = new ConcurrentQueue<ICensusEvent>();
+            events = new ConcurrentQueue<ICensusCharacterEvent>();
             Logger = Program.LoggerFactory.CreateLogger<PlanetSideTeam>();
 
             streamKey = $"PlanetSideTeam_{teamName}_PlayerEventStream";
@@ -71,7 +71,7 @@ namespace PlanetSide
             string eventType;
             string characterId;
             JsonElement payload;
-            ICensusEvent censusEvent = null;
+            ICensusCharacterEvent censusEvent = null;
 
             // Skip if malformed
             if (!response.Message.RootElement.TryGetProperty("payload", out payload)
@@ -177,14 +177,14 @@ namespace PlanetSide
                     case CensusEventType.Death:
                         var deathEvent = (DeathPayload)payload;
                         if (TeamPlayers.ContainsKey(deathEvent.CharacterId))
-                            TeamStats.AddDeath(ref deathEvent, TeamPlayers.ContainsKey(deathEvent.OtherId));
+                            TeamStats.AddDeath(ref deathEvent, deathEvent.TeamId == deathEvent.AttackerTeamId);
                         else if (TeamPlayers.ContainsKey(deathEvent.OtherId))
                             TeamStats.AddKill(ref deathEvent);
                         break;
                     case CensusEventType.VehicleDestroy:
                         var destroyEvent = (VehicleDestroyPayload)payload;
                         if (TeamPlayers.ContainsKey(destroyEvent.CharacterId))
-                            TeamStats.AddVehicleDeath(ref destroyEvent, TeamPlayers.ContainsKey(destroyEvent.OtherId));
+                            TeamStats.AddVehicleDeath(ref destroyEvent, destroyEvent.TeamId == destroyEvent.AttackerTeamId);
                         else if (TeamPlayers.ContainsKey(destroyEvent.OtherId))
                             TeamStats.AddVehicleKill(ref destroyEvent);
                         break;
@@ -197,8 +197,8 @@ namespace PlanetSide
         protected abstract IDictionary<string, JsonElement> GetTeamDict();
         protected abstract void OnStreamStart();
         protected abstract void OnStreamStop();
-        protected abstract void OnEventProcessed(ICensusEvent payload);
-        protected abstract bool IsEventValid(ICensusEvent payload);
+        protected abstract void OnEventProcessed(ICensusCharacterEvent payload);
+        protected abstract bool IsEventValid(ICensusCharacterEvent payload);
         protected abstract CensusStreamSubscription GetStreamSubscription();
 
         public void Dispose()

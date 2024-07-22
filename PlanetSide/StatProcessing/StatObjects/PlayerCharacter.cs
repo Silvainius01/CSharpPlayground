@@ -4,13 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PlanetSide.StatProcessing.StatObjects
+namespace PlanetSide
 {
-    class PlayerCharacter
+    public class PlayerStats
     {
-        public string Name;
-        public string Id;
-        public string Faction;
+        public CharacterData CharacterData;
         public PlanetStats EventStats;
     }
 }

@@ -143,9 +143,9 @@ namespace PlanetSide
 
         protected override void OnStreamStart() { }
         protected override void OnStreamStop() { }
-        protected override void OnEventProcessed(ICensusEvent payload) { }
+        protected override void OnEventProcessed(ICensusCharacterEvent payload) { }
 
-        protected override bool IsEventValid(ICensusEvent censusEvent)
+        protected override bool IsEventValid(ICensusCharacterEvent censusEvent)
         {
             return TeamPlayers.ContainsKey(censusEvent.CharacterId) 
                 || TeamPlayers.ContainsKey(censusEvent.OtherId);

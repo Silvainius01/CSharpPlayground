@@ -17,8 +17,9 @@ namespace PlanetSide
 
         static ILogger Logger = Program.LoggerFactory.CreateLogger(typeof(ExperienceTable));
 
-        public static async Task Populate(CensusHandler handler)
+        public static async Task Populate()
         {
+            var handler = Tracker.Handler;
             var queryTask = handler.GetClientQuery("experience").SetLimit(5000).GetListAsync();
             
             await queryTask;

@@ -24,9 +24,14 @@ namespace PlanetSide
         public int VehicleDeaths { get; set; }
         public int VehicleTeamKills { get; set; }
 
+        public int AirKills { get; set; } // Only tracks kills on Air Vehicles
+        public int AirDeaths { get; set; } // Only tracks Air vehicle deaths.
+        public int AirTeamKills { get; set; } // Only tracks TKs on Air vehicles.
+
         public float KDR => (float)Kills / (Deaths > 0 ? Deaths : 1);
         public float HSR => (float)Headshots / (Kills > 0 ? Kills : 1);
         public float vKDR => (float)VehicleKills / (VehicleDeaths > 0 ? VehicleDeaths : 1);
+        public float aKDR => (float)AirKills / (AirDeaths > 0 ? AirDeaths : 1);
 
         //public float CheeseScore { get; set; }
         //public float InfantryScore { get; set; }
@@ -35,11 +40,8 @@ namespace PlanetSide
         //public float CohesionScore { get; set; }
         //public float LogisticScore { get; set; }
 
-        [JsonIgnore]
-        Dictionary<int, CumulativeExperience> _allExperience { get; set; }
-
-        [JsonIgnore]
-        ReadOnlyDictionary<int, CumulativeExperience> TeamExperience;
+        [JsonIgnore] Dictionary<int, CumulativeExperience> _allExperience;
+        [JsonIgnore] ReadOnlyDictionary<int, CumulativeExperience> TeamExperience;
 
         [JsonIgnore]
         public PlanetSideTeam LinkedTeam;
@@ -103,18 +105,45 @@ namespace PlanetSide
 
         public void AddVehicleDeath(ref VehicleDestroyPayload destroyEvent, bool isTeamKill)
         {
-            if (isTeamKill)
+            if(isTeamKill)
             {
-                ++VehicleTeamKills;
+                AddVehicleTeamKill(ref destroyEvent);
                 return;
             }
 
-            // Only count deaths from the enemy
-            ++VehicleDeaths;
+            switch(VehicleTable.VehicleData[destroyEvent.AttackerVehicleId].Type)
+            {
+                case VehicleType.Air:
+                    ++AirDeaths;
+                    break;
+                case VehicleType.Ground:
+                    ++VehicleDeaths; 
+                    break;
+            }
+        }
+        public void AddVehicleTeamKill(ref VehicleDestroyPayload destroyEvent)
+        {
+            switch (VehicleTable.VehicleData[destroyEvent.AttackerVehicleId].Type)
+            {
+                case VehicleType.Air:
+                    ++AirTeamKills; 
+                    break;
+                case VehicleType.Ground:
+                    ++VehicleTeamKills; 
+                    break;
+            }
         }
         public void AddVehicleKill(ref VehicleDestroyPayload destroyEvent)
         {
-            ++VehicleKills;
+            switch (VehicleTable.VehicleData[destroyEvent.AttackerVehicleId].Type)
+            {
+                case VehicleType.Air:
+                    ++AirKills;
+                    break;
+                case VehicleType.Ground:
+                    ++VehicleKills;
+                    break;
+            }
         }
     }
 }

@@ -50,7 +50,7 @@ namespace PlanetSide
 
         protected override void OnStreamStart() { }
         protected override void OnStreamStop() { }
-        protected override void OnEventProcessed(ICensusEvent payload)
+        protected override void OnEventProcessed(ICensusCharacterEvent payload)
         {
             // Syncronize dicts
             //if (addedPlayers.Count > 0)
@@ -58,7 +58,7 @@ namespace PlanetSide
             //        _teamPlayers.Add(kvp.Key, kvp.Value);
         }
 
-        protected override bool IsEventValid(ICensusEvent payload)
+        protected override bool IsEventValid(ICensusCharacterEvent payload)
         {
             // Valid if it concerns our players.
             if (playersConcurrent.ContainsKey(payload.CharacterId)
@@ -68,7 +68,7 @@ namespace PlanetSide
             return UnknownCharTable(payload);
         }
 
-        bool UnknownCharTable(ICensusEvent payload)
+        bool UnknownCharTable(ICensusCharacterEvent payload)
         {
             bool teamPlayerFound = false;
 
@@ -86,7 +86,7 @@ namespace PlanetSide
             return teamPlayerFound;
         }
 
-        bool UnknownCharQuery(ICensusEvent payload)
+        bool UnknownCharQuery(ICensusCharacterEvent payload)
         {
             bool playerOneKnown = nonFactionPlayers.ContainsKey(payload.CharacterId);
             bool playerTwoKnown = nonFactionPlayers.ContainsKey(payload.OtherId);

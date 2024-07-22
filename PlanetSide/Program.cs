@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using CommandEngine;
 using Microsoft.Extensions.Logging;
+using PlanetSide.Websocket;
 using PlanetSide.WebsocketServer;
 
 namespace PlanetSide
@@ -37,7 +38,7 @@ namespace PlanetSide
 
         private static void StartSocketServer(List<string> args)
         {
-            Server.StartPublishingServer();
+            //ReportServer.StartPublishingServer();
         }
         private static void StartSocketClient(List<string> args)
         {

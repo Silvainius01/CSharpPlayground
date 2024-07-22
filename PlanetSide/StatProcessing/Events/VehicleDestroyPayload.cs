@@ -1,7 +1,7 @@
 ﻿
 namespace PlanetSide
 {
-    public struct VehicleDestroyPayload : ICensusEvent
+    public struct VehicleDestroyPayload : ICensusDeathEvent
     {
         /// <summary> The Character who died </summary>
         public string CharacterId { get; set; }
@@ -9,8 +9,16 @@ namespace PlanetSide
         public string OtherId { get; set; }
         public CensusEventType EventType { get; set; }
 
+        public int TeamId { get; set; }
+        public int FactionId { get; set; }
+        public int VehicleId { get; set; }
+
         public int AttackerWeaponId { get; set; }
         public int AttackerVehicleId { get; set; }
         public int AttackerLoadoutId { get; set; }
+        public int AttackerTeamId { get; set; }
+
+        public int ZoneId { get; set; }
+        public int WorldId { get; set; }
     }
 }

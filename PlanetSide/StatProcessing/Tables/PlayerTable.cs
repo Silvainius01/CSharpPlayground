@@ -16,13 +16,15 @@ namespace PlanetSide
     public static class PlayerTable
     {
         static ConcurrentDictionary<string, CharacterData> _characters = new ConcurrentDictionary<string, CharacterData>();
-
         public static ReadOnlyDictionary<string, CharacterData> Characters = new ReadOnlyDictionary<string, CharacterData>(_characters);
+        
+        static ILogger Logger = Program.LoggerFactory.CreateLogger(typeof(PlayerTable));
+
 
         /// <summary> Will retrieve character data from local cache, or query Census API if it is missing. </summary>
         public static bool TryGetOrAddCharacter(string id, out CharacterData cData)
         {
-            cData = null;
+            cData = default(CharacterData);
 
             if (_characters.ContainsKey(id))
             {
@@ -43,7 +45,7 @@ namespace PlanetSide
                 }
                 catch (Exception ex)
                 {
-                    int x = 0; 
+                    Logger.LogError(ex, $"Exception when retriveing Char ID {id}");
                 }
 
 
@@ -69,10 +71,17 @@ namespace PlanetSide
             return false;
         }
         /// <summary> Will retrieve character data from local cache, but wont query Census. </summary>
-        public static void TryGetCharacter(string id, out CharacterData cData) => _characters.TryGetValue(id, out cData);
+        public static bool TryGetCharacter(string id, out CharacterData cData) => _characters.TryGetValue(id, out cData);
+
+        public static bool IsSameFaction(string CharacterId, string otherId)
+        {
+            return TryGetOrAddCharacter(CharacterId, out var cData)
+                && TryGetOrAddCharacter(otherId, out var oData)
+                && cData.Faction == oData.Faction;
+        }
     }
 
-    public class CharacterData
+    public struct CharacterData
     {
         public string Id { get; set; }
         public string Name { get; set; }
