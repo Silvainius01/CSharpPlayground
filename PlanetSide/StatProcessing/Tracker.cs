@@ -82,6 +82,22 @@ namespace PlanetSide
                         || !TryProcessDeathEvent(payload, eventType, out VehicleDestroyPayload vKillEvent))
                             break;
 
+                        if(!VehicleTable.VehicleData.ContainsKey(vehicleId))
+                        {
+                            Logger.LogWarning($"Dropped VehicleDestroy event due to missing vehicle ID: {vehicleId}");
+                            break;
+                        }
+                        else if (!VehicleTable.VehicleData.ContainsKey(vKillEvent.AttackerVehicleId))
+                        {
+                            Logger.LogWarning($"Dropped VehicleDestroy event due to missing attacker vehicle ID: {vKillEvent.AttackerVehicleId}");
+                            break;
+                        }
+                        else if (vehicleId != 0 && VehicleTable.VehicleData[vehicleId].Type == VehicleType.Unknown)
+                        {
+                            Logger.LogWarning($"Dropped VehicleDestroy event due to vehicle ID of unkown type: {vehicleId}");
+                            break;
+                        }
+
                         vKillEvent.FactionId = factionId;
                         vKillEvent.VehicleId = vehicleId;
                         return vKillEvent;

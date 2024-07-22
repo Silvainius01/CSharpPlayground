@@ -24,11 +24,11 @@ namespace PlanetSide.Websocket
 
             leaderboardRequests = new List<LeaderboardRequest>()
             {
-                new LeaderboardRequest() { Name = "leaderboard-kills-infantry", GetStat= stats => stats.Kills },
+                new LeaderboardRequest() { Name = "leaderboard-kills-infantry", GetStat = stats => stats.Kills },
                 new LeaderboardRequest() { Name = "leaderboard-kills-vehilce", GetStat= stats => stats.VehicleKills },
                 new LeaderboardRequest() { Name = "leaderboard-kills-air", GetStat= stats => stats.AirKills },
                 new LeaderboardRequest() { Name = "leaderboard-kills-max", GetStat= stats => stats.GetExp(29).NumEvents },
-                new LeaderboardRequest() { Name = "leaderboard-revives", GetStat= stats => stats.GetExp(7).NumEvents },
+                new LeaderboardRequest() { Name = "leaderboard-revives", GetStat = stats => stats.GetExp(7).NumEvents },
                 new LeaderboardRequest() { Name = "leaderboard-resupplies", GetStat = stats =>
                 {
                     int count = 0;
@@ -44,7 +44,7 @@ namespace PlanetSide.Websocket
             Tracker.PopulateTables();
 
             var teamOne = new FactionTeam("New Conglomerate", 2, world);
-            var teamTwo = new FactionTeam("New Conglomerate", 2, world);
+            var teamTwo = new FactionTeam("Terran Republic", 3, world);
 
             activeTeams.Add(teamOne);
             activeTeams.Add(teamTwo);
@@ -66,10 +66,10 @@ namespace PlanetSide.Websocket
 
             int numPlayers = activeTeams[0].TeamPlayers.Count + activeTeams[1].TeamPlayers.Count;
 
-            if (activeTeams[0].TeamPlayers.Count + activeTeams[1].TeamPlayers.Count < 10)
+            if (numPlayers >= 10)
                 foreach (var request in leaderboardRequests)
                 {
-                    GenerateLeaderboard(request);
+                    leaderboard.GenerateLeaderboard(request);
                     var board = leaderboard.Boards[request.Name];
                     _reportList.Add(new ServerReport()
                     {
@@ -77,7 +77,8 @@ namespace PlanetSide.Websocket
                         Topic = request.Name
                     });
                 }
-            return _reportList.ToArray();
+
+            return _reportList;
         }
 
         ServerReport GetCommsSmashReport()
@@ -108,16 +109,6 @@ namespace PlanetSide.Websocket
                 Topic = "net_stats",
                 Data = JsonConvert.SerializeObject(csReport)
             };
-        }
-
-        ServerReport GenerateLeaderboard(LeaderboardRequest reqeust)
-        {
-            
-
-            foreach (var request in leaderboardRequests)
-            {
-                leaderboard.GenerateLeaderboard(request);
-            }
         }
     }
 }

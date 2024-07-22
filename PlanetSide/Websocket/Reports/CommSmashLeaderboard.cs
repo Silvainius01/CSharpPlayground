@@ -44,7 +44,7 @@ namespace PlanetSide.Websocket
                 ? Boards[request.Name]
                 : (Boards[request.Name] = new List<LeaderboardEntry>());
             Comparison<PlayerStats> playerComparer = (a, b) 
-                => request.GetStat(a.EventStats).CompareTo(request.GetStat(b.EventStats));
+                => -request.GetStat(a.EventStats).CompareTo(request.GetStat(b.EventStats));
 
 
             if (_teamOnePlayers.Count != teamOne.TeamPlayers.Count)

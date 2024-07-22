@@ -124,11 +124,12 @@ namespace PlanetSide
                         else if (TeamPlayers.ContainsKey(deathEvent.OtherId))
                         {
                             TeamStats.AddKill(ref deathEvent);
-                            TeamPlayers[deathEvent.CharacterId].EventStats.AddKill(ref deathEvent);
+                            TeamPlayers[deathEvent.OtherId].EventStats.AddKill(ref deathEvent);
                         }
                         break;
                     case CensusEventType.VehicleDestroy:
                         var destroyEvent = (VehicleDestroyPayload)payload;
+
                         if (TeamPlayers.ContainsKey(destroyEvent.CharacterId))
                         {
                             TeamStats.AddVehicleDeath(ref destroyEvent);
@@ -137,7 +138,7 @@ namespace PlanetSide
                         else if (TeamPlayers.ContainsKey(destroyEvent.OtherId))
                         {
                             TeamStats.AddVehicleKill(ref destroyEvent);
-                            TeamPlayers[destroyEvent.CharacterId].EventStats.AddVehicleKill(ref destroyEvent);
+                            TeamPlayers[destroyEvent.OtherId].EventStats.AddVehicleKill(ref destroyEvent);
                         }
                         break;
                 }

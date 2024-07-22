@@ -34,6 +34,13 @@ namespace PlanetSide
                 VehicleId = 0
             });
 
+            _vehicleData.TryAdd(1012, new VehicleData()
+            {
+                Name = "Mystery Vehicle",
+                Type = VehicleType.Unknown,
+                VehicleId = 1012
+            });
+
             foreach (var element in vehicleDataRaw)
             {
                 if (!element.TryGetCensusInteger("vehicle_id", out int vehicleId)

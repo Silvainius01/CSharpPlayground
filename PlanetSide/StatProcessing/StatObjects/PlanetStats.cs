@@ -9,6 +9,7 @@ using System.Reactive.Disposables;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Bson;
 using static System.Formats.Asn1.AsnWriter;
+using Microsoft.Extensions.Logging;
 
 namespace PlanetSide
 {
