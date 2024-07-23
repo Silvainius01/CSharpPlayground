@@ -44,7 +44,7 @@ namespace PlanetSide
 
                 WeaponData weaponData = new WeaponData()
                 {
-                    ItemId = int.Parse(element.GetProperty("item_id").GetString()),
+                    Id = int.Parse(element.GetProperty("item_id").GetString()),
 
                     // Entry [981] has item_id 6004918, but no weapon_id
                     // Its name? "Mystery Weapon". Of-fucking-course.
@@ -53,7 +53,7 @@ namespace PlanetSide
                         : -1,
 
                     // Some elements dont have names?
-                    WeaponName = (joinedItemProperty.ValueKind != JsonValueKind.Undefined) && joinedItemProperty.TryGetProperty("name", out var nameProp)
+                    Name = (joinedItemProperty.ValueKind != JsonValueKind.Undefined) && joinedItemProperty.TryGetProperty("name", out var nameProp)
                         ? nameProp.GetProperty("en").GetString()
                         : "Unknown Weapon!",
 
@@ -66,7 +66,7 @@ namespace PlanetSide
                     : 0,
                 };
 
-                if(!_weaponMap.TryAdd(weaponData.ItemId, weaponData))
+                if(!_weaponMap.TryAdd(weaponData.Id, weaponData))
                     Logger.LogError($"Failed to add weapon to table: {weaponData}");
             }
 

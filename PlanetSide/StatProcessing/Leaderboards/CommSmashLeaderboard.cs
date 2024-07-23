@@ -36,7 +36,6 @@ namespace PlanetSide.Websocket
         FactionTeam teamTwo;
         ConcurrentDictionary<string, List<LeaderboardEntry>> PlayerBoards = new ConcurrentDictionary<string, List<LeaderboardEntry>>();
         ConcurrentDictionary<string, List<LeaderboardEntry>> WeaponBoards = new ConcurrentDictionary<string, List<LeaderboardEntry>>();
-        Leaderboard<PlayerStats, CharacterData> leaderboard = new Leaderboard<PlayerStats, CharacterData>();
 
         public CommSmashLeaderboard(FactionTeam team1, FactionTeam team2)
         {
