@@ -115,7 +115,7 @@ namespace PlanetSide
                         if (TeamPlayers.ContainsKey(expEvent.CharacterId))
                         {
                             TeamStats.AddExperience(ref expEvent);
-                            TeamPlayers[expEvent.CharacterId].EventStats.AddExperience(ref expEvent);
+                            TeamPlayers[expEvent.CharacterId].Stats.AddExperience(ref expEvent);
                         }
                         break;
                     case CensusEventType.Death:
@@ -123,16 +123,16 @@ namespace PlanetSide
                         if (TeamPlayers.ContainsKey(deathEvent.OtherId))
                         {
                             TeamStats.AddKill(ref deathEvent);
-                            TeamPlayers[deathEvent.OtherId].EventStats.AddKill(ref deathEvent);
+                            TeamPlayers[deathEvent.OtherId].Stats.AddKill(ref deathEvent);
                             if (TryGetOrAddWeaponStats(deathEvent.AttackerWeaponId, out var wstats))
-                                wstats.EventStats.AddKill(ref deathEvent);
+                                wstats.Stats.AddKill(ref deathEvent);
                         }
                         else if (TeamPlayers.ContainsKey(deathEvent.CharacterId))
                         {
                             TeamStats.AddDeath(ref deathEvent);
-                            TeamPlayers[deathEvent.CharacterId].EventStats.AddDeath(ref deathEvent);
+                            TeamPlayers[deathEvent.CharacterId].Stats.AddDeath(ref deathEvent);
                             if(TryGetOrAddWeaponStats(deathEvent.AttackerWeaponId, out var wstats))
-                                wstats.EventStats.AddDeath(ref deathEvent);
+                                wstats.Stats.AddDeath(ref deathEvent);
                         }
                         break;
                     case CensusEventType.VehicleDestroy:
@@ -141,16 +141,16 @@ namespace PlanetSide
                         if (TeamPlayers.ContainsKey(destroyEvent.CharacterId))
                         {
                             TeamStats.AddVehicleDeath(ref destroyEvent);
-                            TeamPlayers[destroyEvent.CharacterId].EventStats.AddVehicleDeath(ref destroyEvent);
+                            TeamPlayers[destroyEvent.CharacterId].Stats.AddVehicleDeath(ref destroyEvent);
                             if (TryGetOrAddWeaponStats(destroyEvent.AttackerWeaponId, out var wstats))
-                                wstats.EventStats.AddVehicleDeath(ref destroyEvent);
+                                wstats.Stats.AddVehicleDeath(ref destroyEvent);
                         }
                         else if (TeamPlayers.ContainsKey(destroyEvent.OtherId))
                         {
                             TeamStats.AddVehicleKill(ref destroyEvent);
-                            TeamPlayers[destroyEvent.OtherId].EventStats.AddVehicleKill(ref destroyEvent);
+                            TeamPlayers[destroyEvent.OtherId].Stats.AddVehicleKill(ref destroyEvent);
                             if (TryGetOrAddWeaponStats(destroyEvent.AttackerWeaponId, out var wstats))
-                                wstats.EventStats.AddVehicleKill(ref destroyEvent);
+                                wstats.Stats.AddVehicleKill(ref destroyEvent);
                         }
                         break;
                 }
@@ -165,9 +165,18 @@ namespace PlanetSide
             {
                 if(TeamWeapons.ContainsKey(itemId))
                     weaponStats = TeamWeapons[itemId];
-                else weaponStats = (_teamWeaponStats[itemId] = new WeaponStats());
+                else
+                {
+                    weaponStats = new WeaponStats()
+                    {
+                        Data = wData,
+                        Stats = new PlanetStats()
+                    };
+                    _teamWeaponStats[itemId] = weaponStats;
+                };
                 return true;
             }
+
             weaponStats = null;
             return false;
         }

@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using PlanetSide.StatProcessing.StatObjects;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -16,6 +17,7 @@ namespace PlanetSide.Websocket
     public enum LeaderboardType { Player, Weapon }
     public struct LeaderboardRequest
     {
+        public int BoardSize { get; set; }
         public string Name { get; set; }
         public LeaderboardType LeaderboardType { get; set; }
         public Func<PlanetStats, float> GetStat { get; set; }
@@ -34,6 +36,7 @@ namespace PlanetSide.Websocket
         FactionTeam teamTwo;
         ConcurrentDictionary<string, List<LeaderboardEntry>> PlayerBoards = new ConcurrentDictionary<string, List<LeaderboardEntry>>();
         ConcurrentDictionary<string, List<LeaderboardEntry>> WeaponBoards = new ConcurrentDictionary<string, List<LeaderboardEntry>>();
+        Leaderboard<PlayerStats, CharacterData> leaderboard = new Leaderboard<PlayerStats, CharacterData>();
 
         public CommSmashLeaderboard(FactionTeam team1, FactionTeam team2)
         {
@@ -63,7 +66,7 @@ namespace PlanetSide.Websocket
                 ? PlayerBoards[request.Name]
                 : (PlayerBoards[request.Name] = new List<LeaderboardEntry>());
             Comparison<PlayerStats> playerComparer = (a, b)
-                => -request.GetStat(a.EventStats).CompareTo(request.GetStat(b.EventStats));
+                => -request.GetStat(a.Stats).CompareTo(request.GetStat(b.Stats));
 
 
             if (_teamOnePlayers.Count != teamOne.TeamPlayers.Count)
@@ -94,19 +97,19 @@ namespace PlanetSide.Websocket
             leaderboard.Clear();
             for (int i = 0; i < 10 && i < _allPlayers.Count; ++i)
             {
-                float score = request.GetStat(_allPlayers[i].EventStats);
+                float score = request.GetStat(_allPlayers[i].Stats);
                 if (score > 0) // Only add players with a score to begin with.
                     leaderboard.Add(new LeaderboardEntry()
                     {
                         Score = score,
-                        EntryName = _allPlayers[i].CharacterData.Name,
-                        TeamId = _allPlayers[i].CharacterData.Faction
+                        EntryName = _allPlayers[i].Data.Name,
+                        TeamId = _allPlayers[i].Data.FactionId
                     });
             }
             return leaderboard;
         }
 
-        List<WeaponStats> _allWeapons = new List<WeaponStats>();
+        List<(int teamId, WeaponStats stats)> _allWeapons = new List<(int teamId, WeaponStats stats)>();
         List<WeaponStats> _teamOneWeapons = new List<WeaponStats>();
         List<WeaponStats> _teamTwoWeapons = new List<WeaponStats>();
         private List<LeaderboardEntry> GenerateWeaponLeaderboard(LeaderboardRequest request)
@@ -115,7 +118,7 @@ namespace PlanetSide.Websocket
                 ? WeaponBoards[request.Name]
                 : (WeaponBoards[request.Name] = new List<LeaderboardEntry>());
             Comparison<WeaponStats> comparer = (a, b)
-                => -request.GetStat(a.EventStats).CompareTo(request.GetStat(b.EventStats));
+                => -request.GetStat(a.Stats).CompareTo(request.GetStat(b.Stats));
 
 
             if (_teamOneWeapons.Count != teamOne.TeamWeapons.Count)
@@ -137,22 +140,22 @@ namespace PlanetSide.Websocket
             for (int i = 0; i < 10; ++i)
             {
                 if (i < _teamOneWeapons.Count)
-                    _allWeapons.Add(_teamOneWeapons[i]);
+                    _allWeapons.Add((teamOne.Faction, _teamOneWeapons[i]));
                 if (i < _teamTwoWeapons.Count)
-                    _allWeapons.Add(_teamTwoWeapons[i]);
+                    _allWeapons.Add((teamTwo.Faction, _teamTwoWeapons[i]));
             }
-            _allWeapons.Sort(comparer);
+            _allWeapons.Sort((a, b) => comparer(a.stats, b.stats));
 
             leaderboard.Clear();
             for (int i = 0; i < 10 && i < _allWeapons.Count; ++i)
             {
-                float score = request.GetStat(_allWeapons[i].EventStats);
+                float score = request.GetStat(_allWeapons[i].stats.Stats);
                 if (score > 0) // Only add players with a score to begin with.
                     leaderboard.Add(new LeaderboardEntry()
                     {
                         Score = score,
-                        EntryName = _allWeapons[i].WeaponData.WeaponName,
-                        TeamId = _allWeapons[i].WeaponData.FactionId,
+                        EntryName = _allWeapons[i].stats.Data.Name,
+                        TeamId = _allWeapons[i].teamId,
                     });
             }
             return leaderboard;

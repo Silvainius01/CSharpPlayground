@@ -77,20 +77,9 @@ namespace PlanetSide
             if (WeaponMap.TryGetValue(itemId, out weaponData))
                 return true;
 
-            Logger.LogWarning($"Tried to get an unknown weapon item ID: {itemId}");
+            if (itemId != 0)
+                Logger.LogWarning($"Tried to get an unknown weapon item ID: {itemId}");
             return false;
         }
-    }
-
-    public struct WeaponData
-    {
-        public int ItemId;
-        public int WeaponId;
-        public int FactionId;
-        public string WeaponName;
-        public bool IsVehicleWeapon;
-
-        public override string ToString()
-            => $"[{ItemId}][{WeaponId}] {WeaponName}";
     }
 }

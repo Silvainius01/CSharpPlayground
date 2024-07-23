@@ -17,16 +17,16 @@ namespace PlanetSide
         public const int Revive = 7;
         public const int KillMAX = 29;
         public const int InfantryKillAssist = 2;
+        public static ReadOnlyCollection<int> ReviveIds;
         public static ReadOnlyCollection<int> ResupplyIds;
         public static ReadOnlyCollection<int> MaxRepairIds;
         public static ReadOnlyCollection<int> VehicleRepairIds;
-        public static ReadOnlyCollection<int> ReviveIds;
         public static ReadOnlyDictionary<int, ExperienceTick> ExperienceMap;
 
-        static List<int> _resupplyIds = new List<int>();
-        static List<int> _vehicleRepairIds = new List<int>();
-        static List<int> _maxRepairIds = new List<int>() { 6, 142 };
         static List<int> _reviveIds = new List<int> { 7, 53 };
+        static List<int> _resupplyIds = new List<int>();
+        static List<int> _maxRepairIds = new List<int>() { 6, 142 };
+        static List<int> _vehicleRepairIds = new List<int>();
         static ConcurrentDictionary<int, ExperienceTick> _experienceMap;
 
         static ILogger Logger = Program.LoggerFactory.CreateLogger(typeof(ExperienceTable));
@@ -36,6 +36,7 @@ namespace PlanetSide
             var handler = Tracker.Handler;
             var queryData = await handler.GetClientQuery("experience").SetLimit(5000).GetListAsync();
 
+            ReviveIds = new ReadOnlyCollection<int>(_reviveIds);
             ResupplyIds = new ReadOnlyCollection<int>(_resupplyIds);
             MaxRepairIds = new ReadOnlyCollection<int>(_maxRepairIds);
             VehicleRepairIds = new ReadOnlyCollection<int>(_vehicleRepairIds);
@@ -49,7 +50,7 @@ namespace PlanetSide
 
                 exp.Id = expType.TryGetProperty("experience_id", out var idProp)
                     ? int.Parse(idProp.GetString())
-                    : -1;
+                    : 0;
                 exp.Name = expType.TryGetProperty("description", out var descProp)
                     ? (descProp.GetString() ?? "Invalid Description")
                     : "Invalid Description";

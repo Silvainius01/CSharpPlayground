@@ -9,6 +9,10 @@ using System.Threading.Tasks;
 
 namespace PlanetSide
 {
+    public enum VehicleType { Unknown = 0, Air = 1, Hover = 2, Ground = 5, Turret = 7, DropPod = 8 }
+    
+
+
     public static class VehicleTable
     {
         static ConcurrentDictionary<int, VehicleData> _vehicleData;
@@ -31,14 +35,14 @@ namespace PlanetSide
             {
                 Name = "Suicide",
                 Type = VehicleType.Unknown,
-                VehicleId = 0
+                Id = 0
             });
 
             _vehicleData.TryAdd(1012, new VehicleData()
             {
-                Name = "Mystery Vehicle",
+                Name = "Phoenix Missle", // Thanks Falcon!
                 Type = VehicleType.Unknown,
-                VehicleId = 1012
+                Id = 1012
             });
 
             foreach (var element in vehicleDataRaw)
@@ -53,25 +57,14 @@ namespace PlanetSide
 
                 var vData = new VehicleData()
                 {
-                    VehicleId = vehicleId,
+                    Id = vehicleId,
                     Type = (VehicleType)typeId,
                     Name = element.GetProperty("name").GetProperty("en").GetString()
                 };
 
-                if (!_vehicleData.TryAdd(vData.VehicleId, vData))
+                if (!_vehicleData.TryAdd(vData.Id, vData))
                     Logger.LogError($"Failed to add vehicle to table: {vData}");
             }
         }
-    }
-
-    public enum VehicleType { Unknown = 0, Air = 1, Hover = 2, Ground = 5, Turret = 7, DropPod = 8 }
-    public struct VehicleData
-    {
-        public int VehicleId { get; set; }
-        public string Name { get; set; }
-        public VehicleType Type { get; set; }
-
-        public override string ToString()
-            => $"[{VehicleId}] {Name}";
     }
 }

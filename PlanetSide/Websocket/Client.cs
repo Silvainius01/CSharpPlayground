@@ -13,7 +13,7 @@ namespace PlanetSide.WebsocketServer
             using (var subscriber = new SubscriberSocket())
             {
                 subscriber.Connect("tcp://localhost:56854");
-                subscriber.Subscribe("net_stats");
+                subscriber.Subscribe("");
 
                 while (true)
                 {

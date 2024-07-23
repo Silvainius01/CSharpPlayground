@@ -60,9 +60,9 @@ namespace PlanetSide
 
                 cData = new CharacterData()
                 {
-                    Id = id,
+                    CensusId = id,
                     Name = name,
-                    Faction = faction
+                    FactionId = faction
                 };
                 _characters[id] = cData;
                 return true;
@@ -77,14 +77,7 @@ namespace PlanetSide
         {
             return TryGetOrAddCharacter(CharacterId, out var cData)
                 && TryGetOrAddCharacter(otherId, out var oData)
-                && cData.Faction == oData.Faction;
+                && cData.FactionId == oData.FactionId;
         }
-    }
-
-    public struct CharacterData
-    {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public int Faction { get; set; }
     }
 }

@@ -77,22 +77,22 @@ namespace PlanetSide
         {
             bool teamPlayerFound = false;
 
-            if (PlayerTable.TryGetOrAddCharacter(payload.CharacterId, out var cData1) && cData1.Faction == Faction)
+            if (PlayerTable.TryGetOrAddCharacter(payload.CharacterId, out var cData1) && cData1.FactionId == Faction)
             {
                 teamPlayerFound = true;
                 playersConcurrent.TryAdd(payload.CharacterId, new PlayerStats()
                 {
-                    CharacterData= cData1,
-                    EventStats = new PlanetStats()
+                    Data= cData1,
+                    Stats = new PlanetStats()
                 });
             }
-            if (PlayerTable.TryGetOrAddCharacter(payload.OtherId, out var cData2) && cData2.Faction == Faction)
+            if (PlayerTable.TryGetOrAddCharacter(payload.OtherId, out var cData2) && cData2.FactionId == Faction)
             {
                 teamPlayerFound = true;
                 playersConcurrent.TryAdd(payload.OtherId, new PlayerStats()
                 {
-                    CharacterData = cData1,
-                    EventStats = new PlanetStats()
+                    Data = cData1,
+                    Stats = new PlanetStats()
                 });
             }
 
