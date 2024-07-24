@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Websocket.Client.Logging;
 
 namespace PlanetSide.Websocket
 {
@@ -29,30 +32,35 @@ namespace PlanetSide.Websocket
                 {
                     Name = "leaderboard-kills-infantry",
                     LeaderboardType = LeaderboardType.Player,
+                    BoardSize = 10,
                     GetStat = stats => stats.Kills
                 },
                 new LeaderboardRequest()
                 {
                     Name = "leaderboard-kills-vehilce",
                     LeaderboardType = LeaderboardType.Player,
+                    BoardSize = 10,
                     GetStat = stats => stats.VehicleKills
                 },
                 new LeaderboardRequest()
                 {
                     Name = "leaderboard-kills-air",
                     LeaderboardType = LeaderboardType.Player,
+                    BoardSize = 10,
                     GetStat = stats => stats.AirKills
                 },
                 new LeaderboardRequest()
                 {
                     Name = "leaderboard-kills-max",
                     LeaderboardType = LeaderboardType.Player,
+                    BoardSize = 10,
                     GetStat = stats => stats.GetExp(ExperienceTable.KillMAX).NumEvents,
                 },
                 new LeaderboardRequest()
                 {
                     Name = "leaderboard-revives",
                     LeaderboardType = LeaderboardType.Player,
+                    BoardSize = 10,
                     GetStat = stats =>
                     {
                         int count = 0;
@@ -65,6 +73,7 @@ namespace PlanetSide.Websocket
                 {
                     Name = "leaderboard-resupplies",
                     LeaderboardType = LeaderboardType.Player,
+                    BoardSize = 10,
                     GetStat = stats =>
                     {
                         int count = 0;
@@ -77,6 +86,7 @@ namespace PlanetSide.Websocket
                 {
                     Name = "leaderboard-repair-vehicle",
                     LeaderboardType = LeaderboardType.Player,
+                    BoardSize = 10,
                     GetStat = stats =>
                     {
                         float count = 0;
@@ -88,7 +98,8 @@ namespace PlanetSide.Websocket
                 new LeaderboardRequest() 
                 {
                     Name = "leaderboard-repair-max",
-                    LeaderboardType = LeaderboardType.Player, 
+                    LeaderboardType = LeaderboardType.Player,
+                    BoardSize = 10,
                     GetStat = stats =>
                     {
                         float count = 0;
@@ -101,6 +112,7 @@ namespace PlanetSide.Websocket
                 {
                     Name = "leaderboard-weapons",
                     LeaderboardType = LeaderboardType.Weapon,
+                    BoardSize = 10,
                     GetStat = stats => stats.Kills
                 }
             };
@@ -130,6 +142,7 @@ namespace PlanetSide.Websocket
         }
 
         List<ServerReport> _reportList = new List<ServerReport>();
+        ConcurrentQueue<ServerReport> _leaderboardReports = new ConcurrentQueue<ServerReport>();
         protected override IEnumerable<ServerReport> GenerateReports()
         {
             _reportList.Clear();
@@ -138,14 +151,10 @@ namespace PlanetSide.Websocket
             int numPlayers = activeTeams[0].TeamPlayers.Count + activeTeams[1].TeamPlayers.Count;
 
             if (numPlayers >= 10)
-                foreach (var request in leaderboardRequests)
+                while(_leaderboardReports.Count > 0)
                 {
-                    var board = leaderboard.GetLeaderboard(request);
-                    _reportList.Add(new ServerReport()
-                    {
-                        Data = JsonConvert.SerializeObject(board),
-                        Topic = request.Name
-                    });
+                    if (_leaderboardReports.TryDequeue(out var report))
+                        _reportList.Add(report);
                 }
 
             return _reportList;
@@ -190,10 +199,19 @@ namespace PlanetSide.Websocket
             {
                 foreach (var request in leaderboardRequests)
                 {
-                    leaderboard.GenerateLeaderboard(request);
+                    var board = leaderboard.CalculateLeaderboard(request);
+                    _leaderboardReports.Enqueue(new ServerReport()
+                    {
+                        Data = JsonConvert.SerializeObject(board),
+                        Topic = request.Name,
+                    });
                     await boardtimer.WaitForNextTickAsync(ct);
                 }
             }
+
+            if (!ct.IsCancellationRequested)
+                Logger.LogError("Leaderboard calculations routine exited!");
+            Logger.LogDebug("Leaderboard calculation routine exited.");
         }
     }
 }

@@ -34,8 +34,8 @@ namespace PlanetSide.Websocket
     {
         FactionTeam teamOne;
         FactionTeam teamTwo;
-        ConcurrentDictionary<string, List<LeaderboardEntry>> PlayerBoards = new ConcurrentDictionary<string, List<LeaderboardEntry>>();
-        ConcurrentDictionary<string, List<LeaderboardEntry>> WeaponBoards = new ConcurrentDictionary<string, List<LeaderboardEntry>>();
+        ConcurrentDictionary<string, PlayerLeaderboard> PlayerBoards = new ConcurrentDictionary<string, PlayerLeaderboard>();
+        ConcurrentDictionary<string, WeaponLeaderboard> WeaponBoards = new ConcurrentDictionary<string, WeaponLeaderboard>();
 
         public CommSmashLeaderboard(FactionTeam team1, FactionTeam team2)
         {
@@ -43,128 +43,154 @@ namespace PlanetSide.Websocket
             this.teamTwo = team2;
         }
 
-        public List<LeaderboardEntry> GenerateLeaderboard(LeaderboardRequest request)
+        public LeaderboardEntry[] CalculateLeaderboard(LeaderboardRequest request)
         {
             switch (request.LeaderboardType)
             {
                 case LeaderboardType.Player:
-                    return GeneratePlayerLeaderboard(request);
+                    return GetPlayerBoard(request).Calculate();
                 case LeaderboardType.Weapon:
-                    return GenerateWeaponLeaderboard(request);
+                    return GetWeaponBoard(request).Calculate();
             }
 
-            return new List<LeaderboardEntry>();
+            return new LeaderboardEntry[request.BoardSize];
         }
 
-        List<PlayerStats> _allPlayers = new List<PlayerStats>();
-        List<PlayerStats> _teamOnePlayers = new List<PlayerStats>();
-        List<PlayerStats> _teamTwoPlayers = new List<PlayerStats>();
-        private List<LeaderboardEntry> GeneratePlayerLeaderboard(LeaderboardRequest request)
+        public LeaderboardEntry[] GetLeaderboard(LeaderboardRequest request)
         {
-            var leaderboard = PlayerBoards.ContainsKey(request.Name)
-                ? PlayerBoards[request.Name]
-                : (PlayerBoards[request.Name] = new List<LeaderboardEntry>());
-            Comparison<PlayerStats> playerComparer = (a, b)
-                => -request.GetStat(a.Stats).CompareTo(request.GetStat(b.Stats));
-
-
-            if (_teamOnePlayers.Count != teamOne.TeamPlayers.Count)
+            switch (request.LeaderboardType)
             {
-                _teamOnePlayers.Clear();
-                _teamOnePlayers.AddRange(teamOne.TeamPlayers.Values);
+                case LeaderboardType.Player:
+                    return GetPlayerBoard(request).Get();
+                case LeaderboardType.Weapon:
+                    return GetWeaponBoard(request).Get();
             }
-
-            if (_teamTwoPlayers.Count != teamTwo.TeamPlayers.Count)
-            {
-                _teamTwoPlayers.Clear();
-                _teamTwoPlayers.AddRange(teamTwo.TeamPlayers.Values);
-            }
-
-            _teamOnePlayers.Sort(playerComparer);
-            _teamTwoPlayers.Sort(playerComparer);
-
-            _allPlayers.Clear();
-            for (int i = 0; i < 10; ++i)
-            {
-                if (i < _teamOnePlayers.Count)
-                    _allPlayers.Add(_teamOnePlayers[i]);
-                if (i < _teamTwoPlayers.Count)
-                    _allPlayers.Add(_teamTwoPlayers[i]);
-            }
-            _allPlayers.Sort(playerComparer);
-
-            leaderboard.Clear();
-            for (int i = 0; i < 10 && i < _allPlayers.Count; ++i)
-            {
-                float score = request.GetStat(_allPlayers[i].Stats);
-                if (score > 0) // Only add players with a score to begin with.
-                    leaderboard.Add(new LeaderboardEntry()
-                    {
-                        Score = score,
-                        EntryName = _allPlayers[i].Data.Name,
-                        TeamId = _allPlayers[i].Data.FactionId
-                    });
-            }
-            return leaderboard;
+            return new LeaderboardEntry[request.BoardSize];
         }
 
-        List<(int teamId, WeaponStats stats)> _allWeapons = new List<(int teamId, WeaponStats stats)>();
-        List<WeaponStats> _teamOneWeapons = new List<WeaponStats>();
-        List<WeaponStats> _teamTwoWeapons = new List<WeaponStats>();
-        private List<LeaderboardEntry> GenerateWeaponLeaderboard(LeaderboardRequest request)
+        private PlayerLeaderboard GetPlayerBoard(LeaderboardRequest request)
         {
-            var leaderboard = WeaponBoards.ContainsKey(request.Name)
-                ? WeaponBoards[request.Name]
-                : (WeaponBoards[request.Name] = new List<LeaderboardEntry>());
-            Comparison<WeaponStats> comparer = (a, b)
-                => -request.GetStat(a.Stats).CompareTo(request.GetStat(b.Stats));
-
-
-            if (_teamOneWeapons.Count != teamOne.TeamWeapons.Count)
+            if (!PlayerBoards.TryGetValue(request.Name, out var board))
             {
-                _teamOneWeapons.Clear();
-                _teamOneWeapons.AddRange(teamOne.TeamWeapons.Values);
+                board = new PlayerLeaderboard(request, teamOne, teamTwo);
+                if (!PlayerBoards.TryAdd(request.Name, board))
+                    throw new InvalidOperationException($"Failed to add missing player leaderboard {request.Name}");
             }
-
-            if (_teamTwoWeapons.Count != teamTwo.TeamWeapons.Count)
-            {
-                _teamTwoWeapons.Clear();
-                _teamTwoWeapons.AddRange(teamTwo.TeamWeapons.Values);
-            }
-
-            _teamOneWeapons.Sort(comparer);
-            _teamTwoWeapons.Sort(comparer);
-
-            _allWeapons.Clear();
-            for (int i = 0; i < 10; ++i)
-            {
-                if (i < _teamOneWeapons.Count)
-                    _allWeapons.Add((teamOne.Faction, _teamOneWeapons[i]));
-                if (i < _teamTwoWeapons.Count)
-                    _allWeapons.Add((teamTwo.Faction, _teamTwoWeapons[i]));
-            }
-            _allWeapons.Sort((a, b) => comparer(a.stats, b.stats));
-
-            leaderboard.Clear();
-            for (int i = 0; i < 10 && i < _allWeapons.Count; ++i)
-            {
-                float score = request.GetStat(_allWeapons[i].stats.Stats);
-                if (score > 0) // Only add players with a score to begin with.
-                    leaderboard.Add(new LeaderboardEntry()
-                    {
-                        Score = score,
-                        EntryName = _allWeapons[i].stats.Data.Name,
-                        TeamId = _allWeapons[i].teamId,
-                    });
-            }
-            return leaderboard;
+            return board;
         }
 
-        public List<LeaderboardEntry> GetLeaderboard(LeaderboardRequest request)
+        private WeaponLeaderboard GetWeaponBoard(LeaderboardRequest request)
         {
-            if (PlayerBoards.TryGetValue(request.Name, out var board))
-                return board;
-            return new List<LeaderboardEntry>();
+            if (!WeaponBoards.TryGetValue(request.Name, out var board))
+            {
+                board = new WeaponLeaderboard(request, teamOne, teamTwo);
+                if (!WeaponBoards.TryAdd(request.Name, board))
+                    throw new InvalidOperationException($"Failed to add missing player leaderboard {request.Name}");
+            }
+            return board;
         }
+
+
+        //List<PlayerStats> _allPlayers = new List<PlayerStats>();
+        //List<PlayerStats> _teamOnePlayers = new List<PlayerStats>();
+        //List<PlayerStats> _teamTwoPlayers = new List<PlayerStats>();
+        //private List<LeaderboardEntry> GeneratePlayerLeaderboard(LeaderboardRequest request)
+        //{
+        //    var leaderboard = PlayerBoards.ContainsKey(request.Name)
+        //        ? PlayerBoards[request.Name]
+        //        : (PlayerBoards[request.Name] = new List<LeaderboardEntry>());
+        //    Comparison<PlayerStats> playerComparer = (a, b)
+        //        => -request.GetStat(a.Stats).CompareTo(request.GetStat(b.Stats));
+
+        //    if (_teamOnePlayers.Count != teamOne.TeamPlayers.Count)
+        //    {
+        //        _teamOnePlayers.Clear();
+        //        _teamOnePlayers.AddRange(teamOne.TeamPlayers.Values);
+        //    }
+
+        //    if (_teamTwoPlayers.Count != teamTwo.TeamPlayers.Count)
+        //    {
+        //        _teamTwoPlayers.Clear();
+        //        _teamTwoPlayers.AddRange(teamTwo.TeamPlayers.Values);
+        //    }
+
+        //    _teamOnePlayers.Sort(playerComparer);
+        //    _teamTwoPlayers.Sort(playerComparer);
+
+        //    _allPlayers.Clear();
+        //    for (int i = 0; i < 10; ++i)
+        //    {
+        //        if (i < _teamOnePlayers.Count)
+        //            _allPlayers.Add(_teamOnePlayers[i]);
+        //        if (i < _teamTwoPlayers.Count)
+        //            _allPlayers.Add(_teamTwoPlayers[i]);
+        //    }
+        //    _allPlayers.Sort(playerComparer);
+
+        //    leaderboard.Clear();
+        //    for (int i = 0; i < 10 && i < _allPlayers.Count; ++i)
+        //    {
+        //        float score = request.GetStat(_allPlayers[i].Stats);
+        //        if (score > 0) // Only add players with a score to begin with.
+        //            leaderboard.Add(new LeaderboardEntry()
+        //            {
+        //                Score = score,
+        //                EntryName = _allPlayers[i].Data.Name,
+        //                TeamId = _allPlayers[i].Data.FactionId
+        //            });
+        //    }
+        //    return leaderboard;
+        //}
+
+        //List<(int teamId, WeaponStats stats)> _allWeapons = new List<(int teamId, WeaponStats stats)>();
+        //List<WeaponStats> _teamOneWeapons = new List<WeaponStats>();
+        //List<WeaponStats> _teamTwoWeapons = new List<WeaponStats>();
+        //private List<LeaderboardEntry> GenerateWeaponLeaderboard(LeaderboardRequest request)
+        //{
+        //    var leaderboard = WeaponBoards.ContainsKey(request.Name)
+        //        ? WeaponBoards[request.Name]
+        //        : (WeaponBoards[request.Name] = new List<LeaderboardEntry>());
+        //    Comparison<WeaponStats> comparer = (a, b)
+        //        => -request.GetStat(a.Stats).CompareTo(request.GetStat(b.Stats));
+
+        //    if (_teamOneWeapons.Count != teamOne.TeamWeapons.Count)
+        //    {
+        //        _teamOneWeapons.Clear();
+        //        _teamOneWeapons.AddRange(teamOne.TeamWeapons.Values);
+        //    }
+
+        //    if (_teamTwoWeapons.Count != teamTwo.TeamWeapons.Count)
+        //    {
+        //        _teamTwoWeapons.Clear();
+        //        _teamTwoWeapons.AddRange(teamTwo.TeamWeapons.Values);
+        //    }
+
+        //    _teamOneWeapons.Sort(comparer);
+        //    _teamTwoWeapons.Sort(comparer);
+
+        //    _allWeapons.Clear();
+        //    for (int i = 0; i < 10; ++i)
+        //    {
+        //        if (i < _teamOneWeapons.Count)
+        //            _allWeapons.Add((teamOne.Faction, _teamOneWeapons[i]));
+        //        if (i < _teamTwoWeapons.Count)
+        //            _allWeapons.Add((teamTwo.Faction, _teamTwoWeapons[i]));
+        //    }
+        //    _allWeapons.Sort((a, b) => comparer(a.stats, b.stats));
+
+        //    leaderboard.Clear();
+        //    for (int i = 0; i < 10 && i < _allWeapons.Count; ++i)
+        //    {
+        //        float score = request.GetStat(_allWeapons[i].stats.Stats);
+        //        if (score > 0) // Only add players with a score to begin with.
+        //            leaderboard.Add(new LeaderboardEntry()
+        //            {
+        //                Score = score,
+        //                EntryName = _allWeapons[i].stats.Data.Name,
+        //                TeamId = _allWeapons[i].teamId,
+        //            });
+        //    }
+        //    return leaderboard;
+        //}
     }
 }

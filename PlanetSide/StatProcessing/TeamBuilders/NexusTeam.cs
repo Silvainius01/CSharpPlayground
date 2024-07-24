@@ -58,10 +58,10 @@ namespace PlanetSide
                             {
                                 ICensusDeathEvent deathEvent = censusEvent as ICensusDeathEvent;
 
-                                if (deathEvent.TeamId == this.Faction)
+                                if (deathEvent.TeamId == this.FactionId)
                                     playersConcurrent.TryAdd(deathEvent.CharacterId, new PlayerStats());
 
-                                if (deathEvent.AttackerTeamId == this.Faction)
+                                if (deathEvent.AttackerTeamId == this.FactionId)
                                     playersConcurrent.TryAdd(deathEvent.OtherId, new PlayerStats());
                             }
                             break;

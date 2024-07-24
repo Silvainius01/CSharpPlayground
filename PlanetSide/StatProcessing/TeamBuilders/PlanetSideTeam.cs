@@ -17,7 +17,7 @@ namespace PlanetSide
         public int TeamSize { get; private set; }
         public int WorldId { get; private set; }
         public int ZoneId { get; private set; }
-        public int Faction { get; private set; }
+        public int FactionId { get; private set; }
         public string TeamName { get; private set; }
         public PlanetStats TeamStats { get; private set; }
         public ReadOnlyDictionary<int, WeaponStats> TeamWeapons { get; private set; }
@@ -36,7 +36,7 @@ namespace PlanetSide
 
         public PlanetSideTeam(int teamSize, string teamName, int faction, string world)
         {
-            this.Faction = faction;
+            this.FactionId = faction;
             this.TeamName = teamName;
             this.TeamSize = teamSize;
             worldString = world;
@@ -167,6 +167,7 @@ namespace PlanetSide
                     weaponStats = TeamWeapons[itemId];
                 else
                 {
+                    wData.TeamId = FactionId;
                     weaponStats = new WeaponStats()
                     {
                         Data = wData,

@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Runtime.ConstrainedExecution;
 using System.Text;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using NetMQ;
 using NetMQ.Sockets;
 using Newtonsoft.Json;
+using Websocket.Client.Logging;
 
 namespace PlanetSide.Websocket
 {
@@ -14,6 +16,7 @@ namespace PlanetSide.Websocket
     {
         private string port = "56854";
         private ServerType serverType;
+        protected static ILogger Logger = Program.LoggerFactory.CreateLogger(typeof(ReportServer));
 
         public ReportServer(string port, ServerType type)
         {

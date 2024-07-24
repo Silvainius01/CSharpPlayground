@@ -49,7 +49,7 @@ namespace PlanetSide
             }
 
             topStats.Clear();
-            for (int i = 0; i < 10; ++i)
+            for (int i = 0; i < request.BoardSize; ++i)
             {
                 foreach (var tuple in statTuples)
                     if(i < tuple.sortedStats.Count)
@@ -57,7 +57,7 @@ namespace PlanetSide
             }
             topStats.Sort(statComparer);
 
-            for (int i = 0; i < 10 && i < topStats.Count; ++i)
+            for (int i = 0; i < request.BoardSize && i < topStats.Count; ++i)
             {
                 float score = request.GetStat(topStats[i].Stats);
                 if (score > 0) // Only add players with a score to begin with.
