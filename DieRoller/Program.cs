@@ -5,11 +5,14 @@ using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
+using System.ComponentModel;
 
 namespace DieRoller
 {
     class Program
     {
+        static CancellationTokenSource ctFishing = new CancellationTokenSource();
         static void Main(string[] args)
         {
             Console.WriteLine("Enter dice in the following format: XdY ZdW");
@@ -24,26 +27,24 @@ namespace DieRoller
             Console.WriteLine("-h [numDice]  -> Take only the highest X dice");
             Console.WriteLine("-r [value] [retries]  -> Reroll any dice that roll [value], up to the retry limit. Omitting the retry limit or entering 0 or less will retry indefinitely.");
 
+            Task.Run(() => FishingTimer(ctFishing.Token));
+            
             while (true)
             {
-                DiceRoller.DiceRollPrompt<DiceRoll>(DiceRoll.TryParse);
+                //DiceRoller.DiceRollPrompt<DiceRoll>(DiceRoll.TryParse);
+
             }
+        }
 
-            //long kb = 1024;
-            //long twoGb = (kb * kb * kb * 2) / 4; // Each ram is 4 bytes, so divide by 4 so we get 2gb of mem
-            //StringBuilder ramString = new StringBuilder("🐏", 536870912);
-            //StreamWriter writer = new StreamWriter("D:/Documents (Real)/2gb_of_ram.txt");
+        static async Task FishingTimer(CancellationToken ct)
+        {
+            PeriodicTimer t = new PeriodicTimer(TimeSpan.FromSeconds(3.5));
 
-            //while(ramString.Length < ramString.Capacity)
-            //{
-            //    ramString.Append(ramString.ToString());
-            //    Console.WriteLine($"Rams: {ramString.Length}");
-            //}
-
-            //Console.WriteLine("Write 1");
-            //writer.Write(ramString.ToString());
-            //Console.WriteLine("Write 2");
-            //writer.Write(ramString.ToString());
+            while (!ct.IsCancellationRequested)
+            {
+                Console.WriteLine("FISH!!!!");
+                await t.WaitForNextTickAsync(ct);
+            }
         }
     }
 }

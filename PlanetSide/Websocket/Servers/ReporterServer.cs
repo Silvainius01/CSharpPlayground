@@ -48,7 +48,7 @@ namespace PlanetSide.Websocket
                         else Console.WriteLine($"Sent report '{report.Topic}'");
                     }
 
-                    Thread.Sleep(5000);
+                    Thread.Sleep(1000);
                 }
             }
         }
