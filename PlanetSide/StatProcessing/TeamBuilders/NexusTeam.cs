@@ -18,7 +18,7 @@ namespace PlanetSide
 {
     public class NexusTeam : PlanetSideTeam
     {
-        Dictionary<string, PlayerStats> nexusTeamPlayers;
+        ConcurrentDictionary<string, PlayerStats> nexusTeamPlayers;
 
         public NexusTeam(int teamSize, string teamName, int faction, string world)
             : base(teamSize, teamName, faction, world)
@@ -26,9 +26,9 @@ namespace PlanetSide
             streamKey = $"NexusTeam_{teamName}_PlayerEventStream";
         }
 
-        protected override IDictionary<string, PlayerStats> GetTeamDict()
+        protected override ConcurrentDictionary<string, PlayerStats> GetTeamDict()
         {
-            nexusTeamPlayers = new Dictionary<string, PlayerStats>();
+            nexusTeamPlayers = new ConcurrentDictionary<string, PlayerStats>();
             return nexusTeamPlayers;
         }
 
@@ -84,7 +84,7 @@ namespace PlanetSide
 
                         nexusTeamPlayers.Clear();
                         foreach (var kvp in playersConcurrent)
-                            nexusTeamPlayers.Add(kvp.Key, kvp.Value);
+                            nexusTeamPlayers.TryAdd(kvp.Key, kvp.Value);
 
                         Logger.LogInformation("Genrated NexusTeam {0} with {1} players", TeamName, TeamSize);
                     }

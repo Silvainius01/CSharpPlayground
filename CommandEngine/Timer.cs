@@ -8,12 +8,12 @@ namespace CommandEngine
         public bool isActive { get; private set; }
         public bool canActivate { get; private set; }
 
-        public float timeStart;
-        public float timeLeft { get; private set; }
-        public float timePassed { get { return timeStart - timeLeft; } }
-        public float percentComplete { get { return timePassed / timeStart; } }
+        public double timeStart;
+        public double timeLeft { get; private set; }
+        public double timePassed { get { return timeStart - timeLeft; } }
+        public double percentComplete { get { return timePassed / timeStart; } }
 
-        public Timer(float time, bool active = false, bool canActivate = true)
+        public Timer(double time, bool active = false, bool canActivate = true)
         {
             hasFired = false;
             isActive = false;
@@ -26,7 +26,7 @@ namespace CommandEngine
 
         /// <summary> Updates the timer by deltaTime. </summary>
         /// <param name="modTime"> Additional time to take off the timer. Negative numbers increase the timer. </param>
-        public bool Update(float dt)
+        public bool Update(double dt)
         {
             if (isActive)
             {
@@ -43,7 +43,7 @@ namespace CommandEngine
         }
 
         /// <summary> Updates the timer by deltaTime if condition is true. </summary>
-        public bool Update(float dt, bool condition)
+        public bool Update(double dt, bool condition)
         {
             if (condition)
                 return Update(dt);
@@ -64,7 +64,7 @@ namespace CommandEngine
 
         /// <summary> Start the timer. Returns false if timer cannot activate. </summary>
         /// <param name="time"> Changes the start time. </param>
-        public bool Activate(float time)
+        public bool Activate(double time)
         {
             timeStart = time;
             return Activate();
@@ -78,7 +78,7 @@ namespace CommandEngine
             hasFired = forceToFire;
         }
 
-        public void SetPercentComplete(float percent)
+        public void SetPercentComplete(double percent)
         {
             if (!isActive) return;
             percent = Mathc.Clamp(percent, 0.0f, 1.0f);
@@ -102,25 +102,25 @@ namespace CommandEngine
 
     public class TimeCounter
     {
-        public float currentTime { get; private set; }
-        public float maxTimeAllowed;
+        public double currentTime { get; private set; }
+        public double maxTimeAllowed;
 
-        public TimeCounter(float maxTimeAllowed)
+        public TimeCounter(double maxTimeAllowed)
         {
-            this.maxTimeAllowed = maxTimeAllowed <= 0.0f ? float.MaxValue : maxTimeAllowed;
+            this.maxTimeAllowed = maxTimeAllowed <= 0.0f ? double.MaxValue : maxTimeAllowed;
         }
 
-        void Update(float time)
+        void Update(double time)
         {
             currentTime = Mathc.Clamp(currentTime + time, 0.0f, maxTimeAllowed);
         }
 
-        public void AddTime(float time)
+        public void AddTime(double time)
         {
             Update(time);
         }
 
-        public void SubTime(float time)
+        public void SubTime(double time)
         {
             Update(-time);
         }
@@ -139,7 +139,7 @@ namespace CommandEngine
         public int timerStart;
         public int timeLeft { get; private set; }
         public int timePassed { get { return timerStart - timeLeft; } }
-        public float percentComplete { get { return (float)timePassed / (float)timerStart; } }
+        public double percentComplete { get { return (double)timePassed / (double)timerStart; } }
 
         public FrameTimer(int time, bool active = false, bool canActivate = true)
         {
@@ -211,7 +211,7 @@ namespace CommandEngine
             hasFired = forceToFire;
         }
 
-        public void SetPercentComplete(float percent)
+        public void SetPercentComplete(double percent)
         {
             if (!isActive) return;
             percent = Mathc.Clamp(percent, 0.0f, 1.0f);

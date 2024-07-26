@@ -24,9 +24,6 @@ namespace PlanetSide.Websocket
         [JsonProperty("kills-air-t2")]
         public int kills_air_t2 { get; set; }
 
-        //public int deaths_net_t1 { get; set; }
-        //public int deaths_net_t2 { get; set; }
-
         [JsonProperty("revives-t1")]
         public int revives_t1 { get; set; }
         [JsonProperty("revives-t2")]
@@ -41,9 +38,6 @@ namespace PlanetSide.Websocket
         public int defenses_t1 { get; set; }
         [JsonProperty("defenses-t2")]
         public int defenses_t2 { get; set; }
-
-        //public int online_t1 { get; set; }
-        //public int online_t2 { get; set; }
     }
 
     public struct CommSmashTeamReport

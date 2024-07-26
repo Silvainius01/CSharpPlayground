@@ -39,7 +39,7 @@ namespace PlanetSide
             get
             {
                 float rezCount = GetExp(ExperienceTable.Revive).NumEvents;
-                return (float)Deaths / (rezCount > 0 ? rezCount : 1);
+                return rezCount / (Deaths > 0 ? Deaths : 1);
             }
         }
 
@@ -51,18 +51,15 @@ namespace PlanetSide
         //public float LogisticScore { get; set; }
 
         [JsonIgnore] Dictionary<int, CumulativeExperience> _allExperience;
-        [JsonIgnore] ReadOnlyDictionary<int, CumulativeExperience> TeamExperience;
-
 
         public PlanetStats()
         {
             _allExperience = new Dictionary<int, CumulativeExperience>();
-            TeamExperience = new ReadOnlyDictionary<int, CumulativeExperience>(_allExperience);
         }
 
         public CumulativeExperience GetExp(int id)
         {
-            if (TeamExperience.TryGetValue(id, out var exp))
+            if (_allExperience.TryGetValue(id, out var exp))
                 return exp;
 
             _allExperience[id] = new CumulativeExperience()
@@ -160,6 +157,29 @@ namespace PlanetSide
                     break;
                 case VehicleType.Unknown:
                     break;
+            }
+        }
+
+        public void Reset()
+        {
+            Kills = 0;
+            Assists = 0;
+            Deaths = 0;
+            TeamKills = 0;
+            Headshots = 0;
+
+            VehicleKills = 0;
+            VehicleDeaths = 0;
+            VehicleTeamKills = 0;
+
+            AirKills = 0;
+            AirDeaths = 0;
+            AirTeamKills = 0;
+
+            foreach (var cxp in _allExperience.Values)
+            {
+                cxp.NumEvents = 0;
+                cxp.CumulativeScore = 0;
             }
         }
     }

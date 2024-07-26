@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,23 +11,20 @@ using Websocket.Client.Logging;
 
 namespace PlanetSide.Websocket
 {
-    public class CommSmashReporter : ReportServer
+    public class CommSmashReporter : PlanetSideReporter
     {
-        string world;
-        CommSmashLeaderboard leaderboard;
-        List<PlanetSideTeam> activeTeams;
-        List<LeaderboardRequest> leaderboardRequests;
+
         Dictionary<string, PlanetStats> statsDict;
         CancellationTokenSource ctLeaderboardLoop;
 
-
-        public CommSmashReporter(string port, string world) : base(port, ServerType.Publisher)
+        public CommSmashReporter(string port, string world) : base(port, world)
         {
-            this.world = world;
-            activeTeams = new List<PlanetSideTeam>();
-            statsDict = new Dictionary<string, PlanetStats>();
 
-            leaderboardRequests = new List<LeaderboardRequest>()
+        }
+
+        protected override List<LeaderboardRequest> GenerateLeaderboardRequests()
+        {
+            return new List<LeaderboardRequest>()
             {
                 new LeaderboardRequest()
                 {
@@ -37,7 +35,7 @@ namespace PlanetSide.Websocket
                 },
                 new LeaderboardRequest()
                 {
-                    Name = "leaderboard-kills-vehilce",
+                    Name = "leaderboard-kills-vehicle",
                     LeaderboardType = LeaderboardType.Player,
                     BoardSize = 10,
                     GetStat = stats => stats.VehicleKills
@@ -95,7 +93,7 @@ namespace PlanetSide.Websocket
                         return count;
                     }
                 },
-                new LeaderboardRequest() 
+                new LeaderboardRequest()
                 {
                     Name = "leaderboard-repair-max",
                     LeaderboardType = LeaderboardType.Player,
@@ -118,46 +116,17 @@ namespace PlanetSide.Websocket
             };
         }
 
-        protected override bool OnServerStart()
-        {
-            Tracker.PopulateTables();
-
-            var teamOne = new FactionTeam("New Conglomerate", 2, world);
-            var teamTwo = new FactionTeam("Terran Republic", 3, world);
-            ctLeaderboardLoop = new CancellationTokenSource();
-
-            activeTeams.Add(teamOne);
-            activeTeams.Add(teamTwo);
-            leaderboard = new CommSmashLeaderboard(teamOne, teamTwo);
-
-            foreach (var team in activeTeams)
-            {
-                team.StartStream();
-            }
-
-            // Start calculating leaderboards in the back ground.
-            Task.Run(() => LeaderboardCalcLoop(ctLeaderboardLoop.Token));
-
-            return true;
-        }
-
-        List<ServerReport> _reportList = new List<ServerReport>();
-        ConcurrentQueue<ServerReport> _leaderboardReports = new ConcurrentQueue<ServerReport>();
         protected override IEnumerable<ServerReport> GenerateReports()
         {
-            _reportList.Clear();
-            _reportList.Add(GetCommsSmashReport());
+            return base.GenerateReports().Append(GetCommsSmashReport());
+        }
 
-            int numPlayers = activeTeams[0].TeamPlayers.Count + activeTeams[1].TeamPlayers.Count;
-
-            if (numPlayers >= 10)
-                while(_leaderboardReports.Count > 0)
-                {
-                    if (_leaderboardReports.TryDequeue(out var report))
-                        _reportList.Add(report);
-                }
-
-            return _reportList;
+        protected override List<PlanetSideTeam> GenerateTeams()
+        {
+            return new List<PlanetSideTeam>() {
+                 new FactionTeam("New Conglomerate", 2, world),
+                 new FactionTeam("Terran Republic", 3, world)
+            };
         }
 
         ServerReport GetCommsSmashReport()
@@ -188,30 +157,6 @@ namespace PlanetSide.Websocket
                 Topic = "net_stats",
                 Data = JsonConvert.SerializeObject(csReport)
             };
-        }
-
-        private async Task LeaderboardCalcLoop(CancellationToken ct)
-        {
-            float waitTime = 5.0f / leaderboardRequests.Count;
-            PeriodicTimer boardtimer = new PeriodicTimer(TimeSpan.FromSeconds(waitTime));
-
-            while (!ct.IsCancellationRequested)
-            {
-                foreach (var request in leaderboardRequests)
-                {
-                    var board = leaderboard.CalculateLeaderboard(request);
-                    _leaderboardReports.Enqueue(new ServerReport()
-                    {
-                        Data = JsonConvert.SerializeObject(board),
-                        Topic = request.Name,
-                    });
-                    await boardtimer.WaitForNextTickAsync(ct);
-                }
-            }
-
-            if (!ct.IsCancellationRequested)
-                Logger.LogError("Leaderboard calculations routine exited!");
-            Logger.LogDebug("Leaderboard calculation routine exited.");
         }
     }
 }

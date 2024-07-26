@@ -43,7 +43,7 @@ namespace PlanetSide
             return WorldSubscriptions[worldString];
         }
 
-        protected override IDictionary<string, PlayerStats> GetTeamDict()
+        protected override ConcurrentDictionary<string, PlayerStats> GetTeamDict()
         {
             return playersConcurrent;
         }

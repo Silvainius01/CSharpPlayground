@@ -15,9 +15,10 @@ namespace PlanetSide
 {
     public static class PlayerTable
     {
+        const int playerRetry = 5;
         static ConcurrentDictionary<string, CharacterData> _characters = new ConcurrentDictionary<string, CharacterData>();
         public static ReadOnlyDictionary<string, CharacterData> Characters = new ReadOnlyDictionary<string, CharacterData>(_characters);
-        
+
         static ILogger Logger = Program.LoggerFactory.CreateLogger(typeof(PlayerTable));
 
 
@@ -31,24 +32,30 @@ namespace PlanetSide
                 cData = _characters[id];
                 return true;
             }
+            else if ("02468".Contains(id.Last())) // Char IDs are always odd numbers.
+                return false;
             else
             {
+                int retry = 0;
+                bool foundChar = false;
                 var query = Tracker.Handler.GetCharacterQuery(id).ShowFields("faction_id", "name.first");
                 JsonElement result = default(JsonElement);
 
-                try
+                do
                 {
-                    var queryTask = query.GetAsync();
-
-                    queryTask.Wait();
-                    result = queryTask.Result;
+                    try
+                    {
+                        var queryTask = query.GetAsync();
+                        queryTask.Wait();
+                        result = queryTask.Result;
+                    }
+                    catch (Exception ex)
+                    {
+                        if (retry >= playerRetry - 1)
+                            Logger.LogError(ex, $"Exception when retriveing Char ID {id}");
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Logger.LogError(ex, $"Exception when retriveing Char ID {id}");
-                }
-
-
+                while (!foundChar && retry < playerRetry);
 
                 if (result.Equals(default(JsonElement)))
                     return false;

@@ -14,6 +14,9 @@ namespace PlanetSide.Websocket
     public enum ServerType { Publisher }
     public abstract class ReportServer
     {
+        public bool DebugEventNames { get; set; }
+        public bool DebugEventDetails { get; set; }
+
         private string port = "56854";
         private ServerType serverType;
         protected static ILogger Logger = Program.LoggerFactory.CreateLogger(typeof(ReportServer));
@@ -43,14 +46,19 @@ namespace PlanetSide.Websocket
                             .SendMoreFrame(report.Topic) // Topic
                             .SendFrame(report.Data); // Message
 
-                        if (report.DebugData)
+                        if (DebugEventDetails)
                             Console.WriteLine($"Sent report '{report.Topic}': {report.Data}");
-                        else Console.WriteLine($"Sent report '{report.Topic}'");
+                        else if (DebugEventNames)
+                            Console.WriteLine($"Sent report '{report.Topic}'");
                     }
 
                     Thread.Sleep(1000);
                 }
             }
+        }
+        public void CloseServer()
+        {
+
         }
 
         protected abstract bool OnServerStart();

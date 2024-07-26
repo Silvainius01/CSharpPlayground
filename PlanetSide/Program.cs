@@ -78,9 +78,21 @@ namespace PlanetSide
 
         private static void StartSocketServer(List<string> args)
         {
-            CommSmashReporter csReporter = new CommSmashReporter("56854", "all");
+            ReportServer reporter = null;
 
-            csReporter.StartServer();
+            switch (args[0])
+            {
+                case "cs":
+                    reporter = new KothReporter(args[1], args[2]);
+                    break;
+                case "koth":
+                    reporter = new KothReporter(args[1], args[2]);
+                    break;
+                default:
+                    return;
+            }
+
+            reporter.StartServer();
         }
         private static void StartSocketClient(List<string> args)
         {

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Threading;
@@ -20,11 +21,12 @@ namespace PlanetSide
         public int FactionId { get; private set; }
         public string TeamName { get; private set; }
         public PlanetStats TeamStats { get; private set; }
-        public ReadOnlyDictionary<int, WeaponStats> TeamWeapons { get; private set; }
-        public ReadOnlyDictionary<string, PlayerStats> TeamPlayers { get; private set; }
+        public IReadOnlyDictionary<int, WeaponStats> TeamWeapons { get; private set; }
+        public IReadOnlyDictionary<string, PlayerStats> TeamPlayers { get; private set; }
 
         public bool IsStreaming { get; private set; }
         public bool IsProccessing { get; private set; }
+        public bool IsPaused { get; set; }
 
         protected string worldString;
         protected string streamKey = string.Empty;
@@ -40,10 +42,10 @@ namespace PlanetSide
             this.TeamName = teamName;
             this.TeamSize = teamSize;
             worldString = world;
-            
+
             TeamStats = new PlanetStats();
-            TeamWeapons = new ReadOnlyDictionary<int, WeaponStats>(_teamWeaponStats);
-            TeamPlayers = new ReadOnlyDictionary<string, PlayerStats>(GetTeamDict());
+            TeamWeapons = _teamWeaponStats;
+            TeamPlayers = GetTeamDict();
 
             events = new ConcurrentQueue<ICensusEvent>();
             Logger = Program.LoggerFactory.CreateLogger<PlanetSideTeam>();
@@ -79,8 +81,38 @@ namespace PlanetSide
             IsStreaming = false;
         }
 
+        public void PauseStream()
+        {
+            if (!IsStreaming || !IsPaused)
+                return;
+
+            IsPaused = true;
+        }
+        public void UnPauseStream()
+        {
+            if (!IsStreaming || IsPaused)
+                return;
+
+            IsPaused = false;
+        }
+
+        public void ResetStats()
+        {
+            TeamStats.Reset();
+
+            foreach(var w in TeamWeapons.Values)
+                w.Stats.Reset();
+
+            foreach(var p in TeamPlayers.Values)
+                p.Stats.Reset();
+        }
+
         private bool ProcessCensusEvent(SocketResponse response)
         {
+            // Drop all events while paused.
+            if (IsPaused)
+                return false;
+
             ICensusEvent? censusEvent = Tracker.ProcessCensusEvent(response);
 
             // Only queue event if it is considered valid by the child class.
@@ -131,7 +163,7 @@ namespace PlanetSide
                         {
                             TeamStats.AddDeath(ref deathEvent);
                             TeamPlayers[deathEvent.CharacterId].Stats.AddDeath(ref deathEvent);
-                            if(TryGetOrAddWeaponStats(deathEvent.AttackerWeaponId, out var wstats))
+                            if (TryGetOrAddWeaponStats(deathEvent.AttackerWeaponId, out var wstats))
                                 wstats.Stats.AddDeath(ref deathEvent);
                         }
                         break;
@@ -163,7 +195,7 @@ namespace PlanetSide
         {
             if (WeaponTable.TryGetWeapon(itemId, out var wData))
             {
-                if(TeamWeapons.ContainsKey(itemId))
+                if (TeamWeapons.ContainsKey(itemId))
                     weaponStats = TeamWeapons[itemId];
                 else
                 {
@@ -182,7 +214,7 @@ namespace PlanetSide
             return false;
         }
 
-        protected abstract IDictionary<string, PlayerStats> GetTeamDict();
+        protected abstract ConcurrentDictionary<string, PlayerStats> GetTeamDict();
         protected abstract void OnStreamStart();
         protected abstract void OnStreamStop();
         protected abstract void OnEventProcessed(ICensusEvent payload);
