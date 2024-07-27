@@ -21,8 +21,9 @@ namespace PlanetSide.Websocket
         CommandEngine.Timer roundTimer = new CommandEngine.Timer(TimeSpan.FromMinutes(10).TotalSeconds);
         CancellationTokenSource ctUpdate = new CancellationTokenSource();
 
-        public KothReporter(string port, string world) : base(port, world)
+        public KothReporter(string port, string world, int zone) : base(port, world, zone)
         {
+            this.ZoneId = zone;
             RoundPaused = true;
         }
 
@@ -59,9 +60,9 @@ namespace PlanetSide.Websocket
         {
             var teams = new List<PlanetSideTeam>()
             {
-                new FactionTeam("VS", 1, world),
-                new FactionTeam("NC", 2, world),
-                new FactionTeam("TR", 3, world),
+                new FactionTeam("VS", 1, world, this.ZoneId),
+                new FactionTeam("NC", 2, world, this.ZoneId),
+                new FactionTeam("TR", 3, world, this.ZoneId),
             };
 
             // Pre-pause streams so they dont start before the game does.
@@ -78,14 +79,14 @@ namespace PlanetSide.Websocket
                 {
                     Name = "koth-leaderboard-kills",
                     LeaderboardType = LeaderboardType.Player,
-                    BoardSize = 5,
+                    BoardSize = 10,
                     GetStat = stats => stats.Kills
                 },
                 new LeaderboardRequest()
                 {
                     Name = "koth-leaderboard-revives",
                     LeaderboardType = LeaderboardType.Player,
-                    BoardSize = 5,
+                    BoardSize = 10,
                     GetStat = stats =>
                     {
                         int count = 0;
@@ -94,6 +95,13 @@ namespace PlanetSide.Websocket
                         return count;
                     }
                 },
+                new LeaderboardRequest()
+                {
+                    Name = "leaderboard-team-kills",
+                    LeaderboardType = LeaderboardType.Player,
+                    BoardSize = 10,
+                    GetStat = stats => stats.TeamKills
+                }
             };
         }
         protected override IEnumerable<ServerReport> GenerateReports()

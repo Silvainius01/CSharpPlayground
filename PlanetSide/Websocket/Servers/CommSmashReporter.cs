@@ -13,11 +13,11 @@ namespace PlanetSide.Websocket
 {
     public class CommSmashReporter : PlanetSideReporter
     {
-
+        Action saveAction;
         Dictionary<string, PlanetStats> statsDict;
         CancellationTokenSource ctLeaderboardLoop;
 
-        public CommSmashReporter(string port, string world) : base(port, world)
+        public CommSmashReporter(string port, string world, int zone=-1) : base(port, world, zone)
         {
 
         }
@@ -112,6 +112,13 @@ namespace PlanetSide.Websocket
                     LeaderboardType = LeaderboardType.Weapon,
                     BoardSize = 10,
                     GetStat = stats => stats.Kills
+                },
+                new LeaderboardRequest()
+                {
+                    Name = "leaderboard-team-kills",
+                    LeaderboardType = LeaderboardType.Player,
+                    BoardSize = 10,
+                    GetStat = stats => stats.TeamKills
                 }
             };
         }
@@ -124,33 +131,30 @@ namespace PlanetSide.Websocket
         protected override List<PlanetSideTeam> GenerateTeams()
         {
             return new List<PlanetSideTeam>() {
-                 new FactionTeam("New Conglomerate", 2, world),
-                 new FactionTeam("Terran Republic", 3, world)
+                 new FactionTeam("CommSmash11_TeamOne_TR", 3, world),
+                 new FactionTeam("CommSmash11_TeamTwo_NC", 2, world)
             };
         }
 
         ServerReport GetCommsSmashReport()
         {
-            var csReport = new CommSmashReport()
+            var csReport = new CommSmashTeamReport()
             {
-                kills_net_t1 = activeTeams[0].TeamStats.Kills,
-                kills_net_t2 = activeTeams[1].TeamStats.Kills,
-
-                kills_vehicle_t1 = activeTeams[0].TeamStats.VehicleKills,
-                kills_vehicle_t2 = activeTeams[1].TeamStats.VehicleKills,
-
-                kills_air_t1 = activeTeams[0].TeamStats.AirKills,
-                kills_air_t2 = activeTeams[1].TeamStats.AirKills,
-
-                revives_t1 = activeTeams[0].TeamStats.GetExp(7).NumEvents,
-                revives_t2 = activeTeams[1].TeamStats.GetExp(7).NumEvents,
-
-                captures_t1 = 0,
-                captures_t2 = 0,
-
-                defenses_t1 = 0,
-                defenses_t2 = 0
+                TeamOneStats = activeTeams[0].TeamStats,
+                TeamTwoStats = activeTeams[1].TeamStats,
             };
+
+            // Start a task to save teams.
+            if (saveAction is null)
+            {
+                saveAction = () =>
+                {
+                    foreach (var team in activeTeams)
+                        team.SaveStats();
+                    saveAction = null;
+                };
+                Task.Run(saveAction);
+            }
 
             return new ServerReport()
             {
@@ -158,5 +162,6 @@ namespace PlanetSide.Websocket
                 Data = JsonConvert.SerializeObject(csReport)
             };
         }
+
     }
 }

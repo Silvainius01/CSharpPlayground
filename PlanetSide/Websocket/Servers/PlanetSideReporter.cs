@@ -12,8 +12,8 @@ namespace PlanetSide.Websocket
 {
     public abstract class PlanetSideReporter : ReportServer
     {
-        public int Zone { get; set; } = -1;
-        public float LeaderboardRefresh { get; set; } = 5.0f;
+        public int ZoneId { get; set; } = -1;
+        public float LeaderboardRefresh { get; set; } = 10.0f;
 
         protected string world;
         protected EventLeaderboard leaderboard;
@@ -22,9 +22,10 @@ namespace PlanetSide.Websocket
         
         CancellationTokenSource ctLeaderboardLoop;
 
-        public PlanetSideReporter(string port, string world) : base(port, ServerType.Publisher)
+        public PlanetSideReporter(string port, string world, int zone) : base(port, ServerType.Publisher)
         {
             this.world = world;
+            this.ZoneId = zone;
             activeTeams = GenerateTeams();
             leaderboardRequests = GenerateLeaderboardRequests();
             leaderboard = new EventLeaderboard(activeTeams.ToArray());
@@ -54,11 +55,14 @@ namespace PlanetSide.Websocket
             int numPlayers = activeTeams[0].TeamPlayers.Count + activeTeams[1].TeamPlayers.Count;
 
             if (numPlayers >= 10)
+            {
+                Console.WriteLine($"Leaderboard Queue: {_leaderboardReports.Count}");
                 while (_leaderboardReports.Count > 0)
                 {
                     if (_leaderboardReports.TryDequeue(out var report))
                         _reportList.Add(report);
                 }
+            }
 
             return _reportList;
         }

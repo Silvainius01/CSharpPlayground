@@ -42,23 +42,7 @@ namespace PlanetSide.Websocket
 
     public struct CommSmashTeamReport
     {
-        [JsonProperty("kills-net")]
-        public int kills_net { get; set; }
-
-        [JsonProperty("kills-vehicle")]
-        public int kills_vehicle { get; set; }
-
-        [JsonProperty("kills-air")]
-        public int kills_air { get; set; }
-
-        //public int deaths_net { get; set; }
-
-        public int revives{ get; set; }
-
-        public int captures { get; set; }
-
-        public int defenses { get; set; }
-
-        //public int online { get; set; }
+        public PlanetStats TeamOneStats { get; set; }
+        public PlanetStats TeamTwoStats { get; set; }
     }
 }

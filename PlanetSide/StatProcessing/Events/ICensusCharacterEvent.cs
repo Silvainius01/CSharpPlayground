@@ -7,15 +7,22 @@ namespace PlanetSide
         Unknown,
         GainExperience,
         Death,
-        VehicleDestroy
+        VehicleDestroy,
+        FacilityControl
     }
 
     public interface ICensusEvent
     {
-        CensusEventType EventType { get; set; }
+        public CensusEventType EventType { get; set; }
     }
 
-    public interface ICensusCharacterEvent : ICensusEvent
+    public interface ICensusZoneEvent : ICensusEvent
+    {
+        int ZoneId { get; set; }
+        int WorldId { get; set; }
+    }
+
+    public interface ICensusCharacterEvent : ICensusZoneEvent
     {
         string CharacterId { get; set; }
         string OtherId { get; set; }
@@ -29,8 +36,5 @@ namespace PlanetSide
         public int AttackerVehicleId { get; set; }
         public int AttackerLoadoutId { get; set; }
         public int AttackerTeamId { get; set; }
-
-        public int ZoneId { get; set; }
-        public int WorldId { get; set; }
     }
 }

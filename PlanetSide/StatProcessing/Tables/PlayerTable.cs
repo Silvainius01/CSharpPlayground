@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using DaybreakGames.Census;
+using Websocket.Client;
 
 namespace PlanetSide
 {
@@ -48,11 +49,13 @@ namespace PlanetSide
                         var queryTask = query.GetAsync();
                         queryTask.Wait();
                         result = queryTask.Result;
+                        foundChar = true;
                     }
                     catch (Exception ex)
                     {
                         if (retry >= playerRetry - 1)
                             Logger.LogError(ex, $"Exception when retriveing Char ID {id}");
+                        ++retry;
                     }
                 }
                 while (!foundChar && retry < playerRetry);

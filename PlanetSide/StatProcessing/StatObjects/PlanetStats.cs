@@ -11,6 +11,7 @@ using Newtonsoft.Json.Bson;
 using static System.Formats.Asn1.AsnWriter;
 using Microsoft.Extensions.Logging;
 using System.Reflection.Metadata.Ecma335;
+using PlanetSide.StatProcessing.Events;
 
 namespace PlanetSide
 {
@@ -21,6 +22,16 @@ namespace PlanetSide
         public int Deaths { get; set; }
         public int TeamKills { get; set; }
         public int Headshots { get; set; }
+        public int Revives
+        {
+            get
+            {
+                int rezCount = 0;
+                foreach (var id in ExperienceTable.ReviveIds)
+                    rezCount += GetExp(id).NumEvents;
+                return rezCount;
+            }
+        }
 
         public int VehicleKills { get; set; }
         public int VehicleDeaths { get; set; }
@@ -30,18 +41,14 @@ namespace PlanetSide
         public int AirDeaths { get; set; } // Only tracks Air vehicle deaths.
         public int AirTeamKills { get; set; } // Only tracks TKs on Air vehicles.
 
+        public int FacilityCaptures { get; set; }
+        public int FacilityDefenses { get; set; }
+
         public float KDR => (float)Kills / (Deaths > 0 ? Deaths : 1);
         public float HSR => (float)Headshots / (Kills > 0 ? Kills : 1);
         public float vKDR => (float)VehicleKills / (VehicleDeaths > 0 ? VehicleDeaths : 1);
         public float aKDR => (float)AirKills / (AirDeaths > 0 ? AirDeaths : 1);
-        public float ReviveScore
-        {
-            get
-            {
-                float rezCount = GetExp(ExperienceTable.Revive).NumEvents;
-                return rezCount / (Deaths > 0 ? Deaths : 1);
-            }
-        }
+        public float ReviveScore => (float)Revives / (Deaths > 0 ? Deaths : 1);
 
         //public float CheeseScore { get; set; }
         //public float InfantryScore { get; set; }
@@ -158,6 +165,13 @@ namespace PlanetSide
                 case VehicleType.Unknown:
                     break;
             }
+        }
+
+        public void AddFacilityEvent(ref FacilityControlEvent facilityEvent)
+        {
+            if (facilityEvent.OldFaction == facilityEvent.NewFaction)
+                ++FacilityDefenses;
+            else ++FacilityCaptures;
         }
 
         public void Reset()

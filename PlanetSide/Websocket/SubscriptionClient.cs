@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace PlanetSide.WebsocketServer
 {
-    public class Client
+    public class SubscriptionClient
     {
         public static void Start()
         {

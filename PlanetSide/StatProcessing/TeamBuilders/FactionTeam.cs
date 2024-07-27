@@ -15,6 +15,7 @@ using System.Xml;
 using DaybreakGames.Census.Operators;
 using System.Collections.ObjectModel;
 using System.Reactive.Joins;
+using PlanetSide.StatProcessing.Events;
 
 namespace PlanetSide
 {
@@ -24,9 +25,10 @@ namespace PlanetSide
         ConcurrentDictionary<string, PlayerStats> playersConcurrent = new ConcurrentDictionary<string, PlayerStats>();
         static Dictionary<string, CensusStreamSubscription> WorldSubscriptions = new Dictionary<string, CensusStreamSubscription>();
 
-        public FactionTeam(string teamName, int faction, string world)
+        public FactionTeam(string teamName, int faction, string world, int zone=-1)
             : base(-1, teamName, faction, world)
         {
+            ZoneId = zone;
             streamKey = $"World{world}_CharacterEventStream";
         }
 
@@ -37,7 +39,7 @@ namespace PlanetSide
                 {
                     Characters = new[] { "all" },
                     Worlds = new[] { worldString },
-                    EventNames = new[] { "Death", "GainExperience", "VehicleDestroy" },
+                    EventNames = new[] { "Death", "GainExperience", "VehicleDestroy", "FacilityControl" },
                     LogicalAndCharactersWithWorlds = true
                 });
             return WorldSubscriptions[worldString];
@@ -60,6 +62,9 @@ namespace PlanetSide
                 case CensusEventType.GainExperience:
                 case CensusEventType.VehicleDestroy:
                     break;
+                case CensusEventType.FacilityControl:
+                    var facilityEvent = (FacilityControlEvent)payload;
+                    return facilityEvent.NewFaction == FactionId;
                 default:
                     return false;
             }

@@ -1,0 +1,17 @@
+Kills - Infantry Kills
+Deaths - True death count, minus TKs
+TeamKills - Infantry TKs
+Headshots - Number of headshot kills from all sources
+
+VehicleKills - Number of GROUND vehicles killed
+VehicleDeaths - Number of Ground vehicles lost, minus TKs
+VehicleTeamKills - Number of ground vehicles lost to Tks
+
+AirKills - Number of Air vehicles killed
+AirDeaths - Number of Air vehicles lost, minus TKs
+AirTeamKills - Number of Air vehicles lost to TKs
+
+ReviveScore - Revives divided by deaths. Basically Rez efficiency. 
+
+Repair (Any category) - Total cumulative score gained
+Resupplies - Total amount of resupply ticks

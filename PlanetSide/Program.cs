@@ -4,11 +4,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Text.Json;
+using System.Threading.Tasks;
 using CommandEngine;
 using Microsoft.Extensions.Logging;
 using PlanetSide.Websocket;
 using PlanetSide.WebsocketServer;
+using Newtonsoft.Json;
+using System.Text.Json.Nodes;
+using Newtonsoft.Json.Linq;
 
 namespace PlanetSide
 {
@@ -78,25 +81,69 @@ namespace PlanetSide
 
         private static void StartSocketServer(List<string> args)
         {
+            int zone = -1;
+            string world = "all";
             ReportServer reporter = null;
+
+            if (args.Count > 2)
+                world = args[2];
+            if (args.Count > 3 && int.TryParse(args[3], out int intergerInput))
+                zone = intergerInput;
 
             switch (args[0])
             {
                 case "cs":
-                    reporter = new KothReporter(args[1], args[2]);
+                    reporter = new CommSmashReporter(args[1], world, zone)
+                    {
+                        DebugEventNames = false
+                    };
                     break;
                 case "koth":
-                    reporter = new KothReporter(args[1], args[2]);
+                    reporter = new KothReporter(args[1], world, zone)
+                    {
+                        DebugEventNames = true
+                    };
                     break;
                 default:
                     return;
             }
 
+            //for(int i = 4; i < args.Count; ++i)
+            //{
+            //    switch(args[i])
+            //    {
+            //        case "-load":
+            //            {
+            //                string fileTeam1 = $"./SavedTeamData/CommSmash11_TeamOne_TR.json";
+            //                string fileTeam2 = $"./SavedTeamData/CommSmash11_TeamTwo_NC.json";
+
+            //                //ReadTeamFile(fileTeam1);
+            //            }
+            //            break;
+            //    }
+            //}
+
             reporter.StartServer();
         }
+
+        static void ReadTeamFile(string file)
+        {
+            string fileContents = string.Empty;
+            using (StreamReader reader = new StreamReader(file))
+                fileContents = reader.ReadToEnd();
+
+            SerializedTeam team = new SerializedTeam();
+            var serializer = JsonSerializer.CreateDefault();
+            var jObject =  JsonConvert.DeserializeObject<JObject>(fileContents);
+            var tokenReader = new JTokenReader(jObject);
+            object? obj = serializer.Deserialize(tokenReader);
+
+            int x = 0;
+        }
+
         private static void StartSocketClient(List<string> args)
         {
-            Client.Start();
+            SubscriptionClient.Start();
         }
 
         private static void WarpgateCam(List<string> args)

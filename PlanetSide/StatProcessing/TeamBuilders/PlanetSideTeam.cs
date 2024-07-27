@@ -10,6 +10,9 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
+using PlanetSide.StatProcessing.Events;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace PlanetSide
 {
@@ -17,24 +20,24 @@ namespace PlanetSide
     {
         public int TeamSize { get; private set; }
         public int WorldId { get; private set; }
-        public int ZoneId { get; private set; }
+        public int ZoneId { get; protected set; }
         public int FactionId { get; private set; }
         public string TeamName { get; private set; }
         public PlanetStats TeamStats { get; private set; }
         public IReadOnlyDictionary<int, WeaponStats> TeamWeapons { get; private set; }
         public IReadOnlyDictionary<string, PlayerStats> TeamPlayers { get; private set; }
 
-        public bool IsStreaming { get; private set; }
-        public bool IsProccessing { get; private set; }
-        public bool IsPaused { get; set; }
+        [JsonIgnore] public bool IsStreaming { get; private set; }
+        [JsonIgnore] public bool IsProccessing { get; private set; }
+        [JsonIgnore] public bool IsPaused { get; set; }
 
-        protected string worldString;
-        protected string streamKey = string.Empty;
-        protected readonly ILogger<PlanetSideTeam> Logger;
+        [JsonIgnore] protected string worldString;
+        [JsonIgnore] protected string streamKey = string.Empty;
+        [JsonIgnore] protected readonly ILogger<PlanetSideTeam> Logger;
 
-        private ConcurrentQueue<ICensusEvent> events;
-        private CancellationTokenSource ctQueueProcess;
-        private ConcurrentDictionary<int, WeaponStats> _teamWeaponStats = new ConcurrentDictionary<int, WeaponStats>(8, 128);
+        [JsonIgnore] private ConcurrentQueue<ICensusEvent> events;
+        [JsonIgnore] private CancellationTokenSource ctQueueProcess;
+        [JsonIgnore] private ConcurrentDictionary<int, WeaponStats> _teamWeaponStats = new ConcurrentDictionary<int, WeaponStats>(8, 128);
 
         public PlanetSideTeam(int teamSize, string teamName, int faction, string world)
         {
@@ -79,6 +82,8 @@ namespace PlanetSide
             ctQueueProcess.Cancel();
             Tracker.Handler.DisconnectSocketAsync(streamKey).Wait();
             IsStreaming = false;
+
+            SaveStats();
         }
 
         public void PauseStream()
@@ -105,6 +110,15 @@ namespace PlanetSide
 
             foreach(var p in TeamPlayers.Values)
                 p.Stats.Reset();
+        }
+        public void SaveStats()
+        {
+            if (!Directory.Exists("./SavedTeamData"))
+                Directory.CreateDirectory("./SavedTeamData");
+            using (StreamWriter writer = new StreamWriter($"./SavedTeamData/{TeamName}.json"))
+            {
+                writer.WriteLine(JsonConvert.SerializeObject(this));
+            }
         }
 
         private bool ProcessCensusEvent(SocketResponse response)
@@ -144,7 +158,8 @@ namespace PlanetSide
                 {
                     case CensusEventType.GainExperience:
                         var expEvent = (ExperiencePayload)payload;
-                        if (TeamPlayers.ContainsKey(expEvent.CharacterId))
+                        bool zoneId = ZoneId == -1 || expEvent.ZoneId == ZoneId;
+                        if (zoneId && TeamPlayers.ContainsKey(expEvent.CharacterId))
                         {
                             TeamStats.AddExperience(ref expEvent);
                             TeamPlayers[expEvent.CharacterId].Stats.AddExperience(ref expEvent);
@@ -152,7 +167,8 @@ namespace PlanetSide
                         break;
                     case CensusEventType.Death:
                         var deathEvent = (DeathPayload)payload;
-                        if (TeamPlayers.ContainsKey(deathEvent.OtherId))
+                        bool zoneId2 = ZoneId == -1 || deathEvent.ZoneId == ZoneId;
+                        if (zoneId2 && TeamPlayers.ContainsKey(deathEvent.OtherId))
                         {
                             TeamStats.AddKill(ref deathEvent);
                             TeamPlayers[deathEvent.OtherId].Stats.AddKill(ref deathEvent);
@@ -169,8 +185,8 @@ namespace PlanetSide
                         break;
                     case CensusEventType.VehicleDestroy:
                         var destroyEvent = (VehicleDestroyPayload)payload;
-
-                        if (TeamPlayers.ContainsKey(destroyEvent.CharacterId))
+                        bool zoneId3 = ZoneId == -1 || destroyEvent.ZoneId == ZoneId;
+                        if (zoneId3 && TeamPlayers.ContainsKey(destroyEvent.CharacterId))
                         {
                             TeamStats.AddVehicleDeath(ref destroyEvent);
                             TeamPlayers[destroyEvent.CharacterId].Stats.AddVehicleDeath(ref destroyEvent);
@@ -184,6 +200,11 @@ namespace PlanetSide
                             if (TryGetOrAddWeaponStats(destroyEvent.AttackerWeaponId, out var wstats))
                                 wstats.Stats.AddVehicleKill(ref destroyEvent);
                         }
+                        break;
+                    case CensusEventType.FacilityControl:
+                        var facilityEvent = (FacilityControlEvent)payload;
+                        if(facilityEvent.NewFaction == FactionId)
+                            TeamStats.AddFacilityEvent(ref facilityEvent);
                         break;
                 }
             }
@@ -223,6 +244,7 @@ namespace PlanetSide
 
         public void Dispose()
         {
+            StopStream();
             ctQueueProcess.Dispose();
         }
     }
