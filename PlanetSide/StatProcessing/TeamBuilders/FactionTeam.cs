@@ -98,7 +98,7 @@ namespace PlanetSide
                 cData2.TeamId = FactionId;
                 playersConcurrent.TryAdd(payload.OtherId, new PlayerStats()
                 {
-                    Data = cData1,
+                    Data = cData2,
                     Stats = new PlanetStats()
                 });
             }
