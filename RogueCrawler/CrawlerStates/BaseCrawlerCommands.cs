@@ -40,7 +40,7 @@ namespace RogueCrawler
                 }
 
                 creature = dungeon.creatureManager.GetObjectInRoom(player.CurrentRoom, creatureId);
-                if (creature != null)
+                if (creature is not null)
                 {
                     errorMsg = string.Empty;
                     return true;

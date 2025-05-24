@@ -17,6 +17,7 @@ namespace RogueCrawler
         public ItemWeaponHandedness Handedness { get; set; }
 
         public int BaseDamage { get; set; }
+        public int BaseValue { get; set; }
         public int PrimaryAttributeBaseReq { get; set; }
         public int SecondaryAttributeBaseReq { get; set; }
         public float LargeWeaponDamageMult { get; set; } = 2;
@@ -49,6 +50,7 @@ namespace RogueCrawler
                 MajorAttribute = weaponTypeData.MajorAttribute,
                 MinorAttribute = weaponTypeData.MinorAttribute,
                 BaseDamage = weaponTypeData.BaseDamage,
+                BaseValue = weaponTypeData.BaseValue,
                 Material = MaterialTypeManager.Materials.Values.RandomItem()
             };
             weapon.Quality = GetQuality(wParams, weapon);
@@ -60,9 +62,6 @@ namespace RogueCrawler
                 weapon.BaseDamage *= weaponTypeData.LargeWeaponDamageMult;
                 weapon.Weight *= weaponTypeData.LargeWeaponWeightMult;
             }
-
-            weapon.AttributeRequirements = GenerateAttributeRequirements(weapon);
-            weapon.Value = weapon.GetValue();
 
             return weapon;
         }
@@ -80,13 +79,11 @@ namespace RogueCrawler
                 WeaponType = weaponType,
                 Quality = serialized.Quality,
                 BaseDamage = serialized.BaseDamage,
+                BaseValue = serialized.BaseValue,
                 MinorAttribute = WeaponTypes[weaponType].MinorAttribute,
                 MajorAttribute = WeaponTypes[weaponType].MajorAttribute,
                 Material = MaterialTypeManager.GetMaterialFromName(serialized.MaterialName)
             };
-
-            weapon.AttributeRequirements = GenerateAttributeRequirements(weapon);
-            weapon.Value = weapon.GetValue();
 
             return weapon;
         }
@@ -96,31 +93,18 @@ namespace RogueCrawler
             return new ItemWeapon()
             {
                 ID = -1,
-                BaseDamage = 1,
+                BaseDamage = c.GetAttribute(AttributeType.STR),
                 Weight = 1.0f,
                 Quality = 1.0f,
-                Value = 0,
+                BaseValue = 0,
                 ObjectName = "Unarmed",
                 WeaponType = "Blunt",
                 ItemName = "Bare Fists",
                 IsLargeWeapon = false,
                 MajorAttribute = AttributeType.DEX,
                 MinorAttribute = AttributeType.STR,
-                AttributeRequirements = new CrawlerAttributeSet(0),
                 Material = MaterialTypeManager.DefaultMaterial
             };
-        }
-
-        CrawlerAttributeSet GenerateAttributeRequirements(ItemWeapon weapon)
-        {
-            var weaponTypeData = WeaponTypes[weapon.WeaponType];
-            CrawlerAttributeSet req = new CrawlerAttributeSet();
-
-            req[AttributeType.STR] = GetStrengthReq(weapon.Weight);
-            req[weaponTypeData.MajorAttribute] += (int)Math.Ceiling(weapon.Quality * GetPrimaryStatReq(weapon));
-            req[weaponTypeData.MinorAttribute] += (int)Math.Ceiling(weapon.Quality * GetSecondaryStatReq(weapon));
-
-            return req;
         }
 
         string GetWeaponName(WeaponTypeData typeData, bool isLarge)
@@ -135,12 +119,12 @@ namespace RogueCrawler
 
             string QualityPrefix(float quality) => quality switch
             {
-                 < 0 => "Broken",
-                 < 1 => "PoorQuality",
-                 < 2 => string.Empty,
-                 < 3 => "HighQuality",
-                 < 4 => "Renowned",
-                >= 4 => "Legendary",
+                <= 0 => "Broken",       // Unusable
+                 < 1 => "Rusty",        // Less than base (0-1)
+                 < 3 => string.Empty,   // Base+ Damage (1-3) 
+                 < 7 => "Superior",     // Double+ (3-7)
+                 < 15 => "Renowned",    // Triple+ (7-15)
+                >= 15 => "Legendary",   // Quadruple+ (15+)
                 _ => "Anomalous"
             };
 

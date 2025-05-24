@@ -1,10 +1,10 @@
 [
   {
-    "Name": "Wood",
-    "ValueModifier": 0.25,
+    "Name": "Bronze",
+    "ValueModifier": 0.75,
     "WeightModifier": 0.75,
     "QualityModifier": 0.8,
-    "DurabilityModifer":  0.5,
+    "DurabilityModifer":  0.6,
     "DamageModifier": 0.9
   },
   {

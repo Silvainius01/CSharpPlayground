@@ -10,7 +10,7 @@ namespace RogueCrawler
         public int Level { get; set; }
         public string ItemName { get; set; }
         public string ObjectName { get; set; }
-        public int Value { get; set; }
+        public int BaseValue { get; set; }
         public float Weight { get; set; }
         public float Quality { get; set; }
         public ItemMaterial Material { get; set; }

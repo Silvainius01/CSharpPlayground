@@ -138,10 +138,12 @@ namespace RogueCrawler
             float damage = weapon.BaseDamage
                 + GetAttribute(weapon.MajorAttribute) / 2
                 + GetAttribute(weapon.MinorAttribute) / 4;
-            float qualityMod = weapon.Quality / (1.4f - CreatureSkillUtility.GetWeaponSkillBonus(weapon, Proficiencies));
+            float qualityMod = MathF.Log2(1 + weapon.Quality);
+            float skillBonus = 1 + CreatureSkillUtility.GetWeaponSkillBonus(weapon, Proficiencies);
             return damage
                 * weapon.Material.DamageModifier
-                * qualityMod;
+                * qualityMod
+                * skillBonus;
         }
         public float GetCombatHitChance()
         {
@@ -172,9 +174,6 @@ namespace RogueCrawler
 
         public bool CanEquipWeapon(ItemWeapon weapon)
         {
-            foreach (KeyValuePair<AttributeType, int> kvp in weapon.AttributeRequirements)
-                if (GetAttribute(kvp.Key) < kvp.Value)
-                    return false;
             return true;
         }
 
@@ -193,9 +192,6 @@ namespace RogueCrawler
         }
         void UpdateUnarmedWeapon()
         {
-            UnarmedWeapon.AttributeRequirements[AttributeType.STR] = GetAttribute(AttributeType.STR);
-            UnarmedWeapon.AttributeRequirements[AttributeType.DEX] = GetAttribute(AttributeType.DEX);
-            UnarmedWeapon.AttributeRequirements[AttributeType.WIS] = GetAttribute(AttributeType.WIS);
         }
 
         public void AddAttributePoints(AttributeType attr, int amount)

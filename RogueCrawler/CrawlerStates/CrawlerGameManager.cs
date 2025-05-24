@@ -13,6 +13,7 @@ namespace RogueCrawler
         {
             public Creature Creature { get; set; }
             public int MaxActions { get; set; }
+            public float Speed => Creature.CombatSpeed.Value;
         }
 
         CommandModule commands = new CommandModule("\nEnter next game command");
@@ -292,14 +293,18 @@ namespace RogueCrawler
             // Sort combatants by combat speed;
             if (dungeon.creatureManager.GetObjectCount(player.CurrentRoom) > 0)
             {
+                int playerIndex = 0;
                 var roomCreatures = dungeon.creatureManager.GetObjectsInRoom(player.CurrentRoom);
                 roomCreatures.Add(player);
                 roomCreatures.Sort((a, b) => a.CombatSpeed.Value.CompareTo(b.CombatSpeed.Value));
 
-                creatureTurnOrder.Clear();
                 foreach (var creature in roomCreatures)
                 {
                     float speed = creature.CombatSpeed.Value;
+
+                    if (creature == player)
+                        playerIndex = creatureTurnOrder.Count;
+
                     creatureTurnOrder.Add(
                         new CreatureTurn()
                         {
@@ -308,6 +313,18 @@ namespace RogueCrawler
                         }
                     );
                 }
+
+                // Player always wins speed ties
+                int newIndex = playerIndex;
+                while (newIndex > 0 && creatureTurnOrder[newIndex - 1].Speed <= player.CombatSpeed.Value)
+                    --newIndex;
+                if(newIndex < playerIndex)
+                {
+                    CreatureTurn t = creatureTurnOrder[newIndex];
+                    creatureTurnOrder[newIndex] = creatureTurnOrder[playerIndex];
+                    creatureTurnOrder[playerIndex] = t;
+                }
+
                 PrintEnteredCombatMessage();
             }
             else

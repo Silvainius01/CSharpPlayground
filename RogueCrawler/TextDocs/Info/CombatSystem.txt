@@ -45,13 +45,44 @@ Damage
 	Every weapon gets a damage bonus based on their major attribute.
 	The two exceptions are Ranged weapons, and hand-to-hand, which get bonus damage from WIS instead. 
 	(baseDamage+(majAttr/2)+(minAttr/4)) 
-	* materialBonus 
-	* (quality / (1.4-skillBonus)) // Ski
+	* Log2(quality) 
+	* 1 + skillBonus // Skill
 
 
 Evasion
-	baseChance = 0.01 * ( (evasion * 0.75) + (unarmored/4) ) // Max 100
+	armorSlow = armorCoverage
+	baseChance = 0.01 * ( 1.25 * evasion * (1.25 - armorEncumberance) ) // Max 150
 	realChance = baseChance * (pDEX+(pWIS/2)) * (0.25+fatiguePercent) // 1*1.5*1.25 = 187.5% at max skill
+
+Blocking
+
+Armor
+	Armor Class:
+		Armor is split into 5 classes: Unarmored, Clothing, Light, Medium, and Heavy. For the purpose of combat mechanics, Clothing and Unarmored are functionally identical.
+		Armor possesses the following traits:
+			Armor Rating
+			Magic Resistance
+			Encumberance
+			Insulation
+
+	Coverage:
+		Armor coverage is a catch all for Insulation and Encumberance, and generally follow this pattern:
+		The base coverage value for each armor piece are as follows:
+			Gauntlets - 0.05
+			Cuirass - 0.35
+			Greaves - 0.35
+			Boots - 0.1
+			Pauldrons - 0.1
+			Helm - 0.05
+		Mulitplier ranges for armor classes:
+			Unarmored - 0
+			Clothing - [0.01, 0.1]
+			Light - [0.1, 0.4]
+			Medium - [0.4, 0.8]
+			Heavy - [0.8, 1]
+		A typical calculation for total coverage would be:
+			armorCoverage = Helm * helmAC + Cuirass * cuirassAC + Pauldrons * pauldronsAC + Gauntlets * gauntletAC + Greaves * greavesAC + Boots * bootsAC
+
 
 Weapon Quality
 	Weapon Quality is a subtle but extremely important stat that affects its performance in indirect ways.

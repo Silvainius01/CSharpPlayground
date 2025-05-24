@@ -5,6 +5,7 @@
     "MinorAttribute": 1,
     "Handedness":  0,
     "BaseDamage": 1,
+    "BaseValue": 5,
     "PrimaryAttributeBaseReq": 4,
     "SecondaryAttributeBaseReq": 2,
     "LargeWeaponDamageMult": 2.5,
@@ -26,6 +27,7 @@
     "MinorAttribute": 0,
     "Handedness": 0,
     "BaseDamage": 1,
+    "BaseValue": 5,
     "PrimaryAttributeBaseReq": 4,
     "SecondaryAttributeBaseReq": 2,
     "LargeWeaponDamageMult": 2.0,
@@ -47,6 +49,7 @@
     "MinorAttribute": 2,
     "Handedness": 0,
     "BaseDamage": 1,
+    "BaseValue": 5,
     "PrimaryAttributeBaseReq": 4,
     "SecondaryAttributeBaseReq": 2,
     "LargeWeaponDamageMult": 3.0,
@@ -66,6 +69,7 @@
     "MinorAttribute": 5,
     "Handedness": 2,
     "BaseDamage": 2,
+    "BaseValue": 5,
     "PrimaryAttributeBaseReq": 4,
     "SecondaryAttributeBaseReq": 2,
     "LargeWeaponDamageMult": 2.0,
@@ -86,17 +90,15 @@
     "MinorAttribute": 2,
     "Handedness": 2,
     "BaseDamage": 2,
+    "BaseValue": 5,
     "PrimaryAttributeBaseReq": 4,
     "SecondaryAttributeBaseReq": 2,
     "LargeWeaponDamageMult": 2.0,
     "LargeWeaponWeightMult": 1.5,
     "OneHandedWeaponNames": [
-      "OneHandSpear1",
-      "OneHandSpear2",
-      "OneHandSpear3"
+      "Spear"
     ],
     "TwoHandedWeaponNames": [
-      "Spear",
       "Halberd",
       "Polearm"
     ]
