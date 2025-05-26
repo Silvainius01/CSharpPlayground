@@ -32,6 +32,7 @@ namespace RogueCrawler
 
         public AttributeType MajorAttribute { get; set; }
         public AttributeType MinorAttribute { get; set; }
+        public CrawlerAttributeSet AttributeRequirements { get; set; }
 
         public float GetWeaponDamage() 
             => BaseDamage * Material.DamageModifier * MathF.Log2(Quality);

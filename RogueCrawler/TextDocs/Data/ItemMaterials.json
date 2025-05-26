@@ -5,7 +5,7 @@
     "WeightModifier": 0.75,
     "QualityModifier": 0.8,
     "DurabilityModifer":  0.6,
-    "DamageModifier": 0.9
+    "DamageModifier": 1.0
   },
   {
     "Name": "Iron",
@@ -32,7 +32,7 @@
     "DamageModifier": 1.75
   },
   {
-    "Name": "Obsidian",
+    "Name": "Chromasteel",
     "ValueModifier": 1.7,
     "WeightModifier": 1.0,
     "QualityModifier": 1.0,

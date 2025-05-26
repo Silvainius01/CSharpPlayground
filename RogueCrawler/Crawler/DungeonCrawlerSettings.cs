@@ -61,19 +61,17 @@ namespace RogueCrawler
         public const int MinCreatureLevel = 1;
         /// <summary>Maximum level a creature can be</summary>
         public const int MaxCreatureLevel = 100;
-        #endregion
 
-        #region Chest Generation Settings
         /// <summary>Loot level multiplier for Low Quality loot</summary>
-        public const float LowQualityLootLevelBias = -1f;
+        public const float LowQualityLevelBias = -1f;
         /// <summary>Loot level multiplier for Mid Quality loot</summary>
-        public const float MidQualityLootLevelBias = 0.5f;
+        public const float NormalLevelBias = 0.0f;
         /// <summary>Loot level multiplier for High Quality loot</summary>
-        public const float HighQualityLootLevelBias = 1.5f;
+        public const float SuperiorLevelBias = 1.5f;
         /// <summary>Loot level multiplier for Exalted Quality loot</summary>
-        public const float ExaltedQualityLootLevelBias = 2.5f;
+        public const float ExaltedLevelBias = 2.5f;
         /// <summary>Loot level multiplier for Legendary Quality loot</summary>
-        public const float LegendaryQualityLootLevelBias = 3.0f;
+        public const float LegendaryLevelBias = 3.0f;
         #endregion
 
         #region Quality Generation Settings

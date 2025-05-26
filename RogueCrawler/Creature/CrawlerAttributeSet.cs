@@ -24,7 +24,6 @@ namespace RogueCrawler
             get => totalScore;
         }
         public int CreatureLevel => GetAttributeLevel(DungeonCrawlerSettings.AttributePointsPerCreatureLevel);
-        public int WeaponLevel => GetAttributeLevel(DungeonCrawlerSettings.AttributePointsPerWeaponLevel);
 
         public CrawlerAttributeSet(int baseValue = 0)
         {

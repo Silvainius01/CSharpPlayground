@@ -48,14 +48,14 @@ namespace RogueCrawler
 
         public static float GetLevelBias(QualityLevel quality)
         {
-            float bias = 1.0f;
+            float bias = 0.0f;
             switch (quality)
             {
-                case QualityLevel.Low: bias = DungeonCrawlerSettings.LowQualityLootLevelBias; break;
-                case QualityLevel.Normal: bias = DungeonCrawlerSettings.MidQualityLootLevelBias; break;
-                case QualityLevel.Superior: bias = DungeonCrawlerSettings.HighQualityLootLevelBias; break;
-                case QualityLevel.Exalted: bias = DungeonCrawlerSettings.ExaltedQualityLootLevelBias; break;
-                case QualityLevel.Legendary: bias = DungeonCrawlerSettings.LegendaryQualityLootLevelBias; break;
+                case QualityLevel.Low: bias = DungeonCrawlerSettings.LowQualityLevelBias; break;
+                case QualityLevel.Normal: bias = DungeonCrawlerSettings.NormalLevelBias; break;
+                case QualityLevel.Superior: bias = DungeonCrawlerSettings.SuperiorLevelBias; break;
+                case QualityLevel.Exalted: bias = DungeonCrawlerSettings.ExaltedLevelBias; break;
+                case QualityLevel.Legendary: bias = DungeonCrawlerSettings.LegendaryLevelBias; break;
             }
             return bias;
         }
@@ -63,7 +63,7 @@ namespace RogueCrawler
         {
             return GetRandomRelativeLevel(level, GetLevelBias(quality));
         }
-        public static int GetRandomRelativeLevel(int level, float bias = 1.0f)
+        public static int GetRandomRelativeLevel(int level, float bias = 0.0f)
         {
             var rDouble = CommandEngine.Random.GetMarsagliaBetween(
                 RelativeLootLevelFloor(level),
@@ -89,7 +89,6 @@ namespace RogueCrawler
             <= 0.975f => QualityLevel.Exalted,
             _ => QualityLevel.Legendary
         };
-
         public static Vector2Int GetBaseQualityRange(QualityLevel quality)
         {
             int Qmax = (2 << (int)quality) - 1;
@@ -97,14 +96,13 @@ namespace RogueCrawler
 
             return new Vector2Int(Qmin, Qmax);
         }
-
-        public static float GetItemQuality(QualityLevel baseQuality, QualityLevel subQuality)
+        public static float GetItemQuality(QualityLevel baseQuality, QualityLevel qualityBias)
         {
             float bias = 0;
             float quality = 0;
             Vector2Int qRange = GetBaseQualityRange(baseQuality);
 
-            switch(subQuality)
+            switch(qualityBias)
             {
                 case QualityLevel.Low:
                     bias = -0.25f;

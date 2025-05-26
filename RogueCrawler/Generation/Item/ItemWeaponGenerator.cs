@@ -51,7 +51,7 @@ namespace RogueCrawler
                 MinorAttribute = weaponTypeData.MinorAttribute,
                 BaseDamage = weaponTypeData.BaseDamage,
                 BaseValue = weaponTypeData.BaseValue,
-                Material = MaterialTypeManager.Materials.Values.RandomItem()
+                Material = wParams.Material,
             };
             weapon.Quality = GetQuality(wParams, weapon);
             weapon.ObjectName = GetWeaponName(weaponTypeData, weapon.IsLargeWeapon);
@@ -146,12 +146,11 @@ namespace RogueCrawler
         /// <summary>Get the stat requirement for Quality 1.0 weapon</summary>
         int GetSecondaryStatReq(ItemWeapon weapon)
             => WeaponTypes[weapon.WeaponType].SecondaryAttributeBaseReq;
-        
-        float GetQuality(ItemWeaponGenerationParameters wParams, ItemWeapon weapon)
-        {
-            float bias = DungeonGenerator.GetLevelBias(wParams.QualityBias);
-            return 1.0f;
-        }
+
+        float GetQuality(ItemWeaponGenerationParameters wParams)
+            => wParams.QualityOverride < 0.0f
+                ? DungeonGenerator.GetItemQuality(wParams.Quality, wParams.QualityBias)
+                : wParams.QualityOverride;
 
         bool IsLargeWeapon(WeaponTypeData weaponType, ItemWeaponGenerationParameters wParams)
         {

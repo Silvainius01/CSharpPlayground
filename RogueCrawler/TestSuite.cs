@@ -169,11 +169,11 @@ namespace RogueCrawler
                 case "f": properties = ItemWeaponGenerationPresets.RandomWeaponItem; break;
                 case "b": properties = ItemWeaponGenerationPresets.BrokenWeaponItem; break;
                 case "l": properties = ItemWeaponGenerationPresets.LowQualityWeaponChestItem; break;
-                case "m": properties = ItemWeaponGenerationPresets.MidQualityWeaponChestItem; break;
-                case "h": properties = ItemWeaponGenerationPresets.HighQualityWeaponChestItem; break;
+                case "m": properties = ItemWeaponGenerationPresets.NormalQualityWeaponChestItem; break;
+                case "h": properties = ItemWeaponGenerationPresets.SuperiorQualityWeaponChestItem; break;
                 case "c":
                     if (args.Count > 1 && int.TryParse(args[1], out int level))
-                        properties = ItemWeaponGenerationPresets.GenerateWeaponAtLevel(level, true, false);
+                        properties = ItemWeaponGenerationPresets.GenerateWeaponAtLevel(level);
                     else { Console.WriteLine("Invalid level argument."); return; }
                     break;
             }

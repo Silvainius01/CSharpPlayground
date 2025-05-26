@@ -16,7 +16,7 @@ namespace RogueCrawler
 
         public ItemWeaponGenerationParameters(IEnumerable<QualityLevel> qualities) : base(qualities) { }
         public ItemWeaponGenerationParameters(params QualityLevel[] qualities) : base(qualities) { }
-        public ItemWeaponGenerationParameters(int numQualities, QualityLevel quality) : base(numQualities, quality) { }
-        public ItemWeaponGenerationParameters(int numQualities, Func<QualityLevel> DetermineQuality) : base(numQualities, DetermineQuality) { }
+        public ItemWeaponGenerationParameters(QualityLevel quality) : base(quality) { }
+        public ItemWeaponGenerationParameters(Func<QualityLevel> DetermineQuality) : base(DetermineQuality) { }
     }
 }

@@ -34,42 +34,6 @@ namespace RogueCrawler
             return GetWeightRange((QualityLevel)rInt);
         }
 
-        public static readonly Vector2Int LowQuality = new Vector2Int(AllowBrokenWeapons ? 0 : 1, LowWeaponQuality);
-        public static readonly Vector2Int MidQuality = new Vector2Int(LowWeaponQuality, MidWeaponQuality);
-        public static readonly Vector2Int HighQuality = new Vector2Int(MidWeaponQuality, MaxWeaponQuality);
-        public static readonly Vector2Int AnyQuality = new Vector2Int(AllowBrokenWeapons ? 0 : 1, MaxWeaponQuality);
-        public static Vector2Int GetQualityRange(QualityLevel QualityRange)
-        {
-            switch (QualityRange)
-            {
-                case QualityLevel.Low: return LowQuality;
-                case QualityLevel.Normal: return MidQuality;
-                case QualityLevel.Superior: return HighQuality;
-            }
-            return AnyQuality;
-        }
-        public static Vector2Int GetQualityRangeOrHigher(QualityLevel QualityRange)
-        {
-            int rInt = CommandEngine.Random.NextInt((int)QualityRange, EnumExt<QualityLevel>.Count);
-            return GetQualityRange((QualityLevel)rInt);
-        }
-        public static Vector2Int GetQualityRangeOrLower(QualityLevel QualityRange)
-        {
-            int rInt = CommandEngine.Random.NextInt(0, (int)QualityRange);
-            return GetQualityRange((QualityLevel)rInt);
-        }
-        public static float GetQualityBias(QualityLevel q)
-        {
-            float bias = 1.0f;
-            switch(q)
-            {
-                case QualityLevel.Low: bias = LowQualityLootLevelBias; break;
-                case QualityLevel.Normal: bias = MidQualityLootLevelBias; break;
-                case QualityLevel.Superior: bias = HighQualityLootLevelBias; break;
-            }
-            return bias;
-        }
-
         public static readonly int NoLargeRate = 0;
         public static readonly int LowLargeRate = 25;
         public static readonly int MidLargeRate = 50;
@@ -103,10 +67,10 @@ namespace RogueCrawler
             get => new ItemWeaponGenerationParameters(QualityLevel.Normal)
             {
                 CreatureLevel = 1,
-                GenerateRelative = false,
-                CapToCreatureLevel = true,
+                QualityOverride = 1.0f,
                 WeightRange = new Vector2Int(25, 25),
                 LargeWeaponProbability = ItemWeaponGenerationPresets.NoLargeRate,
+                Material = MaterialTypeManager.DefaultMaterial,
             };
         }
         public static ItemWeaponGenerationParameters BrokenWeaponItem
@@ -114,31 +78,30 @@ namespace RogueCrawler
             get => new ItemWeaponGenerationParameters()
             {
                 WeightRange = new Vector2Int(25, 50),
-                // QualityRange = new Vector2Int(0, 0), // ~28% chance of <1.0 Quality starter
+                QualityOverride = 0.0f,
                 LargeWeaponProbability = ItemWeaponGenerationPresets.MidLargeRate,
             };
         }
         public static ItemWeaponGenerationParameters LowQualityWeaponChestItem
         {
-            get => new ItemWeaponGenerationParameters()
+            get => new ItemWeaponGenerationParameters(QualityLevel.Low, DungeonGenerator.GetRandomQuality())
             {
-                // QualityRange = LowQuality,
                 WeightRange = AnyWeight,
                 LargeWeaponProbability = GetRandomLargeProb()
             };
         }
-        public static ItemWeaponGenerationParameters MidQualityWeaponChestItem
+        public static ItemWeaponGenerationParameters NormalQualityWeaponChestItem
         {
-            get => new ItemWeaponGenerationParameters()
+            get => new ItemWeaponGenerationParameters(QualityLevel.Normal, DungeonGenerator.GetRandomQuality())
             {
                 // QualityRange = MidQuality,
                 WeightRange = AnyWeight,
                 LargeWeaponProbability = GetRandomLargeProb()
             };
         }
-        public static ItemWeaponGenerationParameters HighQualityWeaponChestItem
+        public static ItemWeaponGenerationParameters SuperiorQualityWeaponChestItem
         {
-            get => new ItemWeaponGenerationParameters()
+            get => new ItemWeaponGenerationParameters(QualityLevel.Superior, DungeonGenerator.GetRandomQuality())
             {
                 // QualityRange = HighQuality,
                 WeightRange = AnyWeight,
@@ -147,7 +110,7 @@ namespace RogueCrawler
         }
         public static ItemWeaponGenerationParameters RandomWeaponItem
         {
-            get => new ItemWeaponGenerationParameters()
+            get => new ItemWeaponGenerationParameters(DungeonGenerator.GetRandomQuality)
             {
                 // QualityRange = AnyQuality,
                 WeightRange = AnyWeight,
@@ -157,33 +120,27 @@ namespace RogueCrawler
         
         public static ItemWeaponGenerationParameters GetParamsForChest(int level, QualityLevel weaponQuality, QualityLevel weightQuality)
         {
-            return new ItemWeaponGenerationParameters(weaponQuality)
+            return new ItemWeaponGenerationParameters(weaponQuality, DungeonGenerator.GetRandomQuality())
             {
                 CreatureLevel = level,
-                GenerateRelative = true,
-                CapToCreatureLevel = false,
                 WeightRange = GetWeightRange(weightQuality),
                 LargeWeaponProbability = MidLargeRate
             };
         }
         public static ItemWeaponGenerationParameters GetParamsForCreature(Creature creature, QualityLevel weaponQuality, QualityLevel weightQuality)
         {
-            return new ItemWeaponGenerationParameters(weaponQuality)
+            return new ItemWeaponGenerationParameters(weaponQuality, DungeonGenerator.GetRandomQuality())
             {
                 CreatureLevel = creature.Level,
-                GenerateRelative = true,
-                CapToCreatureLevel = true,
                 WeightRange = GetWeightRange(weightQuality),
                 LargeWeaponProbability = MidLargeRate
             };
         }
-        public static ItemWeaponGenerationParameters GenerateWeaponAtLevel(int level, bool generateRelative, bool capLevel)
+        public static ItemWeaponGenerationParameters GenerateWeaponAtLevel(int level)
         {
             return new ItemWeaponGenerationParameters(QualityLevel.Normal)
             {
                 CreatureLevel = level,
-                GenerateRelative = generateRelative,
-                CapToCreatureLevel = false,
                 WeightRange = AnyWeight,
                 LargeWeaponProbability = MidLargeRate
             };

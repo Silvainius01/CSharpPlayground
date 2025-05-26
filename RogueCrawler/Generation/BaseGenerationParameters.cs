@@ -14,16 +14,16 @@ namespace RogueCrawler
         public BaseGenerationParameters(IEnumerable<QualityLevel> qualities) { AddQuality(qualities); }
         public BaseGenerationParameters(params QualityLevel[] qualities) { AddQuality(qualities); }
 
-        public void AddQuality(QualityLevel q, int amount = 1)
+        protected void AddQuality(QualityLevel q, int amount = 1)
         {
             for (int i = 0; i < amount; ++i)
                 Qualities.Add(q);
         }
-        public void AddQuality(IEnumerable<QualityLevel> qualities)
+        protected void AddQuality(IEnumerable<QualityLevel> qualities)
         {
             Qualities.AddRange(qualities);
         }
-        public void AddQuality(int numQualities, Func<QualityLevel> DetermineQuality)
+        protected void AddQuality(int numQualities, Func<QualityLevel> DetermineQuality)
         {
             for (int i = 0; i < numQualities; ++i)
                 Qualities.Add(DetermineQuality());
