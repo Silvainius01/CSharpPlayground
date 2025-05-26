@@ -137,8 +137,9 @@ namespace CommandEngine
         public static float GetMarsagliaBetween(float min, float max)
         {
             Mathc.Swap(ref min, ref max);
-            float mid = Mathc.GetMidValue(min, max);
-            return MarsagliaRange(mid, true) + mid;
+            float range = (max - min) / 2;
+            float middle = Mathc.GetMidValue(min, max);
+            return MarsagliaRange(range, true) + middle;
         }
 
         public static float GetMarsagliaBetween(Vector2Int range)

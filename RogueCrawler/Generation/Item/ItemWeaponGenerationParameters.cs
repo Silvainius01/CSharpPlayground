@@ -11,9 +11,7 @@ namespace RogueCrawler
     /// </summary>
     class ItemWeaponGenerationParameters : ItemGenerationParameters
     {   
-        public bool GenerateRelative { get; set; }
-        public bool CapToCreatureLevel { get; set; }
-        public int LargeWeaponProbability { get; set; } = 50;
+        public int LargeWeaponProbability { get; set; } = 25;
         public List<string> PossibleWeaponTypes { get; set; } = new List<string>();
 
         public ItemWeaponGenerationParameters(IEnumerable<QualityLevel> qualities) : base(qualities) { }

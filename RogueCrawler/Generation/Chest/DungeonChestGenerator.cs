@@ -88,13 +88,13 @@ namespace RogueCrawler
             double r = CommandEngine.Random.NormalDouble;
 
             if (r < 0.5) // 50%
-                return QualityLevel.Mid;
+                return QualityLevel.Normal;
             if (r < 0.75) // 25% 
                 return QualityLevel.Low;
             if (r < 0.9) // 15%
-                return QualityLevel.High;
+                return QualityLevel.Superior;
             if (r < 0.98) // 8%
-                return QualityLevel.Renowned;
+                return QualityLevel.Exalted;
             return QualityLevel.Legendary; // 2%
         }
     }

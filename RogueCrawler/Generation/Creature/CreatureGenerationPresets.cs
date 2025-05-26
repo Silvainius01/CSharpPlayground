@@ -19,9 +19,9 @@ namespace RogueCrawler
             switch(level)
             {
                 case QualityLevel.Low: return LowHealthRange;
-                case QualityLevel.Mid: return MidHealthRange;
-                case QualityLevel.High: return HighHealthRange;
-                case QualityLevel.Renowned: return RenownedHealthRange;
+                case QualityLevel.Normal: return MidHealthRange;
+                case QualityLevel.Superior: return HighHealthRange;
+                case QualityLevel.Exalted: return RenownedHealthRange;
                 case QualityLevel.Legendary: return LegendaryHealthRange;
             }
             return AnyHealthRange;
@@ -38,9 +38,9 @@ namespace RogueCrawler
             switch (level)
             {
                 case QualityLevel.Low: return LowSkillRange;
-                case QualityLevel.Mid: return MidSkillRange;
-                case QualityLevel.High: return HighSkillRange;
-                case QualityLevel.Renowned: return RenownedSkillRange;
+                case QualityLevel.Normal: return MidSkillRange;
+                case QualityLevel.Superior: return HighSkillRange;
+                case QualityLevel.Exalted: return RenownedSkillRange;
                 case QualityLevel.Legendary: return LegendarySkillRange;
             }
             return AnySkillRange;

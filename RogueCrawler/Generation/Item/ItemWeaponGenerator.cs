@@ -123,7 +123,7 @@ namespace RogueCrawler
                  < 1 => "Rusty",        // Less than base (0-1)
                  < 3 => string.Empty,   // Base+ Damage (1-3) 
                  < 7 => "Superior",     // Double+ (3-7)
-                 < 15 => "Renowned",    // Triple+ (7-15)
+                 < 15 => "Exalted",    // Triple+ (7-15)
                 >= 15 => "Legendary",   // Quadruple+ (15+)
                 _ => "Anomalous"
             };
@@ -147,29 +147,10 @@ namespace RogueCrawler
         int GetSecondaryStatReq(ItemWeapon weapon)
             => WeaponTypes[weapon.WeaponType].SecondaryAttributeBaseReq;
         
-        float GetMaxQuality(int level, ItemWeapon weapon)
-        {
-            if (level <= 0)
-                return 0;
-
-            int maxAttrPoints = (level * DungeonCrawlerSettings.AttributePointsPerWeaponLevel) - GetStrengthReq(weapon.Weight);
-            float pointsPerQual = GetPrimaryStatReq(weapon) + GetSecondaryStatReq(weapon);
-            return (maxAttrPoints / pointsPerQual).Truncate(1);    
-        }
-
         float GetQuality(ItemWeaponGenerationParameters wParams, ItemWeapon weapon)
         {
-            if (wParams.GenerateRelative)
-            {
-                var levelRange = DungeonGenerator.GetRelativeLootRange(wParams.CreatureLevel);
-                int level = (int)(
-                    CommandEngine.Random.GetMarsagliaBetween(levelRange) +
-                    DungeonGenerator.GetLevelBias(wParams.QualityBias));
-                if (wParams.CapToCreatureLevel && level > wParams.CreatureLevel)
-                    level = wParams.CreatureLevel;
-                return GetMaxQuality(level, weapon);
-            }
-            return GetMaxQuality(wParams.CreatureLevel, weapon);
+            float bias = DungeonGenerator.GetLevelBias(wParams.QualityBias);
+            return 1.0f;
         }
 
         bool IsLargeWeapon(WeaponTypeData weaponType, ItemWeaponGenerationParameters wParams)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection.Metadata;
 using System.Text;
 using CommandEngine;
 
@@ -31,8 +32,6 @@ namespace RogueCrawler
         #region Attribute Settings
         /// <summary>Amount of attribute points a creature can have per level</summary>
         public const int AttributePointsPerCreatureLevel = 3;
-        /// <summary>Amount of attribute points a weapon can have per level</summary>
-        public const int AttributePointsPerWeaponLevel = 2;
         /// <summary>Bonus HitPoints granted by every point of CON</summary>
         public const int HitPointsPerConstitution = 5;
         #endregion
@@ -71,26 +70,27 @@ namespace RogueCrawler
         public const float MidQualityLootLevelBias = 0.5f;
         /// <summary>Loot level multiplier for High Quality loot</summary>
         public const float HighQualityLootLevelBias = 1.5f;
-        /// <summary>Loot level multiplier for Renowned Quality loot</summary>
-        public const float RenownedQualityLootLevelBias = 2.5f;
+        /// <summary>Loot level multiplier for Exalted Quality loot</summary>
+        public const float ExaltedQualityLootLevelBias = 2.5f;
         /// <summary>Loot level multiplier for Legendary Quality loot</summary>
         public const float LegendaryQualityLootLevelBias = 3.0f;
+        #endregion
+
+        #region Quality Generation Settings
+        public const float MinGeneratedItemQuality = 0;
+        public const float MaxGeneratedItemQuality = 30;
         #endregion
 
         #region Weapon Generation Settings
         /// <summary>Determines if weapons of quality level 0 can be generated</summary>
         public const bool AllowBrokenWeapons = true;
         /// <summary>The maximum quality level a weapon can be</summary>
-        public const int MaxWeaponQuality = 50;
-        /// <summary>The maximum quality a mid-range weapon can be</summary>
-        public const int MidWeaponQuality = (int)(MaxWeaponQuality * (2.0 / 3.0));
-        /// <summary>The maximum quality a low-range weapon can be</summary>
-        public const int LowWeaponQuality = (int)(MaxWeaponQuality * (1.0 / 3.0));
+        public const int MaxWeaponQuality = 32;
 
         /// <summary>The most a weapon can weigh</summary>
         public const int MaxWeaponWeight = 100;
         /// <summary>The least a weapon can weigh</summary>
-        public const int MinWeaponWeight = 25;
+        public const int MinWeaponWeight = 5;
         /// <summary>The most a mid-range weapon can weigh</summary>
         public const int MidWeaponWeight = (int)((MaxWeaponWeight - MinWeaponWeight) * (2.0 / 3.0)) + MinWeaponWeight;
         /// <summary>The most a low-range weapon can weigh</summary>

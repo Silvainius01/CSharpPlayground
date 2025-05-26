@@ -18,8 +18,8 @@ namespace RogueCrawler
             switch (weightRange)
             {
                 case QualityLevel.Low: return LightWeight;
-                case QualityLevel.Mid: return MidWeight;
-                case QualityLevel.High: return HeavyWeight;
+                case QualityLevel.Normal: return MidWeight;
+                case QualityLevel.Superior: return HeavyWeight;
             }
             return AnyWeight;
         }
@@ -43,8 +43,8 @@ namespace RogueCrawler
             switch (QualityRange)
             {
                 case QualityLevel.Low: return LowQuality;
-                case QualityLevel.Mid: return MidQuality;
-                case QualityLevel.High: return HighQuality;
+                case QualityLevel.Normal: return MidQuality;
+                case QualityLevel.Superior: return HighQuality;
             }
             return AnyQuality;
         }
@@ -64,8 +64,8 @@ namespace RogueCrawler
             switch(q)
             {
                 case QualityLevel.Low: bias = LowQualityLootLevelBias; break;
-                case QualityLevel.Mid: bias = MidQualityLootLevelBias; break;
-                case QualityLevel.High: bias = HighQualityLootLevelBias; break;
+                case QualityLevel.Normal: bias = MidQualityLootLevelBias; break;
+                case QualityLevel.Superior: bias = HighQualityLootLevelBias; break;
             }
             return bias;
         }
@@ -100,7 +100,7 @@ namespace RogueCrawler
 
         public static ItemWeaponGenerationParameters StartWeaponItem
         {
-            get => new ItemWeaponGenerationParameters(QualityLevel.Mid)
+            get => new ItemWeaponGenerationParameters(QualityLevel.Normal)
             {
                 CreatureLevel = 1,
                 GenerateRelative = false,
@@ -179,7 +179,7 @@ namespace RogueCrawler
         }
         public static ItemWeaponGenerationParameters GenerateWeaponAtLevel(int level, bool generateRelative, bool capLevel)
         {
-            return new ItemWeaponGenerationParameters(QualityLevel.Mid)
+            return new ItemWeaponGenerationParameters(QualityLevel.Normal)
             {
                 CreatureLevel = level,
                 GenerateRelative = generateRelative,

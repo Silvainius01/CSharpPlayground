@@ -66,7 +66,7 @@ namespace RogueCrawler
             }
             var roomRange = GetRoomRange();
 
-            DungeonGenerationParameters dParams = new DungeonGenerationParameters(3, () => DungeonGenerator.GetShiftedQuality(QualityLevel.Mid))
+            DungeonGenerationParameters dParams = new DungeonGenerationParameters(3, DungeonGenerator.GetRandomQuality)
             {
                 PlayerLevel = player.Level,
                 RoomRange = roomRange,

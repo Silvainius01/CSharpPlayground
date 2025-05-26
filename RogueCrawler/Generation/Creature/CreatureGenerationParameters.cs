@@ -28,7 +28,7 @@ namespace RogueCrawler
 
         protected override bool ValidateInternal()
         {
-            QualityLevel[] rLevel = new QualityLevel[] { QualityLevel.Low, QualityLevel.Mid };
+            QualityLevel[] rLevel = new QualityLevel[] { QualityLevel.Low, QualityLevel.Normal };
 
             while (Qualities.Count < 3)
                 Qualities.Add(rLevel.RandomItem());

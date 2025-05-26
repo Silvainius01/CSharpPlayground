@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using CommandEngine;
+using Microsoft.VisualBasic;
 
 namespace RogueCrawler
 {
@@ -51,9 +52,9 @@ namespace RogueCrawler
             switch (quality)
             {
                 case QualityLevel.Low: bias = DungeonCrawlerSettings.LowQualityLootLevelBias; break;
-                case QualityLevel.Mid: bias = DungeonCrawlerSettings.MidQualityLootLevelBias; break;
-                case QualityLevel.High: bias = DungeonCrawlerSettings.HighQualityLootLevelBias; break;
-                case QualityLevel.Renowned: bias = DungeonCrawlerSettings.RenownedQualityLootLevelBias; break;
+                case QualityLevel.Normal: bias = DungeonCrawlerSettings.MidQualityLootLevelBias; break;
+                case QualityLevel.Superior: bias = DungeonCrawlerSettings.HighQualityLootLevelBias; break;
+                case QualityLevel.Exalted: bias = DungeonCrawlerSettings.ExaltedQualityLootLevelBias; break;
                 case QualityLevel.Legendary: bias = DungeonCrawlerSettings.LegendaryQualityLootLevelBias; break;
             }
             return bias;
@@ -77,19 +78,56 @@ namespace RogueCrawler
         public static int RelativeLootLevelCeiling(int level)
             => Mathc.Min(level + DungeonCrawlerSettings.PlayerRelativeLootCeiling, DungeonCrawlerSettings.MaxCreatureLevel);
 
-        /// <summary>Rolls against a normal curve to see if the quality gets shift up or down</summary>
+        /// <summary>Returns a random quality on a predetermined distribution</summary>
         /// <param name="level"></param>
         /// <returns></returns>
-        public static QualityLevel GetShiftedQuality(QualityLevel level)
+        public static QualityLevel GetRandomQuality() => CommandEngine.Random.NextFloat() switch
         {
-            float rFloat = CommandEngine.Random.NextFloat();
-            if (rFloat < DungeonCrawlerSettings.QualityLevelShiftChance)
+            <= 0.2f => QualityLevel.Low,
+            <= 0.7f => QualityLevel.Normal,
+            <= 0.9f => QualityLevel.Superior,
+            <= 0.975f => QualityLevel.Exalted,
+            _ => QualityLevel.Legendary
+        };
+
+        public static Vector2Int GetBaseQualityRange(QualityLevel quality)
+        {
+            int Qmax = (2 << (int)quality) - 1;
+            int Qmin = (Qmax + 1) / 2 - 1;
+
+            return new Vector2Int(Qmin, Qmax);
+        }
+
+        public static float GetItemQuality(QualityLevel baseQuality, QualityLevel subQuality)
+        {
+            float bias = 0;
+            float quality = 0;
+            Vector2Int qRange = GetBaseQualityRange(baseQuality);
+
+            switch(subQuality)
             {
-                // Increase or decrease level by one based on second decimal place
-                int shiftedLevel = (int)level + ((int)(rFloat * 100) % 2 == 0 ? 1 : -1);
-                return (QualityLevel)Mathc.Mod(shiftedLevel, EnumExt<QualityLevel>.Count);
+                case QualityLevel.Low:
+                    bias = -0.25f;
+                    break;
+                case QualityLevel.Normal:
+                    break;
+                case QualityLevel.Superior:
+                    bias = 0.25f;
+                    break;
+                case QualityLevel.Exalted:
+                    bias = 0.25f;
+                    qRange.Y += 1;
+                    break;
+                case QualityLevel.Legendary:
+                    bias = 0.25f;
+                    qRange.X += 1;
+                    qRange.Y += 1;
+                    break;
             }
-            return level;
+
+            bias = (qRange.Y - qRange.X) / 2 * bias;
+            quality = CommandEngine.Random.GetMarsagliaBetween(qRange) + bias;
+            return Mathc.Clamp(quality, 0, 30);
         }
     }
 }
