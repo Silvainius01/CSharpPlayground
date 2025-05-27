@@ -35,13 +35,13 @@ namespace RogueCrawler
         public CrawlerAttributeSet AttributeRequirements { get; set; }
 
         public float GetWeaponDamage() 
-            => BaseDamage * Material.DamageModifier * MathF.Log2(Quality);
-        public float GetWeaponDamage(CrawlerAttributeSet attrs)
+            => BaseDamage * Material.DamageModifier * MathF.Log2(Quality + 1);
+        public float GetWeaponDamage(Creature wielder)
         {
             float damage = BaseDamage
-                + attrs.GetAttribute(MajorAttribute) / 2
-                + attrs.GetAttribute(MinorAttribute) / 4;
-            return damage * Material.DamageModifier * MathF.Log2(Quality);
+                + wielder.GetAttribute(MajorAttribute) / 2.0f
+                + wielder.GetAttribute(MinorAttribute) / 4.0f;
+            return damage * Material.DamageModifier * MathF.Log2(Quality + 1);
         }
 
         public float GetFatigueCost() => Weight * 2;

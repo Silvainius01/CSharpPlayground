@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using System.Numerics;
+using System.Transactions;
 
 namespace RogueCrawler
 {
@@ -16,10 +17,11 @@ namespace RogueCrawler
             public float Speed => Creature.CombatSpeed.Value;
         }
 
-        CommandModule commands = new CommandModule("\nEnter next game command");
+        //CommandModule commands = new CommandModule("\nEnter next game command");
+        CommandModule<int> commands = new CommandModule<int>("\nEnter next game command");
 
         int turnIndex = 0;
-        int actionCommands = 0;
+        bool newRoom = false;
         bool dungeonExit = false;
         string firstDungeonMessage = "Entering first dungeon:";
         SmartStringBuilder staticBuilder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);
@@ -34,27 +36,27 @@ namespace RogueCrawler
         public CrawlerGameManager(DungeonCrawlerManager manager) : base(manager)
         {
             // Free Commands
-            commands.Add(new ConsoleCommand("check", LookToRoom));
-            commands.Add(new ConsoleCommand("creature", InspectCreature));
-            commands.Add(new ConsoleCommand("cr", InspectCreature));
-            commands.Add(new ConsoleCommand("item", InspectItem));
-            commands.Add(new ConsoleCommand("inventory", Inventory));
-            commands.Add(new ConsoleCommand("inv", Inventory));
-            commands.Add(new ConsoleCommand("map", PrintPlayerMap));
-            commands.Add(new ConsoleCommand("path", PathToRoom));
-            commands.Add(new ConsoleCommand("self", CheckSelf));
+            commands.Add(new ConsoleCommand<int>("check", LookToRoom));
+            commands.Add(new ConsoleCommand<int>("creature", InspectCreature));
+            commands.Add(new ConsoleCommand<int>("cr", InspectCreature));
+            commands.Add(new ConsoleCommand<int>("item", InspectItem));
+            commands.Add(new ConsoleCommand<int>("inventory", Inventory));
+            commands.Add(new ConsoleCommand<int>("inv", Inventory));
+            commands.Add(new ConsoleCommand<int>("map", PrintPlayerMap));
+            commands.Add(new ConsoleCommand<int>("path", PathToRoom));
+            commands.Add(new ConsoleCommand<int>("self", CheckSelf));
 
             // Action Commands
-            commands.Add(new ConsoleCommand("chest", InspectChest));
-            commands.Add(new ConsoleCommand("equip", Equip));
-            commands.Add(new ConsoleCommand("exit", ExitDungeon));
-            commands.Add(new ConsoleCommand("fight", FightCreature));
-            commands.Add(new ConsoleCommand("move", MoveToRoom));
-            commands.Add(new ConsoleCommand("take", TakeItem));
+            commands.Add(new ConsoleCommand<int>("chest", InspectChest));
+            commands.Add(new ConsoleCommand<int>("equip", Equip));
+            commands.Add(new ConsoleCommand<int>("exit", ExitDungeon));
+            commands.Add(new ConsoleCommand<int>("fight", FightCreature));
+            commands.Add(new ConsoleCommand<int>("move", MoveToRoom));
+            commands.Add(new ConsoleCommand<int>("take", TakeItem));
 
             // No Creature Commands
-            commands.Add(new ConsoleCommand("rest", Rest));
-            commands.Add(new ConsoleCommand("takeall", TakeAllItems));
+            commands.Add(new ConsoleCommand<int>("rest", Rest));
+            commands.Add(new ConsoleCommand<int>("takeall", TakeAllItems));
         }
 
         public override void StartCrawlerState()
@@ -76,9 +78,14 @@ namespace RogueCrawler
         }
         public override CrawlerState UpdateCrawlerState()
         {
+            if(newRoom)
+            {
+                newRoom = false;
+                BuildCreatureTurnOrder();
+            }
+
             if (creatureTurnOrder.Count > 1)
             {
-                actionCommands = 0;
                 bool isPlayerDead = false;
 
                 for (turnIndex = 0; turnIndex < creatureTurnOrder.Count; ++turnIndex)
@@ -103,8 +110,8 @@ namespace RogueCrawler
                         }
                         else
                         {
-                            commands.NextCommand(true);
-                            i = actionCommands - 1;
+                            commands.NextCommand(true, out int actionPoints);
+                            i += actionPoints - 1;
                         }
                     }
 
@@ -116,7 +123,7 @@ namespace RogueCrawler
                     }
                 }
             }
-            else commands.NextCommand(true);
+            else commands.NextCommand(true, out int actionPoints);
 
             if (ExitGameState())
                 return CrawlerState.Menu;
@@ -126,11 +133,8 @@ namespace RogueCrawler
 
         private void PlayerMoveToRoom(DungeonRoom room)
         {
+            newRoom = true;
             dungeon.MovePlayerToRoom(player, room);
-
-            turnIndex = 0;
-            actionCommands = 0;
-            BuildCreatureTurnOrder();
 
             int tabCount = 0;
             staticBuilder.Clear();
@@ -281,6 +285,7 @@ namespace RogueCrawler
         }
         private void OnPlayerDeath()
         {
+            staticBuilder.Clear();
             staticBuilder.NewlineAppend(1, "----------  YOU DIED  ----------");
             staticBuilder.NewlineAppend(1, "Enter 'newGame' for a new game.");
             Console.WriteLine(staticBuilder.ToString());
@@ -296,11 +301,15 @@ namespace RogueCrawler
                 int playerIndex = 0;
                 var roomCreatures = dungeon.creatureManager.GetObjectsInRoom(player.CurrentRoom);
                 roomCreatures.Add(player);
-                roomCreatures.Sort((a, b) => a.CombatSpeed.Value.CompareTo(b.CombatSpeed.Value));
+                roomCreatures.Sort((a, b) => b.CombatSpeed.Value.CompareTo(a.CombatSpeed.Value));
 
                 foreach (var creature in roomCreatures)
                 {
                     float speed = creature.CombatSpeed.Value;
+                    int actions = (int)MathF.Floor(speed);
+
+                    if (CommandEngine.Random.NextFloat() < speed % 1)
+                        ++actions;
 
                     if (creature == player)
                         playerIndex = creatureTurnOrder.Count;
@@ -309,7 +318,7 @@ namespace RogueCrawler
                         new CreatureTurn()
                         {
                             Creature = creature,
-                            MaxActions = (int)MathF.Floor(speed) + (CommandEngine.Random.NextFloat() < speed % 1 ? 1 : 0)
+                            MaxActions = actions
                         }
                     );
                 }
@@ -332,7 +341,7 @@ namespace RogueCrawler
                 creatureTurnOrder.Add(new CreatureTurn()
                 {
                     Creature = player,
-                    MaxActions = int.MaxValue
+                    MaxActions = 1
                 });
             }
         }
@@ -352,7 +361,7 @@ namespace RogueCrawler
         }
 
         #region Free Commands
-        private void LookToRoom(List<string> args)
+        private bool LookToRoom(List<string> args, out int ap)
         {
             if (args.Count == 0)
             {
@@ -370,49 +379,66 @@ namespace RogueCrawler
                     PlayerCheckRoom(room);
             }
             else Console.WriteLine(errorMsg);
+
+            ap = 0;
+            return true;
         }
 
-        private void InspectCreature(List<string> args)
+        private bool InspectCreature(List<string> args, out int ap)
         {
             if (BaseCreatureCommand(args, out var creature, out string errorMsg))
             {
                 Console.WriteLine(creature.InspectString(string.Empty, 0));
             }
             else Console.WriteLine(errorMsg);
+
+            ap = 0;
+            return true;
         }
 
-        private void InspectItem(List<string> args)
+        private bool InspectItem(List<string> args, out int ap)
         {
             if (BaseItemCommand(args, out IItem item, out string msg))
             {
                 Console.WriteLine(item.InspectString(string.Empty, 0));
             }
             else Console.WriteLine(msg);
+
+            ap = 0;
+            return true;
         }
 
-        public void PrintPlayerMap(List<string> args)
+        public bool PrintPlayerMap(List<string> args, out int ap)
         {
             var builder = dungeon.BuildPlayerMap(player);
             builder.WriteLine();
+
+            ap = 0;
+            return true;
         }
 
-        public void Inventory(List<string> args)
+        public bool Inventory(List<string> args, out int ap)
         {
+            ap = 0;
+
             if (args.Count == 0)
             {
                 string str = player.Inventory.InspectString("Items in Inventory:", 0);
                 Console.WriteLine(str);
-                return;
+                return true;
             }
             else if (BaseInventoryItemCommand(args, out IItem item, out string errorMsg))
             {
                 Console.WriteLine(item.InspectString(string.Empty, 0));
             }
             else Console.WriteLine(errorMsg);
+
+            return true;
         }
 
-        public void CheckSelf(List<string> args)
+        public bool CheckSelf(List<string> args, out int ap)
         {
+            ap = 0;
             if (args.Count > 0)
             {
                 switch (args[0])
@@ -420,21 +446,23 @@ namespace RogueCrawler
                     case "f":
                     case "full":
                         Console.WriteLine(player.InspectString(string.Empty, 0));
-                        return;
+                        return true;
                     case "a":
                     case "attr":
                         Console.WriteLine(player.MaxAttributes.InspectString("Your Attributes:", 0));
-                        return;
+                        return true;
                     case "w":
                     case "weapon":
                         Console.WriteLine(player.PrimaryWeapon.InspectString("Your Weapon Stats:", 0));
-                        return;
+                        return true;
                 }
             }
+
             Console.WriteLine(player.BriefInspectString(string.Empty, 0));
+            return true;
         }
 
-        public void PathToRoom(List<string> args)
+        public bool PathToRoom(List<string> args, out int ap)
         {
             if (BaseRoomCommand(args, out DungeonRoom room, out string errorMsg))
             {
@@ -462,68 +490,81 @@ namespace RogueCrawler
             {
                 DungeonRoom endRoom = dungeon.navPath.Last();
                 dungeon.ClearPath();
-                Console.WriteLine($"Cleared path to room {room.Index} from the map.");
+                Console.WriteLine($"Cleared path to room {endRoom.Index} from the map.");
             }
+
+            ap = 0;
+            return true;
         }
         #endregion
 
         #region Action Commands
-        public void Equip(List<string> args)
+        public bool Equip(List<string> args, out int ap)
         {
             if (BaseInventoryItemCommand(args, out IItem item, out string errorMsg))
             {
                 ItemWeapon weapon = item as ItemWeapon;
 
+                ap = 1;
                 if (weapon == null)
                 {
                     Console.WriteLine("Item is not a weapon!");
-                    return;
+                    return true;
                 }
                 if (!player.CanEquipWeapon(weapon))
                 {
                     Console.WriteLine("You dont meet the attribute requirements.");
-                    return;
+                    return true;
                 }
                 if (player.Inventory.RemoveItem(item.ID, out item))
                 {
                     player.Inventory.AddItem(player.PrimaryWeapon);
                     player.PrimaryWeapon = weapon;
                     Console.WriteLine(weapon.InspectString("Equipped Weapon:", 0));
-                    ++actionCommands;
-                    return;
+                    return true;
                 }
                 else Console.WriteLine("ERROR: failed to find weapon in inventory. This'll be a nasty debug.");
             }
             else Console.WriteLine(errorMsg);
+
+            ap = 0;
+            return true;
         }
 
-        private void TakeItem(List<string> args)
+        private bool TakeItem(List<string> args, out int ap)
         {
+            ap = 0;
             if (BaseItemCommand(args, out IItem item, out DungeonChest<IItem> chest, out string errorMsg))
             {
                 chest.RemoveItem(item.ID, out item);
                 player.Inventory.AddItem(item, 1);
-                ++actionCommands;
+                ap = 1;
             }
             else Console.WriteLine(errorMsg);
+
+            return true; 
         }
 
-        private void InspectChest(List<string> args)
+        private bool InspectChest(List<string> args, out int ap)
         {
+            ap = 0;
             if (BaseChestCommand(args, out var chest, out string errorMsg))
             {
-                ++actionCommands;
+                ap = 1;
                 chest.MarkInspected();
                 Console.WriteLine(chest.InspectString(string.Empty, 0));
             }
             else Console.WriteLine(errorMsg);
+
+            return true;
         }
 
-        private void FightCreature(List<string> args)
+        private bool FightCreature(List<string> args, out int ap)
         {
+            ap = 0;
             if (BaseCreatureCommand(args, out var creature, out string errorMsg))
             {
-                ++actionCommands;
+                ap = 1;
                 player.Fatigue.AddValue(-player.GetAttackFatigueCost());
                 if (dungeon.DamageCreature(creature, player.GetCombatDamage()))
                 {
@@ -533,24 +574,44 @@ namespace RogueCrawler
                 else Console.WriteLine($"{creature.ObjectName} HP Left: {creature.Health.Value}");
             }
             else Console.WriteLine(errorMsg);
+
+            return true;
         }
 
-        private void MoveToRoom(List<string> args)
+        private bool MoveToRoom(List<string> args, out int ap)
         {
+            ap = 0;
             if (BaseRoomCommand(args, out DungeonRoom room, out string errorMsg))
             {
-                ++actionCommands;
+                if (!player.CurrentRoom.ConnectedTo(room))
+                {
+                    errorMsg = "No connection to this room!";
+                    Console.WriteLine(errorMsg);
+                    return false;
+                }
+
+                ap = (int)MathF.Ceiling(player.CombatSpeed.MaxValue);
                 PlayerMoveToRoom(room);
             }
             else Console.WriteLine(errorMsg);
+
+            return true;
         }
 
-        public void ExitDungeon(List<string> args)
+        public bool ExitDungeon(List<string> args, out int ap)
         {
+            if(!BaseNoCreatureCommand(out string msg))
+            {
+                ap = 0;
+                Console.WriteLine(msg);
+                return true;
+            }
+
             int tabCount = 0;
             int roomExp = player.ExploredRooms.Count * DungeonCrawlerSettings.ExperiencePerExploredRoom;
             int killExp = player.CreaturesKilled * DungeonCrawlerSettings.ExperiencePerCreatureKilled;
             int lootExp = PlayerSellLootMenu(tabCount, out int soldItemCount);
+            ap = (int)MathF.Ceiling(player.CombatSpeed.MaxValue);
 
             PlayerExperienceMenu(tabCount, roomExp, killExp, lootExp, soldItemCount);
 
@@ -569,13 +630,14 @@ namespace RogueCrawler
                 // attrPoints += player.MaxAttributes.CreatureLevel;
                 CharacterCreator.AttributePrompt(player, levelsGained, attrPoints, tabCount);
             }
-            ++actionCommands;
+
             dungeonExit = true;
+            return true;
         }
         #endregion
 
         #region NoCreature Commands
-        private void Rest(List<string> args)
+        private bool Rest(List<string> args, out int ap)
         {
             if (BaseNoCreatureCommand(out string errorMsg) && BaseIntCommand(args, out int hitPoints, out errorMsg))
             {
@@ -587,14 +649,18 @@ namespace RogueCrawler
                 Console.WriteLine("You've rested up, but so has the dungeon...");
             }
             else Console.WriteLine(errorMsg);
+
+            ap = 0;
+            return true;
         }
 
-        private void TakeAllItems(List<string> args)
+        private bool TakeAllItems(List<string> args, out int ap)
         {
-            if(BaseNoCreatureCommand(out string errorMsg))
+            if(!BaseNoCreatureCommand(out string errorMsg))
             {
                 Console.WriteLine(errorMsg);
-                return;
+                ap = 0;
+                return true;
             }
 
             DungeonRoom room = player.CurrentRoom;
@@ -618,6 +684,9 @@ namespace RogueCrawler
             }
             tabCount--;
             Console.WriteLine(staticBuilder.ToString());
+
+            ap = 0;
+            return true;
         }
         #endregion
     }

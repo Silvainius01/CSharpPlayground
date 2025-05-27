@@ -118,11 +118,11 @@ namespace RogueCrawler
                     errorMsg = "Not a valid room index.";
                     return false;
                 }
-                else if(!player.CurrentRoom.ConnectedTo(room))
-                {
-                    errorMsg = "No connection to this room!";
-                    return false;
-                }
+                //else if(!player.CurrentRoom.ConnectedTo(room))
+                //{
+                //    errorMsg = "No connection to this room!";
+                //    return false;
+                //}
 
                 return true;
             }

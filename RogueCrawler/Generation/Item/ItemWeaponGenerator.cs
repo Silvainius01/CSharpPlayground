@@ -52,8 +52,9 @@ namespace RogueCrawler
                 BaseDamage = weaponTypeData.BaseDamage,
                 BaseValue = weaponTypeData.BaseValue,
                 Material = wParams.Material,
+                AttributeRequirements = new CrawlerAttributeSet()
             };
-            weapon.Quality = GetQuality(wParams, weapon);
+            weapon.Quality = GetQuality(wParams);
             weapon.ObjectName = GetWeaponName(weaponTypeData, weapon.IsLargeWeapon);
             weapon.ItemName = GetDisplayName(weapon);
 

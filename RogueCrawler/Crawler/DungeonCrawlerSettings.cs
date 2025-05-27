@@ -17,6 +17,9 @@ namespace RogueCrawler
         #region Player Settings
         /// <summary>Minimum HitPoints a player can have, regardless of attributes</summary>
         public const int MinPlayerHitPoints = 5;
+
+        public const int StartingPlayerLevel = 2;
+
         /// <summary>Most amount of levels generated loot can be below a player's level</summary>
         public const int PlayerRelativeLootFloor = 5;
         /// <summary>Most amount of levels generated loot can be above a player's level</summary>

@@ -11,7 +11,7 @@ namespace RogueCrawler
         public static Dictionary<AttributeType, string> attributeDescriptions = new Dictionary<AttributeType, string>()
         {
             [AttributeType.STR] = "+5 Carry weight. Get bonus damage for Axes and Blunt weapons.",
-            [AttributeType.DEX] = "Get bonus damage for Blades and Ranged weapons.",
+            [AttributeType.DEX] = "+0.2 Combat Speed. Bonus damage for Blades, Spears, Axes, and Ranged.",
             [AttributeType.CON] = $"+{DungeonCrawlerSettings.HitPointsPerConstitution} HP. Secondary stat for Blunt weapons.",
         };
 
@@ -41,11 +41,11 @@ namespace RogueCrawler
             player.AddAttributePoints(player.PrimaryWeapon.AttributeRequirements);
             // Always add 1 to CON.
             player.AddAttributePoints(AttributeType.CON, 1);
-            // Set the player to the minimum possible creature level
-            player.Level = player.MaxAttributes.CreatureLevel;
+            // Set the player to the smallest possible level, or the starting level. Whichever is greater.
+            player.Level = Math.Max(player.MaxAttributes.CreatureLevel, DungeonCrawlerSettings.StartingPlayerLevel);
 
             // Allow player to apply any extra points
-            int missingPoints = player.MaxAttributes.GetMissingPoints(DungeonCrawlerSettings.AttributePointsPerCreatureLevel);
+            int missingPoints = DungeonCrawlerSettings.AttributePointsPerCreatureLevel * player.Level - player.MaxAttributes.TotalScore;
             if (missingPoints > 0)
             {
                 AttributePrompt(player, 0, missingPoints, 0);

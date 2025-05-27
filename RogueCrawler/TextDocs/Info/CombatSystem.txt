@@ -48,7 +48,6 @@ Damage
 	* Log2(quality) 
 	* 1 + skillBonus // Skill
 
-
 Evasion
 	armorSlow = armorCoverage
 	baseChance = 0.01 * ( 1.25 * evasion * (1.25 - armorEncumberance) ) // Max 150

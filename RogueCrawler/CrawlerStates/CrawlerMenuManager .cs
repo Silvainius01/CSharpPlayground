@@ -46,7 +46,7 @@ namespace RogueCrawler
 
         public void NewDungeon(List<string> args)
         {
-            if (player == null || player.Health.Value <= 0)
+            if (player is null || player.Health.Value <= 0)
             {
                 Console.WriteLine("Cannot enter a new dungeon, YOU'RE DEAD.");
                 return;

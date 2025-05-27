@@ -90,8 +90,8 @@ namespace RogueCrawler
                 (c.GetAttribute(AttributeType.INT) + c.GetAttribute(AttributeType.CHA)) * 2 +
                 (c.GetAttribute(AttributeType.WIS) + 1) * 5.0f;
             var combatSpeedFunc = (Creature c) => 1.0f + (
-                c.GetAttribute(AttributeType.DEX) * 2 +
-                c.GetAttribute(AttributeType.CHA)) / 10;
+                c.GetAttribute(AttributeType.DEX) * 2.0f +
+                c.GetAttribute(AttributeType.CHA)) / 10.0f;
 
             Afflictions = new CrawlerAttributeSet(0);
             MaxAttributes = new CrawlerAttributeSet(0);
@@ -135,15 +135,9 @@ namespace RogueCrawler
         public float GetCombatDamage()
         {
             ItemWeapon weapon = GetCombatWeapon();
-            float damage = weapon.BaseDamage
-                + GetAttribute(weapon.MajorAttribute) / 2
-                + GetAttribute(weapon.MinorAttribute) / 4;
-            float qualityMod = MathF.Log2(1 + weapon.Quality);
+            float weaponDamage = weapon.GetWeaponDamage(this);
             float skillBonus = 1 + CreatureSkillUtility.GetWeaponSkillBonus(weapon, Proficiencies);
-            return damage
-                * weapon.Material.DamageModifier
-                * qualityMod
-                * skillBonus;
+            return weaponDamage * skillBonus;
         }
         public float GetCombatHitChance()
         {
