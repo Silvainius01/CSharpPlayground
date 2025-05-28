@@ -19,6 +19,7 @@ namespace RogueCrawler
         public float DamageModifier { get; set; } = 1.0f;
         public float ArmorModifier { get; set; } = 1.0f;
 
+        public bool IsMetallic { get; set; } = true;
         public bool IsWeaponMaterial { get; set; } = true;
         public bool IsArmorMaterial { get; set; } = true;
 
@@ -47,6 +48,7 @@ namespace RogueCrawler
                 ArmorModifier = ArmorModifier,
                 IsWeaponMaterial = IsWeaponMaterial,
                 IsArmorMaterial = IsArmorMaterial,
+                IsMetallic = IsMetallic,
             };
         }
     }
@@ -60,6 +62,7 @@ namespace RogueCrawler
         public float DamageModifier { get; set; }
         public float ArmorModifier { get; set; }
 
+        public bool IsMetallic { get; set; } = true;
         public bool IsWeaponMaterial { get; set; } = false;
         public bool IsArmorMaterial { get; set; } = false;
 
@@ -75,6 +78,7 @@ namespace RogueCrawler
                 ArmorModifier = ArmorModifier,
                 IsWeaponMaterial = IsWeaponMaterial,
                 IsArmorMaterial = IsArmorMaterial,
+                IsMetallic = IsMetallic
             };
         }
     }

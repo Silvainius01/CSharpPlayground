@@ -1,5 +1,199 @@
 [
   {
-    
+    "ArmorType": "Cap", 
+    "ArmorClass": "Light",
+    "ArmorSlot": 0,
+    "BaseValue": 1,
+    "BaseArmorRating": 1,
+    "AllowAnyMetal" : true,
+    "AllowedMaterials": [
+      "Leather"
+    ]
+  },
+  {
+    "ArmorType": "Coif", 
+    "ArmorClass": "Medium",
+    "ArmorSlot": 0,
+    "BaseValue": 1,
+    "BaseArmorRating": 1,
+    "AllowAnyMetal" : true,
+    "AllowedMaterials": [
+    ]
+  },
+  {
+    "ArmorType": "Helmet", 
+    "ArmorClass": "Heavy",
+    "ArmorSlot": 0,
+    "BaseValue": 1,
+    "BaseArmorRating": 1,
+    "AllowAnyMetal" : true,
+    "AllowedMaterials": [
+    ]
+  },
+  {
+    "ArmorType": "Jacket", 
+    "ArmorClass": "Light",
+    "ArmorSlot": 1,
+    "BaseValue": 1,
+    "BaseArmorRating": 1,
+    "AllowAnyMetal" : true,
+    "AllowedMaterials": [
+      "Leather"
+    ]
+  },
+  {
+    "ArmorType": "Brigandine", 
+    "ArmorClass": "Medium",
+    "ArmorSlot": 1,
+    "BaseValue": 1,
+    "BaseArmorRating": 1,
+    "AllowAnyMetal" : true,
+    "AllowedMaterials": [
+      "Leather"
+    ]
+  },
+  {
+    "ArmorType": "Cuirass", 
+    "ArmorClass": "Heavy",
+    "ArmorSlot": 1,
+    "BaseValue": 1,
+    "BaseArmorRating": 1,
+    "AllowAnyMetal" : true,
+    "AllowedMaterials": [
+    ]
+  },
+  {
+    "ArmorType": "Sleeves", 
+    "ArmorClass": "Light",
+    "ArmorSlot": 2,
+    "BaseValue": 2,
+    "BaseArmorRating": 1,
+    "AllowAnyMetal" : true,
+    "AllowedMaterials": [
+      "Leather"
+    ]
+  },
+  {
+    "ArmorType": "Vambrace", 
+    "ArmorClass": "Medium",
+    "ArmorSlot": 2,
+    "BaseValue": 2,
+    "BaseArmorRating": 1,
+    "AllowAnyMetal" : true,
+    "AllowedMaterials": [
+    ]
+  },
+  {
+    "ArmorType": "Pauldrons", 
+    "ArmorClass": "Heavy",
+    "ArmorSlot": 2,
+    "BaseValue": 2,
+    "BaseArmorRating": 1,
+    "AllowAnyMetal" : true,
+    "AllowedMaterials": [
+    ]
+  },
+  {
+    "ArmorType": "Gloves", 
+    "ArmorClass": "Light",
+    "ArmorSlot": 3,
+    "BaseValue": 2,
+    "BaseArmorRating": 1,
+    "AllowAnyMetal" : true,
+    "AllowedMaterials": [
+      "Leather"
+    ]
+  },
+  {
+    "ArmorType": "Bracers", 
+    "ArmorClass": "Medium",
+    "ArmorSlot": 3,
+    "BaseValue": 2,
+    "BaseArmorRating": 1,
+    "AllowAnyMetal" : true,
+    "AllowedMaterials": [
+    ]
+  },
+  {
+    "ArmorType": "Gauntlets", 
+    "ArmorClass": "Heavy",
+    "ArmorSlot": 3,
+    "BaseValue": 2,
+    "BaseArmorRating": 1,
+    "AllowAnyMetal" : true,
+    "AllowedMaterials": [
+    ]
+  },
+  {
+    "ArmorType": "Pants", 
+    "ArmorClass": "Light",
+    "ArmorSlot": 4,
+    "BaseValue": 2,
+    "BaseArmorRating": 1,
+    "AllowAnyMetal" : false,
+    "AllowedMaterials": [
+      "Leather"
+    ]
+  },
+  {
+    "ArmorType": "Tassets", 
+    "ArmorClass": "Light",
+    "ArmorSlot": 4,
+    "BaseValue": 2,
+    "BaseArmorRating": 1,
+    "AllowAnyMetal" : true,
+    "AllowedMaterials": [
+    ]
+  },
+  {
+    "ArmorType": "Cuisses", 
+    "ArmorClass": "Medium",
+    "ArmorSlot": 4,
+    "BaseValue": 2,
+    "BaseArmorRating": 1,
+    "AllowAnyMetal" : true,
+    "AllowedMaterials": [
+    ]
+  },
+  {
+    "ArmorType": "Greaves", 
+    "ArmorClass": "Heavy",
+    "ArmorSlot": 4,
+    "BaseValue": 2,
+    "BaseArmorRating": 1,
+    "AllowAnyMetal" : true,
+    "AllowedMaterials": [
+    ]
+  },
+  {
+    "ArmorType": "Shoes", 
+    "ArmorClass": "Light",
+    "ArmorSlot": 5,
+    "BaseValue": 2,
+    "BaseArmorRating": 1,
+    "AllowAnyMetal" : true,
+    "AllowedMaterials": [
+      "Leather"
+    ]
+  },
+  {
+    "ArmorType": "Boots", 
+    "ArmorClass": "Medium",
+    "ArmorSlot": 5,
+    "BaseValue": 2,
+    "BaseArmorRating": 1,
+    "AllowAnyMetal" : true,
+    "AllowedMaterials": [
+    ]
+  },
+  {
+    "ArmorType": "Sabatons", 
+    "ArmorClass": "Heavy",
+    "ArmorSlot": 5,
+    "BaseValue": 2,
+    "BaseArmorRating": 1,
+    "AllowAnyMetal" : true,
+    "AllowedMaterials": [
+    ]
   }
 ]

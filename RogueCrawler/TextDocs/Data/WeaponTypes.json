@@ -6,8 +6,6 @@
     "Handedness":  0,
     "BaseDamage": 1,
     "BaseValue": 5,
-    "PrimaryAttributeBaseReq": 4,
-    "SecondaryAttributeBaseReq": 2,
     "LargeWeaponDamageMult": 2.5,
     "LargeWeaponWeightMult": 3.0,
     "OneHandedWeaponNames": [
@@ -28,8 +26,6 @@
     "Handedness": 0,
     "BaseDamage": 1,
     "BaseValue": 5,
-    "PrimaryAttributeBaseReq": 4,
-    "SecondaryAttributeBaseReq": 2,
     "LargeWeaponDamageMult": 2.0,
     "LargeWeaponWeightMult": 3.0,
     "OneHandedWeaponNames": [
@@ -50,8 +46,6 @@
     "Handedness": 0,
     "BaseDamage": 1,
     "BaseValue": 5,
-    "PrimaryAttributeBaseReq": 4,
-    "SecondaryAttributeBaseReq": 2,
     "LargeWeaponDamageMult": 3.0,
     "LargeWeaponWeightMult": 4.0,
     "OneHandedWeaponNames": [
@@ -70,8 +64,6 @@
     "Handedness": 2,
     "BaseDamage": 2,
     "BaseValue": 5,
-    "PrimaryAttributeBaseReq": 4,
-    "SecondaryAttributeBaseReq": 2,
     "LargeWeaponDamageMult": 2.0,
     "LargeWeaponWeightMult": 1.5,
     "OneHandedWeaponNames": [
@@ -91,8 +83,6 @@
     "Handedness": 2,
     "BaseDamage": 2,
     "BaseValue": 5,
-    "PrimaryAttributeBaseReq": 4,
-    "SecondaryAttributeBaseReq": 2,
     "LargeWeaponDamageMult": 2.0,
     "LargeWeaponWeightMult": 1.5,
     "OneHandedWeaponNames": [
