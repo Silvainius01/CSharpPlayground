@@ -13,7 +13,7 @@ namespace RogueCrawler
     enum DungeonChestType { Weapon, Armor, Misc, Any }
     enum QualityLevel { Low, Normal, Superior, Exalted, Legendary, Divine }
     enum ItemWeaponLargeRate { None, Low, Mid, High, All }
-    enum ItemArmorSlotType { Head, Body, Legs, Feet, Ring }
+    enum ItemArmorSlotType { Head, Chest, Arm, Hand, Waist, Foot }
     enum ItemWeaponHandedness { Both, One, Two }
     // enum WeaponType { Blade, Ranged, Axe, Blunt }
 }

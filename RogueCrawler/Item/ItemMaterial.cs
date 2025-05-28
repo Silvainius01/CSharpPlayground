@@ -12,11 +12,15 @@ namespace RogueCrawler
 {
     class ItemMaterial : IInspectable, ISerializable<SerializedItemMaterial, ItemMaterial>
     {
-        public string Name { get; set; }
-        public float ValueModifier { get; set; }
-        public float WeightModifier { get; set; }
-        public float QualityModifier { get; set; }
-        public float DamageModifier { get; set; }
+        public string Name { get; set; } = "Anomolous";
+        public float ValueModifier { get; set; } = 1.0f;
+        public float WeightModifier { get; set; } = 1.0f;
+        public float QualityModifier { get; set; } = 1.0f;
+        public float DamageModifier { get; set; } = 1.0f;
+        public float ArmorModifier { get; set; } = 1.0f;
+
+        public bool IsWeaponMaterial { get; set; } = true;
+        public bool IsArmorMaterial { get; set; } = true;
 
         public string BriefString()
         {
@@ -39,7 +43,10 @@ namespace RogueCrawler
                 ValueModifier = ValueModifier,
                 WeightModifier = WeightModifier,
                 QualityModifier = QualityModifier,
-                DamageModifier = DamageModifier
+                DamageModifier = DamageModifier,
+                ArmorModifier = ArmorModifier,
+                IsWeaponMaterial = IsWeaponMaterial,
+                IsArmorMaterial = IsArmorMaterial,
             };
         }
     }
@@ -51,6 +58,10 @@ namespace RogueCrawler
         public float WeightModifier { get; set; }
         public float QualityModifier { get; set; }
         public float DamageModifier { get; set; }
+        public float ArmorModifier { get; set; }
+
+        public bool IsWeaponMaterial { get; set; } = false;
+        public bool IsArmorMaterial { get; set; } = false;
 
         public ItemMaterial GetDeserialized()
         {
@@ -60,7 +71,10 @@ namespace RogueCrawler
                 ValueModifier = ValueModifier,
                 WeightModifier = WeightModifier,
                 QualityModifier = QualityModifier,
-                DamageModifier = DamageModifier
+                DamageModifier = DamageModifier,
+                ArmorModifier = ArmorModifier,
+                IsWeaponMaterial = IsWeaponMaterial,
+                IsArmorMaterial = IsArmorMaterial,
             };
         }
     }

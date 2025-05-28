@@ -92,6 +92,8 @@ namespace RogueCrawler
         public const int MaxWeaponWeight = 100;
         /// <summary>The least a weapon can weigh</summary>
         public const int MinWeaponWeight = 5;
+        /// <summary>How much one point of STR will allow you to swing</summary>
+        public const int WeaponWeightPerStr = 5;
         /// <summary>The most a mid-range weapon can weigh</summary>
         public const int MidWeaponWeight = (int)((MaxWeaponWeight - MinWeaponWeight) * (2.0 / 3.0)) + MinWeaponWeight;
         /// <summary>The most a low-range weapon can weigh</summary>

@@ -1,11 +1,36 @@
 [
   {
+    "Name": "Leather",
+    "ValueModifier": 0.75,
+    "WeightModifier": 0.75,
+    "QualityModifier": 1.0,
+    "DurabilityModifer":  0.6,
+    "DamageModifier": 1.0,
+    "ArmorModifier": 1.0,
+    "IsWeaponMaterial" : false,
+    "IsArmorMaterial": true
+  },
+  {
+    "Name": "Wood",
+    "ValueModifier": 0.75,
+    "WeightModifier": 0.75,
+    "QualityModifier": 1.0,
+    "DurabilityModifer":  0.6,
+    "DamageModifier": 1.0,
+    "ArmorModifier": 1.0,
+    "IsWeaponMaterial" : true,
+    "IsArmorMaterial": false
+  },
+  {
     "Name": "Bronze",
     "ValueModifier": 0.75,
     "WeightModifier": 0.75,
-    "QualityModifier": 0.8,
+    "QualityModifier": 1.0,
     "DurabilityModifer":  0.6,
-    "DamageModifier": 1.0
+    "DamageModifier": 1.0,
+    "ArmorModifier": 1.0,
+    "IsWeaponMaterial" : true,
+    "IsArmorMaterial": true
   },
   {
     "Name": "Iron",
@@ -13,37 +38,52 @@
     "WeightModifier": 1.0,
     "QualityModifier": 1.0,
     "DurabilityModifer": 1.0,
-    "DamageModifier": 1.0
+    "DamageModifier": 1.0,
+    "ArmorModifier": 1.0,
+    "IsWeaponMaterial" : true,
+    "IsArmorMaterial": true
   },
   {
     "Name": "Steel",
     "ValueModifier": 1.5,
     "WeightModifier": 1.0,
-    "QualityModifier": 1.25,
+    "QualityModifier": 1.0,
     "DurabilityModifer": 1.25,
-    "DamageModifier": 1.25
+    "DamageModifier": 1.25,
+    "ArmorModifier": 1.0,
+    "IsWeaponMaterial" : true,
+    "IsArmorMaterial": true
   },
   {
     "Name": "Mythryl",
     "ValueModifier": 2.0,
     "WeightModifier": 0.75,
-    "QualityModifier": 2.0,
+    "QualityModifier": 1.0,
     "DurabilityModifer": 1.5,
-    "DamageModifier": 1.75
+    "DamageModifier": 1.75,
+    "ArmorModifier": 1.0,
+    "IsWeaponMaterial" : true,
+    "IsArmorMaterial": true
   },
   {
-    "Name": "Chromasteel",
+    "Name": "Magisteel",
     "ValueModifier": 1.7,
     "WeightModifier": 1.0,
     "QualityModifier": 1.0,
     "DurabilityModifer": 0.75,
-    "DamageModifier": 1.5
+    "DamageModifier": 1.5,
+    "ArmorModifier": 1.0,
+    "IsWeaponMaterial" : true,
+    "IsArmorMaterial": true
   },
   {
     "Name": "Adamantite",
     "ValueModifier": 3.0,
     "WeightModifier": 1.5,
-    "QualityModifier": 2.5,
-    "DamageModifier": 2
+    "QualityModifier": 1.0,
+    "DamageModifier": 2,
+    "ArmorModifier": 1.0,
+    "IsWeaponMaterial" : true,
+    "IsArmorMaterial": true
   }
 ]

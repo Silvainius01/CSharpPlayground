@@ -1,6 +1,8 @@
 ﻿
 - Finish Martial Weapon System!!
 	- Implement remaining character systems
+		- Armor
+		- Skill Gain
 		- Fatigue
 			- Figure out costs
 	- Add weapon durability
@@ -19,6 +21,7 @@
 
 - Update dungeon generation
 	- Allow inaccessible rooms to make the layout more interesting.
+	- Review 
 
 - Implement magic (oh god this will be hard af)
 	- Implement character systems

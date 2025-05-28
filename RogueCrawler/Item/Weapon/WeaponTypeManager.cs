@@ -6,7 +6,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace RogueCrawler.Item.Weapon
+namespace RogueCrawler
 {
     class WeaponTypeManager
     {

@@ -6,7 +6,6 @@ using CommandEngine;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using RogueCrawler.Item.Weapon;
 
 namespace RogueCrawler
 {

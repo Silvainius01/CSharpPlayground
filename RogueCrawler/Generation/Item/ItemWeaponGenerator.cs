@@ -3,29 +3,10 @@ using System;
 using System.Linq;
 using System.Text;
 using System.Collections.Generic;
-using RogueCrawler.Item.Weapon;
 using System.Runtime.Serialization;
 
 namespace RogueCrawler
 {
-    class WeaponTypeData
-    {
-        public string WeaponType { get; set; }
-        public AttributeType MajorAttribute { get; set; }
-        public AttributeType MinorAttribute { get; set; }
-        public AttributeType DamageAttribute { get; set; }
-        public ItemWeaponHandedness Handedness { get; set; }
-
-        public int BaseDamage { get; set; }
-        public int BaseValue { get; set; }
-        public int PrimaryAttributeBaseReq { get; set; }
-        public int SecondaryAttributeBaseReq { get; set; }
-        public float LargeWeaponDamageMult { get; set; } = 2;
-        public float LargeWeaponWeightMult { get; set; } = 3;
-        public string[] OneHandedWeaponNames { get; set; }
-        public string[] TwoHandedWeaponNames { get; set; }
-    }
-
     class ItemWeaponGenerator : BaseDungeonObjectGenerator<ItemWeapon, ItemWeaponGenerationParameters>
     {
         static Dictionary<string, WeaponTypeData> WeaponTypes => WeaponTypeManager.WeaponTypes;
@@ -52,9 +33,11 @@ namespace RogueCrawler
                 BaseDamage = weaponTypeData.BaseDamage,
                 BaseValue = weaponTypeData.BaseValue,
                 Material = wParams.Material,
+                Quality = GetQuality(wParams),
                 AttributeRequirements = new CrawlerAttributeSet()
             };
-            weapon.Quality = GetQuality(wParams);
+
+            weapon.AttributeRequirements.SetAttribute(AttributeType.STR, (int)Math.Ceiling(weapon.Weight / DungeonCrawlerSettings.WeaponWeightPerStr));
             weapon.ObjectName = GetWeaponName(weaponTypeData, weapon.IsLargeWeapon);
             weapon.ItemName = GetDisplayName(weapon);
 
@@ -140,14 +123,6 @@ namespace RogueCrawler
         int GetStrengthReq(float weight)
             => (int)Math.Ceiling(weight / 5.0);
         
-        /// <summary>Get the stat requirement for Quality 1.0 weapon</summary>
-        int GetPrimaryStatReq(ItemWeapon weapon)
-            => WeaponTypes[weapon.WeaponType].PrimaryAttributeBaseReq;
-        
-        /// <summary>Get the stat requirement for Quality 1.0 weapon</summary>
-        int GetSecondaryStatReq(ItemWeapon weapon)
-            => WeaponTypes[weapon.WeaponType].SecondaryAttributeBaseReq;
-
         float GetQuality(ItemWeaponGenerationParameters wParams)
             => wParams.QualityOverride < 0.0f
                 ? DungeonGenerator.GetItemQuality(wParams.Quality, wParams.QualityBias)

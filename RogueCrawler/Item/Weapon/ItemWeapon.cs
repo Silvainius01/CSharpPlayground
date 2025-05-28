@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CommandEngine;
-using RogueCrawler.Item.Weapon;
 
 namespace RogueCrawler
 {
@@ -15,11 +14,11 @@ namespace RogueCrawler
             get => 1;
             set { throw new InvalidOperationException("Cannot directly set the level of a weapon."); }
         }
-        public float BaseDamage { get; set; }
+
+        public int BaseValue { get; set; }
         public float Weight { get; set; }
         public float Quality { get; set; }
-        public int BaseValue { get; set; }
-        public bool IsLargeWeapon { get; set; }
+        public ItemMaterial Material { get; set; }
 
         public float Condition { get; set; } = 1;
         public float MaxCondition { get; set; } = 1;
@@ -27,8 +26,9 @@ namespace RogueCrawler
         public string ItemName { get; set; } // Display Name
         public string ObjectName { get; set; } // Weapon Skill
         public string WeaponType { get; set; } // General Skill
-
-        public ItemMaterial Material { get; set; }
+        
+        public bool IsLargeWeapon { get; set; }
+        public float BaseDamage { get; set; }
 
         public AttributeType MajorAttribute { get; set; }
         public AttributeType MinorAttribute { get; set; }
@@ -145,6 +145,9 @@ namespace RogueCrawler
         public float BaseDamage { get; set; }
         public bool IsLargeWeapon { get; set; }
         public string WeaponType { get; set; }
+
+        public float Condition { get; set; } = 1;
+        public float MaxCondition { get; set; } = 1;
 
         public override IItem GetDeserialized()
         {

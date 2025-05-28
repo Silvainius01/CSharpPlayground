@@ -67,12 +67,12 @@ Armor
 	Coverage:
 		Armor coverage is a catch all for Insulation and Encumberance, and generally follow this pattern:
 		The base coverage value for each armor piece are as follows:
-			Gauntlets - 0.05
 			Cuirass - 0.35
 			Greaves - 0.35
 			Boots - 0.1
 			Pauldrons - 0.1
 			Helm - 0.05
+			Gauntlets - 0.05
 		Mulitplier ranges for armor classes:
 			Unarmored - 0
 			Clothing - [0.01, 0.1]

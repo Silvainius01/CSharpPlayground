@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using CommandEngine;
-using RogueCrawler.Item.Weapon;
 
 namespace RogueCrawler
 {

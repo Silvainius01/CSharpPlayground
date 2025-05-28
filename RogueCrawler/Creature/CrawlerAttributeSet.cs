@@ -33,12 +33,12 @@ namespace RogueCrawler
         public CrawlerAttributeSet(CrawlerAttributeSet otherAttributes) : this((attr) => otherAttributes[attr]) { }
         public CrawlerAttributeSet(Func<AttributeType, int> determineAttribute) : this() { SetAttributes(determineAttribute); }
 
-        void AddAttribute(AttributeType attr, int amt)
+        public void AddAttribute(AttributeType attr, int amt)
         {
             Attributes[attr] += amt;
             UpdateMetaData();
         }
-        void SetAttribute(AttributeType attr, int amt)
+        public void SetAttribute(AttributeType attr, int amt)
         {
             Attributes[attr] = amt;
             UpdateMetaData();
@@ -56,7 +56,6 @@ namespace RogueCrawler
                 Attributes[attr] = determineAttribute(attr);
             UpdateMetaData();
         }
-
         public int GetAttribute(AttributeType attribute)
         {
             if (Attributes.ContainsKey(attribute))
