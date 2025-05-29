@@ -9,7 +9,7 @@ namespace RogueCrawler
     {
         public string ArmorType { get; set; }
         public string ArmorClass { get; set; }
-        public ItemArmorSlotType ArmorSlot { get; set; }
+        public ArmorSlotType ArmorSlot { get; set; }
 
         public int BaseValue { get; set; } = 1;
         public int BaseArmorRating { get; set; } = 1;

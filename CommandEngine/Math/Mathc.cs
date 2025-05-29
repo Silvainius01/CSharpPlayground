@@ -162,8 +162,8 @@ namespace CommandEngine
         }
         public static float Truncate(this float val, int numPlaces)
         {
-            double m = Math.Pow(10, numPlaces);
-            return (float)(Math.Truncate(m * val) / m);
+            float m = MathF.Pow(10, numPlaces);
+            return MathF.Truncate(m * val) / m;
         }
 
         /// <summary> Swaps two values if min is greater than max. </summary>

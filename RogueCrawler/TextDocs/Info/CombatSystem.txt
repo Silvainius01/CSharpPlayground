@@ -77,8 +77,8 @@ Armor
 			Unarmored - 0
 			Clothing - [0.01, 0.1]
 			Light - [0.1, 0.4]
-			Medium - [0.4, 0.8]
-			Heavy - [0.8, 1]
+			Medium - [0.4, 0.7]
+			Heavy - [0.7, 1]
 		A typical calculation for total coverage would be:
 			armorCoverage = Helm * helmAC + Cuirass * cuirassAC + Pauldrons * pauldronsAC + Gauntlets * gauntletAC + Greaves * greavesAC + Boots * bootsAC
 

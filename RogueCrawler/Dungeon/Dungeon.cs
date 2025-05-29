@@ -105,10 +105,16 @@ namespace RogueCrawler
             return builder.ToString();
         }
 
-        public bool DamageCreature(Creature c, float damage)
+        public bool DamageCreature(Creature c, float damage, out float receivedDamage)
         {
-            damage = Mathc.Truncate(damage, 1);
-            c.Health.AddValue(-damage);
+            // Armor rating
+            float armor = MathF.Floor(c.ArmorSlots.ArmorRating);
+            receivedDamage = damage * (damage / (2 * armor + damage));
+            receivedDamage = Mathc.Truncate(receivedDamage, 1);
+
+            c.Health.AddValue(-receivedDamage);
+
+            //  If the creature dies, create a "chest" with their items.
             if (c.Health.Value <= 0)
             {
                 c.Inventory.AddItem(c.PrimaryWeapon);

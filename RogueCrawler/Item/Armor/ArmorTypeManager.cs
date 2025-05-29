@@ -17,7 +17,6 @@ namespace RogueCrawler
         public static Dictionary<string, ArmorTypeData> ArmorTypes = new Dictionary<string, ArmorTypeData>();
         public static Dictionary<string, List<ArmorTypeData>> ArmorByClass = new Dictionary<string, List<ArmorTypeData>>();
         
-
         public static MappedCommandModule<ArmorTypeData> ArmorTypeCommandModule;
 
         public static ArmorTypeData GetRandomArmorType(string armorClass, ItemMaterial material)
@@ -52,6 +51,24 @@ namespace RogueCrawler
             }
             TypesLoaded = true;
             ArmorTypeCommandModule = new MappedCommandModule<ArmorTypeData>("What is the default armor type prompt??", ArmorTypes);
+        }
+
+        public static ItemArmor GenerateUnarmoredSlot(ArmorSlotType slot)
+        {
+            string slotName = EnumExt<ArmorSlotType>.GetName(slot);
+            return new ItemArmor()
+            {
+                ID = -1,
+                BaseValue = 0,
+                Weight = 0,
+                Quality = 1,
+                Material = MaterialTypeManager.DefaultMaterial,
+                ItemName = $"$Bare {slotName}",
+                ObjectName = $"Bare{slotName}",
+                ArmorClass = "Unarmored",
+                BaseArmorRating = 0,
+                SlotType = slot
+            };
         }
     }
 }

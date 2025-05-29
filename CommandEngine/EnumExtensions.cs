@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -26,6 +27,12 @@ namespace CommandEngine
             else commandModule.AllowsIntegerShortcuts = allowIntegerShortcuts;
 
             return commandModule;
+        }
+
+        public static string GetName(T t)
+        {
+            string? name = Enum.GetName(typeof(T), t);
+            return name is not null ? name : string.Empty;
         }
 
         static EnumCommandModule<T> commandModule = null;

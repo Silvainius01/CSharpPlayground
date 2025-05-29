@@ -274,10 +274,10 @@ namespace RogueCrawler
         private bool TakeCreatureTurn(Creature c)
         {
             float damage = c.GetCombatDamage();
-            bool playerDied = dungeon.DamageCreature(player, c.GetCombatDamage());
+            bool playerDied = dungeon.DamageCreature(player, c.GetCombatDamage(), out float rDamage);
 
             staticBuilder.Clear();
-            staticBuilder.NewlineAppend($"{c.ToString()} attacks for {damage} damage!");
+            staticBuilder.NewlineAppend($"{c.ToString()} attacks for {rDamage} damage!");
             staticBuilder.NewlineAppend($"HP Left: {player.Health.Value}/{player.Health.MaxValue}");
             Console.WriteLine(staticBuilder.ToString());
 
@@ -566,7 +566,7 @@ namespace RogueCrawler
             {
                 ap = 1;
                 player.Fatigue.AddValue(-player.GetAttackFatigueCost());
-                if (dungeon.DamageCreature(creature, player.GetCombatDamage()))
+                if (dungeon.DamageCreature(creature, player.GetCombatDamage(), out float rDamage))
                 {
                     ++player.CreaturesKilled;
                     Console.WriteLine($"{creature.ObjectName} died!");

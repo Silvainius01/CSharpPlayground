@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CommandEngine;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -27,27 +28,20 @@ namespace RogueCrawler
         public float Condition { get; set; } = 1;
         public float MaxCondition { get; set; } = 1;
 
-        public ItemArmorSlotType SlotType { get; set; }
+        public ArmorSlotType SlotType { get; set; }
 
-        float ArmorSlotModifier()
-        {
-            switch(SlotType)
-            {
-                case ItemArmorSlotType.Head:    return 0.05f;
-                case ItemArmorSlotType.Chest:   return 0.35f;
-                case ItemArmorSlotType.Arm:     return 0.10f;
-                case ItemArmorSlotType.Hand:    return 0.05f;
-                case ItemArmorSlotType.Waist:   return 0.35f;
-                case ItemArmorSlotType.Foot:    return 0.10f;
-            }
-            return 1.0f;
-        }
         public float GetArmorRating()
         {
-            return BaseArmorRating 
-                * Material.ArmorModifier 
+            return MathF.Ceiling(
+                BaseArmorRating 
+                * Material.ArmorRatingModifier 
+                * MathF.Log2(Quality + 1)
                 * ArmorSlotModifier() 
-                * MathF.Log2(Quality + 1);
+            );
+        }
+        public float GetArmorCoverage()
+        {
+            return ArmorSlotModifier() * ArmorClassModifier() * Material.ArmorCoverageModifier;
         }
 
         public int GetValue()
@@ -72,6 +66,36 @@ namespace RogueCrawler
             throw new NotImplementedException();
         }
 
+        float ArmorSlotModifier()
+        {
+            switch (SlotType)
+            {
+                case ArmorSlotType.Head: return 0.05f;
+                case ArmorSlotType.Chest: return 0.35f;
+                case ArmorSlotType.Arm: return 0.10f;
+                case ArmorSlotType.Hand: return 0.05f;
+                case ArmorSlotType.Waist: return 0.35f;
+                case ArmorSlotType.Foot: return 0.10f;
+            }
+            return 1.0f;
+        }
+        float ArmorClassModifier()
+        {
+            float acm = 1.0f;
+            switch (ArmorClass)
+            {
+                case "Unarmored": acm = 0.0f; break;
+                case "Clothing": acm = 0.1f * Material.ArmorRatingModifier; break;
+                case "Light": acm = 0.33f * Material.ArmorCoverageModifier; break;
+                case "Medium": acm = 0.66f * Material.ArmorCoverageModifier; break;
+                case "Heavy": acm = 1.0f * Material.ArmorCoverageModifier; break;
+                default:
+                    ConsoleExt.WriteWarning($"Unknown armor class '{ArmorClass}'");
+                    break;
+            }
+            return acm;
+        }
+
         public SerializedItem GetSerializable()
         {
             throw new NotImplementedException();
@@ -86,7 +110,7 @@ namespace RogueCrawler
         public float Condition { get; set; }
         public float MaxCondition { get; set; } 
 
-        public ItemArmorSlotType SlotType { get; set; }
+        public ArmorSlotType SlotType { get; set; }
 
         public override IItem GetDeserialized()
         {

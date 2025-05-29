@@ -22,7 +22,6 @@ namespace RogueCrawler
             PlayerCharacter player = new PlayerCharacter()
             {
                 ObjectName = "Default",
-                ArmorClass = 0
             };
             
             player.ObjectName = CommandManager.UserInputPrompt("Enter name", false);

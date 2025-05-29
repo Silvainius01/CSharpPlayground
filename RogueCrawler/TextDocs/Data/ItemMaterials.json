@@ -4,11 +4,12 @@
     "ValueModifier": 0.75,
     "WeightModifier": 0.75,
     "QualityModifier": 1.0,
-    "DurabilityModifer":  0.6,
+    "DurabilityModifer": 0.6,
     "DamageModifier": 1.0,
-    "ArmorModifier": 1.0,
+    "ArmorRatingModifier": 1.0,
+    "ArmorCoverageModifier": 1.0,
     "IsMetallic": false,
-    "IsWeaponMaterial" : false,
+    "IsWeaponMaterial": false,
     "IsArmorMaterial": true
   },
   {
@@ -16,11 +17,12 @@
     "ValueModifier": 0.75,
     "WeightModifier": 0.75,
     "QualityModifier": 1.0,
-    "DurabilityModifer":  0.6,
+    "DurabilityModifer": 0.6,
     "DamageModifier": 1.0,
-    "ArmorModifier": 1.0,
+    "ArmorRatingModifier": 1.0,
+    "ArmorCoverageModifier": 1.0,
     "IsMetallic": false,
-    "IsWeaponMaterial" : true,
+    "IsWeaponMaterial": true,
     "IsArmorMaterial": false
   },
   {
@@ -28,11 +30,12 @@
     "ValueModifier": 0.75,
     "WeightModifier": 0.75,
     "QualityModifier": 1.0,
-    "DurabilityModifer":  0.6,
+    "DurabilityModifer": 0.6,
     "DamageModifier": 1.0,
-    "ArmorModifier": 1.0,
+    "ArmorRatingModifier": 1.0,
+    "ArmorCoverageModifier": 1.0,
     "IsMetallic": true,
-    "IsWeaponMaterial" : true,
+    "IsWeaponMaterial": true,
     "IsArmorMaterial": true
   },
   {
@@ -42,9 +45,10 @@
     "QualityModifier": 1.0,
     "DurabilityModifer": 1.0,
     "DamageModifier": 1.0,
-    "ArmorModifier": 1.0,
+    "ArmorRatingModifier": 1.0,
+    "ArmorCoverageModifier": 1.0,
     "IsMetallic": true,
-    "IsWeaponMaterial" : true,
+    "IsWeaponMaterial": true,
     "IsArmorMaterial": true
   },
   {
@@ -54,9 +58,10 @@
     "QualityModifier": 1.0,
     "DurabilityModifer": 1.25,
     "DamageModifier": 1.25,
-    "ArmorModifier": 1.0,
+    "ArmorRatingModifier": 1.0,
+    "ArmorCoverageModifier": 1.0,
     "IsMetallic": true,
-    "IsWeaponMaterial" : true,
+    "IsWeaponMaterial": true,
     "IsArmorMaterial": true
   },
   {
@@ -66,9 +71,10 @@
     "QualityModifier": 1.0,
     "DurabilityModifer": 1.5,
     "DamageModifier": 1.75,
-    "ArmorModifier": 1.0,
+    "ArmorRatingModifier": 1.0,
+    "ArmorCoverageModifier": 1.0,
     "IsMetallic": true,
-    "IsWeaponMaterial" : true,
+    "IsWeaponMaterial": true,
     "IsArmorMaterial": true
   },
   {
@@ -78,9 +84,10 @@
     "QualityModifier": 1.0,
     "DurabilityModifer": 0.75,
     "DamageModifier": 1.5,
-    "ArmorModifier": 1.0,
+    "ArmorRatingModifier": 1.0,
+    "ArmorCoverageModifier": 1.0,
     "IsMetallic": true,
-    "IsWeaponMaterial" : true,
+    "IsWeaponMaterial": true,
     "IsArmorMaterial": true
   },
   {
@@ -89,9 +96,10 @@
     "WeightModifier": 1.5,
     "QualityModifier": 1.0,
     "DamageModifier": 2,
-    "ArmorModifier": 1.0,
+    "ArmorRatingModifier": 1.0,
+    "ArmorCoverageModifier": 1.0,
     "IsMetallic": true,
-    "IsWeaponMaterial" : true,
+    "IsWeaponMaterial": true,
     "IsArmorMaterial": true
   }
 ]

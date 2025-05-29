@@ -55,7 +55,6 @@ namespace RogueCrawler
     {
         public int ID { get; set; }
         public string ObjectName { get; set; }
-        public int ArmorClass { get; set; }
         public int Level { get; set; } = 1;
 
         public bool IsAlive => Health.Value > 0;
