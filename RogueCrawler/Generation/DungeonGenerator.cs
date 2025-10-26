@@ -30,6 +30,12 @@ namespace RogueCrawler
         public static ItemWeapon GenerateUnarmedWeapon(Creature c)
             => itemWeaponGenerator.GenerateUnarmed(c);
 
+        static ItemArmorGenerator itemArmorGenerator = new ItemArmorGenerator();
+        public static ItemArmor GenerateArmorFromSerialized(SerializedArmor serialized)
+            => itemArmorGenerator.FromSerializable(serialized);
+        public static ItemArmor GenerateUnarmoredSlot(ArmorSlotType armorSlotType)
+            => itemArmorGenerator.GenerateUnarmoredSlot(armorSlotType);
+
         static DungeonRoomGenerator roomGenerator = new DungeonRoomGenerator();
         public static DungeonRoomManager CreateRoomManager(DungeonGenerationParameters dParams) 
             => roomGenerator.GenerateDungeonRooms(dParams);

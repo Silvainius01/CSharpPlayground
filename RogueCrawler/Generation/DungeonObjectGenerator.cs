@@ -18,6 +18,11 @@ namespace RogueCrawler
 
         public abstract TObject Generate(TParams oParams);
         protected void ResetId() { nextId = 0; }
+
+        protected float GetQuality(ItemGenerationParameters iParams)
+            => iParams.QualityOverride < 0.0f
+                ? DungeonGenerator.GetItemQuality(iParams.Quality, iParams.QualityBias)
+                : iParams.QualityOverride;
     }
 
     /// <summary>

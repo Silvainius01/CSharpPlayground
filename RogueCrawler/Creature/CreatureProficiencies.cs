@@ -59,7 +59,7 @@ namespace RogueCrawler
             SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);
 
             if (prefix == string.Empty)
-                prefix = "Attributes:";
+                prefix = "Skills:";
             builder.Append(tabCount, prefix);
 
             tabCount++;
@@ -103,7 +103,7 @@ namespace RogueCrawler
         public void AddSkill(string skillName, int level, float progress)
         {
             var skill = GetSkill(skillName);
-            skill.SkillLevel = Math.Max(skill.SkillLevel + level, DungeonCrawlerSettings.MaxSkillLevel);
+            skill.SkillLevel = Math.Min(skill.SkillLevel + level, DungeonCrawlerSettings.MaxSkillLevel);
             skill.SkillProgress += progress;
         }
         public void AddSkillLevel(string skillName, int level) => AddSkill(skillName, level, 0);

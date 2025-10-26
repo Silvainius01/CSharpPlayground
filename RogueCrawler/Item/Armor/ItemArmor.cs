@@ -44,26 +44,60 @@ namespace RogueCrawler
             return ArmorSlotModifier() * ArmorClassModifier() * Material.ArmorCoverageModifier;
         }
 
-        public int GetValue()
-        {
-            throw new NotImplementedException();
-        }
-        public float GetRawValue()
-        {
-            throw new NotImplementedException();
-        }
+        public float GetRawValue() =>
+            BaseValue * Quality * Material.ValueModifier * (Condition / MaxCondition);
+        public int GetValue() => (int)Math.Max(GetRawValue(), 1);
 
         public string BriefString()
         {
-            throw new NotImplementedException();
-        }
-        public string DebugString(string prefix, int tabCount)
-        {
-            throw new NotImplementedException();
+            return $"[{ID}] {ItemName} | " +
+                $"AR: {GetArmorRating().ToString("n1")} | " +
+                $"AC: {GetArmorCoverage().ToString("n1")} | " +
+                $"V: {GetValue()} | " +
+                $"W: {Weight.ToString("n1")}";
         }
         public string InspectString(string prefix, int tabCount)
         {
-            throw new NotImplementedException();
+            SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);
+
+            if (prefix == string.Empty)
+                prefix = $"Armor stats for [{ID}] {ItemName}:";
+
+            builder.Append(tabCount, prefix);
+            tabCount++;
+            builder.NewlineAppend(tabCount, $"Type: {SlotType}, {ObjectName}, {ArmorClass}");
+            builder.NewlineAppend(tabCount, $"Rating: {GetArmorRating().ToString("n1")}");
+            builder.NewlineAppend(tabCount, $"Coverage: {GetArmorCoverage().ToString("n1")}");
+            builder.NewlineAppend(tabCount, $"Value: {GetValue()}");
+            builder.NewlineAppend(tabCount, $"Quality: {Quality.ToString("n1")}");
+            builder.NewlineAppend(tabCount, $"Weight: {Weight.ToString("n1")}");
+            builder.NewlineAppend(tabCount, $"Material: {Material.Name}");
+            tabCount--;
+
+            return builder.ToString();
+        }
+        public string DebugString(string prefix, int tabCount)
+        {
+            SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);
+
+            if (prefix == string.Empty)
+                prefix = $"Armor stats for [{ID}] {ItemName}:";
+
+            builder.Append(tabCount, prefix);
+            tabCount++;
+            builder.NewlineAppend(tabCount, $"Type: {SlotType}, {ObjectName}");
+            builder.NewlineAppend(tabCount, $"Rating: {GetArmorRating()}");
+            builder.NewlineAppend(tabCount, $"Coverage: {GetArmorCoverage()}");
+            builder.NewlineAppend(tabCount, $"Value: {GetValue()}");
+            builder.NewlineAppend(tabCount, $"Quality: {Quality}");
+            builder.NewlineAppend(tabCount, $"Weight: {Weight}");
+            builder.NewlineAppend(tabCount, $"Material: {Material.Name}");
+
+            // Debug Specific
+            builder.NewlineAppend(tabCount, $"BaseAR: {BaseArmorRating}");
+            tabCount--;
+
+            return builder.ToString();
         }
 
         float ArmorSlotModifier()
@@ -98,7 +132,23 @@ namespace RogueCrawler
 
         public SerializedItem GetSerializable()
         {
-            throw new NotImplementedException();
+            SerializedArmor s = new SerializedArmor()
+            {
+                BaseValue = BaseValue,
+                Quality = Quality,
+                Weight = Weight,
+                ItemName = ItemName,
+                ObjectName = ObjectName,
+                MaterialName = Material.Name,
+                Condition = Condition,
+                MaxCondition = MaxCondition,
+
+                SlotType = SlotType,
+                ArmorClass = ArmorClass,
+                BaseArmorRating = BaseArmorRating,
+            };
+
+            return s;
         }
     }
 
@@ -114,7 +164,7 @@ namespace RogueCrawler
 
         public override IItem GetDeserialized()
         {
-            throw new NotImplementedException();
+            return DungeonGenerator.GenerateArmorFromSerialized(this);
         }
     }
 }

@@ -56,7 +56,7 @@ namespace RogueCrawler
 
         public string BriefString()
         {
-            return $"[{ID}] {ItemName} | DMG: {GetWeaponDamage()} | V: {GetValue()} | W: {Weight}";
+            return $"[{ID}] {ItemName} | DMG: {GetWeaponDamage().ToString("n1")} | V: {GetValue()} | W: {Weight.ToString("n1")}";
         }
         public string InspectString(string prefix, int tabCount)
         {
@@ -68,10 +68,10 @@ namespace RogueCrawler
             builder.Append(tabCount, prefix);
             tabCount++;
             builder.NewlineAppend(tabCount, $"Type: {WeaponType}, {ObjectName}");
-            builder.NewlineAppend(tabCount, $"Damage: {GetWeaponDamage()}");
+            builder.NewlineAppend(tabCount, $"Damage: {GetWeaponDamage().ToString("n1")}");
             builder.NewlineAppend(tabCount, $"Value: {GetValue()}");
-            builder.NewlineAppend(tabCount, $"Quality: {Quality}");
-            builder.NewlineAppend(tabCount, $"Weight: {Weight}");
+            builder.NewlineAppend(tabCount, $"Quality: {Quality.ToString("n1")}");
+            builder.NewlineAppend(tabCount, $"Weight: {Weight.ToString("n1")}");
             builder.NewlineAppend(tabCount, $"Material: {Material.Name}");
             tabCount--;
 
@@ -79,22 +79,24 @@ namespace RogueCrawler
         }
         public string DebugString(string prefix, int tabCount)
         {
-            SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString); ;
+            ColorStringBuilder builder = new ColorStringBuilder(DungeonCrawlerSettings.TabString); ;
 
             if (prefix == string.Empty)
-                prefix = $"Weapon stats for {ItemName}:";
+                prefix = $"Weapon stats for [{ID}] {ItemName}:";
 
             builder.Append(tabCount, prefix);
             tabCount++;
             builder.NewlineAppend(tabCount, $"ID: {ID}");
             builder.NewlineAppend(tabCount, $"Type: {WeaponType},{ObjectName}");
-            builder.NewlineAppend(tabCount, $"Base Damage: {BaseDamage}");
+            builder.NewlineAppend(tabCount, $"Damage: {GetWeaponDamage()}");
+            builder.NewlineAppend(tabCount, $"Value: {GetValue()} ({GetRawValue()})");
             builder.NewlineAppend(tabCount, $"Quality: {Quality}");
             builder.NewlineAppend(tabCount, $"Weight: {Weight}");
             builder.NewlineAppend(tabCount, $"Two Handed: {IsLargeWeapon}");
-            builder.NewlineAppend(tabCount, $"Min Expected Damage: {GetWeaponDamage()}");
-            builder.NewlineAppend(tabCount, $"Value: {GetValue()} ({GetRawValue()})");
             builder.NewlineAppend(tabCount, $"Material: {Material.Name}");
+
+            // Debug Specific
+            builder.NewlineAppend(tabCount, $"Base Damage: {BaseDamage}", ConsoleColor.Cyan);
             tabCount--;
 
             return builder.ToString();
@@ -132,9 +134,12 @@ namespace RogueCrawler
                 BaseDamage = BaseDamage,
                 ItemName = ItemName,
                 ObjectName = ObjectName,
+                MaterialName = Material.Name,
+                Condition = Condition,
+                MaxCondition = MaxCondition,
+
                 WeaponType = WeaponType,
                 IsLargeWeapon = IsLargeWeapon,
-                MaterialName = Material.Name
             };
 
             return s;

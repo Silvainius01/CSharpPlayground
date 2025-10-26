@@ -19,18 +19,6 @@ namespace RogueCrawler
         
         public static MappedCommandModule<ArmorTypeData> ArmorTypeCommandModule;
 
-        public static ArmorTypeData GetRandomArmorType(string armorClass, ItemMaterial material)
-        {
-            // Filter to only valid types
-            var validArmorTypes = ArmorByClass[armorClass].Where(a =>
-                a.AllowedMaterials.Contains(material.Name) || (material.IsMetallic && a.AllowAnyMetal));
-
-            if (!validArmorTypes.Any())
-                throw new System.Exception($"No valid armor type exists for Class {armorClass} and Material {material.Name}");
-
-            return validArmorTypes.RandomItem();
-        }
-
         public static void LoadArmorTypes()
         {
             StreamReader reader = new StreamReader(DataPath);
@@ -53,22 +41,6 @@ namespace RogueCrawler
             ArmorTypeCommandModule = new MappedCommandModule<ArmorTypeData>("What is the default armor type prompt??", ArmorTypes);
         }
 
-        public static ItemArmor GenerateUnarmoredSlot(ArmorSlotType slot)
-        {
-            string slotName = EnumExt<ArmorSlotType>.GetName(slot);
-            return new ItemArmor()
-            {
-                ID = -1,
-                BaseValue = 0,
-                Weight = 0,
-                Quality = 1,
-                Material = MaterialTypeManager.DefaultMaterial,
-                ItemName = $"$Bare {slotName}",
-                ObjectName = $"Bare{slotName}",
-                ArmorClass = "Unarmored",
-                BaseArmorRating = 0,
-                SlotType = slot
-            };
-        }
+        
     }
 }

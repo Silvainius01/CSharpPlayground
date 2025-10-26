@@ -53,11 +53,15 @@ namespace RogueCrawler
 
             builder.Append(tabCount, prefix);
             tabCount++;
-            builder.NewlineAppend(tabCount, $"HP: {Health.Value}/{Health.MaxValue}");
             builder.NewlineAppend(tabCount, $"Level: {Level}");
-            builder.NewlineAppend(tabCount, $"Damage: {GetCombatDamage()}");
+            builder.NewlineAppend(tabCount, $"HP: {Health.Value.ToString("n1")}/{Health.MaxValue.ToString("n1")}");
+            builder.NewlineAppend(tabCount, $"CombatSpeed: {CombatSpeed.Value.ToString("n1")}/{CombatSpeed.MaxValue.ToString("n1")}");
+            builder.NewlineAppend(tabCount, $"Damage: {GetCombatDamage().ToString("n1")}");
             builder.NewlineAppend(PrimaryWeapon.InspectString($"Weapon Stats:", tabCount));
+            builder.NewlineAppend(tabCount, "Armor Stats:");
+            builder.NewlineAppend(tabCount+1, ArmorSlots.BriefString());
             builder.NewlineAppend(MaxAttributes.InspectString("Attributes:", tabCount));
+            builder.NewlineAppend(Proficiencies.InspectString("Skills:", tabCount));
 
             return builder.ToString();
         }

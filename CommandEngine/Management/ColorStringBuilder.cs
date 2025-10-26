@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using static CommandEngine.StringBuilderManager;
+
 namespace CommandEngine
 {
     public struct ColoredString
@@ -20,7 +22,7 @@ namespace CommandEngine
 
     public class ColorStringBuilder : SmartStringBuilder
     {
-        ConsoleColor currColor = ConsoleColor.Gray;
+        ConsoleColor currColor = DefaultColor;
         List<ColoredString> strings = new List<ColoredString>();
 
         public ColorStringBuilder() { }
@@ -61,13 +63,13 @@ namespace CommandEngine
         public ColorStringBuilder AppendNewline(string str, ConsoleColor color)
         {
             BaseAppend(color);
-            Append($"{NewString}{str}");
+            Append($"{NewlineString}{str}");
             return this;
         }
         public ColorStringBuilder NewlineAppend(string str, ConsoleColor color)
         {
             BaseAppend(color);
-            Append($"{NewString}{str}");
+            Append($"{NewlineString}{str}");
             return this;
         }
 
@@ -92,21 +94,26 @@ namespace CommandEngine
         public ColorStringBuilder AppendNewline(int tabCount, string str, ConsoleColor color)
         {
             BaseAppend(color);
-            CheckCapacity(str.Length + NewString.Length, tabCount);
+            CheckCapacity(str.Length + NewlineString.Length, tabCount);
             
             AppendTabs(tabCount);
-            Append($"{str}{NewString}");
+            Append($"{str}{NewlineString}");
             return this;
         }
         public ColorStringBuilder NewlineAppend(int tabCount, string str, ConsoleColor color)
         {
             BaseAppend(color);
-            CheckCapacity(str.Length + NewString.Length, tabCount);
+            CheckCapacity(str.Length + NewlineString.Length, tabCount);
             
-            Append(NewString);
+            Append(NewlineString);
             AppendTabs(tabCount);
             Append(str);
             return this;
+        }
+
+        internal void SetColor(ConsoleColor color)
+        {
+            currColor = color;
         }
 
         public void Write(bool clear = false)

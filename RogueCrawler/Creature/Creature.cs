@@ -105,6 +105,7 @@ namespace RogueCrawler
             };
 
             UnarmedWeapon = DungeonGenerator.GenerateUnarmedWeapon(this);
+            ArmorSlots = new CreatureArmorSlots();
         }
 
         public int GetAttribute(AttributeType attr)
@@ -213,7 +214,7 @@ namespace RogueCrawler
 
         public virtual string BriefString()
         {
-            return $"[{ID}] {ObjectName} ({Level}) | HP: {Health.Value} | DMG: {GetCombatDamage()} | SPD: {CombatSpeed.Value}";
+            return $"[{ID}] {ObjectName} ({Level}) | HP: {Health.Value.ToString("n1")} | DMG: {GetCombatDamage().ToString("n1")} | SPD: {CombatSpeed.Value.ToString("n1")}";
         }
         public virtual string InspectString(string prefix, int tabCount)
         {
@@ -225,8 +226,8 @@ namespace RogueCrawler
             builder.Append(tabCount, prefix);
 
             tabCount++;
-            builder.NewlineAppend(tabCount, $"HP: {Health.Value}");
-            builder.NewlineAppend(tabCount, $"DMG: {GetCombatDamage()}");
+            builder.NewlineAppend(tabCount, $"HP: {Health.Value.ToString("n1")}");
+            builder.NewlineAppend(tabCount, $"DMG: {GetCombatDamage().ToString("n1")}");
             builder.NewlineAppend(tabCount, $"Weapon:");
             builder.NewlineAppend(tabCount + 1, PrimaryWeapon.BriefString());
             --tabCount;
@@ -243,11 +244,12 @@ namespace RogueCrawler
             builder.Append(tabCount, prefix);
             tabCount++;
             builder.NewlineAppend(tabCount, $"ID: {ID}");
-            builder.NewlineAppend(tabCount, $"HP: {Health.Value}/{Health.MaxValue}");
+            builder.NewlineAppend(tabCount, $"HP: {Health.Value.ToString("n1")}/{Health.MaxValue.ToString("n1")}");
             builder.NewlineAppend(tabCount, $"Level: {Level}");
             builder.NewlineAppend(tabCount, $"Damage: {GetCombatDamage()}");
-            builder.NewlineAppend(MaxAttributes.DebugString("Atributes:", tabCount));
             builder.NewlineAppend(PrimaryWeapon.DebugString($"Weapon Stats:", tabCount));
+            builder.NewlineAppend(MaxAttributes.DebugString("Atributes:", tabCount));
+            builder.NewlineAppend(Proficiencies.DebugString("Skills:", tabCount));
 
             return builder.ToString();
         }
@@ -273,6 +275,7 @@ namespace RogueCrawler
         public int Level { get; set; }
         public List<float> CurrentStats { get; set; }
         public SerializedWeapon PrimaryWeapon { get; set; }
+        public SerializedArmorSlots ArmorSlots { get; set; }
         public SerializedAttributes Attributes { get; set; }
         public SerializedAttributes Afflictions { get; set; }
         public SerializedProfeciencies Profeciencies { get; set; }
@@ -288,6 +291,7 @@ namespace RogueCrawler
             Attributes = c.MaxAttributes.GetSerializable();
             Afflictions = c.Afflictions.GetSerializable();
             Profeciencies = c.Proficiencies.GetSerializable();
+            ArmorSlots = c.ArmorSlots.GetSerializable();
 
             for (int i = 0; i < c.Stats.Count; ++i)
                 CurrentStats.Add(c.Stats[i].Value);
@@ -318,6 +322,7 @@ namespace RogueCrawler
             c.ObjectName = Name;
             c.Level = Level;
             c.PrimaryWeapon = DungeonGenerator.GenerateWeaponFromSerialized(PrimaryWeapon);
+            c.ArmorSlots = ArmorSlots.GetDeserialized();
             c.AddAttributePoints(Attributes.GetDeserialized());
             c.AddAffliction(Afflictions.GetDeserialized());
             c.Proficiencies = Profeciencies.GetDeserialized();

@@ -136,16 +136,6 @@
     ]
   },
   {
-    "ArmorType": "Tassets", 
-    "ArmorClass": "Light",
-    "ArmorSlot": 4,
-    "BaseValue": 2,
-    "BaseArmorRating": 1,
-    "AllowAnyMetal" : true,
-    "AllowedMaterials": [
-    ]
-  },
-  {
     "ArmorType": "Cuisses", 
     "ArmorClass": "Medium",
     "ArmorSlot": 4,

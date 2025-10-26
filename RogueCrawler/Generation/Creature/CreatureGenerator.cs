@@ -54,6 +54,8 @@ namespace RogueCrawler
             };
 
             creature.PrimaryWeapon = GenerateCreatureWeapon(cParams, creature);
+            creature.ArmorSlots = GenerateCreatureArmor(cParams, creature);
+
             creature.AddAttributePoints(new CrawlerAttributeSet((attr) =>
             {
                 int value = Math.Max(creature.PrimaryWeapon.AttributeRequirements[attr], DungeonCrawlerSettings.MinCreatureAttributeScore);
@@ -154,6 +156,13 @@ namespace RogueCrawler
                 weapon = DungeonGenerator.GenerateWeapon(wParams);
             }
             return weapon;
+        }
+        CreatureArmorSlots GenerateCreatureArmor(CreatureGenerationParameters cParams, Creature creature)
+        {
+            CreatureArmorSlots armorSlots = new CreatureArmorSlots();
+            foreach (ArmorSlotType slot in EnumExt<ArmorSlotType>.Values)
+                armorSlots.EquipItem(DungeonGenerator.GenerateUnarmoredSlot(slot));
+            return armorSlots;
         }
 
 

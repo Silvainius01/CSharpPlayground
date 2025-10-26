@@ -18,6 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="TextDocs\Data\ArmorTypes.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="TextDocs\Data\ItemMaterials.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

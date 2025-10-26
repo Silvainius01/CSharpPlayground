@@ -37,6 +37,11 @@ namespace RogueCrawler
 
             // Set the starting attributes to the start weapon requirements
             player.AddAttributePoints(player.PrimaryWeapon.AttributeRequirements);
+
+            // Generate player armor
+            foreach (var slot in EnumExt<ArmorSlotType>.Values)
+                player.ArmorSlots.EquipItem(DungeonGenerator.GenerateUnarmoredSlot(slot));
+
             // Always add 1 to CON.
             player.AddAttributePoints(AttributeType.CON, 1);
             // Set the player to the smallest possible level, or the starting level. Whichever is greater.

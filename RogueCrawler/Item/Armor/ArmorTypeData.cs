@@ -16,5 +16,10 @@ namespace RogueCrawler
 
         public bool AllowAnyMetal { get; set; } = false;
         public string[] AllowedMaterials { get; set; }
+
+        public override string ToString()
+        {
+            return $"{ArmorClass} {ArmorSlot} {ArmorType}";
+        }
     }
 }

@@ -4,20 +4,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using static CommandEngine.StringBuilderManager;
+
 namespace CommandEngine
 {
     public class SmartStringBuilder
     {
-        public string TabString { get; set; } = "\t";
-        public string NewString { get; set; } = "\n";
+        public int Length => builder.Length;
+        public string TabString { get; set; } = DefaultTabString;
+        public string NewlineString { get; set; } = DefaultNewlineString;
         public StringBuilder builder;
 
-        public SmartStringBuilder() : this("\t", "\n") { }
-        public SmartStringBuilder(string tabString) : this(tabString, "\n") { }
+        public SmartStringBuilder() : this(DefaultTabString, DefaultNewlineString) { }
+        public SmartStringBuilder(string tabString) : this(tabString, DefaultNewlineString) { }
         public SmartStringBuilder(string tabString, string newString)
         {
             this.TabString = tabString;
-            this.NewString = newString;
+            this.NewlineString = newString;
             this.builder = new StringBuilder();
         }
 
@@ -31,16 +34,16 @@ namespace CommandEngine
             builder.AppendLine(str);
             return this;
         }
-        /// <summary>Append  <paramref name="str"/> followed by <see cref="SmartStringBuilder.NewString"/></summary>
+        /// <summary>Append  <paramref name="str"/> followed by <see cref="SmartStringBuilder.NewlineString"/></summary>
         public SmartStringBuilder AppendNewline(string str)
         {
-            builder.Append($"{NewString}{str}");
+            builder.Append($"{NewlineString}{str}");
             return this;
         }
-        /// <summary>Append <see cref="SmartStringBuilder.NewString"/>, follwed by <paramref name="str"/></summary>
+        /// <summary>Append <see cref="SmartStringBuilder.NewlineString"/>, follwed by <paramref name="str"/></summary>
         public SmartStringBuilder NewlineAppend(string str)
         {
-            builder.Append($"{NewString}{str}");
+            builder.Append($"{NewlineString}{str}");
             return this;
         }
 
@@ -58,19 +61,19 @@ namespace CommandEngine
             builder.AppendLine(str);
             return this;
         }
-        /// <summary>Append  <paramref name="str"/> followed by <see cref="SmartStringBuilder.NewString"/></summary>
+        /// <summary>Append  <paramref name="str"/> followed by <see cref="SmartStringBuilder.NewlineString"/></summary>
         public SmartStringBuilder AppendNewline(int tabCount, string str)
         {
-            CheckCapacity(str.Length + NewString.Length, tabCount);
+            CheckCapacity(str.Length + NewlineString.Length, tabCount);
             AppendTabs(tabCount);
-            builder.Append($"{str}{NewString}");
+            builder.Append($"{str}{NewlineString}");
             return this;
         }
-        /// <summary>Append <see cref="SmartStringBuilder.NewString"/>, follwed by <paramref name="str"/></summary>
+        /// <summary>Append <see cref="SmartStringBuilder.NewlineString"/>, follwed by <paramref name="str"/></summary>
         public SmartStringBuilder NewlineAppend(int tabCount, string str)
         {
-            CheckCapacity(str.Length + NewString.Length, tabCount);
-            builder.Append(NewString);
+            CheckCapacity(str.Length + NewlineString.Length, tabCount);
+            builder.Append(NewlineString);
             AppendTabs(tabCount);
             builder.Append(str);
             return this;

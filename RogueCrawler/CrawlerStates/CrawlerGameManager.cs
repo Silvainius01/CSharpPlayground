@@ -447,13 +447,21 @@ namespace RogueCrawler
                     case "full":
                         Console.WriteLine(player.InspectString(string.Empty, 0));
                         return true;
-                    case "a":
+                    case "at":
                     case "attr":
                         Console.WriteLine(player.MaxAttributes.InspectString("Your Attributes:", 0));
                         return true;
                     case "w":
                     case "weapon":
                         Console.WriteLine(player.PrimaryWeapon.InspectString("Your Weapon Stats:", 0));
+                        return true;
+                    case "ar":
+                    case "armor":
+                        Console.WriteLine(player.ArmorSlots.InspectString("Your Armor Stats:", 0));
+                        return true;
+                    case "s":
+                    case "skills":
+                        Console.WriteLine(player.Proficiencies.InspectString("Your Skills:", 0));
                         return true;
                 }
             }

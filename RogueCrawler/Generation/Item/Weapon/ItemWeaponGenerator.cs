@@ -26,15 +26,16 @@ namespace RogueCrawler
             {
                 ID = NextId,
                 Weight = CommandEngine.Random.NextInt(wParams.WeightRange, true) / 10.0f,
-                IsLargeWeapon = IsLargeWeapon(weaponTypeData, wParams),
-                WeaponType = weaponType,
-                MajorAttribute = weaponTypeData.MajorAttribute,
-                MinorAttribute = weaponTypeData.MinorAttribute,
-                BaseDamage = weaponTypeData.BaseDamage,
                 BaseValue = weaponTypeData.BaseValue,
                 Material = wParams.Material,
                 Quality = GetQuality(wParams),
-                AttributeRequirements = new CrawlerAttributeSet()
+
+                WeaponType = weaponType,
+                BaseDamage = weaponTypeData.BaseDamage,
+                IsLargeWeapon = IsLargeWeapon(weaponTypeData, wParams),
+                MajorAttribute = weaponTypeData.MajorAttribute,
+                MinorAttribute = weaponTypeData.MinorAttribute,
+                AttributeRequirements = new CrawlerAttributeSet(),
             };
 
             weapon.AttributeRequirements.SetAttribute(AttributeType.STR, (int)Math.Ceiling(weapon.Weight / DungeonCrawlerSettings.WeaponWeightPerStr));
@@ -59,14 +60,17 @@ namespace RogueCrawler
                 ItemName = serialized.ItemName,
                 ObjectName = serialized.ObjectName,
                 Weight = serialized.Weight,
-                IsLargeWeapon = serialized.IsLargeWeapon,
-                WeaponType = weaponType,
                 Quality = serialized.Quality,
-                BaseDamage = serialized.BaseDamage,
                 BaseValue = serialized.BaseValue,
+                Material = MaterialTypeManager.GetMaterialFromName(serialized.MaterialName),
+                Condition = serialized.Condition,
+                MaxCondition = serialized.MaxCondition,
+
+                WeaponType = weaponType,
+                BaseDamage = serialized.BaseDamage,
+                IsLargeWeapon = serialized.IsLargeWeapon,
                 MinorAttribute = WeaponTypes[weaponType].MinorAttribute,
                 MajorAttribute = WeaponTypes[weaponType].MajorAttribute,
-                Material = MaterialTypeManager.GetMaterialFromName(serialized.MaterialName)
             };
 
             return weapon;
@@ -122,11 +126,6 @@ namespace RogueCrawler
 
         int GetStrengthReq(float weight)
             => (int)Math.Ceiling(weight / 5.0);
-        
-        float GetQuality(ItemWeaponGenerationParameters wParams)
-            => wParams.QualityOverride < 0.0f
-                ? DungeonGenerator.GetItemQuality(wParams.Quality, wParams.QualityBias)
-                : wParams.QualityOverride;
 
         bool IsLargeWeapon(WeaponTypeData weaponType, ItemWeaponGenerationParameters wParams)
         {

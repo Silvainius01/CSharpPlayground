@@ -26,6 +26,7 @@ namespace RogueCrawler
             string json = reader.ReadToEnd();
             reader.Close();
 
+            int index = 0;
             var serializer = JsonSerializer.CreateDefault();
             var jArray = JsonConvert.DeserializeObject<JArray>(json);
 
@@ -33,6 +34,7 @@ namespace RogueCrawler
             {
                 ItemMaterial data = (ItemMaterial)serializer.Deserialize(new JTokenReader(obj), typeof(ItemMaterial));
                 Materials.Add(data.Name, data);
+                ++index;
             }
             Loaded = true;
             MaterialNameCommandModule = new MappedCommandModule<ItemMaterial>("What is the default material name prompt??", Materials);
@@ -46,6 +48,33 @@ namespace RogueCrawler
                 return DefaultMaterial;
             }
             return Materials[name];
+        }
+
+        static bool IsValidMaterial(JToken obj, int index)
+        {
+            int sbLength = 0;
+            string starterString = $"Invalid material detected at position [{index}]";
+            SmartStringBuilder sb = new SmartStringBuilder();
+
+            sb.Append(starterString);
+            sb.NewlineAppend(1, "Missing Required Fields:");
+            sbLength = sb.Length;
+
+            if (!obj.Contains("Name"))
+                sb.NewlineAppend(2, "Name -> string");
+            if (!obj.Contains("IsMetallic"))
+                sb.NewlineAppend(2, "IsMetallic -> bool");
+            if (!obj.Contains("IsWeaponMaterial"))
+                sb.NewlineAppend(2, "IsWeaponMaterial -> bool");
+            if (!obj.Contains("IsArmorMaterial"))
+                sb.NewlineAppend(2, "IsArmorMaterial -> bool");
+
+            if (sb.Length > sbLength)
+            {
+                ConsoleExt.WriteWarningLine(sb.ToString());
+                return false;
+            }
+            return true;
         }
     }
 }

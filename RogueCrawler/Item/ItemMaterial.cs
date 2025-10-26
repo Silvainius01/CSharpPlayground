@@ -20,9 +20,9 @@ namespace RogueCrawler
         public float ArmorRatingModifier { get; set; } = 1.0f;
         public float ArmorCoverageModifier { get; set; } = 1.0f;
 
-        public bool IsMetallic { get; set; } = true;
-        public bool IsWeaponMaterial { get; set; } = true;
-        public bool IsArmorMaterial { get; set; } = true;
+        public bool IsMetallic { get; set; } = false;
+        public bool IsWeaponMaterial { get; set; } = false;
+        public bool IsArmorMaterial { get; set; } = false;
 
         public string BriefString()
         {
