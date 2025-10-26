@@ -98,7 +98,7 @@ namespace RogueCrawler
             CreatureArmorSlots armorSlots = new CreatureArmorSlots();
 
             foreach (var slot in ArmorSlots)
-                armorSlots.EquipItem(DungeonGenerator.GenerateArmorFromSerialized(slot.Value));
+                armorSlots.EquipItem(DungeonGenerator.ArmorGenerator.FromSerialized(slot.Value));
 
             return armorSlots;
         }

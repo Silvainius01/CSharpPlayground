@@ -23,26 +23,17 @@ namespace RogueCrawler
         }
 
         static ItemWeaponGenerator itemWeaponGenerator = new ItemWeaponGenerator();
-        public static ItemWeapon GenerateWeapon(ItemWeaponGenerationParameters wParams) 
-            => itemWeaponGenerator.Generate(wParams);
-        public static ItemWeapon GenerateWeaponFromSerialized(SerializedWeapon serialized)
-            => itemWeaponGenerator.FromSerializable(serialized);
-        public static ItemWeapon GenerateUnarmedWeapon(Creature c)
-            => itemWeaponGenerator.GenerateUnarmed(c);
+        public static ItemWeaponGenerator WeaponGenerator { get => itemWeaponGenerator; }
 
         static ItemArmorGenerator itemArmorGenerator = new ItemArmorGenerator();
-        public static ItemArmor GenerateArmorFromSerialized(SerializedArmor serialized)
-            => itemArmorGenerator.FromSerializable(serialized);
-        public static ItemArmor GenerateUnarmoredSlot(ArmorSlotType armorSlotType)
-            => itemArmorGenerator.GenerateUnarmoredSlot(armorSlotType);
+        public static ItemArmorGenerator ArmorGenerator { get => itemArmorGenerator; }
 
         static DungeonRoomGenerator roomGenerator = new DungeonRoomGenerator();
         public static DungeonRoomManager CreateRoomManager(DungeonGenerationParameters dParams) 
             => roomGenerator.GenerateDungeonRooms(dParams);
 
         static CreatureGenerator creatureGenerator = new CreatureGenerator();
-        public static Creature GenerateCreature(CreatureGenerationParameters cParams) 
-            => creatureGenerator.Generate(cParams);
+        public static CreatureGenerator CreatureGenerator { get => creatureGenerator; }
         public static DungeonCreatureManager CreateCreatureManager(DungeonGenerationParameters dParams, DungeonRoomManager roomManager)
             => creatureGenerator.GenerateObjects(dParams, roomManager);
 

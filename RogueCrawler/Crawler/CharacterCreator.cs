@@ -30,7 +30,7 @@ namespace RogueCrawler
             var wParams = ItemWeaponGenerationPresets.StartWeaponItem;
             string WeaponTypePrompt = $"Pick your preferred weapon:\n\t{WeaponTypeManager.WeaponTypes.Keys.ToString(" | ")}\n";
             wParams.PossibleWeaponTypes = new List<string>() { GetNextWeaponCommand(WeaponTypePrompt, $"[Invalid] Preferred Weapon", false) };
-            player.PrimaryWeapon = DungeonGenerator.GenerateWeapon(wParams);
+            player.PrimaryWeapon = DungeonGenerator.WeaponGenerator.Generate(wParams);
 
             player.Proficiencies.AddSkillLevel(player.PrimaryWeapon.WeaponType, 30);
             player.Proficiencies.AddSkillLevel(player.PrimaryWeapon.ObjectName, 30);
@@ -40,7 +40,7 @@ namespace RogueCrawler
 
             // Generate player armor
             foreach (var slot in EnumExt<ArmorSlotType>.Values)
-                player.ArmorSlots.EquipItem(DungeonGenerator.GenerateUnarmoredSlot(slot));
+                player.ArmorSlots.EquipItem(DungeonGenerator.ArmorGenerator.GenerateUnarmoredSlot(slot));
 
             // Always add 1 to CON.
             player.AddAttributePoints(AttributeType.CON, 1);

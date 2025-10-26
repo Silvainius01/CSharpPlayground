@@ -78,7 +78,7 @@ namespace RogueCrawler
             {
                 ItemWeaponGenerationParameters weaponProperties =
                     ItemWeaponGenerationPresets.GetParamsForChest(cParams.CreatureLevel, cParams.ItemQuality, cParams.ItemWeight);
-                chest.AddItem(DungeonGenerator.GenerateWeapon(weaponProperties));
+                chest.AddItem(DungeonGenerator.WeaponGenerator.Generate(weaponProperties));
             }
             return $"{cParams.ItemQuality}Quality {cParams.ItemWeight}Weight WeaponChest";
         }

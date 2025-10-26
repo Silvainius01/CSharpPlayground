@@ -60,7 +60,7 @@ namespace RogueCrawler
             };
         }
 
-        public ItemArmor FromSerializable(SerializedArmor serialized)
+        public ItemArmor FromSerialized(SerializedArmor serialized)
         {
             ItemArmor armor = new ItemArmor()
             {

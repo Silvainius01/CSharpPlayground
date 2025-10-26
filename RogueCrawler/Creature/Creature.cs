@@ -104,7 +104,7 @@ namespace RogueCrawler
                 new CreatureStat(this, combatSpeedFunc, AttributeType.DEX, AttributeType.CHA)
             };
 
-            UnarmedWeapon = DungeonGenerator.GenerateUnarmedWeapon(this);
+            UnarmedWeapon = DungeonGenerator.WeaponGenerator.GenerateUnarmed(this);
             ArmorSlots = new CreatureArmorSlots();
         }
 
@@ -321,7 +321,7 @@ namespace RogueCrawler
 
             c.ObjectName = Name;
             c.Level = Level;
-            c.PrimaryWeapon = DungeonGenerator.GenerateWeaponFromSerialized(PrimaryWeapon);
+            c.PrimaryWeapon = DungeonGenerator.WeaponGenerator.FromSerialized(PrimaryWeapon);
             c.ArmorSlots = ArmorSlots.GetDeserialized();
             c.AddAttributePoints(Attributes.GetDeserialized());
             c.AddAffliction(Afflictions.GetDeserialized());

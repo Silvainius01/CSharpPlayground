@@ -153,7 +153,7 @@ namespace RogueCrawler
             {
                 ItemWeaponGenerationParameters wParams =
                     ItemWeaponGenerationPresets.GetParamsForCreature(creature, cParams.WeaponQuality, cParams.WeaponWeight);
-                weapon = DungeonGenerator.GenerateWeapon(wParams);
+                weapon = DungeonGenerator.WeaponGenerator.Generate(wParams);
             }
             return weapon;
         }
@@ -161,7 +161,7 @@ namespace RogueCrawler
         {
             CreatureArmorSlots armorSlots = new CreatureArmorSlots();
             foreach (ArmorSlotType slot in EnumExt<ArmorSlotType>.Values)
-                armorSlots.EquipItem(DungeonGenerator.GenerateUnarmoredSlot(slot));
+                armorSlots.EquipItem(DungeonGenerator.ArmorGenerator.GenerateUnarmoredSlot(slot));
             return armorSlots;
         }
 

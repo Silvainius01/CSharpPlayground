@@ -51,7 +51,7 @@ namespace RogueCrawler
             return weapon;
         }
 
-        public ItemWeapon FromSerializable(SerializedWeapon serialized)
+        public ItemWeapon FromSerialized(SerializedWeapon serialized)
         {
             var weaponType = serialized.WeaponType;
             ItemWeapon weapon = new ItemWeapon()

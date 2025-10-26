@@ -178,7 +178,7 @@ namespace RogueCrawler
                     break;
             }
 
-            var weapon = DungeonGenerator.GenerateWeapon(properties);
+            var weapon = DungeonGenerator.WeaponGenerator.Generate(properties);
             Console.WriteLine(weapon.DebugString(string.Empty, 0));
 
             if (args.Count > 0 && args[args.Count - 1][0] == 'r')
@@ -199,7 +199,7 @@ namespace RogueCrawler
                 WeaponChance = 1.0f
             };
 
-            Creature creature = DungeonGenerator.GenerateCreature(cParams);
+            Creature creature = DungeonGenerator.CreatureGenerator.Generate(cParams);
             Console.WriteLine(creature.DebugString(string.Empty, 0));
 
             if (args.Count > 0 && args[args.Count - 1][0] == 'r')

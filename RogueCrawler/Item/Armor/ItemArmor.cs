@@ -164,7 +164,7 @@ namespace RogueCrawler
 
         public override IItem GetDeserialized()
         {
-            return DungeonGenerator.GenerateArmorFromSerialized(this);
+            return DungeonGenerator.ArmorGenerator.FromSerialized(this);
         }
     }
 }
