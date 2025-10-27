@@ -457,7 +457,7 @@ namespace RogueCrawler
                         return true;
                     case "ar":
                     case "armor":
-                        Console.WriteLine(player.ArmorSlots.InspectString("Your Armor Stats:", 0));
+                        Console.WriteLine(player.Armor.InspectString("Your Armor Stats:", 0));
                         return true;
                     case "s":
                     case "skills":

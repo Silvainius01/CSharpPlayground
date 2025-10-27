@@ -108,8 +108,8 @@ namespace RogueCrawler
         public bool DamageCreature(Creature c, float damage, out float receivedDamage)
         {
             // Armor rating
-            float armor = MathF.Floor(c.ArmorSlots.ArmorRating);
-            receivedDamage = damage * (damage / (2 * armor + damage));
+            float ar = MathF.Floor(c.Armor.ArmorRating);
+            receivedDamage = damage * (damage / (2 * ar + damage));
             receivedDamage = Mathc.Truncate(receivedDamage, 1);
 
             c.Health.AddValue(-receivedDamage);
@@ -118,6 +118,11 @@ namespace RogueCrawler
             if (c.Health.Value <= 0)
             {
                 c.Inventory.AddItem(c.PrimaryWeapon);
+
+                foreach (var armorItem in c.Armor.ArmorSlots.Values)
+                    if (armorItem.ArmorClass != DungeonConstants.ArmorClassUnarmored)
+                        c.Inventory.AddItem(armorItem);
+
                 c.Inventory.ObjectName = $"{c.ObjectName}'s Corpse";
                 chestManager.AddObject(c.Inventory, c.CurrentRoom);
                 creatureManager.RemoveObject(c, c.CurrentRoom);

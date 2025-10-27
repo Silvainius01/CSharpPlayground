@@ -10,7 +10,7 @@ namespace RogueCrawler
     enum Allignment { LawfulGood, LawfulNeutral, LawfulEvil, NeutralGood, TrueNeutral, NeutralEvil, ChaoticGood, ChaoticNeutral, ChoaticEvil }
     enum AttributeType { STR, DEX, CON, INT, WIS, CHA }
     enum Direction { North, East, South, West }
-    enum DungeonChestType { Weapon, Armor, Misc, Any }
+    enum DungeonChestType { Weapon, Armor }
     enum QualityLevel { Low, Normal, Superior, Exalted, Legendary, Divine }
     enum ItemWeaponLargeRate { None, Low, Mid, High, All }
     enum ArmorSlotType { Head, Chest, Arm, Hand, Waist, Foot }

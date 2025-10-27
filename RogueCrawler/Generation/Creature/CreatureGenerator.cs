@@ -54,7 +54,7 @@ namespace RogueCrawler
             };
 
             creature.PrimaryWeapon = GenerateCreatureWeapon(cParams, creature);
-            creature.ArmorSlots = GenerateCreatureArmor(cParams, creature);
+            creature.Armor = GenerateCreatureArmor(cParams, creature);
 
             creature.AddAttributePoints(new CrawlerAttributeSet((attr) =>
             {

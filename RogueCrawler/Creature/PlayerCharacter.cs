@@ -59,7 +59,7 @@ namespace RogueCrawler
             builder.NewlineAppend(tabCount, $"Damage: {GetCombatDamage().ToString("n1")}");
             builder.NewlineAppend(PrimaryWeapon.InspectString($"Weapon Stats:", tabCount));
             builder.NewlineAppend(tabCount, "Armor Stats:");
-            builder.NewlineAppend(tabCount+1, ArmorSlots.BriefString());
+            builder.NewlineAppend(tabCount+1, Armor.BriefString());
             builder.NewlineAppend(MaxAttributes.InspectString("Attributes:", tabCount));
             builder.NewlineAppend(Proficiencies.InspectString("Skills:", tabCount));
 

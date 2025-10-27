@@ -68,7 +68,7 @@ namespace RogueCrawler
         public ItemWeapon PrimaryWeapon { get; set; }
         public ItemWeapon SecondaryWeapon { get; set; }
         public DungeonChest<IItem> Inventory { get; set; } = DungeonChestGenerator.GetEmptyChest();
-        public CreatureArmorSlots ArmorSlots;
+        public CreatureArmorSlots Armor;
 
         public List<CreatureStat> Stats { get; private set; }
         public CrawlerAttributeSet MaxAttributes { get; private set; }
@@ -105,7 +105,7 @@ namespace RogueCrawler
             };
 
             UnarmedWeapon = DungeonGenerator.WeaponGenerator.GenerateUnarmed(this);
-            ArmorSlots = new CreatureArmorSlots();
+            Armor = new CreatureArmorSlots();
         }
 
         public int GetAttribute(AttributeType attr)
@@ -291,7 +291,7 @@ namespace RogueCrawler
             Attributes = c.MaxAttributes.GetSerializable();
             Afflictions = c.Afflictions.GetSerializable();
             Profeciencies = c.Proficiencies.GetSerializable();
-            ArmorSlots = c.ArmorSlots.GetSerializable();
+            ArmorSlots = c.Armor.GetSerializable();
 
             for (int i = 0; i < c.Stats.Count; ++i)
                 CurrentStats.Add(c.Stats[i].Value);
@@ -322,7 +322,7 @@ namespace RogueCrawler
             c.ObjectName = Name;
             c.Level = Level;
             c.PrimaryWeapon = DungeonGenerator.WeaponGenerator.FromSerialized(PrimaryWeapon);
-            c.ArmorSlots = ArmorSlots.GetDeserialized();
+            c.Armor = ArmorSlots.GetDeserialized();
             c.AddAttributePoints(Attributes.GetDeserialized());
             c.AddAffliction(Afflictions.GetDeserialized());
             c.Proficiencies = Profeciencies.GetDeserialized();

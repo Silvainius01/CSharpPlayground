@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using CommandEngine;
 
@@ -46,7 +47,7 @@ namespace RogueCrawler
                         EnumExt<QualityLevel>.RandomValue) // Weight quality
                     {
                         CreatureLevel = dParams.PlayerLevel,
-                        ChestType = DungeonChestType.Weapon,
+                        ChestType = EnumExt<DungeonChestType>.RandomValue,
                         ItemRange = new Vector2Int(2, 5)
                     };
                     chestManager.AddObject(DungeonGenerator.GenerateChest(cParams), room);
@@ -60,11 +61,21 @@ namespace RogueCrawler
             DungeonChest<IItem> chest = new DungeonChest<IItem>()
             {
                 ID = NextId,
-                Type = DungeonChestType.Weapon
+                Type = cParams.ChestType
             };
 
             // Assume a weapons chest for now
-            chest.ObjectName = PopulateWeaponsChest(chest, cParams);
+            switch (cParams.ChestType)
+            {
+                case DungeonChestType.Weapon:
+                    chest.ObjectName = PopulateWeaponsChest(chest, cParams);
+                    break;
+                case DungeonChestType.Armor:
+                    chest.ObjectName = PopulateArmorChest(chest, cParams);
+                    break;
+                default:
+                    throw new ArgumentException($"ChestType {cParams.ChestType} has no population method");
+            }
 
             return chest;
         }
@@ -81,6 +92,18 @@ namespace RogueCrawler
                 chest.AddItem(DungeonGenerator.WeaponGenerator.Generate(weaponProperties));
             }
             return $"{cParams.ItemQuality}Quality {cParams.ItemWeight}Weight WeaponChest";
+        }
+
+        static string PopulateArmorChest(DungeonChest<IItem> chest, DungeonChestGenerationParamerters cParams)
+        {
+            int numItems = CommandEngine.Random.NextInt(cParams.ItemRange, true);
+            for (int i = 0; i < numItems; ++i)
+            {
+                ItemArmorGenerationParameters armorProperties =
+                    ItemArmorGenerationPresets.GetParamsForChest(cParams.CreatureLevel, cParams.ItemQuality);
+                chest.AddItem(DungeonGenerator.ArmorGenerator.Generate(armorProperties));
+            }
+            return $"{cParams.ItemQuality}Quality {cParams.ItemWeight}Weight ArmorChest";
         }
 
         static QualityLevel GetChestItemQuality()

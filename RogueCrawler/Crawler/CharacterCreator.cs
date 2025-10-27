@@ -40,7 +40,7 @@ namespace RogueCrawler
 
             // Generate player armor
             foreach (var slot in EnumExt<ArmorSlotType>.Values)
-                player.ArmorSlots.EquipItem(DungeonGenerator.ArmorGenerator.GenerateUnarmoredSlot(slot));
+                player.Armor.EquipItem(DungeonGenerator.ArmorGenerator.GenerateUnarmoredSlot(slot));
 
             // Always add 1 to CON.
             player.AddAttributePoints(AttributeType.CON, 1);

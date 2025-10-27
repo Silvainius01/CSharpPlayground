@@ -30,8 +30,6 @@ namespace RogueCrawler
                 roomManager.roomLookup.Add(room.Index, room);
             }
 
-
-
             // Generate Connections 
             GenerateDungeonConnections(roomManager, dParams);
 
