@@ -218,7 +218,7 @@ namespace RogueCrawler
         }
         public virtual string InspectString(string prefix, int tabCount)
         {
-            SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString); ;
+            SmartStringBuilder builder = new SmartStringBuilder(DungeonSettings.TabString); ;
 
             if (prefix == string.Empty)
                 prefix = $"[{ID}] {ObjectName} (Lv.{Level}):";
@@ -236,7 +236,7 @@ namespace RogueCrawler
         }
         public virtual string DebugString(string prefix, int tabCount)
         {
-            SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString); ;
+            SmartStringBuilder builder = new SmartStringBuilder(DungeonSettings.TabString); ;
 
             if (prefix == string.Empty)
                 prefix = $"Creature Stats for {ObjectName}:";

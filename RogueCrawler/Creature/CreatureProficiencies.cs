@@ -41,7 +41,7 @@ namespace RogueCrawler
         }
         public string DebugString(string prefix, int tabCount)
         {
-            SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);
+            SmartStringBuilder builder = new SmartStringBuilder(DungeonSettings.TabString);
 
             if (prefix == string.Empty)
                 prefix = "Skills:";
@@ -56,7 +56,7 @@ namespace RogueCrawler
         }
         public string InspectString(string prefix, int tabCount)
         {
-            SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);
+            SmartStringBuilder builder = new SmartStringBuilder(DungeonSettings.TabString);
 
             if (prefix == string.Empty)
                 prefix = "Skills:";
@@ -93,7 +93,7 @@ namespace RogueCrawler
         {
             var skill = GetSkill(skillName);
             if(level >= 0)
-                skill.SkillLevel = Math.Max(level, DungeonCrawlerSettings.MaxSkillLevel);
+                skill.SkillLevel = Math.Max(level, DungeonSettings.MaxSkillLevel);
             if (progress >= 0)
                 skill.SkillProgress = progress;
         }
@@ -103,7 +103,7 @@ namespace RogueCrawler
         public void AddSkill(string skillName, int level, float progress)
         {
             var skill = GetSkill(skillName);
-            skill.SkillLevel = Math.Min(skill.SkillLevel + level, DungeonCrawlerSettings.MaxSkillLevel);
+            skill.SkillLevel = Math.Min(skill.SkillLevel + level, DungeonSettings.MaxSkillLevel);
             skill.SkillProgress += progress;
         }
         public void AddSkillLevel(string skillName, int level) => AddSkill(skillName, level, 0);

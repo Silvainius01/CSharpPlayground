@@ -60,7 +60,7 @@ namespace RogueCrawler
         }
         public string InspectString(string prefix, int tabCount)
         {
-            ColorStringBuilder builder = new ColorStringBuilder(DungeonCrawlerSettings.TabString);
+            ColorStringBuilder builder = new ColorStringBuilder(DungeonSettings.TabString);
 
             if (prefix == string.Empty)
                 prefix = $"Weapon stats for [{ID}] {ItemName}:";
@@ -79,7 +79,7 @@ namespace RogueCrawler
         }
         public string DebugString(string prefix, int tabCount)
         {
-            ColorStringBuilder builder = new ColorStringBuilder(DungeonCrawlerSettings.TabString); ;
+            ColorStringBuilder builder = new ColorStringBuilder(DungeonSettings.TabString); ;
 
             if (prefix == string.Empty)
                 prefix = $"Weapon stats for [{ID}] {ItemName}:";
@@ -103,7 +103,7 @@ namespace RogueCrawler
         }
         public string PlayerWeaponString(string prefix, int tabCount)
         {
-            SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString); ;
+            SmartStringBuilder builder = new SmartStringBuilder(DungeonSettings.TabString); ;
 
             if (prefix == string.Empty)
                 prefix = $"Weapon stats for [{ID}] {ObjectName}:";

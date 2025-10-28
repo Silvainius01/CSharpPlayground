@@ -5,6 +5,7 @@ using System.Text;
 using System.Linq;
 using System.Numerics;
 using System.Transactions;
+using System.Reflection.Metadata.Ecma335;
 
 namespace RogueCrawler
 {
@@ -24,8 +25,8 @@ namespace RogueCrawler
         bool newRoom = false;
         bool dungeonExit = false;
         string firstDungeonMessage = "Entering first dungeon:";
-        SmartStringBuilder staticBuilder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);
-        ColorStringBuilder colorBuilder = new ColorStringBuilder(DungeonCrawlerSettings.TabString);
+        SmartStringBuilder staticBuilder = new SmartStringBuilder(DungeonSettings.TabString);
+        ColorStringBuilder colorBuilder = new ColorStringBuilder(DungeonSettings.TabString);
         List<CreatureTurn> creatureTurnOrder = new List<CreatureTurn>();
 
         CreatureTurn CurrentTurn => creatureTurnOrder[turnIndex];
@@ -61,7 +62,7 @@ namespace RogueCrawler
 
         public override void StartCrawlerState()
         {
-            DungeonSize size = (DungeonSize)Math.Min(EnumExt<DungeonSize>.Count - 1, player.Level / DungeonCrawlerSettings.LevelsPerDungeonSizeUnlock);
+            DungeonSize size = (DungeonSize)Math.Min(EnumExt<DungeonSize>.Count - 1, player.Level / DungeonSettings.LevelsPerDungeonSizeUnlock);
             dungeon = crawlerManager.GenerateDungeon(size);
 
             Console.WriteLine(player.InspectString($"Your Stats:\n  Name: {player.ObjectName}", 0));
@@ -78,7 +79,7 @@ namespace RogueCrawler
         }
         public override CrawlerState UpdateCrawlerState()
         {
-            if(newRoom)
+            if (newRoom)
             {
                 newRoom = false;
                 BuildCreatureTurnOrder();
@@ -241,18 +242,18 @@ namespace RogueCrawler
             staticBuilder.Clear();
             staticBuilder.Append(tabCount, $"Experience break down:");
             tabCount++;
-            staticBuilder.NewlineAppend(tabCount, $"Exploration: {player.ExploredRooms.Count} * {DungeonCrawlerSettings.ExperiencePerExploredRoom}");
+            staticBuilder.NewlineAppend(tabCount, $"Exploration: {player.ExploredRooms.Count} * {DungeonSettings.ExperiencePerExploredRoom}");
             if (player.ExploredRooms.Count >= dungeon.roomManager.rooms.Count)
             {
-                expSources[0] = (int)(expSources[0] * DungeonCrawlerSettings.FullExploreBonus);
+                expSources[0] = (int)(expSources[0] * DungeonSettings.FullExploreBonus);
                 staticBuilder.Append($" x [FULL MAP BONUS]");
             }
             staticBuilder.Append($" = {expSources[0]}");
 
-            staticBuilder.NewlineAppend(tabCount, $"Kills: {player.CreaturesKilled} * {DungeonCrawlerSettings.ExperiencePerCreatureKilled}");
+            staticBuilder.NewlineAppend(tabCount, $"Kills: {player.CreaturesKilled} * {DungeonSettings.ExperiencePerCreatureKilled}");
             if (player.CreaturesKilled >= dungeon.CreatureCount)
             {
-                expSources[1] = (int)(expSources[1] * DungeonCrawlerSettings.FullClearBonus);
+                expSources[1] = (int)(expSources[1] * DungeonSettings.FullClearBonus);
                 staticBuilder.Append($" x [FULL CLEAR BONUS]");
             }
             staticBuilder.Append($" = {expSources[1]}");
@@ -327,7 +328,7 @@ namespace RogueCrawler
                 int newIndex = playerIndex;
                 while (newIndex > 0 && creatureTurnOrder[newIndex - 1].Speed <= player.CombatSpeed.Value)
                     --newIndex;
-                if(newIndex < playerIndex)
+                if (newIndex < playerIndex)
                 {
                     CreatureTurn t = creatureTurnOrder[newIndex];
                     creatureTurnOrder[newIndex] = creatureTurnOrder[playerIndex];
@@ -511,27 +512,38 @@ namespace RogueCrawler
         {
             if (BaseInventoryItemCommand(args, out IItem item, out string errorMsg))
             {
-                ItemWeapon weapon = item as ItemWeapon;
+                ap = 0;
 
-                ap = 1;
-                if (weapon == null)
+                switch (item)
                 {
-                    Console.WriteLine("Item is not a weapon!");
-                    return true;
+                    case ItemWeapon weapon:
+                        if (!player.CanEquipWeapon(weapon))
+                        {
+                            Console.WriteLine("You dont meet the attribute requirements.");
+                        }
+                        if (player.Inventory.RemoveItem(item.ID, out item))
+                        {
+                            ap = 1;
+                            player.Inventory.AddItem(player.PrimaryWeapon);
+                            player.PrimaryWeapon = weapon;
+                            Console.WriteLine(weapon.InspectString("Equipped Weapon:", 0));
+                        }
+                        break;
+                    case ItemArmor armor:
+                        if (player.Inventory.RemoveItem(item.ID, out item))
+                        {
+                            ap = 1;
+                            ItemArmor previousArmor = player.Armor.EquipItem(armor);
+                            if (previousArmor is not null)
+                                player.Inventory.AddItem(previousArmor);
+                        }
+                        break;
+                    default:
+                        Console.WriteLine("ERROR: failed to find weapon in inventory. This'll be a nasty debug.");
+                        break;
+
                 }
-                if (!player.CanEquipWeapon(weapon))
-                {
-                    Console.WriteLine("You dont meet the attribute requirements.");
-                    return true;
-                }
-                if (player.Inventory.RemoveItem(item.ID, out item))
-                {
-                    player.Inventory.AddItem(player.PrimaryWeapon);
-                    player.PrimaryWeapon = weapon;
-                    Console.WriteLine(weapon.InspectString("Equipped Weapon:", 0));
-                    return true;
-                }
-                else Console.WriteLine("ERROR: failed to find weapon in inventory. This'll be a nasty debug.");
+
             }
             else Console.WriteLine(errorMsg);
 
@@ -550,7 +562,7 @@ namespace RogueCrawler
             }
             else Console.WriteLine(errorMsg);
 
-            return true; 
+            return true;
         }
 
         private bool InspectChest(List<string> args, out int ap)
@@ -608,7 +620,7 @@ namespace RogueCrawler
 
         public bool ExitDungeon(List<string> args, out int ap)
         {
-            if(!BaseNoCreatureCommand(out string msg))
+            if (!BaseNoCreatureCommand(out string msg))
             {
                 ap = 0;
                 Console.WriteLine(msg);
@@ -616,8 +628,8 @@ namespace RogueCrawler
             }
 
             int tabCount = 0;
-            int roomExp = player.ExploredRooms.Count * DungeonCrawlerSettings.ExperiencePerExploredRoom;
-            int killExp = player.CreaturesKilled * DungeonCrawlerSettings.ExperiencePerCreatureKilled;
+            int roomExp = player.ExploredRooms.Count * DungeonSettings.ExperiencePerExploredRoom;
+            int killExp = player.CreaturesKilled * DungeonSettings.ExperiencePerCreatureKilled;
             int lootExp = PlayerSellLootMenu(tabCount, out int soldItemCount);
             ap = (int)MathF.Ceiling(player.CombatSpeed.MaxValue);
 
@@ -634,7 +646,7 @@ namespace RogueCrawler
             levelsGained = player.Level - levelsGained;
             if (levelsGained > 0)
             {
-                int attrPoints = levelsGained * DungeonCrawlerSettings.AttributePointsPerCreatureLevel;
+                int attrPoints = levelsGained * DungeonSettings.AttributePointsPerCreatureLevel;
                 // attrPoints += player.MaxAttributes.CreatureLevel;
                 CharacterCreator.AttributePrompt(player, levelsGained, attrPoints, tabCount);
             }
@@ -664,7 +676,7 @@ namespace RogueCrawler
 
         private bool TakeAllItems(List<string> args, out int ap)
         {
-            if(!BaseNoCreatureCommand(out string errorMsg))
+            if (!BaseNoCreatureCommand(out string errorMsg))
             {
                 Console.WriteLine(errorMsg);
                 ap = 0;

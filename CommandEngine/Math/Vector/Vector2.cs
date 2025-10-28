@@ -260,7 +260,7 @@ namespace CommandEngine
 
     public struct Vector2Int
     {
-        private int[] data;
+        private int[] data = new int[2];
         public ref int X
         {
             get { return ref data[0]; }

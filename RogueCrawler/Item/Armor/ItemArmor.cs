@@ -32,16 +32,39 @@ namespace RogueCrawler
 
         public float GetArmorRating()
         {
+            // Base armor rating adds to 10 with full set.
+            float slotModifier = SlotType switch
+            {
+                ArmorSlotType.Head => 2f,
+                ArmorSlotType.Chest => 3f,
+                ArmorSlotType.Arm => 1f,
+                ArmorSlotType.Hand => 1f,
+                ArmorSlotType.Waist => 2f,
+                ArmorSlotType.Foot => 1f,
+                _ => 1.0f
+            };
+
             return MathF.Ceiling(
-                BaseArmorRating 
-                * Material.ArmorRatingModifier 
+                BaseArmorRating
+                * Material.ArmorRatingModifier
                 * MathF.Log2(Quality + 1)
-                * ArmorSlotModifier() 
+                * slotModifier
             );
         }
         public float GetArmorCoverage()
         {
-            return ArmorSlotModifier() * ArmorClassModifier() * Material.ArmorCoverageModifier;
+            // Must add to 1f
+            float slotModifier = SlotType switch
+            {
+                ArmorSlotType.Head => 0.05f,
+                ArmorSlotType.Chest => 0.35f,
+                ArmorSlotType.Arm => 0.10f,
+                ArmorSlotType.Hand => 0.05f,
+                ArmorSlotType.Waist => 0.35f,
+                ArmorSlotType.Foot => 0.10f,
+                _ => 1.0f
+            };
+            return slotModifier * ArmorClassModifier() * Material.ArmorCoverageModifier;
         }
 
         public float GetRawValue() =>
@@ -51,14 +74,14 @@ namespace RogueCrawler
         public string BriefString()
         {
             return $"[{ID}] {ItemName} | " +
-                $"AR: {GetArmorRating().ToString("n1")} | " +
-                $"AC: {GetArmorCoverage().ToString("n1")} | " +
+                $"R: {GetArmorRating().ToString("n1")} | " +
+                $"C: {GetArmorCoverage().ToString("n1")} | " +
                 $"V: {GetValue()} | " +
                 $"W: {Weight.ToString("n1")}";
         }
         public string InspectString(string prefix, int tabCount)
         {
-            SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);
+            SmartStringBuilder builder = new SmartStringBuilder(DungeonSettings.TabString);
 
             if (prefix == string.Empty)
                 prefix = $"Armor stats for [{ID}] {ItemName}:";
@@ -78,7 +101,7 @@ namespace RogueCrawler
         }
         public string DebugString(string prefix, int tabCount)
         {
-            SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);
+            SmartStringBuilder builder = new SmartStringBuilder(DungeonSettings.TabString);
 
             if (prefix == string.Empty)
                 prefix = $"Armor stats for [{ID}] {ItemName}:";
@@ -100,29 +123,16 @@ namespace RogueCrawler
             return builder.ToString();
         }
 
-        float ArmorSlotModifier()
-        {
-            switch (SlotType)
-            {
-                case ArmorSlotType.Head: return 0.05f;
-                case ArmorSlotType.Chest: return 0.35f;
-                case ArmorSlotType.Arm: return 0.10f;
-                case ArmorSlotType.Hand: return 0.05f;
-                case ArmorSlotType.Waist: return 0.35f;
-                case ArmorSlotType.Foot: return 0.10f;
-            }
-            return 1.0f;
-        }
         float ArmorClassModifier()
         {
             float acm = 1.0f;
             switch (ArmorClass)
             {
-                case "Unarmored": acm = 0.0f; break;
-                case "Clothing": acm = 0.1f * Material.ArmorRatingModifier; break;
-                case "Light": acm = 0.33f * Material.ArmorCoverageModifier; break;
-                case "Medium": acm = 0.66f * Material.ArmorCoverageModifier; break;
-                case "Heavy": acm = 1.0f * Material.ArmorCoverageModifier; break;
+                case DungeonConstants.ArmorClassUnarmored: acm = 0.0f; break;
+                case DungeonConstants.ArmorClassClothing: acm = 0.1f; break;
+                case DungeonConstants.ArmorClassLight: acm = 0.33f; break;
+                case DungeonConstants.ArmorClassMedium: acm = 0.66f; break;
+                case DungeonConstants.ArmorClassHeavy: acm = 1.0f; break;
                 default:
                     ConsoleExt.WriteWarning($"Unknown armor class '{ArmorClass}'");
                     break;
@@ -158,7 +168,7 @@ namespace RogueCrawler
 
         public int BaseArmorRating { get; set; }
         public float Condition { get; set; }
-        public float MaxCondition { get; set; } 
+        public float MaxCondition { get; set; }
 
         public ArmorSlotType SlotType { get; set; }
 

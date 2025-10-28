@@ -113,7 +113,7 @@ namespace RogueCrawler
         }
         public string InspectString(string prefix, int tabCount)
         {
-            SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);;
+            SmartStringBuilder builder = new SmartStringBuilder(DungeonSettings.TabString);;
 
             if (prefix == string.Empty)
                 prefix = $"Items in {ObjectName}: ";

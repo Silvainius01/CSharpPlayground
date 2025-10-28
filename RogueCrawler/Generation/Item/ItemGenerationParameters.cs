@@ -14,7 +14,7 @@ namespace RogueCrawler
         protected const int minQualities = 2;
 
         public int CreatureLevel { get; set; } = 0;
-        public Vector2Int WeightRange { get; set; }
+        public Vector2Int WeightRange { get; set; } = new Vector2Int(-1, -1);
         public Vector2Int QualityRange { get; set; } = new Vector2Int(-1, -1);
 
         public ItemMaterial Material { get; set; } = MaterialTypeManager.DefaultMaterial;

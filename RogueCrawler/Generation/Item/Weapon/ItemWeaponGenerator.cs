@@ -38,7 +38,7 @@ namespace RogueCrawler
                 AttributeRequirements = new CrawlerAttributeSet(),
             };
 
-            weapon.AttributeRequirements.SetAttribute(AttributeType.STR, (int)Math.Ceiling(weapon.Weight / DungeonCrawlerSettings.WeaponWeightPerStr));
+            weapon.AttributeRequirements.SetAttribute(AttributeType.STR, (int)Math.Ceiling(weapon.Weight / DungeonSettings.WeaponWeightPerStr));
             weapon.ObjectName = GetWeaponName(weaponTypeData, weapon.IsLargeWeapon);
             weapon.ItemName = GetDisplayName(weapon);
 
@@ -105,20 +105,10 @@ namespace RogueCrawler
         {
             StringBuilder builder = new StringBuilder();
 
-            string QualityPrefix(float quality) => quality switch
-            {
-                <= 0 => "Broken",       // Unusable
-                 < 1 => "Rusty",        // Less than base (0-1)
-                 < 3 => string.Empty,   // Base+ Damage (1-3) 
-                 < 7 => "Superior",     // Double+ (3-7)
-                 < 15 => "Exalted",    // Triple+ (7-15)
-                >= 15 => "Legendary",   // Quadruple+ (15+)
-                _ => "Anomalous"
-            };
-
             //if (weapon.IsLargeWeapon)
             //    builder.Append("Large");
-            builder.Append(QualityPrefix(weapon.Quality));
+            
+            builder.Append(DungeonHelper.GetQualityPrefix(weapon.Quality));
             builder.Append(weapon.Material.Name);
             builder.Append(weapon.ObjectName);
             return builder.ToString();

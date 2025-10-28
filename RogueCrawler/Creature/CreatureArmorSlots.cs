@@ -22,20 +22,22 @@ namespace RogueCrawler
             ArmorSlots = new ReadOnlyDictionary<ArmorSlotType, ItemArmor>(_armorSlots);
         }
 
-        /// <returns>The item previously in the slot, if any.</returns>
+        /// <returns> The item previously in the slot, if any. </returns>
         public ItemArmor EquipItem(ItemArmor item)
         {
             ItemArmor rv = null;
 
-            if(IsSlotOccupied(item.SlotType))
+            if (IsSlotOccupied(item.SlotType))
+            {
                 rv = _armorSlots[item.SlotType];
+            }
 
             _armorSlots[item.SlotType] = item;
             return rv;
         }
 
         public bool IsSlotOccupied(ArmorSlotType slot)
-            => _armorSlots.ContainsKey(slot);
+            => _armorSlots.ContainsKey(slot) && _armorSlots[slot].ArmorClass != DungeonConstants.ArmorClassUnarmored;
         public float GetSlotArmorRating(ArmorSlotType slot)
             => IsSlotOccupied(slot) ? _armorSlots[slot].GetArmorRating() : 0f;
         public float GetSlotArmorCoverage(ArmorSlotType slot)
@@ -76,7 +78,8 @@ namespace RogueCrawler
             {
                 if(IsSlotOccupied(slotType))
                 {
-                    sb.NewlineAppend(_armorSlots[slotType].InspectString(slotType.ToString(), tabCount));
+                    string slotPrefix = $"{slotType}, {_armorSlots[slotType].ItemName}";
+                    sb.NewlineAppend(_armorSlots[slotType].InspectString(slotPrefix, tabCount));
                 }
             }
             --tabCount;

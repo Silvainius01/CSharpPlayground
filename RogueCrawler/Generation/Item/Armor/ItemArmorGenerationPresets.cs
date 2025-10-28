@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Text;
-using static RogueCrawler.DungeonCrawlerSettings;
+using static RogueCrawler.DungeonSettings;
 
 namespace RogueCrawler
 {

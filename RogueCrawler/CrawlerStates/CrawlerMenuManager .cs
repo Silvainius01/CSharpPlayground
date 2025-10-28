@@ -12,7 +12,7 @@ namespace RogueCrawler
     class CrawlerMenuManager : BaseCrawlerStateManager
     {
         CommandModule commands = new CommandModule("\nEnter next menu command");
-        SmartStringBuilder staticBuilder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);
+        SmartStringBuilder staticBuilder = new SmartStringBuilder(DungeonSettings.TabString);
 
         public bool startGame = false;
         public CrawlerMenuManager(DungeonCrawlerManager manager) : base(manager)
@@ -83,6 +83,7 @@ namespace RogueCrawler
             var serializedPlayer = (SerializedCharacter)serializer.Deserialize(new JTokenReader(jObject), typeof(SerializedCharacter));
 
             player = serializedPlayer.GetDeserialized();
+            Console.WriteLine("Successfully loaded character.");
         }
 
         public void TestCommand(List<string> args)

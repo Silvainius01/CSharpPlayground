@@ -34,7 +34,7 @@ namespace RogueCrawler
         {
             int chestCount = chestManager.GetObjectCount(room);
             int creatureCount = creatureManager.GetObjectCount(room);
-            SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);
+            SmartStringBuilder builder = new SmartStringBuilder(DungeonSettings.TabString);
 
             if (prefix == string.Empty)
                 prefix = $"Room {room.Index} Info:";
@@ -84,7 +84,7 @@ namespace RogueCrawler
         {
             int chestCount = chestManager.GetObjectCount(room);
             int creatureCount = creatureManager.GetObjectCount(room);
-            SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);
+            SmartStringBuilder builder = new SmartStringBuilder(DungeonSettings.TabString);
 
             if (prefix == string.Empty)
                 prefix = $"Peeking Room {room.Index}:";
@@ -313,7 +313,7 @@ namespace RogueCrawler
         }
         public string InspectString(string prefix, int tabCount)
         {
-            SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);
+            SmartStringBuilder builder = new SmartStringBuilder(DungeonSettings.TabString);
 
             if (prefix == string.Empty)
                 prefix = "Dungeon Stats:";

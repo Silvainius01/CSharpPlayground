@@ -6,7 +6,7 @@ using CommandEngine;
 
 namespace RogueCrawler
 {
-    static class DungeonCrawlerSettings
+    static class DungeonSettings
     {
         #region Internal Settings
         public const string TabString = "  ";

@@ -22,15 +22,20 @@ namespace RogueCrawler
             ArmorTypeData data = ArmorTypeManager.ArmorByClass[armorClass]
                 .Where(type => type.ArmorSlot == armorSlot).RandomItem();
 
+            float quality = GetQuality(aParams);
+            ItemMaterial material = GetRandomMaterial(data);
+
+
             ItemArmor armor = new ItemArmor()
             {
                 ID = NextId,
                 BaseValue = data.BaseValue,
                 Weight = CommandEngine.Random.NextInt(aParams.WeightRange, true) / 10.0f,
-                Quality = GetQuality(aParams),
-                Material = GetRandomMaterial(data),
-                ItemName = data.ArmorType,
-                ObjectName = data.ArmorClass,
+                Quality = quality,
+                Material = material,
+                ItemName = string.Concat(DungeonHelper.GetQualityPrefix(quality), material.Name, data.ArmorType),
+                ObjectName = data.ArmorType,
+                ArmorClass = data.ArmorClass,
 
                 Condition = 1,
                 MaxCondition = 1,
@@ -54,7 +59,7 @@ namespace RogueCrawler
                 Material = MaterialTypeManager.Materials["Leather"],
                 ItemName = $"Bare {slotName}",
                 ObjectName = $"Bare{slotName}",
-                ArmorClass = "Unarmored",
+                ArmorClass = DungeonConstants.ArmorClassUnarmored,
                 BaseArmorRating = 0,
                 SlotType = slot
             };

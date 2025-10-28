@@ -23,7 +23,7 @@ namespace RogueCrawler
         {
             get => totalScore;
         }
-        public int CreatureLevel => GetAttributeLevel(DungeonCrawlerSettings.AttributePointsPerCreatureLevel);
+        public int CreatureLevel => GetAttributeLevel(DungeonSettings.AttributePointsPerCreatureLevel);
 
         public CrawlerAttributeSet(int baseValue = 0)
         {
@@ -74,7 +74,7 @@ namespace RogueCrawler
         }
         public string InspectString(string prefix, int tabCount)
         {
-            SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString); ;
+            SmartStringBuilder builder = new SmartStringBuilder(DungeonSettings.TabString); ;
 
             if (prefix == string.Empty)
                 prefix = "Attributes:";
@@ -89,7 +89,7 @@ namespace RogueCrawler
         }
         public string DebugString(string prefix, int tabCount)
         {
-            SmartStringBuilder builder = new SmartStringBuilder(DungeonCrawlerSettings.TabString); ;
+            SmartStringBuilder builder = new SmartStringBuilder(DungeonSettings.TabString); ;
 
             if (prefix == string.Empty)
                 prefix = "Attributes:";

@@ -11,7 +11,7 @@ namespace RogueCrawler
         {
             [AttributeType.STR] = "+5 Carry weight. Get bonus damage for Axes and Blunt weapons.",
             [AttributeType.DEX] = "+0.2 Combat Speed. Bonus damage for Blades, Spears, Axes, and Ranged.",
-            [AttributeType.CON] = $"+{DungeonCrawlerSettings.HitPointsPerConstitution} HP. Secondary stat for Blunt weapons.",
+            [AttributeType.CON] = $"+{DungeonSettings.HitPointsPerConstitution} HP. Secondary stat for Blunt weapons.",
         };
 
         static string AttributeTypePrompt = $"Pick an attribute:\n\t{EnumExt<AttributeType>.Values.ToString(" | ")}\n";
@@ -45,10 +45,10 @@ namespace RogueCrawler
             // Always add 1 to CON.
             player.AddAttributePoints(AttributeType.CON, 1);
             // Set the player to the smallest possible level, or the starting level. Whichever is greater.
-            player.Level = Math.Max(player.MaxAttributes.CreatureLevel, DungeonCrawlerSettings.StartingPlayerLevel);
+            player.Level = Math.Max(player.MaxAttributes.CreatureLevel, DungeonSettings.StartingPlayerLevel);
 
             // Allow player to apply any extra points
-            int missingPoints = DungeonCrawlerSettings.AttributePointsPerCreatureLevel * player.Level - player.MaxAttributes.TotalScore;
+            int missingPoints = DungeonSettings.AttributePointsPerCreatureLevel * player.Level - player.MaxAttributes.TotalScore;
             if (missingPoints > 0)
             {
                 AttributePrompt(player, 0, missingPoints, 0);
@@ -61,7 +61,7 @@ namespace RogueCrawler
 
         public static void AttributePrompt(PlayerCharacter player, int levelsGained, int attrPoints, int tabCount)
         {
-            SmartStringBuilder staticBuilder = new SmartStringBuilder(DungeonCrawlerSettings.TabString);
+            SmartStringBuilder staticBuilder = new SmartStringBuilder(DungeonSettings.TabString);
 
             staticBuilder.Clear();
             if(levelsGained > 0)

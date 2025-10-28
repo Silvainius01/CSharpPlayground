@@ -58,7 +58,7 @@ namespace RogueCrawler
 
             creature.AddAttributePoints(new CrawlerAttributeSet((attr) =>
             {
-                int value = Math.Max(creature.PrimaryWeapon.AttributeRequirements[attr], DungeonCrawlerSettings.MinCreatureAttributeScore);
+                int value = Math.Max(creature.PrimaryWeapon.AttributeRequirements[attr], DungeonSettings.MinCreatureAttributeScore);
                 if (value == 0 && attr == AttributeType.CON)
                     return 1; // Ensure CON is at least one
                 return value;
@@ -70,7 +70,7 @@ namespace RogueCrawler
 
             //CrawlerAttributeSet attributes = creature.MaxAttributes;
             List <(AttributeType attribute, float chance)> attributeRanks = GetAttributeImportance(creature);
-            int maxAttrScore = (creature.Level * DungeonCrawlerSettings.AttributePointsPerCreatureLevel);
+            int maxAttrScore = (creature.Level * DungeonSettings.AttributePointsPerCreatureLevel);
 
             // Allocate remaining attribute points
             for (int i = creature.MaxAttributes.TotalScore; i < maxAttrScore; ++i)

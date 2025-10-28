@@ -48,11 +48,11 @@ namespace RogueCrawler
             float bias = 0.0f;
             switch (quality)
             {
-                case QualityLevel.Low: bias = DungeonCrawlerSettings.LowQualityLevelBias; break;
-                case QualityLevel.Normal: bias = DungeonCrawlerSettings.NormalLevelBias; break;
-                case QualityLevel.Superior: bias = DungeonCrawlerSettings.SuperiorLevelBias; break;
-                case QualityLevel.Exalted: bias = DungeonCrawlerSettings.ExaltedLevelBias; break;
-                case QualityLevel.Legendary: bias = DungeonCrawlerSettings.LegendaryLevelBias; break;
+                case QualityLevel.Low: bias = DungeonSettings.LowQualityLevelBias; break;
+                case QualityLevel.Normal: bias = DungeonSettings.NormalLevelBias; break;
+                case QualityLevel.Superior: bias = DungeonSettings.SuperiorLevelBias; break;
+                case QualityLevel.Exalted: bias = DungeonSettings.ExaltedLevelBias; break;
+                case QualityLevel.Legendary: bias = DungeonSettings.LegendaryLevelBias; break;
             }
             return bias;
         }
@@ -65,15 +65,15 @@ namespace RogueCrawler
             var rDouble = CommandEngine.Random.GetMarsagliaBetween(
                 RelativeLootLevelFloor(level),
                 RelativeLootLevelCeiling(level));
-            return Mathc.Clamp((int)Math.Ceiling(rDouble + bias), DungeonCrawlerSettings.MinCreatureLevel, DungeonCrawlerSettings.MaxCreatureLevel);
+            return Mathc.Clamp((int)Math.Ceiling(rDouble + bias), DungeonSettings.MinCreatureLevel, DungeonSettings.MaxCreatureLevel);
         }
 
         public static Vector2Int GetRelativeLootRange(int level)
             => new Vector2Int(RelativeLootLevelFloor(level), RelativeLootLevelCeiling(level));
         public static int RelativeLootLevelFloor(int level)
-            => Mathc.Max(level - DungeonCrawlerSettings.PlayerRelativeLootFloor, DungeonCrawlerSettings.MinCreatureLevel);
+            => Mathc.Max(level - DungeonSettings.PlayerRelativeLootFloor, DungeonSettings.MinCreatureLevel);
         public static int RelativeLootLevelCeiling(int level)
-            => Mathc.Min(level + DungeonCrawlerSettings.PlayerRelativeLootCeiling, DungeonCrawlerSettings.MaxCreatureLevel);
+            => Mathc.Min(level + DungeonSettings.PlayerRelativeLootCeiling, DungeonSettings.MaxCreatureLevel);
 
         /// <summary>Returns a random quality on a predetermined distribution</summary>
         /// <param name="level"></param>
