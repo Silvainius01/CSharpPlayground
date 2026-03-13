@@ -18,6 +18,15 @@
     "IsArmorMaterial": false
   },
   {
+    "Name": "Copper",
+    "ValueModifier": 0.75,
+    "WeightModifier": 0.75,
+    "DurabilityModifer": 0.6,
+    "IsMetallic": true,
+    "IsWeaponMaterial": true,
+    "IsArmorMaterial": true
+  },
+  {
     "Name": "Bronze",
     "ValueModifier": 0.75,
     "WeightModifier": 0.75,

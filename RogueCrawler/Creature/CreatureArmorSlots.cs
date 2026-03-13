@@ -9,6 +9,8 @@ namespace RogueCrawler
 {
     class CreatureArmorSlots : IInspectable, ISerializable<SerializedArmorSlots, CreatureArmorSlots>
     {
+        public static readonly int TotalSlots = EnumExt<ArmorSlotType>.Count;
+
         public float TotalWeight { get => _armorSlots.Sum(kvp => kvp.Value.Weight); }
         public float ArmorRating { get => GetTotalArmorRating(); }
         public float ArmorCoverage { get => GetTotalArmorCoverage(); }

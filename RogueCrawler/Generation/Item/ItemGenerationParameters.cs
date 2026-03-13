@@ -7,7 +7,7 @@ namespace RogueCrawler
 {
     /// <summary>
     /// Required Qualities:
-    /// <para>QualityBias</para>
+    /// <para>Quality, QualityBias</para>
     /// </summary>
     class ItemGenerationParameters : BaseGenerationParameters
     {

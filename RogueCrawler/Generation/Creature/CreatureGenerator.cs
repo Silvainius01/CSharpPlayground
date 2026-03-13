@@ -23,11 +23,11 @@ namespace RogueCrawler
             };
 
             validRooms.Remove(roomManager.EntranceRoom);
-            
+
             // Fill dungeon with the determined creature count
-            for(int i = 0; i < roomManager.rooms.Count; ++i)
+            for (int i = 0; i < roomManager.rooms.Count; ++i)
             {
-                if(CommandEngine.Random.NextFloat() < dParams.CreatureProbability)
+                if (CommandEngine.Random.NextFloat() < dParams.CreatureProbability)
                 {
                     DungeonRoom room = validRooms.RandomItem();
                     Creature creature = Generate(cParams);
@@ -38,7 +38,7 @@ namespace RogueCrawler
                         validRooms.Remove(room);
                 }
             }
-            
+
             return creatureManager;
         }
 
@@ -69,7 +69,7 @@ namespace RogueCrawler
             creature.Proficiencies.AddSkillLevel(creature.PrimaryWeapon.ObjectName, 30);
 
             //CrawlerAttributeSet attributes = creature.MaxAttributes;
-            List <(AttributeType attribute, float chance)> attributeRanks = GetAttributeImportance(creature);
+            List<(AttributeType attribute, float chance)> attributeRanks = GetAttributeImportance(creature);
             int maxAttrScore = (creature.Level * DungeonSettings.AttributePointsPerCreatureLevel);
 
             // Allocate remaining attribute points
@@ -160,7 +160,63 @@ namespace RogueCrawler
         CreatureArmorSlots GenerateCreatureArmor(CreatureGenerationParameters cParams, Creature creature)
         {
             CreatureArmorSlots armorSlots = new CreatureArmorSlots();
-            foreach (ArmorSlotType slot in EnumExt<ArmorSlotType>.Values)
+            Dictionary<ArmorSlotType, float> ArmorSlotChances = new Dictionary<ArmorSlotType, float>();
+            var slotTypes = EnumExt<ArmorSlotType>.Values;
+
+            // Cant be fk'd for an actual distro. So im just gonna normalize it
+            ArmorSlotChances[ArmorSlotType.Head] = 0.334f;
+            ArmorSlotChances[ArmorSlotType.Chest] = 0.5f;
+            ArmorSlotChances[ArmorSlotType.Arm] = 0.15f;
+            ArmorSlotChances[ArmorSlotType.Hand] = 0.2f;
+            ArmorSlotChances[ArmorSlotType.Waist] = 0.334f;
+            ArmorSlotChances[ArmorSlotType.Foot] = 0.25f;
+
+            // This check is redundant, but here incase armor slots get changed.
+            float pTotal = 0.0f;
+            foreach (ArmorSlotType t in EnumExt<ArmorSlotType>.Values)
+            {
+                if (!ArmorSlotChances.ContainsKey(t))
+                    ArmorSlotChances.Add(t, 0.05f);
+                pTotal += ArmorSlotChances[t];
+            }
+
+            ArmorSlotType GetRandomSlot()
+            {
+                if (ArmorSlotChances.Count == 0)
+                    throw new Exception("No armor left to generate!");
+                if(ArmorSlotChances.Count == 1)
+                    return ArmorSlotChances.First().Key;
+
+                float r = CommandEngine.Random.NextFloat();
+                foreach (ArmorSlotType slot in slotTypes)
+                {
+                    float chance = ArmorSlotChances[slot];
+                    // Check against normalized chance
+                    if (ArmorSlotChances.ContainsKey(slot) && r < chance / pTotal)
+                    {
+                        pTotal -= chance;
+                        ArmorSlotChances.Remove(slot);
+                        return slot;
+                    }
+                }
+
+                throw new Exception("Failed to get an armor slot for creature gen");
+            }
+
+            // Roll X times against the armor chance
+            for (int i = 0; i < cParams.MaxArmorPieces; ++i)
+            {
+                if (CommandEngine.Random.NextFloat() < cParams.ArmorChance)
+                {
+                    var aParams = CreatureGenerationPresets.DefaultCreatureArmorParams(cParams);
+                    aParams.PossibleArmorSlots.Add(GetRandomSlot());
+                    var armor = DungeonGenerator.ArmorGenerator.Generate(aParams);
+                    armorSlots.EquipItem(armor);
+                }
+            }
+
+            // Fill remaining slots with unarmored "items"
+            foreach (ArmorSlotType slot in ArmorSlotChances.Keys)
                 armorSlots.EquipItem(DungeonGenerator.ArmorGenerator.GenerateUnarmoredSlot(slot));
             return armorSlots;
         }

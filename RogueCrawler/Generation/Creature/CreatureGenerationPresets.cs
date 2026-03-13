@@ -11,12 +11,12 @@ namespace RogueCrawler
         public static readonly Vector2Int LowHealthRange = new Vector2Int(MinCreatureHitPoints, LowCreatureHitPoints);
         public static readonly Vector2Int MidHealthRange = new Vector2Int(LowCreatureHitPoints, MidCreatureHitPoints);
         public static readonly Vector2Int HighHealthRange = new Vector2Int(MidCreatureHitPoints, MaxCreatureHitPoints);
-        public static readonly Vector2Int RenownedHealthRange = new Vector2Int(MidCreatureHitPoints, MaxCreatureHitPoints+(MaxCreatureHitPoints/2));
-        public static readonly Vector2Int LegendaryHealthRange = new Vector2Int(MidCreatureHitPoints, MaxCreatureHitPoints*2);
+        public static readonly Vector2Int RenownedHealthRange = new Vector2Int(MidCreatureHitPoints, MaxCreatureHitPoints + (MaxCreatureHitPoints / 2));
+        public static readonly Vector2Int LegendaryHealthRange = new Vector2Int(MidCreatureHitPoints, MaxCreatureHitPoints * 2);
         public static readonly Vector2Int AnyHealthRange = new Vector2Int(MinCreatureHitPoints, MaxCreatureHitPoints);
         public static Vector2Int GetBaseHealthRange(QualityLevel level)
         {
-            switch(level)
+            switch (level)
             {
                 case QualityLevel.Low: return LowHealthRange;
                 case QualityLevel.Normal: return MidHealthRange;
@@ -56,7 +56,7 @@ namespace RogueCrawler
                     LevelRange = new Vector2Int(MinCreatureLevel, MaxCreatureLevel),
                     BaseHealthRange = AnyHealthRange,
                     BaseStatRange = new Vector2Int(MinCreatureAttributeScore, MaxCreatureAttributeScore),
-                    WeaponChance = 1.0f 
+                    WeaponChance = 1.0f
                 };
             }
         }
@@ -66,6 +66,13 @@ namespace RogueCrawler
             {
 
             };
+        }
+
+        public static ItemArmorGenerationParameters DefaultCreatureArmorParams(CreatureGenerationParameters cParams)
+        {
+            var aParams = new ItemArmorGenerationParameters(cParams.ArmorQuality, QualityLevel.Normal);
+           
+            return aParams;
         }
     }
 }
