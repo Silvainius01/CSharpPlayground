@@ -1,10 +1,16 @@
-﻿Attributes: STR DEX CON INT WIS CHA
+﻿Attributes: 
+	STR -> Physical strength. Carry load, heavy armor, hand-to-hand damage, and dmg bonus for some weapon types.
+	DEX -> Dexterity. Represents your ability to move yourself, fine motor control, and how familliar you are with your body and its capabilities.
+	CON -> Represents endurance. How much damage you can take through conditioning. Can also be interpreted as your resistance to afflictions from various sources.
+	INT -> Represents intelligence; book smarts. High INT implies your character is knowledgable in magic and how it functions on a technical level.  
+	WIS -> Represents experience. Wisdom influences many aspects of a character. Life experience touches everything your character does, from knowing when to take a blow vs block it, or how much power to put into a spell for optimal effects.
+	CHA -> Represents charisma. Charisma allows you to convince people, gods, and in some cases, even the fabric of reality itself into granting you favorable terms and outcomes.
 
 HP = STR * 2.5 + (CON+1) * 5
 FP = CON * 2.5 + (DEX+1) * 5
 MP = ((INT+CHA) * 2) + (WIS+1) * 5
 
-Combat Speed = 1 + (DEX * 2 + CHA) / 10
+Combat Speed = 1 + (DEX * 2 + WIS + (CHA /2)) / 10
 	Your actions per round is equal to the floor of your speed value.
 	Anything above the floor becomes a % chance to get an additonal action.
 	In battle, combat order is determined by DESCENDING speed order. 

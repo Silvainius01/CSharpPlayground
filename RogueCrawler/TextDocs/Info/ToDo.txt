@@ -1,7 +1,7 @@
 ﻿
 - Finish Martial Weapon System!!
 	- Implement remaining character systems
-		- Armor
+		- Unarmored rating influeced by attributes?
 		- Skill Gain
 		- Fatigue
 			- Figure out costs
@@ -18,6 +18,7 @@
 	- Review weapon damage formula. Starting to look a bit wack.
 	- Review how attributes affect weapons
 		- Current system that gives levels to weapons is fun, but prevents character experimentation.
+	- Current combat is heavily martial focused. Magical characters, when added, will struggle to keep up. Particularly against DEX builds.
 
 - Update dungeon generation
 	- Allow inaccessible rooms to make the layout more interesting.
