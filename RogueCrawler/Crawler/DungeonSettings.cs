@@ -39,7 +39,14 @@ namespace RogueCrawler
         public const int HitPointsPerConstitution = 5;
         #endregion
 
+        #region Skill Settings
+        /// <summary> Maximum base skill level creatures can attain. </summary>
         public const int MaxSkillLevel = 100;
+
+        /// <summary>Maximum BASE armor rating an unarmored slot can reach from the Unarmored skill. Unarmored rating will increase linearly to this maximum.</summary>
+        public const float MaxUnarmoredSkillRating = 5.0f; 
+        #endregion
+
 
         #region Global Generation Settings
         public const float QualityLevelShiftChance = 0.1f;

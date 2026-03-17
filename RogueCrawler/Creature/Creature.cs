@@ -171,6 +171,8 @@ namespace RogueCrawler
             return true;
         }
 
+        public float GetArmorRating() => Armor.GetTotalArmorRating(this);
+
         void UpdateStats()
         {
             foreach (var stat in Stats)
@@ -214,7 +216,13 @@ namespace RogueCrawler
 
         public virtual string BriefString()
         {
-            return $"[{ID}] {ObjectName} ({Level}) | HP: {Health.Value.ToString("n1")} | AR: {Armor.ArmorRating} | DMG: {GetCombatDamage().ToString("n1")} | SPD: {CombatSpeed.Value.ToString("n1")}";
+            StringBuilder builder = new StringBuilder(128);
+            builder.Append($"[{ID}] {ObjectName} ({Level})");
+            builder.Append($" | HP: {Health.Value.ToString("n1")}");
+            builder.Append($" | AR: {GetArmorRating().ToString("n1")}");
+            builder.Append($" | DMG: {GetCombatDamage().ToString("n1")}");
+            builder.Append($" | SPD: {CombatSpeed.Value.ToString("n1")}");
+            return builder.ToString();
         }
         public virtual string InspectString(string prefix, int tabCount)
         {

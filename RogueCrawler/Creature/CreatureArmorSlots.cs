@@ -10,10 +10,11 @@ namespace RogueCrawler
     class CreatureArmorSlots : IInspectable, ISerializable<SerializedArmorSlots, CreatureArmorSlots>
     {
         public static readonly int TotalSlots = EnumExt<ArmorSlotType>.Count;
+        public static readonly float UnarmoredRatingModifier = 100.0f / DungeonSettings.MaxUnarmoredSkillRating;
 
         public float TotalWeight { get => _armorSlots.Sum(kvp => kvp.Value.Weight); }
-        public float ArmorRating { get => GetTotalArmorRating(); }
         public float ArmorCoverage { get => GetTotalArmorCoverage(); }
+        public float BaseArmorRating { get => GetTotalBaseArmorRating(); }
 
         public ReadOnlyDictionary<ArmorSlotType, ItemArmor> ArmorSlots;
 
@@ -40,20 +41,44 @@ namespace RogueCrawler
 
         public bool IsSlotOccupied(ArmorSlotType slot)
             => _armorSlots.ContainsKey(slot) && _armorSlots[slot].ArmorClass != DungeonConstants.ArmorClassUnarmored;
-        public float GetSlotArmorRating(ArmorSlotType slot)
-            => IsSlotOccupied(slot) ? _armorSlots[slot].GetArmorRating() : 0f;
         public float GetSlotArmorCoverage(ArmorSlotType slot)
             => IsSlotOccupied(slot) ? _armorSlots[slot].GetArmorCoverage() : 0f;
+        public float GetSlotBaseArmorRating(ArmorSlotType slot)
+            => IsSlotOccupied(slot) ? _armorSlots[slot].GetArmorRating() : 0f;
+        public float GetSlotArmorRating(ArmorSlotType slot, Creature c)
+        { 
+            if(!_armorSlots.ContainsKey(slot))
+            {
+                ItemArmor armor = _armorSlots[slot];
+                CreatureProficiencies p = c.Proficiencies;
 
+                if(armor.ArmorClass == DungeonConstants.ArmorClassUnarmored)
+                {
+                    // Note: since skill determines both the base rating and the skill bonus, the final maximum rating is 1.25x the number in settings.
+                    // Assuming no enchantments.
+                    float rating = p.GetSkillLevel(armor.ArmorClass) / UnarmoredRatingModifier;
+                    return rating * CreatureSkillUtility.GetArmorSkillBonus(armor, p);
+                }
+                return armor.GetArmorRating() * CreatureSkillUtility.GetArmorSkillBonus(armor, p);
+            }
+            throw new Exception("Armor slots object does not contain an entry");
+        }
 
-        float GetTotalArmorRating()
+        float GetTotalBaseArmorRating()
         {
             float totalRating = 0f;
             foreach (var slot in EnumExt<ArmorSlotType>.Values)
-                totalRating += GetSlotArmorRating(slot);
+                totalRating += GetSlotBaseArmorRating(slot);
             return totalRating;
         }
-        
+        public float GetTotalArmorRating(Creature c)
+        {
+            float totalRating = 0f;
+            foreach (var slot in EnumExt<ArmorSlotType>.Values)
+                totalRating += GetSlotArmorRating(slot, c);
+            return totalRating;
+        }
+
         float GetTotalArmorCoverage()
         {
             float totalCoverage = 0f;
@@ -64,7 +89,7 @@ namespace RogueCrawler
 
         public string BriefString()
         {
-            return $"Armor Rating: {ArmorRating} | Coverage: {ArmorCoverage}";
+            return $"Armor Rating: {BaseArmorRating} | Coverage: {ArmorCoverage}";
         }
         public string InspectString(string prefix, int tabCount)
         {
@@ -76,9 +101,9 @@ namespace RogueCrawler
             sb.Append(tabCount, prefix);
 
             ++tabCount;
-            foreach(var slotType in EnumExt<ArmorSlotType>.Values)
+            foreach (var slotType in EnumExt<ArmorSlotType>.Values)
             {
-                if(IsSlotOccupied(slotType))
+                if (IsSlotOccupied(slotType))
                 {
                     string slotPrefix = $"{slotType}, {_armorSlots[slotType].ItemName}";
                     sb.NewlineAppend(_armorSlots[slotType].InspectString(slotPrefix, tabCount));

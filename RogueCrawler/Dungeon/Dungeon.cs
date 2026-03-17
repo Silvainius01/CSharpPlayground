@@ -108,7 +108,7 @@ namespace RogueCrawler
         public bool DamageCreature(Creature c, float damage, out float receivedDamage)
         {
             // Armor rating
-            float ar = MathF.Floor(c.Armor.ArmorRating);
+            float ar = MathF.Floor(c.GetArmorRating());
             receivedDamage = damage * (damage / (2 * ar + damage));
             receivedDamage = Mathc.Truncate(receivedDamage, 1);
 
