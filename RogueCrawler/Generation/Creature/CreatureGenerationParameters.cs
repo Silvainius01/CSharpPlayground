@@ -21,14 +21,14 @@ namespace RogueCrawler
         public int MaxArmorPieces { get; set; } = -1;
         public float ArmorChance { get; set; } = -1;
 
-        private const int numQualities = 4;
-        public QualityLevel WeaponQuality { get => Qualities[0]; }
-        public QualityLevel WeaponWeight { get => Qualities[1]; }
+        public const int numQualities = 4;
+        public QualityLevel QualityBias { get => Qualities[0]; }
+        public QualityLevel WeaponQuality { get => Qualities[1]; }
         public QualityLevel CreatureDifficulty { get => Qualities[2]; }
         public QualityLevel ArmorQuality { get => Qualities[3]; }
 
-        public CreatureGenerationParameters(int numQualities, QualityLevel quality) : base(numQualities, quality) { }
-        public CreatureGenerationParameters(int numQualities, Func<QualityLevel> DetermineQuality) : base(numQualities, DetermineQuality) { }
+        public CreatureGenerationParameters(QualityLevel quality) : base(numQualities, quality) { }
+        public CreatureGenerationParameters(Func<QualityLevel> DetermineQuality) : base(numQualities, DetermineQuality) { }
         public CreatureGenerationParameters(IEnumerable<QualityLevel> qualities) : base(qualities) { }
         public CreatureGenerationParameters(params QualityLevel[] qualities) : base(qualities) { }
 

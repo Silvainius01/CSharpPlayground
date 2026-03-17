@@ -389,7 +389,31 @@ namespace RogueCrawler
         {
             if (BaseCreatureCommand(args, out var creature, out string errorMsg))
             {
-                Console.WriteLine(creature.InspectString(string.Empty, 0));
+                if (args.Count > 1)
+                {
+                    string cstr = $"[{creature.ID}]{creature.ObjectName}";
+                    switch (args[1].ToLower())
+                    {
+                        case "ar":
+                        case "armor":
+                            Console.WriteLine(creature.Armor.InspectString($"{cstr} Armor Stats:", 0));
+                            break;
+                        case "at":
+                        case "attr":
+                        case "attributes":
+                            Console.WriteLine(creature.MaxAttributes.InspectString($"{cstr} Attributes:", 0));
+                            break;
+                        case "w":
+                        case "weapon":
+                            Console.WriteLine(creature.Armor.InspectString($"{cstr} Weapon Stats:", 0));
+                            break;
+                        case "s":
+                        case "skills":
+                            Console.WriteLine(creature.Armor.InspectString($"{cstr} Skills:", 0));
+                            break;
+                    }
+                }
+                else Console.WriteLine(creature.InspectString(string.Empty, 0));
             }
             else Console.WriteLine(errorMsg);
 

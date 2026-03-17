@@ -17,9 +17,16 @@ namespace RogueCrawler
         {
             switch (weightRange)
             {
-                case QualityLevel.Low: return LightWeight;
-                case QualityLevel.Normal: return MidWeight;
-                case QualityLevel.Superior: return HeavyWeight;
+                case QualityLevel.Low:
+                    return HeavyWeight;
+                case QualityLevel.Normal:
+                case QualityLevel.Superior:
+                    return MidWeight;
+                case QualityLevel.Exalted:
+                    return AnyWeight;
+                case QualityLevel.Legendary:
+                case QualityLevel.Divine: 
+                    return LightWeight;
             }
             return AnyWeight;
         }

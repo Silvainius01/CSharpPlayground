@@ -75,7 +75,7 @@ namespace RogueCrawler
         public static int RelativeLootLevelCeiling(int level)
             => Mathc.Min(level + DungeonSettings.PlayerRelativeLootCeiling, DungeonSettings.MaxCreatureLevel);
 
-        /// <summary>Returns a random quality on a predetermined distribution</summary>
+        /// <summary>Returns a random quality on a predetermined distribution. Cannot return Divine quality.</summary>
         /// <param name="level"></param>
         /// <returns></returns>
         public static QualityLevel GetRandomQuality() => CommandEngine.Random.NextFloat() switch
@@ -88,10 +88,48 @@ namespace RogueCrawler
         };
         public static Vector2Int GetBaseQualityRange(QualityLevel quality)
         {
+            // 2^(x+1) - 1. Mersenne my beloved
             int Qmax = (2 << (int)quality) - 1;
+            // Lowerbound is the floor of Log2(qMax)
             int Qmin = (Qmax + 1) / 2 - 1;
 
+
+            Qmax = Mathc.Max(Qmax, DungeonSettings.MaxWeaponQuality);
             return new Vector2Int(Qmin, Qmax);
+        }
+        public static float GetBiasedRange(Vector2Int range, QualityLevel qualityBias)
+        {
+            float bias = 0;
+            float quality = 0;
+
+            switch (qualityBias)
+            {
+                case QualityLevel.Low:
+                    bias = -0.25f;
+                    break;
+                case QualityLevel.Normal:
+                    break;
+                case QualityLevel.Superior:
+                    bias = 0.25f;
+                    break;
+                case QualityLevel.Exalted:
+                    bias = 0.25f;
+                    range.Y += 1;
+                    break;
+                case QualityLevel.Legendary:
+                    bias = 0.25f;
+                    range.X += 1;
+                    range.Y += 1;
+                    break;
+                case QualityLevel.Divine:
+                    break;
+                default:
+                    throw new ArgumentException($"Attempted to generate bias for unknown quality {EnumExt<QualityLevel>.GetName(qualityBias)}");
+            }
+
+            bias = (range.Y - range.X) / 2 * bias;
+            quality = CommandEngine.Random.GetMarsagliaBetween(range) + bias;
+            return Mathc.Clamp(quality, 0, 30);
         }
         public static float GetItemQuality(QualityLevel baseQuality, QualityLevel qualityBias)
         {
@@ -118,6 +156,10 @@ namespace RogueCrawler
                     qRange.X += 1;
                     qRange.Y += 1;
                     break;
+                case QualityLevel.Divine:
+                    break;
+                default:
+                    throw new ArgumentException($"Attempted to generate bias for unknown quality {EnumExt<QualityLevel>.GetName(qualityBias)}");
             }
 
             bias = (qRange.Y - qRange.X) / 2 * bias;

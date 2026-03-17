@@ -152,7 +152,7 @@ namespace RogueCrawler
             if (CommandEngine.Random.NextFloat() < cParams.WeaponChance)
             {
                 ItemWeaponGenerationParameters wParams =
-                    ItemWeaponGenerationPresets.GetParamsForCreature(creature, cParams.WeaponQuality, cParams.WeaponWeight);
+                    ItemWeaponGenerationPresets.GetParamsForCreature(creature, cParams.WeaponQuality, cParams.QualityBias);
                 weapon = DungeonGenerator.WeaponGenerator.Generate(wParams);
             }
             return weapon;
@@ -184,19 +184,28 @@ namespace RogueCrawler
             {
                 if (ArmorSlotChances.Count == 0)
                     throw new Exception("No armor left to generate!");
-                if(ArmorSlotChances.Count == 1)
+                if (ArmorSlotChances.Count == 1)
                     return ArmorSlotChances.First().Key;
 
+                float t = 0.0f;
                 float r = CommandEngine.Random.NextFloat();
                 foreach (ArmorSlotType slot in slotTypes)
                 {
-                    float chance = ArmorSlotChances[slot];
-                    // Check against normalized chance
-                    if (ArmorSlotChances.ContainsKey(slot) && r < chance / pTotal)
+                    if (ArmorSlotChances.ContainsKey(slot))
                     {
-                        pTotal -= chance;
-                        ArmorSlotChances.Remove(slot);
-                        return slot;
+                        // Check against normalized chance
+                        float baseChance = ArmorSlotChances[slot];
+                        float chance = baseChance / pTotal;
+                        if (r < t + chance)
+                        {
+                            pTotal -= baseChance;
+                            ArmorSlotChances.Remove(slot);
+                            return slot;
+                        }
+                        else
+                        { // Add chance to the fail state to check next bracket
+                            t += chance;
+                        }
                     }
                 }
 

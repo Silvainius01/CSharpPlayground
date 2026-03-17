@@ -214,7 +214,7 @@ namespace RogueCrawler
 
         public virtual string BriefString()
         {
-            return $"[{ID}] {ObjectName} ({Level}) | HP: {Health.Value.ToString("n1")} | DMG: {GetCombatDamage().ToString("n1")} | SPD: {CombatSpeed.Value.ToString("n1")}";
+            return $"[{ID}] {ObjectName} ({Level}) | HP: {Health.Value.ToString("n1")} | AR: {Armor.ArmorRating} | DMG: {GetCombatDamage().ToString("n1")} | SPD: {CombatSpeed.Value.ToString("n1")}";
         }
         public virtual string InspectString(string prefix, int tabCount)
         {
@@ -230,6 +230,8 @@ namespace RogueCrawler
             builder.NewlineAppend(tabCount, $"DMG: {GetCombatDamage().ToString("n1")}");
             builder.NewlineAppend(tabCount, $"Weapon:");
             builder.NewlineAppend(tabCount + 1, PrimaryWeapon.BriefString());
+            builder.NewlineAppend(tabCount, "Armor: ");
+            builder.NewlineAppend(tabCount + 1, Armor.BriefString());
             --tabCount;
 
             return builder.ToString();
@@ -250,6 +252,7 @@ namespace RogueCrawler
             builder.NewlineAppend(PrimaryWeapon.DebugString($"Weapon Stats:", tabCount));
             builder.NewlineAppend(MaxAttributes.DebugString("Atributes:", tabCount));
             builder.NewlineAppend(Proficiencies.DebugString("Skills:", tabCount));
+            builder.NewlineAppend(Armor.DebugString("Armor:", tabCount));
 
             return builder.ToString();
         }

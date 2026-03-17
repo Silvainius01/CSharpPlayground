@@ -85,7 +85,7 @@ namespace RogueCrawler
         #region Weapon Generation Settings
         /// <summary>Determines if weapons of quality level 0 can be generated</summary>
         public const bool AllowBrokenWeapons = true;
-        /// <summary>The maximum quality level a weapon can be</summary>
+        /// <summary>The maximum quality level a weapon can be.</summary>
         public const int MaxWeaponQuality = 32;
 
         /// <summary>The most a weapon can weigh</summary>

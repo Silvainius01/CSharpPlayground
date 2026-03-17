@@ -51,7 +51,7 @@ namespace RogueCrawler
             get
             {
                 var q = DungeonChestGenerationPresets.GetRandomQuality();
-                return new CreatureGenerationParameters(2, () => EnumExt<QualityLevel>.RandomValue)
+                return new CreatureGenerationParameters(() => EnumExt<QualityLevel>.RandomValue)
                 {
                     LevelRange = new Vector2Int(MinCreatureLevel, MaxCreatureLevel),
                     BaseHealthRange = AnyHealthRange,
@@ -70,7 +70,7 @@ namespace RogueCrawler
 
         public static ItemArmorGenerationParameters DefaultCreatureArmorParams(CreatureGenerationParameters cParams)
         {
-            var aParams = new ItemArmorGenerationParameters(cParams.ArmorQuality, QualityLevel.Normal);
+            var aParams = new ItemArmorGenerationParameters(cParams.ArmorQuality, cParams.Qualities[1]);
            
             return aParams;
         }
