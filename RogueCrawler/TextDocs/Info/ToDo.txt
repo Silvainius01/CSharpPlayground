@@ -18,13 +18,13 @@
 	- Review weapon damage formula. Starting to look a bit wack.
 	- Review how attributes affect weapons
 		- Current system that gives levels to weapons is fun, but prevents character experimentation.
-	- Current combat is heavily martial focused. Magical characters, when added, will struggle to keep up. Particularly against DEX builds.
 
 - Update dungeon generation
 	- Allow inaccessible rooms to make the layout more interesting.
 	- Review 
 
 - Implement magic (oh god this will be hard af)
+	- Current combat is heavily martial focused. Magical characters, when added, will struggle to keep up. Particularly against DEX builds.
 	- Implement character systems
 		- Mana
 	- First, gotta fkn design the damn system. 

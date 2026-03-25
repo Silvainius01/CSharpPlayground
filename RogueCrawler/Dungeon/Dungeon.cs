@@ -105,12 +105,17 @@ namespace RogueCrawler
             return builder.ToString();
         }
 
-        public bool DamageCreature(Creature c, float damage, out float receivedDamage)
+        public bool DamageCreature(Creature c, DamageInstance dmg, out float receivedDamage)
         {
-            // Armor rating
-            float ar = MathF.Floor(c.GetArmorRating());
-            receivedDamage = damage * (damage / (2 * ar + damage));
-            receivedDamage = Mathc.Truncate(receivedDamage, 1);
+
+            if (dmg.DamageType != DamageType.True)
+            {
+                // Armor rating
+                float ar = MathF.Floor(c.GetArmorRating());
+                receivedDamage = dmg.Amount * (dmg.Amount / (2 * ar + dmg.Amount));
+                receivedDamage = Mathc.Truncate(receivedDamage, 1);
+            }
+            else receivedDamage = dmg.Amount;
 
             c.Health.AddValue(-receivedDamage);
 
@@ -327,6 +332,21 @@ namespace RogueCrawler
             return builder.ToString();
         }
         public string DebugString(string prefix, int tabCount)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ColorStringBuilder BriefColor(ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ColorStringBuilder InspectColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ColorStringBuilder DebugColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
         {
             throw new NotImplementedException();
         }

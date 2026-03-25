@@ -14,38 +14,50 @@ namespace CommandEngine
         public const string DefaultNewlineString = "\n";
         public const ConsoleColor DefaultColor = ConsoleColor.Gray;
 
-        static Queue<ColorStringBuilder> UnlockedBuilders = new Queue<ColorStringBuilder>();
-        static Dictionary<string, ColorStringBuilder> LockedBuilders = new Dictionary<string, ColorStringBuilder>();
+        static Queue<SmartStringBuilder> UnlockedBuilders = new Queue<SmartStringBuilder>();
+        static Dictionary<string, SmartStringBuilder> LockedBuilders = new Dictionary<string, SmartStringBuilder>();
 
-        public static ColorStringBuilder GetBuilder(string key)
+        static Queue<ColorStringBuilder> UnlockedColorBuilders = new Queue<ColorStringBuilder>();
+        static Dictionary<string, ColorStringBuilder> LockedColorBuilders = new Dictionary<string, ColorStringBuilder>();
+
+        static T GetBuilder<T>(string key, Queue<T> Unlocked, Dictionary<string, T> Locked, Func<T> GetNew) where T : class
         {
-            if (LockedBuilders.ContainsKey(key))
-                throw new InvalidOperationException($"StringBuilder with key '{key}' is already in use.");
+            if (Locked.ContainsKey(key))
+                throw new ArgumentException($"Builder with key '{key}' is already in use.");
 
-            ColorStringBuilder sb = UnlockedBuilders.Any()
-                ? UnlockedBuilders.Dequeue()
-                : new ColorStringBuilder();
+            T builder = Unlocked.Any()
+                ? Unlocked.Dequeue()
+                : GetNew();
 
-            LockedBuilders.Add(key, sb);
-            return sb;
+            Locked.Add(key, builder);
+            return builder;
         }
-
-        public static void ReturnBuilder(string key)
+        public static void ReturnBuilder<T>(string key, Queue<T> Unlocked, Dictionary<string, T> Locked, Action<T> Reset) where T : class
         {
-            if (!LockedBuilders.ContainsKey(key))
-                throw new InvalidOperationException($"StringBuilder with key '{key}' does is not in use.");
+            if (!Locked.ContainsKey(key))
+                throw new InvalidOperationException($"Builder with key '{key}' does is not in use.");
 
-            ColorStringBuilder builder = LockedBuilders[key];
-
-            // Reset ColorBuilder to default
-            builder.Clear();
-            builder.TabString = DefaultTabString;
-            builder.NewlineString = DefaultNewlineString;
-            builder.SetColor(DefaultColor);
+            T builder = Locked[key];
+            Reset(builder);
 
             // Unlock, and add to pool.
-            LockedBuilders.Remove(key);
-            UnlockedBuilders.Enqueue(builder);
+            Locked.Remove(key);
+            Unlocked.Enqueue(builder);
+        }
+
+        public static ColorStringBuilder GetColorBuilder(string key)
+        {
+            return GetBuilder(key, UnlockedColorBuilders, LockedColorBuilders, () => new ColorStringBuilder());
+        }
+        public static void ReturnColorBuilder(string key)
+        {
+            ReturnBuilder(key, UnlockedColorBuilders, LockedColorBuilders, (builder) =>
+            {
+                builder.Clear();
+                builder.TabString = DefaultTabString;
+                builder.NewlineString = DefaultNewlineString;
+                builder.SetColor(DefaultColor);
+            });
         }
 
         public static bool ContainsKey(string key) => LockedBuilders.ContainsKey(key);
@@ -61,25 +73,25 @@ namespace CommandEngine
         public ManagedStringBuilder(string key)
         {
             CheckKey();
-            Builder = StringBuilderManager.GetBuilder(key);
+            Builder = StringBuilderManager.GetColorBuilder(key);
         }
         public ManagedStringBuilder(string key, string tabString)
         {
             CheckKey();
-            Builder = StringBuilderManager.GetBuilder(key);
+            Builder = StringBuilderManager.GetColorBuilder(key);
             Builder.TabString = tabString;
         }
         public ManagedStringBuilder(string key, string startString, ConsoleColor startColor)
         {
             CheckKey();
-            Builder = StringBuilderManager.GetBuilder(key);
+            Builder = StringBuilderManager.GetColorBuilder(key);
             Builder.Append(startString);
             Builder.SetColor(startColor);
         }
         public ManagedStringBuilder(string key, string tabString, string startString, ConsoleColor startColor)
         {
             CheckKey();
-            Builder = StringBuilderManager.GetBuilder(key);
+            Builder = StringBuilderManager.GetColorBuilder(key);
             Builder.TabString = tabString;
             Builder.Append(startString);
             Builder.SetColor(startColor);
@@ -90,7 +102,7 @@ namespace CommandEngine
             if (_disposed)
                 return;
 
-            StringBuilderManager.ReturnBuilder(key);
+            StringBuilderManager.ReturnColorBuilder(key);
             this.Builder = null;
 
             _disposed = true;

@@ -124,5 +124,20 @@ namespace RogueCrawler
         {
             return Attributes.GetEnumerator();
         }
+
+        public ColorStringBuilder BriefColor(ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ColorStringBuilder InspectColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ColorStringBuilder DebugColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

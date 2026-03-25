@@ -160,6 +160,50 @@ namespace RogueCrawler
 
             return s;
         }
+
+        public ColorStringBuilder BriefColor(ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            var player = DungeonCrawlerManager.Instance.player;
+            var slotted = player.Armor.IsSlotOccupied(SlotType) ? player.Armor.ArmorSlots[SlotType] : null;
+            float slottedRating = player.Armor.GetSlotArmorRating(SlotType, player);
+            float ourRating = player.Armor.GetArmorRatingOf(this, player.Proficiencies);
+            float arRatio = slottedRating > 0.0f ? ourRating / slottedRating : 2.0f;
+            float weightRatio = slotted is null ? 1.0f : Weight / slotted.Weight;
+            ColorStringBuilder cb = new ColorStringBuilder(initialColor);
+
+            ConsoleColor ratingColor = initialColor;
+            if (arRatio > 1.0f)
+                ratingColor = ConsoleColor.Green;
+            else if (arRatio < 0.75f)
+                ratingColor = ConsoleColor.Red;
+            else if (arRatio < 0.95f)
+                ratingColor = ConsoleColor.Yellow;
+
+            ConsoleColor weightColor = initialColor;
+            if (weightRatio < 1.0f)
+                weightColor = ConsoleColor.Green;
+            else if (weightRatio > 1.05 && weightRatio < 1.25f)
+                weightColor = ConsoleColor.Yellow;
+            else // if (weightRatio > 1.25f)
+                weightColor = ConsoleColor.Red;
+
+
+            cb.Append($"[{ID}] {ItemName} | R: ");
+            cb.Append(GetArmorRating().ToString("n1"), ratingColor);
+            cb.Append($" | C: {GetArmorCoverage().ToString("n1")} | ", initialColor);
+            cb.Append($"V: {GetValue()} | W:");
+            cb.Append(Weight.ToString("n1"), weightColor);
+
+            return cb;
+        }
+        public ColorStringBuilder InspectColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            throw new NotImplementedException();
+        }
+        public ColorStringBuilder DebugColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     class SerializedArmor : SerializedItem

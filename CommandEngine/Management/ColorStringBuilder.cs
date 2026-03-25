@@ -26,6 +26,7 @@ namespace CommandEngine
         List<ColoredString> strings = new List<ColoredString>();
 
         public ColorStringBuilder() { }
+        public ColorStringBuilder(ConsoleColor startcolor) { currColor = startcolor; }
         public ColorStringBuilder(string tabString) : base(tabString) { }
         public ColorStringBuilder(string startString, ConsoleColor startColor)
         {
@@ -38,82 +39,99 @@ namespace CommandEngine
             currColor = startColor;
         }
 
-        void BaseAppend(ConsoleColor color)
+        void SaveCurrent()
         {
-            if (color != currColor && builder.Length > 0)
+            if (builder.Length > 0)
             {
                 strings.Add(new ColoredString(builder.ToString(), currColor));
                 builder.Clear();
             }
+        }
+        internal void SetColor(ConsoleColor color)
+        {
+            if (color != currColor)
+                SaveCurrent();
             currColor = color;
         }
 
         public ColorStringBuilder Append(string str, ConsoleColor color)
         {
-            BaseAppend(color);
+            SetColor(color);
             Append(str);
             return this;
         }
         public ColorStringBuilder AppendLine(string str, ConsoleColor color)
         {
-            BaseAppend(color);
+            SetColor(color);
             AppendLine(str);
             return this;
         }
         public ColorStringBuilder AppendNewline(string str, ConsoleColor color)
         {
-            BaseAppend(color);
+            SetColor(color);
             Append($"{NewlineString}{str}");
             return this;
         }
         public ColorStringBuilder NewlineAppend(string str, ConsoleColor color)
         {
-            BaseAppend(color);
+            SetColor(color);
             Append($"{NewlineString}{str}");
             return this;
         }
 
         public ColorStringBuilder Append(int tabCount, string str, ConsoleColor color)
         {
-            BaseAppend(color);
+            SetColor(color);
             CheckCapacity(str.Length, tabCount);
-            
+
             AppendTabs(tabCount);
             Append(str);
             return this;
         }
         public ColorStringBuilder AppendLine(int tabCount, string str, ConsoleColor color)
         {
-            BaseAppend(color);
+            SetColor(color);
             CheckCapacity(str.Length + 2, tabCount);
-            
+
             AppendTabs(tabCount);
             AppendLine(str);
             return this;
         }
         public ColorStringBuilder AppendNewline(int tabCount, string str, ConsoleColor color)
         {
-            BaseAppend(color);
+            SetColor(color);
             CheckCapacity(str.Length + NewlineString.Length, tabCount);
-            
+
             AppendTabs(tabCount);
             Append($"{str}{NewlineString}");
             return this;
         }
         public ColorStringBuilder NewlineAppend(int tabCount, string str, ConsoleColor color)
         {
-            BaseAppend(color);
+            SetColor(color);
             CheckCapacity(str.Length + NewlineString.Length, tabCount);
-            
+
             Append(NewlineString);
             AppendTabs(tabCount);
             Append(str);
             return this;
         }
 
-        internal void SetColor(ConsoleColor color)
+        /// <summary>Appends a colored string to this builder, but doesnt set the color. </summary>
+        /// <param name="cstr"></param>
+        /// <returns></returns>
+        public ColorStringBuilder Append(ColoredString cstr)
         {
-            currColor = color;
+            SaveCurrent();
+            strings.Add(cstr);
+            return this;
+        }
+        public ColorStringBuilder Append(ColorStringBuilder cb)
+        {
+            foreach (var cstr in cb.strings)
+                Append(cstr);
+            Append(cb.ToString(), cb.currColor);
+            return this;
         }
 
         public void Write(bool clear = false)
@@ -148,4 +166,3 @@ namespace CommandEngine
         }
     }
 }
- 

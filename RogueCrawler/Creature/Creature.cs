@@ -112,7 +112,7 @@ namespace RogueCrawler
         {
             return MaxAttributes[attr] + Afflictions[attr];
         }
-        public float GetAttributePercent(AttributeType attr, float mult=1.0f)
+        public float GetAttributePercent(AttributeType attr, float mult = 1.0f)
         {
             return GetAttribute(attr) / (float)MaxAttributes[attr];
         }
@@ -132,12 +132,19 @@ namespace RogueCrawler
                 ? PrimaryWeapon
                 : UnarmedWeapon;
         }
-        public float GetCombatDamage()
+        public DamageInstance GetCombatDamage()
         {
             ItemWeapon weapon = GetCombatWeapon();
-            float weaponDamage = weapon.GetWeaponDamage(this);
+            float damage = weapon.GetWeaponDamage()
+                + GetAttribute(weapon.MajorAttribute) / 2.0f
+                + GetAttribute(weapon.MinorAttribute) / 4.0f;
             float skillBonus = 1 + CreatureSkillUtility.GetWeaponSkillBonus(weapon, Proficiencies);
-            return weaponDamage * skillBonus;
+
+            return new DamageInstance()
+            {
+                Amount = damage * skillBonus,
+                DamageType = DamageType.Physical,
+            };
         }
         public float GetCombatHitChance()
         {
@@ -220,7 +227,7 @@ namespace RogueCrawler
             builder.Append($"[{ID}] {ObjectName} ({Level})");
             builder.Append($" | HP: {Health.Value.ToString("n1")}");
             builder.Append($" | AR: {GetArmorRating().ToString("n1")}");
-            builder.Append($" | DMG: {GetCombatDamage().ToString("n1")}");
+            builder.Append($" | DMG: {GetCombatDamage().Amount.ToString("n1")}");
             builder.Append($" | SPD: {CombatSpeed.Value.ToString("n1")}");
             return builder.ToString();
         }
@@ -235,7 +242,7 @@ namespace RogueCrawler
 
             tabCount++;
             builder.NewlineAppend(tabCount, $"HP: {Health.Value.ToString("n1")}");
-            builder.NewlineAppend(tabCount, $"DMG: {GetCombatDamage().ToString("n1")}");
+            builder.NewlineAppend(tabCount, $"DMG: {GetCombatDamage().Amount.ToString("n1")}");
             builder.NewlineAppend(tabCount, $"Weapon:");
             builder.NewlineAppend(tabCount + 1, PrimaryWeapon.BriefString());
             builder.NewlineAppend(tabCount, "Armor: ");
@@ -272,6 +279,21 @@ namespace RogueCrawler
         public virtual SerializedCreature GetSerializable()
         {
             return new SerializedCreature(this);
+        }
+
+        public ColorStringBuilder BriefColor(ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ColorStringBuilder InspectColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ColorStringBuilder DebugColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            throw new NotImplementedException();
         }
 
         #region Overloads

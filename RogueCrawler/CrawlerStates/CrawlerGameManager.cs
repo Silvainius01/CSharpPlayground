@@ -6,6 +6,7 @@ using System.Linq;
 using System.Numerics;
 using System.Transactions;
 using System.Reflection.Metadata.Ecma335;
+using System.Net;
 
 namespace RogueCrawler
 {
@@ -24,6 +25,7 @@ namespace RogueCrawler
         int turnIndex = 0;
         bool newRoom = false;
         bool dungeonExit = false;
+        bool allowCheats = false;
         string firstDungeonMessage = "Entering first dungeon:";
         SmartStringBuilder staticBuilder = new SmartStringBuilder(DungeonSettings.TabString);
         ColorStringBuilder colorBuilder = new ColorStringBuilder(DungeonSettings.TabString);
@@ -58,6 +60,11 @@ namespace RogueCrawler
             // No Creature Commands
             commands.Add(new ConsoleCommand<int>("rest", Rest));
             commands.Add(new ConsoleCommand<int>("takeall", TakeAllItems));
+
+            // Cheats
+            commands.Add(new ConsoleCommand<int>("toggleCheats", ToggleCheats));
+            commands.Add(new ConsoleCommand<int>("kill", Kill));
+
         }
 
         public override void StartCrawlerState()
@@ -274,7 +281,6 @@ namespace RogueCrawler
 
         private bool TakeCreatureTurn(Creature c)
         {
-            float damage = c.GetCombatDamage();
             bool playerDied = dungeon.DamageCreature(player, c.GetCombatDamage(), out float rDamage);
 
             staticBuilder.Clear();
@@ -448,8 +454,10 @@ namespace RogueCrawler
 
             if (args.Count == 0)
             {
+                var cb = player.Inventory.InspectColor("Items in Inventory: ", 0);
                 string str = player.Inventory.InspectString("Items in Inventory:", 0);
-                Console.WriteLine(str);
+                //Console.WriteLine(str);
+                cb.WriteLine(true);
                 return true;
             }
             else if (BaseInventoryItemCommand(args, out IItem item, out string errorMsg))
@@ -609,13 +617,23 @@ namespace RogueCrawler
             if (BaseCreatureCommand(args, out var creature, out string errorMsg))
             {
                 ap = 1;
+                DamageInstance playerDamage = player.GetCombatDamage();
                 player.Fatigue.AddValue(-player.GetAttackFatigueCost());
-                if (dungeon.DamageCreature(creature, player.GetCombatDamage(), out float rDamage))
+                if (dungeon.DamageCreature(creature, playerDamage, out float rDamage))
                 {
+                    string msg = $"{creature.ObjectName} died!";
+                    if (rDamage < playerDamage.Amount)
+                        msg += $" Damage dealt: {playerDamage.Amount.ToString("n1")} - {(playerDamage.Amount - rDamage).ToString("n1")}";
                     ++player.CreaturesKilled;
-                    Console.WriteLine($"{creature.ObjectName} died!");
+                    Console.WriteLine(msg);
                 }
-                else Console.WriteLine($"{creature.ObjectName} HP Left: {creature.Health.Value}");
+                else
+                {
+                    string dStr = $"Damage dealt: {playerDamage.Amount.ToString("n1")}";
+                    if (rDamage < playerDamage.Amount)
+                        dStr += $" - {(playerDamage.Amount - rDamage).ToString("n1")}";
+                    Console.WriteLine($"{creature.ObjectName} HP Left: {creature.Health.Value}  " + dStr);
+                }
             }
             else Console.WriteLine(errorMsg);
 
@@ -730,6 +748,60 @@ namespace RogueCrawler
             Console.WriteLine(staticBuilder.ToString());
 
             ap = 0;
+            return true;
+        }
+        #endregion
+
+        #region Cheats
+        private bool ToggleCheats(List<string> args, out int ap)
+        {
+            ap = 0;
+            allowCheats = !allowCheats;
+            Console.WriteLine($"Cheats Enabled: {allowCheats}");
+            return true;
+        }
+
+        private bool Kill(List<string> args, out int ap)
+        {
+            ap = 0;
+
+            if (!allowCheats)
+            {
+                Console.WriteLine("Cheats are disabled");
+                return true;
+            }
+
+            void KillCreature(Creature c)
+            {
+                var damage = new DamageInstance()
+                {
+                    Amount = float.MaxValue, // extra double sure they die.
+                    DamageType = DamageType.True
+                };
+                bool killed = dungeon.DamageCreature(c, damage, out float dmgDealt);
+
+                if (!killed)
+                    throw new Exception("Kill cheat failed to kill creature.");
+                ++player.CreaturesKilled; 
+                Console.WriteLine($"{c.ObjectName} died!");
+            }
+
+            if (args.FirstOrDefault() == "all")
+            {
+                if (!dungeon.creatureManager.RoomContainsObjects(player.CurrentRoom))
+                {
+                    Console.WriteLine("No creatures in current room.");
+                    return true;
+                }
+
+                foreach (Creature c in dungeon.creatureManager.GetObjectsInRoom(player.CurrentRoom))
+                    KillCreature(c);
+            }
+            else if (BaseCreatureCommand(args, out Creature c, out string error))
+            {
+                KillCreature(c);
+            }
+            else Console.WriteLine(error);
             return true;
         }
         #endregion

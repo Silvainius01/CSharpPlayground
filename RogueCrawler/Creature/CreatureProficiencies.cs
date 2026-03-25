@@ -93,7 +93,7 @@ namespace RogueCrawler
         {
             var skill = GetSkill(skillName);
             if (level >= 0)
-                skill.SkillLevel = Math.Max(level, DungeonSettings.MaxSkillLevel);
+                skill.SkillLevel = Math.Min(level, DungeonSettings.MaxSkillLevel);
             if (progress >= 0)
                 skill.SkillProgress = progress;
         }
@@ -115,6 +115,21 @@ namespace RogueCrawler
             {
                 Skills = this.Skills
             };
+        }
+
+        public ColorStringBuilder BriefColor(ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ColorStringBuilder InspectColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ColorStringBuilder DebugColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            throw new NotImplementedException();
         }
     }
 

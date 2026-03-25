@@ -26,7 +26,7 @@ namespace RogueCrawler
         public string ItemName { get; set; } // Display Name
         public string ObjectName { get; set; } // Weapon Skill
         public string WeaponType { get; set; } // General Skill
-        
+
         public bool IsLargeWeapon { get; set; }
         public float BaseDamage { get; set; }
 
@@ -34,21 +34,19 @@ namespace RogueCrawler
         public AttributeType MinorAttribute { get; set; }
         public CrawlerAttributeSet AttributeRequirements { get; set; }
 
-        public float GetWeaponDamage() 
+        public float GetWeaponDamage()
             => Mathc.Truncate(BaseDamage * Material.DamageModifier * MathF.Log2(Quality + 1), 1);
         public float GetWeaponDamage(Creature wielder)
         {
-            float damage = BaseDamage
-                + wielder.GetAttribute(MajorAttribute) / 2.0f
-                + wielder.GetAttribute(MinorAttribute) / 4.0f;
-            damage *= Material.DamageModifier * MathF.Log2(Quality + 1);
-            return Mathc.Truncate(damage, 1);
+            float damage = BaseDamage * Material.DamageModifier * MathF.Log2(Quality + 1);
+            float skillBonus = 1 + CreatureSkillUtility.GetWeaponSkillBonus(this, wielder.Proficiencies);
+            return Mathc.Truncate(damage * skillBonus, 1);
         }
 
         public float GetFatigueCost() => Weight * 2;
 
         public float GetRawValue() =>
-            BaseValue * (IsLargeWeapon ? 1 : 2) * Quality * Material.ValueModifier * (Condition/MaxCondition);
+            BaseValue * (IsLargeWeapon ? 1 : 2) * Quality * Material.ValueModifier * (Condition / MaxCondition);
         public int GetValue() => (int)Math.Max(GetRawValue(), 1);
 
         public WeaponTypeData GetWeaponData()
@@ -143,6 +141,46 @@ namespace RogueCrawler
             };
 
             return s;
+        }
+
+        public ColorStringBuilder BriefColor(ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            var player = DungeonCrawlerManager.Instance.player;
+            float damageRatio = GetWeaponDamage(player) / player.GetCombatDamage().Amount;
+            float weightRatio = Weight / player.GetCombatWeapon().Weight;
+            ColorStringBuilder cb = new ColorStringBuilder(initialColor);
+
+            ConsoleColor dmgColor = initialColor;
+            if (damageRatio > 1.0f)
+                dmgColor = ConsoleColor.Green;
+            else if (damageRatio < 0.75f)
+                dmgColor = ConsoleColor.Red;
+            else if (damageRatio < 0.95f)
+                dmgColor = ConsoleColor.Yellow;
+
+            ConsoleColor weightColor = initialColor;
+            if (weightRatio < 1.0f)
+                weightColor = ConsoleColor.Green;
+            else if (weightRatio > 1.25f)
+                weightColor = ConsoleColor.Red;
+            else if (weightRatio > 1.05f)
+                weightColor = ConsoleColor.Yellow;
+
+
+            cb.Append($"[{ID}] {ItemName} | DMG: ");
+            cb.Append(GetWeaponDamage().ToString("n1"), dmgColor);
+            cb.Append($" | V: {GetValue()} | W: ", initialColor);
+            cb.Append(Weight.ToString("n1"), weightColor);
+
+            return cb;
+        }
+        public ColorStringBuilder InspectColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            throw new NotImplementedException();
+        }
+        public ColorStringBuilder DebugColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            throw new NotImplementedException();
         }
     }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using CommandEngine;
+using System.Xml;
 
 namespace RogueCrawler
 {
@@ -41,7 +42,7 @@ namespace RogueCrawler
                 var kvp = Items[itemId];
                 item = kvp.Item;
 
-                if(kvp.Count > 1)
+                if (kvp.Count > 1)
                 {
                     AddItemCount(item, -1);
                     return true;
@@ -113,7 +114,7 @@ namespace RogueCrawler
         }
         public string InspectString(string prefix, int tabCount)
         {
-            SmartStringBuilder builder = new SmartStringBuilder(DungeonSettings.TabString);;
+            SmartStringBuilder builder = new SmartStringBuilder(DungeonSettings.TabString); ;
 
             if (prefix == string.Empty)
                 prefix = $"Items in {ObjectName}: ";
@@ -125,7 +126,7 @@ namespace RogueCrawler
             {
                 var item = kvp.Value.Item;
                 int count = kvp.Value.Count;
-                if(count > 1)
+                if (count > 1)
                     builder.NewlineAppend(tabCount, $"{count} x {item.BriefString()}");
                 else builder.NewlineAppend(tabCount, $"{item.BriefString()}");
             }
@@ -136,6 +137,43 @@ namespace RogueCrawler
         public string DebugString(string prefix, int tabCount)
         {
             return InspectString(prefix, tabCount);
+        }
+
+        public ColorStringBuilder BriefColor(ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            throw new NotImplementedException();
+        }
+        public ColorStringBuilder InspectColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            ColorStringBuilder cb = new ColorStringBuilder(initialColor);
+            
+            if (prefix == string.Empty)
+                prefix = $"Items in {ObjectName}: ";
+
+            cb.Append(tabCount, prefix);
+
+            tabCount++;
+            foreach (var kvp in Items)
+            {
+                int count = kvp.Value.Count;
+                TItem item = kvp.Value.Item;
+                ColorStringBuilder itemCB = item.BriefColor();
+
+                if (count > 1)
+                {
+                    cb.NewlineAppend(tabCount, $"{count} x ", ConsoleColor.Gray);
+                }
+                else cb.NewlineAppend(tabCount, string.Empty, ConsoleColor.Gray);
+
+                cb.Append(itemCB);
+            }
+            --tabCount;
+
+            return cb;
+        }
+        public ColorStringBuilder DebugColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            throw new NotImplementedException();
         }
     }
 }

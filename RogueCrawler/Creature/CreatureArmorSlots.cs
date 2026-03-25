@@ -47,21 +47,22 @@ namespace RogueCrawler
             => IsSlotOccupied(slot) ? _armorSlots[slot].GetArmorRating() : 0f;
         public float GetSlotArmorRating(ArmorSlotType slot, Creature c)
         { 
-            if(!_armorSlots.ContainsKey(slot))
+            if(_armorSlots.ContainsKey(slot))
             {
-                ItemArmor armor = _armorSlots[slot];
-                CreatureProficiencies p = c.Proficiencies;
-
-                if(armor.ArmorClass == DungeonConstants.ArmorClassUnarmored)
-                {
-                    // Note: since skill determines both the base rating and the skill bonus, the final maximum rating is 1.25x the number in settings.
-                    // Assuming no enchantments.
-                    float rating = p.GetSkillLevel(armor.ArmorClass) / UnarmoredRatingModifier;
-                    return rating * CreatureSkillUtility.GetArmorSkillBonus(armor, p);
-                }
-                return armor.GetArmorRating() * CreatureSkillUtility.GetArmorSkillBonus(armor, p);
+                return GetArmorRatingOf(_armorSlots[slot], c.Proficiencies);
             }
             throw new Exception("Armor slots object does not contain an entry");
+        }
+        public float GetArmorRatingOf(ItemArmor armor, CreatureProficiencies wearer)
+        {
+            if (armor.ArmorClass == DungeonConstants.ArmorClassUnarmored)
+            {
+                // Note: since skill determines both the base rating and the skill bonus, the final maximum rating is 1.25x the number in settings.
+                // Assuming no enchantments.
+                float rating = wearer.GetSkillLevel(armor.ArmorClass) / UnarmoredRatingModifier;
+                return rating * CreatureSkillUtility.GetArmorSkillBonus(armor, wearer);
+            }
+            return armor.GetArmorRating() * CreatureSkillUtility.GetArmorSkillBonus(armor, wearer);
         }
 
         float GetTotalBaseArmorRating()
@@ -124,6 +125,21 @@ namespace RogueCrawler
             foreach (var slot in _armorSlots)
                 serialized.ArmorSlots.Add(slot.Key, (SerializedArmor)slot.Value.GetSerializable());
             return serialized;
+        }
+
+        public ColorStringBuilder BriefColor(ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ColorStringBuilder InspectColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ColorStringBuilder DebugColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
+        {
+            throw new NotImplementedException();
         }
     }
 
