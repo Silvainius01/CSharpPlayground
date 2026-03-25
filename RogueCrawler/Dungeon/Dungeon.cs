@@ -105,35 +105,42 @@ namespace RogueCrawler
             return builder.ToString();
         }
 
-        public bool DamageCreature(Creature c, DamageInstance dmg, out float receivedDamage)
+        public DamageInstance DamageCreature(Creature defender, Creature attacker)
         {
+            DamageInstance dmg = new DamageInstance()
+            {
+                BaseAmount = attacker.GetCombatDamage(),
+                DamageType = attacker.GetDamageType(),
+                Attacker = attacker,
+                Defender = defender,
+            };
 
             if (dmg.DamageType != DamageType.True)
             {
                 // Armor rating
-                float ar = MathF.Floor(c.GetArmorRating());
-                receivedDamage = dmg.Amount * (dmg.Amount / (2 * ar + dmg.Amount));
-                receivedDamage = Mathc.Truncate(receivedDamage, 1);
+                float ar = MathF.Floor(defender.GetArmorRating());
+                float total = dmg.BaseAmount * (dmg.BaseAmount / (2 * ar + dmg.BaseAmount));
+                dmg.Received = Mathc.Truncate(total, 1);
             }
-            else receivedDamage = dmg.Amount;
+            else dmg.Received = dmg.BaseAmount;
 
-            c.Health.AddValue(-receivedDamage);
+            defender.Health.AddValue(-dmg.Received);
 
             //  If the creature dies, create a "chest" with their items.
-            if (c.Health.Value <= 0)
+            if (defender.Health.Value <= 0)
             {
-                c.Inventory.AddItem(c.PrimaryWeapon);
+                defender.Inventory.AddItem(defender.PrimaryWeapon);
 
-                foreach (var armorItem in c.Armor.ArmorSlots.Values)
+                foreach (var armorItem in defender.Armor.ArmorSlots.Values)
                     if (armorItem.ArmorClass != DungeonConstants.ArmorClassUnarmored)
-                        c.Inventory.AddItem(armorItem);
+                        defender.Inventory.AddItem(armorItem);
 
-                c.Inventory.ObjectName = $"{c.ObjectName}'s Corpse";
-                chestManager.AddObject(c.Inventory, c.CurrentRoom);
-                creatureManager.RemoveObject(c, c.CurrentRoom);
-                return true;
+                defender.Inventory.ObjectName = $"{defender.ObjectName}'s Corpse";
+                chestManager.AddObject(defender.Inventory, defender.CurrentRoom);
+                creatureManager.RemoveObject(defender, defender.CurrentRoom);
+                dmg.DefenderDied = true;
             }
-            return false;
+            return dmg;
         }
         public void HealAllCreatures(float hitPoints)
         {

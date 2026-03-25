@@ -617,21 +617,22 @@ namespace RogueCrawler
             if (BaseCreatureCommand(args, out var creature, out string errorMsg))
             {
                 ap = 1;
-                DamageInstance playerDamage = player.GetCombatDamage();
+                DamageInstance playerDamage = dungeon.DamageCreature(creature, player);
+
                 player.Fatigue.AddValue(-player.GetAttackFatigueCost());
-                if (dungeon.DamageCreature(creature, playerDamage, out float rDamage))
+                if (playerDamage.DefenderDied)
                 {
                     string msg = $"{creature.ObjectName} died!";
-                    if (rDamage < playerDamage.Amount)
-                        msg += $" Damage dealt: {playerDamage.Amount.ToString("n1")} - {(playerDamage.Amount - rDamage).ToString("n1")}";
+                    if (playerDamage.TotalReduction > 0.0f)
+                        msg += $" Damage dealt: {playerDamage.BaseAmount.ToString("n1")} - {(playerDamage.TotalReduction).ToString("n1")}";
                     ++player.CreaturesKilled;
                     Console.WriteLine(msg);
                 }
                 else
                 {
-                    string dStr = $"Damage dealt: {playerDamage.Amount.ToString("n1")}";
-                    if (rDamage < playerDamage.Amount)
-                        dStr += $" - {(playerDamage.Amount - rDamage).ToString("n1")}";
+                    string dStr = $"Damage dealt: {playerDamage.BaseAmount.ToString("n1")}";
+                    if (playerDamage.TotalReduction > 0.0f)
+                        dStr += $" - {(playerDamage.TotalReduction).ToString("n1")}";
                     Console.WriteLine($"{creature.ObjectName} HP Left: {creature.Health.Value}  " + dStr);
                 }
             }
@@ -775,7 +776,7 @@ namespace RogueCrawler
             {
                 var damage = new DamageInstance()
                 {
-                    Amount = float.MaxValue, // extra double sure they die.
+                    BaseAmount = float.MaxValue, // extra double sure they die.
                     DamageType = DamageType.True
                 };
                 bool killed = dungeon.DamageCreature(c, damage, out float dmgDealt);

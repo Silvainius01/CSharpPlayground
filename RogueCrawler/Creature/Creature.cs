@@ -132,7 +132,7 @@ namespace RogueCrawler
                 ? PrimaryWeapon
                 : UnarmedWeapon;
         }
-        public DamageInstance GetCombatDamage()
+        public float GetCombatDamage()
         {
             ItemWeapon weapon = GetCombatWeapon();
             float damage = weapon.GetWeaponDamage()
@@ -140,11 +140,11 @@ namespace RogueCrawler
                 + GetAttribute(weapon.MinorAttribute) / 4.0f;
             float skillBonus = 1 + CreatureSkillUtility.GetWeaponSkillBonus(weapon, Proficiencies);
 
-            return new DamageInstance()
-            {
-                Amount = damage * skillBonus,
-                DamageType = DamageType.Physical,
-            };
+            return damage * skillBonus;
+        }
+        public DamageType GetDamageType()
+        {
+            return DamageType.Physical;
         }
         public float GetCombatHitChance()
         {
