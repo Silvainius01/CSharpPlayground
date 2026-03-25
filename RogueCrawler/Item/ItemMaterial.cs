@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace RogueCrawler
 {
-    class ItemMaterial : IInspectable, ISerializable<SerializedItemMaterial, ItemMaterial>
+    class ItemMaterial : ISerializable<SerializedItemMaterial, ItemMaterial>
     {
         public string Name { get; set; } = "Anomolous";
         public float ValueModifier { get; set; } = 1.0f;
@@ -23,19 +23,6 @@ namespace RogueCrawler
         public bool IsMetallic { get; set; } = false;
         public bool IsWeaponMaterial { get; set; } = false;
         public bool IsArmorMaterial { get; set; } = false;
-
-        public string BriefString()
-        {
-            throw new NotImplementedException();
-        }
-        public string DebugString(string prefix, int tabCount)
-        {
-            throw new NotImplementedException();
-        }
-        public string InspectString(string prefix, int tabCount)
-        {
-            throw new NotImplementedException();
-        }
 
         public SerializedItemMaterial GetSerializable()
         {
@@ -52,21 +39,6 @@ namespace RogueCrawler
                 IsArmorMaterial = IsArmorMaterial,
                 IsMetallic = IsMetallic,
             };
-        }
-
-        public ColorStringBuilder BriefColor(ConsoleColor initialColor = ConsoleColor.Gray)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ColorStringBuilder InspectColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ColorStringBuilder DebugColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
-        {
-            throw new NotImplementedException();
         }
     }
 

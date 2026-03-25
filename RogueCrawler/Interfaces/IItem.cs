@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RogueCrawler
 {
-    interface IItem : IInspectable, IDungeonObject, ISerializable<SerializedItem, IItem>
+    interface IItem : IColorInspectable, IDungeonObject, ISerializable<SerializedItem, IItem>
     {
         int Level { get; set; }
         int BaseValue { get; set; }

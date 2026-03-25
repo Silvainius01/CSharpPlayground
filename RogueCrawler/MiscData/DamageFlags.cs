@@ -8,10 +8,13 @@ using System.Threading.Tasks;
 namespace RogueCrawler
 {
 
-    internal struct DamageInstance: IInspectable
+    internal struct DamageInstance : IInspectable
     {
         public float Amount { get; set; }
         public DamageType DamageType { get; set; }
+        public Creature Attacker { get; set; }
+        public Creature Defender { get; set; }
+        public float TotalReduction { get; set; }
 
         public string BriefString()
         {
@@ -22,19 +25,6 @@ namespace RogueCrawler
             throw new NotImplementedException();
         }
         public string DebugString(string prefix, int tabCount)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ColorStringBuilder BriefColor(ConsoleColor initialColor = ConsoleColor.Gray)
-        {
-            throw new NotImplementedException();
-        }
-        public ColorStringBuilder InspectColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
-        {
-            throw new NotImplementedException();
-        }
-        public ColorStringBuilder DebugColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
         {
             throw new NotImplementedException();
         }

@@ -7,7 +7,7 @@ using System.Xml;
 
 namespace RogueCrawler
 {
-    class DungeonChest<TItem> : IInspectable, IDungeonObject where TItem : IItem
+    class DungeonChest<TItem> : IColorInspectable, IDungeonObject where TItem : IItem
     {
         public int ID { get; set; }
         public string ObjectName { get; set; }

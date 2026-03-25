@@ -51,7 +51,7 @@ namespace RogueCrawler
         public void SetPercent(float percent) => Value = MaxValue * percent;
     }
 
-    class Creature : IInspectable, IDungeonObject, ISerializable<SerializedCreature, Creature>
+    class Creature : IColorInspectable, IDungeonObject, ISerializable<SerializedCreature, Creature>
     {
         public int ID { get; set; }
         public string ObjectName { get; set; }
@@ -285,12 +285,10 @@ namespace RogueCrawler
         {
             throw new NotImplementedException();
         }
-
         public ColorStringBuilder InspectColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
         {
             throw new NotImplementedException();
         }
-
         public ColorStringBuilder DebugColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
         {
             throw new NotImplementedException();

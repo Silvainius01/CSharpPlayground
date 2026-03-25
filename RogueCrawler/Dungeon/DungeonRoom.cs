@@ -18,7 +18,7 @@ namespace RogueCrawler
     /// <summary>
     /// DungeonRooms are expected to only be compared to each other within the same dungeon.
     /// </summary>
-    class DungeonRoom : IDungeonObject, IInspectable
+    class DungeonRoom : IDungeonObject
     {
         public int ID { get; set; }
         public int Index { get; set; }
@@ -39,35 +39,5 @@ namespace RogueCrawler
             => connections.ContainsKey(roomIndex);
         public bool ConnectedTo(DungeonRoom room)
             => connections.ContainsKey(room.Index);
-
-        public string BriefString()
-        {
-            throw new NotImplementedException();
-        }
-
-        public string InspectString(string prefix, int tabCount)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string DebugString(string prefix, int tabCount)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ColorStringBuilder BriefColor(ConsoleColor initialColor = ConsoleColor.Gray)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ColorStringBuilder InspectColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ColorStringBuilder DebugColor(string prefix, int tabCount, ConsoleColor initialColor = ConsoleColor.Gray)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
