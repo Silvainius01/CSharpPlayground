@@ -146,7 +146,7 @@ namespace RogueCrawler
         public ColorStringBuilder BriefColor(ConsoleColor initialColor = ConsoleColor.Gray)
         {
             var player = DungeonCrawlerManager.Instance.player;
-            float damageRatio = GetWeaponDamage(player) / player.GetCombatDamage().Amount;
+            float damageRatio = GetWeaponDamage(player) / player.GetCombatDamage();
             float weightRatio = Weight / player.GetCombatWeapon().Weight;
             ColorStringBuilder cb = new ColorStringBuilder(initialColor);
 

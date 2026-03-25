@@ -105,42 +105,18 @@ namespace RogueCrawler
             return builder.ToString();
         }
 
-        public DamageInstance DamageCreature(Creature defender, Creature attacker)
+        public DamageInstance DamageCreature(DamageInstance damage)
         {
-            DamageInstance dmg = new DamageInstance()
-            {
-                BaseAmount = attacker.GetCombatDamage(),
-                DamageType = attacker.GetDamageType(),
-                Attacker = attacker,
-                Defender = defender,
-            };
-
-            if (dmg.DamageType != DamageType.True)
-            {
-                // Armor rating
-                float ar = MathF.Floor(defender.GetArmorRating());
-                float total = dmg.BaseAmount * (dmg.BaseAmount / (2 * ar + dmg.BaseAmount));
-                dmg.Received = Mathc.Truncate(total, 1);
-            }
-            else dmg.Received = dmg.BaseAmount;
-
-            defender.Health.AddValue(-dmg.Received);
-
-            //  If the creature dies, create a "chest" with their items.
-            if (defender.Health.Value <= 0)
-            {
-                defender.Inventory.AddItem(defender.PrimaryWeapon);
-
-                foreach (var armorItem in defender.Armor.ArmorSlots.Values)
-                    if (armorItem.ArmorClass != DungeonConstants.ArmorClassUnarmored)
-                        defender.Inventory.AddItem(armorItem);
-
-                defender.Inventory.ObjectName = $"{defender.ObjectName}'s Corpse";
-                chestManager.AddObject(defender.Inventory, defender.CurrentRoom);
-                creatureManager.RemoveObject(defender, defender.CurrentRoom);
-                dmg.DefenderDied = true;
-            }
-            return dmg;
+            damage.Defender.Health.AddValue(-damage.Received);
+            return damage;
+        }
+        public DamageInstance DamageCreature(Creature attacker, Creature defender)
+        {
+            return DamageCreature(new DamageInstance(attacker, defender));
+        }
+        public DamageInstance DamageCreature(DamageParameters dParams, Creature defender)
+        {
+            return DamageCreature(new DamageInstance(dParams, defender));
         }
         public void HealAllCreatures(float hitPoints)
         {
@@ -150,6 +126,23 @@ namespace RogueCrawler
                 creature.Mana.AddValue(hitPoints * 2);
                 creature.Fatigue.AddValue(hitPoints * 3);
             }
+        }
+
+        public void RemoveCreature(Creature c, bool isLootable)
+        {
+            if (isLootable)
+            {
+                c.Inventory.AddItem(c.PrimaryWeapon);
+
+                foreach (var armorItem in c.Armor.ArmorSlots.Values)
+                    if (armorItem.ArmorClass != DungeonConstants.ArmorClassUnarmored)
+                        c.Inventory.AddItem(armorItem);
+
+                c.Inventory.ObjectName = $"{c.ObjectName}'s Corpse";
+                chestManager.AddObject(c.Inventory, c.CurrentRoom);
+            }
+
+            creatureManager.RemoveObject(c, c.CurrentRoom);
         }
 
         public bool RoomContainsLoot(DungeonRoom room)

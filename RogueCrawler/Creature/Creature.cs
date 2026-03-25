@@ -227,7 +227,7 @@ namespace RogueCrawler
             builder.Append($"[{ID}] {ObjectName} ({Level})");
             builder.Append($" | HP: {Health.Value.ToString("n1")}");
             builder.Append($" | AR: {GetArmorRating().ToString("n1")}");
-            builder.Append($" | DMG: {GetCombatDamage().Amount.ToString("n1")}");
+            builder.Append($" | DMG: {GetCombatDamage().ToString("n1")}");
             builder.Append($" | SPD: {CombatSpeed.Value.ToString("n1")}");
             return builder.ToString();
         }
@@ -242,7 +242,7 @@ namespace RogueCrawler
 
             tabCount++;
             builder.NewlineAppend(tabCount, $"HP: {Health.Value.ToString("n1")}");
-            builder.NewlineAppend(tabCount, $"DMG: {GetCombatDamage().Amount.ToString("n1")}");
+            builder.NewlineAppend(tabCount, $"DMG: {GetCombatDamage().ToString("n1")}");
             builder.NewlineAppend(tabCount, $"Weapon:");
             builder.NewlineAppend(tabCount + 1, PrimaryWeapon.BriefString());
             builder.NewlineAppend(tabCount, "Armor: ");
