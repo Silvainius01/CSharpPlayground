@@ -49,8 +49,7 @@ namespace RogueCrawler
 
             tabCount++;
             foreach (var skill in Skills.Values)
-                if (skill.SkillLevel > 0 || skill.SkillProgress > 0)
-                    builder.NewlineAppend(tabCount, skill.ToString());
+                builder.NewlineAppend(tabCount, skill.ToString());
             tabCount--;
             return builder.ToString();
         }
@@ -64,7 +63,8 @@ namespace RogueCrawler
 
             tabCount++;
             foreach (var skill in Skills.Values)
-                builder.NewlineAppend(tabCount, skill.ToString());
+                if (skill.SkillLevel > 0 || skill.SkillProgress > 0)
+                    builder.NewlineAppend(tabCount, skill.ToString());
             tabCount--;
             return builder.ToString();
         }
@@ -111,9 +111,22 @@ namespace RogueCrawler
 
         public SerializedProfeciencies GetSerializable()
         {
+            Dictionary<string, CreatureSkill> savedSkills = new Dictionary<string, CreatureSkill>();
+
+            // Dont bother saving skills with no levels or progress.
+            // Also, we are copying skills here to avoid creating additional references.
+            foreach (var skill in this.Skills.Values)
+                if (skill.SkillLevel > 0 || skill.SkillProgress > 0)
+                    savedSkills.Add(skill.SkillName, new CreatureSkill()
+                    {
+                        SkillLevel = skill.SkillLevel,
+                        SkillProgress = skill.SkillProgress,
+                        SkillName = skill.SkillName
+                    });
+
             return new SerializedProfeciencies()
             {
-                Skills = this.Skills
+                Skills = savedSkills
             };
         }
     }
