@@ -16,13 +16,21 @@ namespace RogueCrawler
         public static string Unarmored = "Unarmored";
         #endregion
 
-        public int SkillLevel { get; set; }
-        public float SkillProgress { get; set; }
-        public string SkillName { get; set; }
+        public int Level { get; set; }
+        public int Experience { get; set; }
+        public string Name { get; set; }
+
+        public int ExpNeeded => ExperienceNeeded(Level);
+        public float Progress => (float)Experience / ExpNeeded;
 
         public override string ToString()
         {
-            return $"{SkillName}: {SkillLevel} [{SkillProgress}]";
+            return $"{Name}: {Level} [{Experience}]";
+        }
+
+        public int ExperienceNeeded(int level)
+        {
+            return 50 + 25 * (int)Math.Ceiling(Math.Pow(Level, 1.1521));
         }
     }
 
@@ -63,7 +71,7 @@ namespace RogueCrawler
 
             tabCount++;
             foreach (var skill in Skills.Values)
-                if (skill.SkillLevel > 0 || skill.SkillProgress > 0)
+                if (skill.Level > 0 || skill.Experience > 0)
                     builder.NewlineAppend(tabCount, skill.ToString());
             tabCount--;
             return builder.ToString();
@@ -79,35 +87,48 @@ namespace RogueCrawler
             {
                 Skills.Add(skillName, new CreatureSkill()
                 {
-                    SkillLevel = 0,
-                    SkillProgress = 0,
-                    SkillName = skillName
+                    Level = 0,
+                    Experience = 0,
+                    Name = skillName
                 });
             }
             return Skills[skillName];
         }
-        public int GetSkillLevel(string skillName) => GetSkill(skillName).SkillLevel;
-        public float GetSkillProgress(string skillName) => GetSkill(skillName).SkillProgress;
+        public int GetSkillLevel(string skillName) => GetSkill(skillName).Level;
+        public float GetSkillProgress(string skillName) => GetSkill(skillName).Experience;
 
-        public void SetSkill(string skillName, int level, float progress)
+        public void SetSkill(string skillName, int level, int experience)
         {
             var skill = GetSkill(skillName);
             if (level >= 0)
-                skill.SkillLevel = Math.Min(level, DungeonSettings.MaxSkillLevel);
-            if (progress >= 0)
-                skill.SkillProgress = progress;
+                skill.Level = Math.Min(level, DungeonSettings.MaxSkillLevel);
+            if (experience >= 0)
+                skill.Experience = experience;
         }
         public void SetSkillLevel(string skillName, int level) => SetSkill(skillName, level, -1);
-        public void SetSkillProgress(string skillName, float progress) => SetSkill(skillName, -1, progress);
+        public void SetSkillProgress(string skillName, int experience) => SetSkill(skillName, -1, experience);
 
-        public void AddSkill(string skillName, int level, float progress)
+        public void AddSkill(string skillName, int level, int experience)
         {
             var skill = GetSkill(skillName);
-            skill.SkillLevel = Math.Min(skill.SkillLevel + level, DungeonSettings.MaxSkillLevel);
-            skill.SkillProgress += progress;
+
+            if (experience > 0 && skill.Level < DungeonSettings.MaxSkillLevel)
+            {
+                int expNeeded = skill.ExperienceNeeded(skill.Level + level);
+                skill.Experience += experience;
+                while (skill.Experience > expNeeded)
+                {
+                    ++level;
+                    skill.Experience -= expNeeded;
+                    expNeeded = skill.ExperienceNeeded(skill.Level + level);
+                }
+            }
+            else skill.Experience = 0;
+
+            skill.Level = Math.Min(skill.Level + level, DungeonSettings.MaxSkillLevel);
         }
         public void AddSkillLevel(string skillName, int level) => AddSkill(skillName, level, 0);
-        public void AddSkillProgress(string skillName, float progress) => AddSkill(skillName, 0, progress);
+        public void AddSkillExperience(string skillName, int experience) => AddSkill(skillName, 0, experience);
 
         public SerializedProfeciencies GetSerializable()
         {
@@ -116,12 +137,12 @@ namespace RogueCrawler
             // Dont bother saving skills with no levels or progress.
             // Also, we are copying skills here to avoid creating additional references.
             foreach (var skill in this.Skills.Values)
-                if (skill.SkillLevel > 0 || skill.SkillProgress > 0)
-                    savedSkills.Add(skill.SkillName, new CreatureSkill()
+                if (skill.Level > 0 || skill.Experience > 0)
+                    savedSkills.Add(skill.Name, new CreatureSkill()
                     {
-                        SkillLevel = skill.SkillLevel,
-                        SkillProgress = skill.SkillProgress,
-                        SkillName = skill.SkillName
+                        Level = skill.Level,
+                        Experience = skill.Experience,
+                        Name = skill.Name
                     });
 
             return new SerializedProfeciencies()
@@ -187,7 +208,7 @@ namespace RogueCrawler
             CreatureProficiencies skills = new CreatureProficiencies();
 
             foreach (var skill in Skills.Values)
-                skills.SetSkill(skill.SkillName, skill.SkillLevel, skill.SkillProgress);
+                skills.SetSkill(skill.Name, skill.Level, skill.Experience);
 
             return skills;
         }

@@ -23,8 +23,11 @@ namespace RogueCrawler
         public float Condition { get; set; } = 1;
         public float MaxCondition { get; set; } = 1;
 
+        /// <summary>Display Name</summary>
         public string ItemName { get; set; } // Display Name
+        /// <summary>Weapon Skill</summary>
         public string ObjectName { get; set; } // Weapon Skill
+        /// <summary>General Skill</summary>
         public string WeaponType { get; set; } // General Skill
 
         public bool IsLargeWeapon { get; set; }

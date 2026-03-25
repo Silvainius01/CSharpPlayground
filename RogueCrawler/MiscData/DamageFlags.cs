@@ -30,6 +30,7 @@ namespace RogueCrawler
     {
         public float Received { get; set; }
         public bool DefenderDies { get; set; }
+        public bool AttackSuccessful { get; set; }
         public Creature Defender { get; set; }
         public DamageParameters InitialParams { get; set; }
 

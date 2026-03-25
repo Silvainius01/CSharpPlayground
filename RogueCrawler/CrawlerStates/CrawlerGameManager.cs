@@ -617,24 +617,39 @@ namespace RogueCrawler
             if (BaseCreatureCommand(args, out var creature, out string errorMsg))
             {
                 ap = 1;
-                DamageInstance playerDamage = dungeon.DamageCreature(new DamageParameters(player), creature);
+                int weaponExpGained = 1; // Bruce Lee reference lmfao
+                ItemWeapon weapon = player.GetCombatWeapon();
+                DamageInstance playerDamage = dungeon.DamageCreature(player, creature);
+
+                if (playerDamage.AttackSuccessful)
+                    weaponExpGained += (int)playerDamage.Received;
 
                 player.Fatigue.AddValue(-player.GetAttackFatigueCost());
-                if (playerDamage.DefenderDies)
+                player.Proficiencies.AddSkillExperience(weapon.WeaponType, weaponExpGained);
+                player.Proficiencies.AddSkillExperience(weapon.ObjectName, weaponExpGained);
+
+
+                using (ManagedStringBuilder mb = new ManagedStringBuilder("PlayerFightResult"))
                 {
-                    string msg = $"{creature.ObjectName} died!";
+                    var builder = mb.Builder;
+                    if (playerDamage.DefenderDies)
+                    {
+                        builder.Append($"{creature.ObjectName} died!");
+                        ++player.CreaturesKilled;
+                        dungeon.RemoveCreature(creature, true);
+                    }
+                    else
+                    {
+                        builder.Append($"{creature.ObjectName} HP Left: {creature.Health.Value}");
+                    }
+
+                    builder.NewlineAppend($"Damage dealt: {playerDamage.Received.ToString("n1")}");
                     if (playerDamage.TotalReduction > 0.0f)
-                        msg += $" Damage dealt: {playerDamage.BaseAmount.ToString("n1")} - {(playerDamage.TotalReduction).ToString("n1")}";
-                    ++player.CreaturesKilled;
-                    dungeon.RemoveCreature(creature, true);
-                    Console.WriteLine(msg);
-                }
-                else
-                {
-                    string dStr = $"Damage dealt: {playerDamage.BaseAmount.ToString("n1")}";
-                    if (playerDamage.TotalReduction > 0.0f)
-                        dStr += $" - {(playerDamage.TotalReduction).ToString("n1")}";
-                    Console.WriteLine($"{creature.ObjectName} HP Left: {creature.Health.Value}  " + dStr);
+                        builder.Append($"[{playerDamage.BaseAmount.ToString("n1")} - {(playerDamage.TotalReduction).ToString("n1")}]");
+                    builder.NewlineAppend("XP Gained: ");
+                    builder.NewlineAppend(1, $"{weapon.WeaponType}: {weaponExpGained}xp");
+                    builder.NewlineAppend(1, $"{weapon.ObjectName}: {weaponExpGained}xp");
+                    Console.WriteLine(builder.ToString());
                 }
             }
             else Console.WriteLine(errorMsg);
