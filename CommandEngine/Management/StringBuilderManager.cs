@@ -88,20 +88,17 @@ namespace CommandEngine
         public ManagedStringBuilder(string key)
         {
             CheckKey();
+            this.key = key;
             Builder = StringBuilderManager.GetSmartBuilder(key);
         }
-        public ManagedStringBuilder(string key, string startString)
+        public ManagedStringBuilder(string key, string startString) : this(key)
         {
-            CheckKey();
             Builder = StringBuilderManager.GetSmartBuilder(key);
             Builder.Append(startString);
         }
-        public ManagedStringBuilder(string key, string startString, string tabString)
+        public ManagedStringBuilder(string key, string startString, string tabString) : this(key, startString)
         {
-            CheckKey();
-            Builder = StringBuilderManager.GetSmartBuilder(key);
             Builder.TabString = tabString;
-            Builder.Append(startString);
         }
 
         public void Dispose()
@@ -140,28 +137,20 @@ namespace CommandEngine
         public ManagedColorBuilder(string key)
         {
             CheckKey();
+            this.key = key;
             Builder = StringBuilderManager.GetColorBuilder(key);
         }
-        public ManagedColorBuilder(string key, string tabString)
+        public ManagedColorBuilder(string key, string startString) : this(key)
         {
-            CheckKey();
-            Builder = StringBuilderManager.GetColorBuilder(key);
-            Builder.TabString = tabString;
-        }
-        public ManagedColorBuilder(string key, string startString, ConsoleColor startColor)
-        {
-            CheckKey();
-            Builder = StringBuilderManager.GetColorBuilder(key);
             Builder.Append(startString);
+        }
+        public ManagedColorBuilder(string key, string startString, ConsoleColor startColor) : this(key, startString)
+        {
             Builder.SetColor(startColor);
         }
-        public ManagedColorBuilder(string key, string tabString, string startString, ConsoleColor startColor)
+        public ManagedColorBuilder(string key, string startString, string tabString, ConsoleColor startColor) : this(key, startString, startColor)
         {
-            CheckKey();
-            Builder = StringBuilderManager.GetColorBuilder(key);
             Builder.TabString = tabString;
-            Builder.Append(startString);
-            Builder.SetColor(startColor);
         }
 
         public void Dispose()

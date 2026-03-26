@@ -39,12 +39,6 @@ namespace RogueCrawler
 
         public float GetWeaponDamage()
             => Mathc.Truncate(BaseDamage * Material.DamageModifier * MathF.Log2(Quality + 1), 1);
-        public float GetWeaponDamage(Creature wielder)
-        {
-            float damage = BaseDamage * Material.DamageModifier * MathF.Log2(Quality + 1);
-            float skillBonus = 1 + CreatureSkillUtility.GetWeaponSkillBonus(this, wielder.Proficiencies);
-            return Mathc.Truncate(damage * skillBonus, 1);
-        }
 
         public float GetFatigueCost() => Weight * 2;
 
@@ -149,7 +143,7 @@ namespace RogueCrawler
         public ColorStringBuilder BriefColor(ConsoleColor initialColor = ConsoleColor.Gray)
         {
             var player = DungeonCrawlerManager.Instance.player;
-            float damageRatio = GetWeaponDamage(player) / player.GetCombatDamage();
+            float damageRatio = player.GetCombatDamage(this) / player.GetCombatDamage();
             float weightRatio = Weight / player.GetCombatWeapon().Weight;
             ColorStringBuilder cb = new ColorStringBuilder(initialColor);
 

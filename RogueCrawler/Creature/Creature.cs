@@ -134,7 +134,10 @@ namespace RogueCrawler
         }
         public float GetCombatDamage()
         {
-            ItemWeapon weapon = GetCombatWeapon();
+            return GetCombatDamage(GetCombatWeapon());
+        }
+        public float GetCombatDamage(ItemWeapon weapon)
+        {
             float damage = weapon.GetWeaponDamage()
                 + GetAttribute(weapon.MajorAttribute) / 2.0f
                 + GetAttribute(weapon.MinorAttribute) / 4.0f;
