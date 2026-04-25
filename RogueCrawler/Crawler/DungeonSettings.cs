@@ -44,7 +44,9 @@ namespace RogueCrawler
         public const int MaxSkillLevel = 100;
 
         /// <summary>Maximum BASE armor rating an unarmored slot can reach from the Unarmored skill. Unarmored rating will increase linearly to this maximum.</summary>
-        public const float MaxUnarmoredSkillRating = 5.0f; 
+        public const float MaxUnarmoredSkillRating = 5.0f;
+
+        public const int ArmorExpPerMove = 1;
         #endregion
 
 

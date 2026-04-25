@@ -18,6 +18,13 @@ namespace RogueCrawler
             public int MaxActions { get; set; }
             public float Speed => Creature.CombatSpeed.Value;
         }
+        class FightResult
+        {
+            public DamageInstance DI { get; set; }
+            public ItemWeapon attackerWeapon { get; set; }
+            public int ArmorExp { get; set; }
+            public int WeaponExp { get; set; }
+        }
 
         //CommandModule commands = new CommandModule("\nEnter next game command");
         CommandModule<int> commands = new CommandModule<int>("\nEnter next game command");
@@ -279,6 +286,31 @@ namespace RogueCrawler
             return dungeonExit;
         }
 
+        private FightResult DungeonFight(Creature atk, Creature def)
+        {
+            int armorExpGained = 0;
+            int weaponExpGained = 1; // Bruce Lee reference lmfao
+            ItemWeapon weapon = atk.GetCombatWeapon();
+            DamageInstance dmg = dungeon.DamageCreature(atk, def);
+
+            // Attacker Exp
+            if (dmg.AttackSuccessful)
+                weaponExpGained += (int)dmg.Received;
+            atk.Fatigue.AddValue(-atk.GetAttackFatigueCost());
+            atk.Proficiencies.AddSkillExperience(weapon.WeaponType, weaponExpGained);
+            atk.Proficiencies.AddSkillExperience(weapon.ObjectName, weaponExpGained);
+
+            //Defender Exp
+            int baseExp = (int)(dmg.ArmorReduction);
+
+            return new FightResult()
+            {
+                DI = dmg,
+                attackerWeapon = weapon,
+                WeaponExp = weaponExpGained,
+                ArmorExp = weaponExpGained,
+            };
+        }
         private bool TakeCreatureTurn(Creature c)
         {
             var dmg = dungeon.DamageCreature(c, player);
@@ -671,6 +703,10 @@ namespace RogueCrawler
 
                 ap = (int)MathF.Ceiling(player.CombatSpeed.MaxValue);
                 PlayerMoveToRoom(room);
+
+                foreach (var kvp in player.Armor.ArmorSlots)
+                    if (kvp.Value is not null)
+                        player.Proficiencies.AddSkillExperience(kvp.Value.ArmorClass, DungeonSettings.ArmorExpPerMove);
             }
             else Console.WriteLine(errorMsg);
 

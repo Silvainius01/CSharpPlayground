@@ -26,7 +26,7 @@ namespace RogueCrawler
         public override string ToString()
         {
             if (Level >= DungeonSettings.MaxSkillLevel)
-                return Name + " [MAX]"; 
+                return $"{Name}: [{Level}]"; 
             return $"{Name}: {Level} [{Experience}/{ExpNeeded}] -> {(Progress * 100).ToString("n1")}%";
         }
 

@@ -7,15 +7,25 @@ using System.Threading.Tasks;
 
 namespace RogueCrawler
 {
+    [Flags]
+    internal enum DamageFlags
+    {
+        True = 0,
+        Physical = 1,
+        Magical = 2,
+        Elemental = 4,
+        Divine = 8
+    }
     internal struct DamageParameters
     {
         public float Amount { get; set; }
         public DamageType Type { get; set; }
+        public int DamageArchetype { get; set; }
         public Creature Attacker { get; set; }
 
         public DamageParameters(float amount, DamageType dType) 
         {
-            Amount = amount;
+            Amount = Mathc.Truncate(amount, 1);
             Type = dType;
             Attacker = null;
         }
@@ -28,11 +38,14 @@ namespace RogueCrawler
     }
     internal struct DamageInstance : IInspectable
     {
-        public float Received { get; set; }
-        public bool DefenderDies { get; set; }
-        public bool AttackSuccessful { get; set; }
-        public Creature Defender { get; set; }
-        public DamageParameters InitialParams { get; set; }
+        public float Received { get; private set; }
+        public bool DefenderDies { get; private set; }
+        public bool AttackSuccessful { get; private set; }
+        public Creature Defender { get; private set; }
+        public DamageParameters InitialParams { get; private set; }
+
+        public float ArmorReduction { get; private set; }
+        public float ResistanceReduction { get; private set; }
 
         public float BaseAmount => InitialParams.Amount;
         public float TotalReduction => BaseAmount - Received;
@@ -56,12 +69,23 @@ namespace RogueCrawler
 
         private float CalculateReceived()
         {
-            if (DamageType != DamageType.True)
+            float damage = BaseAmount;
+            DamageType dType = DamageType;
+
+            // True Damage cannot be resisted, and isnt affected by armor.
+            if (dType != DamageType.True)
             {
+                // Resistance
+                float resist = Defender.GetResistance(dType);
+                resist = damage * (1.0f / MathF.Pow(2.0f, resist));
+                ResistanceReduction = Mathc.Truncate(resist, 1);
+
                 // Armor rating
                 float ar = MathF.Floor(Defender.GetArmorRating());
-                float total = BaseAmount * (BaseAmount / (2 * ar + BaseAmount));
-                return Mathc.Truncate(total, 1);
+                ar = damage * (damage / (2 * ar + damage));
+                ArmorReduction = Mathc.Truncate(damage - ar, 1);
+
+                return ;
             }
             return BaseAmount;
         }

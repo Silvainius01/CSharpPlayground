@@ -11,6 +11,8 @@ using System.Numerics;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Reflection.Metadata.Ecma335;
+using System.Collections.ObjectModel;
+using System.Threading;
 
 namespace RogueCrawler
 {
@@ -71,11 +73,13 @@ namespace RogueCrawler
         public CreatureArmorSlots Armor;
 
         public List<CreatureStat> Stats { get; private set; }
+        public ReadOnlyDictionary<DamageType, float> Resistances { get; private set; }
         public CrawlerAttributeSet MaxAttributes { get; private set; }
         public CrawlerAttributeSet Afflictions { get; private set; }
         public CreatureProficiencies Proficiencies { get; set; }
 
         private ItemWeapon UnarmedWeapon;
+        private Dictionary<DamageType, float> _resistances = new Dictionary<DamageType, float>();
 
         public Creature()
         {
@@ -104,8 +108,9 @@ namespace RogueCrawler
                 new CreatureStat(this, combatSpeedFunc, AttributeType.DEX, AttributeType.CHA)
             };
 
-            UnarmedWeapon = DungeonGenerator.WeaponGenerator.GenerateUnarmed(this);
             Armor = new CreatureArmorSlots();
+            Resistances = new ReadOnlyDictionary<DamageType, float>(_resistances);
+            UnarmedWeapon = DungeonGenerator.WeaponGenerator.GenerateUnarmed(this);
         }
 
         public int GetAttribute(AttributeType attr)
@@ -222,6 +227,36 @@ namespace RogueCrawler
             foreach (var kvp in afflictions)
                 Afflictions[kvp.Key] += kvp.Value;
             UpdateStats();
+        }
+
+        public void AddResistance(DamageType damageType, float amount)
+        {
+            if (damageType == DamageType.True)
+                throw new ArgumentException("Cannot add resistance to the True damage type.");
+
+            if (!_resistances.ContainsKey(damageType))
+                _resistances.Add(damageType, 0.0f);
+
+            float r = Mathc.Clamp(_resistances[damageType] + amount, 0.0f, 1.0f);
+            _resistances[damageType] = r;
+        }
+        public void SetResistance(DamageType damageType, float amount)
+        {
+            if (damageType == DamageType.True)
+                throw new ArgumentException("Cannot set a resistance to the True damage type.");
+            if (amount < 0.0f)
+                throw new ArgumentException("Cannot set a negative resistance value.");
+
+            amount = Mathc.Max(amount, 1.0f);
+            if (!_resistances.ContainsKey(damageType))
+                _resistances.Add(damageType, amount);
+            else _resistances[damageType] = amount;
+        }
+        public float GetResistance(DamageType damageType)
+        {
+            if (_resistances.TryGetValue(damageType, out float r))
+                return r;
+            return 0.0f;
         }
 
         public virtual string BriefString()

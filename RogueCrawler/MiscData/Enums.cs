@@ -16,6 +16,6 @@ namespace RogueCrawler
     enum ArmorSlotType { Head, Chest, Arm, Hand, Waist, Foot }
     enum AccessorySlotType { Ring, Necklace }
     enum ItemWeaponHandedness { Both, One, Two }
-    enum DamageType { Physical, True }
+    enum DamageType { Physical, Magical, True }
     // enum WeaponType { Blade, Ranged, Axe, Blunt }
 }
