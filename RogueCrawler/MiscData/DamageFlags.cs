@@ -11,10 +11,11 @@ namespace RogueCrawler
     internal enum DamageFlags
     {
         True = 0,
-        Physical = 1,
-        Magical = 2,
-        Elemental = 4,
-        Divine = 8
+        Blockable = 1, // If a damage type is blockable, it can be mitigated by armor.
+        Resistable = 2,   
+        IsElemental = 4,
+        IsArcane = 8,
+        IsDivine = 16
     }
     internal struct DamageParameters
     {

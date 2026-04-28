@@ -24,6 +24,9 @@
     <None Update="TextDocs\Data\ItemMaterials.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="TextDocs\Data\WeaponTypes - Copy.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="TextDocs\Info\CommandInfo.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

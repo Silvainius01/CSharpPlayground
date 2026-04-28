@@ -1,0 +1,34 @@
+[
+  {
+    "Name": "True",
+    "Flags": 0
+  },
+  {
+    "Name": "Blunt",
+    "Flags": 1
+  },
+  {
+    "Name": "Pierce",
+    "Flags": 1
+  },
+  {
+    "Name": "Slash",
+    "Flags": 1
+  },
+  {
+    "Name": "Fire",
+    "Flags": 2
+  },
+  {
+    "Name": "Ice",
+    "Flags": 2
+  },
+  {
+    "Name": "Lightning",
+    "Flags": 2
+  },
+  {
+    "Name": "Divine",
+    "Flags": 10
+  }
+]
