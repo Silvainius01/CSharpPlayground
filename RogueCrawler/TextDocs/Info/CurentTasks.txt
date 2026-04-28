@@ -1,3 +1,0 @@
-[x] Implement turn orders properly
-[ ] Test new combat turns implementation
-[ ] Implement basic fatigue system

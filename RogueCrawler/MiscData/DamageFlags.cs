@@ -11,32 +11,37 @@ namespace RogueCrawler
     internal enum DamageFlags
     {
         True = 0,
-        Blockable = 1, // If a damage type is blockable, it can be mitigated by armor.
-        Resistable = 2,   
-        IsElemental = 4,
-        IsArcane = 8,
-        IsDivine = 16
+        IsBlockable = 1, // If a damage type is blockable, it can be mitigated by armor.
+        IsResistable = 2
     }
+
+    internal struct DamageTypeData
+    {
+        public string Name { get; set; }
+        public DamageType Type { get; set; }
+        public DamageFlags Flags { get; set; }
+    }
+
     internal struct DamageParameters
     {
         public float Amount { get; set; }
-        public DamageType Type { get; set; }
-        public int DamageArchetype { get; set; }
+        public DamageTypeData TypeData { get; set; }
         public Creature Attacker { get; set; }
 
-        public DamageParameters(float amount, DamageType dType) 
+        public DamageParameters(float amount, DamageTypeData dType)
         {
             Amount = Mathc.Truncate(amount, 1);
-            Type = dType;
+            TypeData = dType;
             Attacker = null;
         }
         public DamageParameters(Creature attacker)
         {
             Amount = attacker.GetCombatDamage();
-            Type = attacker.GetDamageType();
+            TypeData = attacker.GetDamageType();
             Attacker = attacker;
         }
     }
+
     internal struct DamageInstance : IInspectable
     {
         public float Received { get; private set; }
@@ -50,8 +55,8 @@ namespace RogueCrawler
 
         public float BaseAmount => InitialParams.Amount;
         public float TotalReduction => BaseAmount - Received;
-        public DamageType DamageType => InitialParams.Type;
-        public Creature Attacker => InitialParams.Attacker; 
+        public DamageTypeData TypeData => InitialParams.TypeData;
+        public Creature Attacker => InitialParams.Attacker;
 
         public DamageInstance(Creature attacker, Creature defender)
         {
@@ -71,29 +76,38 @@ namespace RogueCrawler
         private float CalculateReceived()
         {
             float damage = BaseAmount;
-            DamageType dType = DamageType;
+            DamageFlags dFlags = TypeData.Flags;
 
             // True Damage cannot be resisted, and isnt affected by armor.
-            if (dType != DamageType.True)
+            if (TypeData.Type != DamageType.True && dFlags != DamageFlags.True)
             {
+                // Armor rating.
+                // Armor comes first since if it didnt, players would be practically invincible once decked out in resistance buffs.
+                if (dFlags.HasFlag(DamageFlags.IsBlockable))
+                {
+                    float ar = MathF.Floor(Defender.GetArmorRating());
+                    ar = damage * (damage / (2 * ar + damage));
+                    ArmorReduction = Mathc.Truncate(damage - ar, 1);
+                    damage -= ArmorReduction;
+                }
+
                 // Resistance
-                float resist = Defender.GetResistance(dType);
-                resist = damage * (1.0f / MathF.Pow(2.0f, resist));
-                ResistanceReduction = Mathc.Truncate(resist, 1);
+                if (dFlags.HasFlag(DamageFlags.IsResistable))
+                {
+                    float resist = Defender.GetResistance(TypeData.Name);
+                    resist = damage * (1.0f / MathF.Pow(2.0f, resist));
+                    ResistanceReduction = Mathc.Truncate(damage - resist, 1);
+                    damage -= ResistanceReduction;
+                }
 
-                // Armor rating
-                float ar = MathF.Floor(Defender.GetArmorRating());
-                ar = damage * (damage / (2 * ar + damage));
-                ArmorReduction = Mathc.Truncate(damage - ar, 1);
-
-                return ;
+                return damage;
             }
             return BaseAmount;
         }
 
         public string BriefString()
         {
-            return $"{BaseAmount.ToString("n1")}, {EnumExt<DamageType>.GetName(DamageType)}";
+            return $"{BaseAmount.ToString("n1")}, {EnumExt<DamageTypeData>.GetName(TypeData)}";
         }
         public string InspectString(string prefix, int tabCount)
         {

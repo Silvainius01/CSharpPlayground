@@ -73,13 +73,13 @@ namespace RogueCrawler
         public CreatureArmorSlots Armor;
 
         public List<CreatureStat> Stats { get; private set; }
-        public ReadOnlyDictionary<DamageType, float> Resistances { get; private set; }
+        public ReadOnlyDictionary<string, float> Resistances { get; private set; }
         public CrawlerAttributeSet MaxAttributes { get; private set; }
         public CrawlerAttributeSet Afflictions { get; private set; }
         public CreatureProficiencies Proficiencies { get; set; }
 
         private ItemWeapon UnarmedWeapon;
-        private Dictionary<DamageType, float> _resistances = new Dictionary<DamageType, float>();
+        private Dictionary<string, float> _resistances = new Dictionary<string, float>();
 
         public Creature()
         {
@@ -109,7 +109,7 @@ namespace RogueCrawler
             };
 
             Armor = new CreatureArmorSlots();
-            Resistances = new ReadOnlyDictionary<DamageType, float>(_resistances);
+            Resistances = new ReadOnlyDictionary<string, float>(_resistances);
             UnarmedWeapon = DungeonGenerator.WeaponGenerator.GenerateUnarmed(this);
         }
 
@@ -150,9 +150,12 @@ namespace RogueCrawler
 
             return damage * skillBonus;
         }
-        public DamageType GetDamageType()
+        public DamageTypeData GetDamageType()
         {
-            return DamageType.Physical;
+            return new DamageTypeData()
+            {
+                Name = "Physical"
+            };
         }
         public float GetCombatHitChance()
         {
@@ -229,9 +232,9 @@ namespace RogueCrawler
             UpdateStats();
         }
 
-        public void AddResistance(DamageType damageType, float amount)
+        public void AddResistance(DamageTypeData damageType, float amount)
         {
-            if (damageType == DamageType.True)
+            if (damageType == DamageTypeData.True)
                 throw new ArgumentException("Cannot add resistance to the True damage type.");
 
             if (!_resistances.ContainsKey(damageType))
@@ -240,9 +243,9 @@ namespace RogueCrawler
             float r = Mathc.Clamp(_resistances[damageType] + amount, 0.0f, 1.0f);
             _resistances[damageType] = r;
         }
-        public void SetResistance(DamageType damageType, float amount)
+        public void SetResistance(DamageTypeData damageType, float amount)
         {
-            if (damageType == DamageType.True)
+            if (damageType == DamageTypeData.True)
                 throw new ArgumentException("Cannot set a resistance to the True damage type.");
             if (amount < 0.0f)
                 throw new ArgumentException("Cannot set a negative resistance value.");
@@ -252,9 +255,9 @@ namespace RogueCrawler
                 _resistances.Add(damageType, amount);
             else _resistances[damageType] = amount;
         }
-        public float GetResistance(DamageType damageType)
+        public float GetResistance(string damageTypeName)
         {
-            if (_resistances.TryGetValue(damageType, out float r))
+            if (_resistances.TryGetValue(damageTypeName, out float r))
                 return r;
             return 0.0f;
         }
