@@ -25,7 +25,6 @@ namespace RogueCrawler
             float quality = GetQuality(aParams);
             ItemMaterial material = GetRandomMaterial(data);
 
-
             ItemArmor armor = new ItemArmor()
             {
                 ID = NextId,

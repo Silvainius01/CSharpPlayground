@@ -91,7 +91,7 @@ namespace RogueCrawler
                     ItemWeaponGenerationPresets.GetParamsForChest(cParams.CreatureLevel, cParams.ItemQuality, cParams.ItemWeight);
                 chest.AddItem(DungeonGenerator.WeaponGenerator.Generate(weaponProperties));
             }
-            return $"{cParams.ItemQuality}Quality {cParams.ItemWeight}Weight WeaponChest";
+            return $"{cParams.ItemQuality}Quality WeaponChest";
         }
 
         static string PopulateArmorChest(DungeonChest<IItem> chest, DungeonChestGenerationParamerters cParams)
@@ -103,7 +103,7 @@ namespace RogueCrawler
                     ItemArmorGenerationPresets.GetParamsForChest(cParams.CreatureLevel, cParams.ItemQuality);
                 chest.AddItem(DungeonGenerator.ArmorGenerator.Generate(armorProperties));
             }
-            return $"{cParams.ItemQuality}Quality {cParams.ItemWeight}Weight ArmorChest";
+            return $"{cParams.ItemQuality}Quality ArmorChest";
         }
 
         static QualityLevel GetChestItemQuality()
