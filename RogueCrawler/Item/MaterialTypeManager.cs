@@ -32,8 +32,11 @@ namespace RogueCrawler
 
             foreach (var obj in jArray)
             {
-                ItemMaterial data = (ItemMaterial)serializer.Deserialize(new JTokenReader(obj), typeof(ItemMaterial));
-                Materials.Add(data.Name, data);
+                if (IsValidMaterial(obj, index))
+                {
+                    ItemMaterial data = (ItemMaterial)serializer.Deserialize(new JTokenReader(obj), typeof(ItemMaterial));
+                    Materials.Add(data.Name, data);
+                }
                 ++index;
             }
             Loaded = true;
@@ -54,25 +57,29 @@ namespace RogueCrawler
         {
             int sbLength = 0;
             string starterString = $"Invalid material detected at position [{index}]";
-            SmartStringBuilder sb = new SmartStringBuilder();
+            // SmartStringBuilder sb = new SmartStringBuilder();
 
-            sb.Append(starterString);
-            sb.NewlineAppend(1, "Missing Required Fields:");
-            sbLength = sb.Length;
-
-            if (!obj.Contains("Name"))
-                sb.NewlineAppend(2, "Name -> string");
-            if (!obj.Contains("IsMetallic"))
-                sb.NewlineAppend(2, "IsMetallic -> bool");
-            if (!obj.Contains("IsWeaponMaterial"))
-                sb.NewlineAppend(2, "IsWeaponMaterial -> bool");
-            if (!obj.Contains("IsArmorMaterial"))
-                sb.NewlineAppend(2, "IsArmorMaterial -> bool");
-
-            if (sb.Length > sbLength)
+            using (ManagedStringBuilder msb = new ManagedStringBuilder("InvalidMaterial", starterString))
             {
-                ConsoleExt.WriteWarningLine(sb.ToString());
-                return false;
+                var sb = msb.Builder;
+                sb.Append(starterString);
+                sb.NewlineAppend(1, "Missing Required Fields:");
+                sbLength = sb.Length;
+
+                if (!obj.Contains("Name"))
+                    sb.NewlineAppend(2, "Name -> string");
+                if (!obj.Contains("IsMetallic"))
+                    sb.NewlineAppend(2, "IsMetallic -> bool");
+                if (!obj.Contains("IsWeaponMaterial"))
+                    sb.NewlineAppend(2, "IsWeaponMaterial -> bool");
+                if (!obj.Contains("IsArmorMaterial"))
+                    sb.NewlineAppend(2, "IsArmorMaterial -> bool");
+
+                if (sb.Length > sbLength)
+                {
+                    ConsoleExt.WriteWarningLine(sb.ToString());
+                    return false;
+                }
             }
             return true;
         }

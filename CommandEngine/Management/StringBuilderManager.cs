@@ -32,7 +32,7 @@ namespace CommandEngine
             Locked.Add(key, builder);
             return builder;
         }
-        public static void ReturnBuilder<T>(string key, Queue<T> Unlocked, Dictionary<string, T> Locked, Action<T> Reset) where T : class
+        static void ReturnBuilder<T>(string key, Queue<T> Unlocked, Dictionary<string, T> Locked, Action<T> Reset) where T : class
         {
             if (!Locked.ContainsKey(key))
                 throw new InvalidOperationException($"Builder with key '{key}' does is not in use.");

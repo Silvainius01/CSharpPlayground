@@ -64,6 +64,7 @@ namespace RogueCrawler
             commands.Add(ConsoleCommand.Create("xp", ExpTest));
             commands.Add(ConsoleCommand.Create("nav", NavTest));
             commands.Add(ConsoleCommand.Create("testSerialize", SerializeTest));
+            commands.Add(ConsoleCommand.Create("generateDamageTypes", GenerateDefaultDamageTypes));
         }
         public void NextTestCommand()
         {
@@ -324,6 +325,11 @@ namespace RogueCrawler
         public void SerializeTest(List<string> args)
         {
             SeriliazableTest test = new SeriliazableTest();
+        }
+
+        public void GenerateDefaultDamageTypes(List<string> args)
+        {
+            DamageTypeManager.GenerateDefaultDamageTypes();
         }
     }
 }

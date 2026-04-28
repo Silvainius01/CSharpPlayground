@@ -827,7 +827,7 @@ namespace RogueCrawler
             void KillCreature(Creature c)
             {
                 // Damage is twice their current HP to make double extra sure
-                var damage = dungeon.DamageCreature(new DamageParameters(c.Health.Value * 2, DamageTypeData.True), c);
+                var damage = dungeon.DamageCreature(new DamageParameters(c.Health.Value * 2, DamageTypeManager.TrueDamage), c);
 
                 if (!damage.DefenderDies)
                     throw new Exception("Kill cheat failed to kill creature.");

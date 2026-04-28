@@ -7,21 +7,6 @@ using System.Threading.Tasks;
 
 namespace RogueCrawler
 {
-    [Flags]
-    internal enum DamageFlags
-    {
-        True = 0,
-        IsBlockable = 1, // If a damage type is blockable, it can be mitigated by armor.
-        IsResistable = 2
-    }
-
-    internal struct DamageTypeData
-    {
-        public string Name { get; set; }
-        public DamageType Type { get; set; }
-        public DamageFlags Flags { get; set; }
-    }
-
     internal struct DamageParameters
     {
         public float Amount { get; set; }
@@ -79,7 +64,7 @@ namespace RogueCrawler
             DamageFlags dFlags = TypeData.Flags;
 
             // True Damage cannot be resisted, and isnt affected by armor.
-            if (TypeData.Type != DamageType.True && dFlags != DamageFlags.True)
+            if (TypeData.Category != DamageCategory.True && dFlags != DamageFlags.True)
             {
                 // Armor rating.
                 // Armor comes first since if it didnt, players would be practically invincible once decked out in resistance buffs.
@@ -107,7 +92,7 @@ namespace RogueCrawler
 
         public string BriefString()
         {
-            return $"{BaseAmount.ToString("n1")}, {EnumExt<DamageTypeData>.GetName(TypeData)}";
+            return $"{BaseAmount.ToString("n1")}, {EnumExt<DamageCategory>.GetName(TypeData.Category)}";
         }
         public string InspectString(string prefix, int tabCount)
         {
