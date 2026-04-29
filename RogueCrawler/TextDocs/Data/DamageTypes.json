@@ -1,47 +1,52 @@
 [
   {
     "Name": "True",
-    "Type": 0,
-    "Flags": 0
-  },
-  {
-    "Name": "Blunt",
-    "Type": 1,
+    "Category": 0,
     "Flags": 0
   },
   {
     "Name": "Pierce",
-    "Type": 1,
+    "Category": 1,
     "Flags": 1
   },
   {
     "Name": "Slash",
-    "Type": 1,
+    "Category": 1,
     "Flags": 1
   },
   {
-    "Name": "Arcane",
-    "Type": 2,
-    "Flags": 2
+    "Name": "Blunt",
+    "Category": 1,
+    "Flags": 3
   },
   {
-    "Name": "Fire",
-    "Type": 3,
+    "Name": "Arcane",
+    "Category": 2,
+    "Flags": 3
+  },
+  {
+    "Name": "Astral",
+    "Category": 2,
     "Flags": 2
   },
   {
     "Name": "Ice",
-    "Type": 3,
+    "Category": 3,
+    "Flags": 2
+  },
+  {
+    "Name": "Fire",
+    "Category": 3,
     "Flags": 2
   },
   {
     "Name": "Lightning",
-    "Type": 3,
+    "Category": 3,
     "Flags": 2
   },
   {
     "Name": "Divine",
-    "Type": 4,
-    "Flags": 10
+    "Category": 4,
+    "Flags": 2
   }
 ]

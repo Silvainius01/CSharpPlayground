@@ -32,6 +32,7 @@ namespace RogueCrawler
 
                 WeaponType = weaponType,
                 BaseDamage = weaponTypeData.BaseDamage,
+                DamageType = DamageTypeManager.DamageTypes[weaponTypeData.DamageType],
                 IsLargeWeapon = IsLargeWeapon(weaponTypeData, wParams),
                 MajorAttribute = weaponTypeData.MajorAttribute,
                 MinorAttribute = weaponTypeData.MinorAttribute,
@@ -54,6 +55,11 @@ namespace RogueCrawler
         public ItemWeapon FromSerialized(SerializedWeapon serialized)
         {
             var weaponType = serialized.WeaponType;
+
+            // Update for legacy weapons
+            if(serialized.DamageType is null || serialized.DamageType == string.Empty)
+                serialized.DamageType = WeaponTypeManager.WeaponTypes[weaponType].DamageType;
+
             ItemWeapon weapon = new ItemWeapon()
             {
                 ID = NextId,
@@ -68,6 +74,7 @@ namespace RogueCrawler
 
                 WeaponType = weaponType,
                 BaseDamage = serialized.BaseDamage,
+                DamageType = DamageTypeManager.DamageTypes[serialized.DamageType],
                 IsLargeWeapon = serialized.IsLargeWeapon,
                 MinorAttribute = WeaponTypes[weaponType].MinorAttribute,
                 MajorAttribute = WeaponTypes[weaponType].MajorAttribute,
@@ -82,6 +89,7 @@ namespace RogueCrawler
             {
                 ID = -1,
                 BaseDamage = c.GetAttribute(AttributeType.STR),
+                DamageType = DamageTypeManager.PhysicalDamage,
                 Weight = 1.0f,
                 Quality = 1.0f,
                 BaseValue = 0,

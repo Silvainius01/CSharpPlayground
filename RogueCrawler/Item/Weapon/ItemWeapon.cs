@@ -32,6 +32,7 @@ namespace RogueCrawler
 
         public bool IsLargeWeapon { get; set; }
         public float BaseDamage { get; set; }
+        public DamageTypeData DamageType { get; set; }
 
         public AttributeType MajorAttribute { get; set; }
         public AttributeType MinorAttribute { get; set; }
@@ -132,6 +133,7 @@ namespace RogueCrawler
                 MaterialName = Material.Name,
                 Condition = Condition,
                 MaxCondition = MaxCondition,
+                DamageType = DamageType.Name,
 
                 WeaponType = WeaponType,
                 IsLargeWeapon = IsLargeWeapon,
@@ -186,6 +188,7 @@ namespace RogueCrawler
         public float BaseDamage { get; set; }
         public bool IsLargeWeapon { get; set; }
         public string WeaponType { get; set; }
+        public string DamageType { get; set; }
 
         public float Condition { get; set; } = 1;
         public float MaxCondition { get; set; } = 1;

@@ -15,8 +15,8 @@ namespace RogueCrawler
 
             while (true)
             {
-                //crawlerGame.UpdateLoop();
-                testSuite.NextTestCommand();
+                crawlerGame.UpdateLoop();
+                //testSuite.NextTestCommand();
             }
         }
     }

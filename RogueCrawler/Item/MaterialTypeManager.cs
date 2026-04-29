@@ -66,13 +66,13 @@ namespace RogueCrawler
                 sb.NewlineAppend(1, "Missing Required Fields:");
                 sbLength = sb.Length;
 
-                if (!obj.Contains("Name"))
+                if (obj["Name"] is null)
                     sb.NewlineAppend(2, "Name -> string");
-                if (!obj.Contains("IsMetallic"))
+                if (obj["IsMetallic"] is null)
                     sb.NewlineAppend(2, "IsMetallic -> bool");
-                if (!obj.Contains("IsWeaponMaterial"))
+                if (obj["IsWeaponMaterial"] is null)
                     sb.NewlineAppend(2, "IsWeaponMaterial -> bool");
-                if (!obj.Contains("IsArmorMaterial"))
+                if (obj["IsArmorMaterial"] is null)
                     sb.NewlineAppend(2, "IsArmorMaterial -> bool");
 
                 if (sb.Length > sbLength)

@@ -1,9 +1,10 @@
 [
   {
     "WeaponType": "Axe",
+    "DamageType": "Slash",
     "MajorAttribute": 0,
     "MinorAttribute": 1,
-    "Handedness":  0,
+    "Handedness": 0,
     "BaseDamage": 1,
     "BaseValue": 5,
     "LargeWeaponDamageMult": 2.5,
@@ -21,6 +22,7 @@
   },
   {
     "WeaponType": "Blade",
+    "DamageType": "Slash",
     "MajorAttribute": 1,
     "MinorAttribute": 0,
     "Handedness": 0,
@@ -41,6 +43,7 @@
   },
   {
     "WeaponType": "Blunt",
+    "DamageType": "Blunt",
     "MajorAttribute": 0,
     "MinorAttribute": 2,
     "Handedness": 0,
@@ -59,6 +62,7 @@
   },
   {
     "WeaponType": "Ranged",
+    "DamageType": "Pierce",
     "MajorAttribute": 1,
     "MinorAttribute": 5,
     "Handedness": 2,
@@ -78,6 +82,7 @@
   },
   {
     "WeaponType": "Spear",
+    "DamageType": "Pierce",
     "MajorAttribute": 1,
     "MinorAttribute": 2,
     "Handedness": 2,

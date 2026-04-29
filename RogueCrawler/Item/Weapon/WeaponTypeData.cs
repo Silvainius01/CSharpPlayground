@@ -8,6 +8,7 @@ namespace RogueCrawler
     class WeaponTypeData
     {
         public string WeaponType { get; set; }
+        public string DamageType { get; set; }
         public AttributeType MajorAttribute { get; set; }
         public AttributeType MinorAttribute { get; set; }
         public AttributeType DamageAttribute { get; set; }

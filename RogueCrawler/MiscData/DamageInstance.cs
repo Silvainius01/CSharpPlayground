@@ -77,9 +77,10 @@ namespace RogueCrawler
                 }
 
                 // Resistance
-                if (dFlags.HasFlag(DamageFlags.IsResistable))
+                // Non-Resistable damage types still respect weaknesses.
+                float resist = Defender.GetDamageResistance(TypeData) / 100.0f;
+                if (resist < 0 || TypeData.Flags.HasFlag(DamageFlags.IsResistable))
                 {
-                    float resist = Defender.GetDamageResistance(TypeData) / 100.0f;
                     resist = damage * MathF.Pow(2.0f, -resist);
                     ResistanceReduction = Mathc.Truncate(damage - resist, 1);
                     damage -= ResistanceReduction;

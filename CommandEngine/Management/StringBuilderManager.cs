@@ -93,7 +93,6 @@ namespace CommandEngine
         }
         public ManagedStringBuilder(string key, string startString) : this(key)
         {
-            Builder = StringBuilderManager.GetSmartBuilder(key);
             Builder.Append(startString);
         }
         public ManagedStringBuilder(string key, string startString, string tabString) : this(key, startString)
