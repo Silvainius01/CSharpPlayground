@@ -73,15 +73,15 @@ namespace RogueCrawler
         public CreatureArmorSlots Armor;
 
         public List<CreatureStat> Stats { get; private set; }
-        public ReadOnlyDictionary<string, float> TypeResistances { get; private set; }
-        public ReadOnlyDictionary<DamageCategory, float> CategoryResistances { get; private set; }
+        public ReadOnlyDictionary<string, int> TypeResistances { get; private set; }
+        public ReadOnlyDictionary<DamageCategory, int> CategoryResistances { get; private set; }
         public CrawlerAttributeSet MaxAttributes { get; private set; }
         public CrawlerAttributeSet Afflictions { get; private set; }
         public CreatureProficiencies Proficiencies { get; set; }
 
         private ItemWeapon UnarmedWeapon;
-        private Dictionary<string, float> _typeResistances = new Dictionary<string, float>();
-        private Dictionary<DamageCategory, float> _categoryResistances = new Dictionary<DamageCategory, float>();
+        private Dictionary<string, int> _typeResistances = new Dictionary<string, int>();
+        private Dictionary<DamageCategory, int> _categoryResistances = new Dictionary<DamageCategory, int>();
 
         public Creature()
         {
@@ -111,8 +111,8 @@ namespace RogueCrawler
             };
 
             Armor = new CreatureArmorSlots();
-            TypeResistances = new ReadOnlyDictionary<string, float>(_typeResistances);
-            CategoryResistances = new ReadOnlyDictionary<DamageCategory, float>(_categoryResistances);
+            TypeResistances = new ReadOnlyDictionary<string, int>(_typeResistances);
+            CategoryResistances = new ReadOnlyDictionary<DamageCategory, int>(_categoryResistances);
             UnarmedWeapon = DungeonGenerator.WeaponGenerator.GenerateUnarmed(this);
         }
 
@@ -235,37 +235,71 @@ namespace RogueCrawler
             UpdateStats();
         }
 
-        public void AddTypeResistance(DamageTypeData damageType, float amount)
+        public void AddTypeResistance(DamageTypeData damageType, int amount)
         {
             if (damageType.Category == DamageCategory.True)
                 throw new ArgumentException("Cannot add resistance to the True damage type.");
             if (!damageType.Flags.HasFlag(DamageFlags.IsResistable))
-                throw new ArgumentException($"Damage Type '{damageType.Name}' is not resistable");
-
+                throw new ArgumentException($"CAnnot add resistance to Damage Type '{damageType.Name}' because it is not resistable.");
 
             if (!_typeResistances.ContainsKey(damageType.Name))
-                _typeResistances.Add(damageType.Name, 0.0f);
-
-            float r = Mathc.Clamp(_typeResistances[damageType] + amount, 0.0f, 1.0f);
-            _typeResistances[damageType] = r;
+                _typeResistances.Add(damageType.Name, 0);
+            int r = _typeResistances[damageType.Name] + amount;
+            _typeResistances[damageType.Name] = r;
         }
-        public void SetResistance(DamageTypeData damageType, float amount)
+        public void AddCategoryResistance(DamageTypeData damageType, int amount)
         {
-            if (damageType == DamageTypeData.True)
+            if (damageType.Category == DamageCategory.True)
+                throw new ArgumentException("Cannot add resistance to the True damage type.");
+            if (!damageType.Flags.HasFlag(DamageFlags.IsResistable))
+                throw new ArgumentException($"CAnnot add resistance to Damage Type '{damageType.Category}' because it is not resistable.");
+
+            if (!_categoryResistances.ContainsKey(damageType.Category))
+                _categoryResistances.Add(damageType.Category, 0);
+            int r = _categoryResistances[damageType.Category] + amount;
+            _categoryResistances[damageType.Category] = r;
+        }
+
+        public void SetTypeResistance(DamageTypeData damageType, int amount)
+        {
+            if (damageType.Category == DamageCategory.True)
                 throw new ArgumentException("Cannot set a resistance to the True damage type.");
-            if (amount < 0.0f)
-                throw new ArgumentException("Cannot set a negative resistance value.");
 
-            amount = Mathc.Max(amount, 1.0f);
-            if (!_catResistances.ContainsKey(damageType))
-                _catResistances.Add(damageType, amount);
-            else _catResistances[damageType] = amount;
+            if (amount > 0 && damageType.Flags.HasFlag(DamageFlags.IsResistable))
+                throw new ArgumentException("Damage Type '{damageType.Name}' cannot have a resistance above 0 because it is not resistable.");
+
+            if (!_typeResistances.ContainsKey(damageType.Name))
+                _typeResistances.Add(damageType.Name, amount);
+            else _typeResistances[damageType.Name] = amount;
         }
-        public float GetResistance(string damageTypeName)
+        public void SetCategoryResistance(DamageTypeData damageType, int amount)
         {
-            if (_catResistances.TryGetValue(damageTypeName, out float r))
+            if (damageType.Category == DamageCategory.True)
+                throw new ArgumentException("Cannot set a resistance to the True damage type.");
+
+            if (amount > 0 && damageType.Flags.HasFlag(DamageFlags.IsResistable))
+                throw new ArgumentException("Damage Type '{damageType.Category}' cannot have a resistance above 0 because it is not resistable.");
+
+            if (!_categoryResistances.ContainsKey(damageType.Category))
+                _categoryResistances.Add(damageType.Category, amount);
+            else _categoryResistances[damageType.Category] = amount;
+        }
+
+        public int GetTypeResistance(string typeName)
+        {
+            if (_typeResistances.TryGetValue(typeName, out int r))
                 return r;
-            return 0.0f;
+            return 0;
+        }
+        public int GetCategoryResistance(DamageCategory category)
+        {
+            if (_categoryResistances.TryGetValue(category, out int r))
+                return r;
+            return 0;
+        }
+        public int GetDamageResistance(DamageTypeData damageType)
+        {
+            return GetTypeResistance(damageType.Name) + GetCategoryResistance(damageType.Category);
         }
 
         public virtual string BriefString()
