@@ -7,7 +7,7 @@
   {
     "Name": "Blunt",
     "Category": 1,
-    "Flags": 3
+    "Flags": 0
   },
   {
     "Name": "Pierce",
@@ -21,11 +21,6 @@
   },
   {
     "Name": "Arcane",
-    "Category": 2,
-    "Flags": 3
-  },
-  {
-    "Name": "Astral",
     "Category": 2,
     "Flags": 2
   },
@@ -47,6 +42,6 @@
   {
     "Name": "Divine",
     "Category": 4,
-    "Flags": 2
+    "Flags": 10
   }
 ]

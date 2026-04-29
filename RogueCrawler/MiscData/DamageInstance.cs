@@ -80,7 +80,7 @@ namespace RogueCrawler
                 if (dFlags.HasFlag(DamageFlags.IsResistable))
                 {
                     float resist = Defender.GetTypeResistance(TypeData.Name);
-                    resist = damage * (1.0f / MathF.Pow(2.0f, resist));
+                    resist = damage * MathF.Pow(2.0f, -resist);
                     ResistanceReduction = Mathc.Truncate(damage - resist, 1);
                     damage -= ResistanceReduction;
                 }
