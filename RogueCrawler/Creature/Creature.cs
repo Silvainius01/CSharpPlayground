@@ -246,24 +246,22 @@ namespace RogueCrawler
             if (!_typeResistances.ContainsKey(damageType.Name))
                 _typeResistances.Add(damageType.Name, 0.0f);
 
-            float r = Mathc.Clamp(_typeResistances[damageType] + amount, 0.0f, 1.0f);
-            _typeResistances[damageType] = r;
+            float r = Mathc.Clamp(_typeResistances[damageType.Name] + amount, 0.0f, 1.0f);
+            _typeResistances[damageType.Name] = r;
         }
-        public void SetResistance(DamageTypeData damageType, float amount)
+        public void SetTypeResistance(DamageTypeData damageType, float amount)
         {
-            if (damageType == DamageTypeData.True)
+            if (damageType.Category == DamageCategory.True)
                 throw new ArgumentException("Cannot set a resistance to the True damage type.");
-            if (amount < 0.0f)
-                throw new ArgumentException("Cannot set a negative resistance value.");
+            if (!damageType.Flags.HasFlag(DamageFlags.IsResistable))
+                throw new ArgumentException($"Damage Type '{damageType.Name}' is not resistable");
 
-            amount = Mathc.Max(amount, 1.0f);
-            if (!_catResistances.ContainsKey(damageType))
-                _catResistances.Add(damageType, amount);
-            else _catResistances[damageType] = amount;
+            amount = Mathc.Clamp(amount, 0.0f, 1.0f);
+            _typeResistances[damageType.Name] = amount;
         }
-        public float GetResistance(string damageTypeName)
+        public float GetTypeResistance(string damageTypeName)
         {
-            if (_catResistances.TryGetValue(damageTypeName, out float r))
+            if (_typeResistances.TryGetValue(damageTypeName, out float r))
                 return r;
             return 0.0f;
         }

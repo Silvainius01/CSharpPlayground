@@ -31,7 +31,7 @@ namespace RogueCrawler
     {
         public float Received { get; private set; }
         public bool DefenderDies { get; private set; }
-        public bool AttackSuccessful { get; private set; }
+        public bool AttackSuccessful { get; set; }
         public Creature Defender { get; private set; }
         public DamageParameters InitialParams { get; private set; }
 
@@ -79,7 +79,7 @@ namespace RogueCrawler
                 // Resistance
                 if (dFlags.HasFlag(DamageFlags.IsResistable))
                 {
-                    float resist = Defender.GetResistance(TypeData.Name);
+                    float resist = Defender.GetTypeResistance(TypeData.Name);
                     resist = damage * (1.0f / MathF.Pow(2.0f, resist));
                     ResistanceReduction = Mathc.Truncate(damage - resist, 1);
                     damage -= ResistanceReduction;
