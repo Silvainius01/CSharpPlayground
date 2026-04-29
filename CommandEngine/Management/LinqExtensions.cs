@@ -39,6 +39,24 @@ namespace CommandEngine
         public static T RandomItem<T>(this IEnumerable<T> enumerable) => enumerable.ElementAt(CommandEngine.Random.NextInt(enumerable.Count()));
         public static T RandomItem<T>(this IEnumerable<T> enumerabe, Func<T, bool> predicate) => enumerabe.Where(predicate).RandomItem();
 
+        public static void AddRange<TKey, TValue>(this IDictionary<TKey, TValue> dict, IEnumerable<TKey> keys, TValue value = default(TValue))
+        {
+            foreach (var key in keys)
+                dict.Add(key, value);
+        }
+        public static void AddRange<TKey, TValue>(this IDictionary<TKey, TValue> dict, IEnumerable<TKey> keys, IEnumerable<TValue> values)
+        {
+            int length = keys.Count();
+            
+            if (length != values.Count())
+                throw new ArgumentException("There must be equal amounts of keys and values.");
+
+            foreach ((TKey First, TValue Second) pair in keys.Zip(values))
+            {
+                dict.Add(pair.First, pair.Second);
+            }
+        }
+
         /// <summary>Create a string with a <paramref name="seperator"/> between the items./// </summary>
         /// <returns>A string with <paramref name="seperator"/> between the items present in <paramref name="enumerable"/></returns>
         public static string ToString<T>(this IEnumerable<T> enumerable, string seperator)

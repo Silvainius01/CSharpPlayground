@@ -155,11 +155,9 @@ namespace RogueCrawler
         }
         public DamageTypeData GetDamageType()
         {
-            return new DamageTypeData()
-            {
-                Name = "Physical"
-            };
+            return GetCombatWeapon().DamageType;
         }
+
         public float GetCombatHitChance()
         {
             ItemWeapon weapon = GetCombatWeapon();
@@ -193,6 +191,7 @@ namespace RogueCrawler
         }
 
         public float GetArmorRating() => Armor.GetTotalArmorRating(this);
+        public float GetArmorSlotRating(ArmorSlotType slot) => Armor.GetSlotArmorRating(slot, this);
 
         void UpdateStats()
         {

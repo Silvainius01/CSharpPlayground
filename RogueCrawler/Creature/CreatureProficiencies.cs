@@ -118,7 +118,7 @@ namespace RogueCrawler
             {
                 int expNeeded = skill.ExperienceNeeded(skill.Level + level);
                 skill.Experience += experience;
-                while (skill.Experience > expNeeded)
+                while (skill.Experience >= expNeeded)
                 {
                     ++level;
                     skill.Experience -= expNeeded;

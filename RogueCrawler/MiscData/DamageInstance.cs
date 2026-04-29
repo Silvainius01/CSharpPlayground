@@ -43,20 +43,15 @@ namespace RogueCrawler
         public DamageTypeData TypeData => InitialParams.TypeData;
         public Creature Attacker => InitialParams.Attacker;
 
-        public DamageInstance(Creature attacker, Creature defender)
-        {
-            InitialParams = new DamageParameters(attacker);
-            Defender = defender;
-            Received = CalculateReceived();
-            DefenderDies = Received >= defender.Health.Value;
-        }
         public DamageInstance(DamageParameters dParams, Creature defender)
         {
             InitialParams = dParams;
             Defender = defender;
             Received = CalculateReceived();
             DefenderDies = Received >= defender.Health.Value;
+            AttackSuccessful = DefenderDies || Received > 0.0f;
         }
+        public DamageInstance(Creature attacker, Creature defender) : this(new DamageParameters(attacker), defender) { }
 
         private float CalculateReceived()
         {

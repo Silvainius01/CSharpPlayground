@@ -7,6 +7,7 @@ using System.Numerics;
 using System.Transactions;
 using System.Reflection.Metadata.Ecma335;
 using System.Net;
+using Microsoft.VisualBasic;
 
 namespace RogueCrawler
 {
@@ -22,8 +23,8 @@ namespace RogueCrawler
         {
             public DamageInstance DI { get; set; }
             public ItemWeapon attackerWeapon { get; set; }
-            public int ArmorExp { get; set; }
-            public int WeaponExp { get; set; }
+            public Dictionary<string, int> AttackerExpGains { get; set; }
+            public Dictionary<string, int> DefenderExpGains { get; set; }
         }
 
         //CommandModule commands = new CommandModule("\nEnter next game command");
@@ -288,39 +289,73 @@ namespace RogueCrawler
 
         private FightResult DungeonFight(Creature atk, Creature def)
         {
-            int armorExpGained = 0;
-            int weaponExpGained = 1; // Bruce Lee reference lmfao
             ItemWeapon weapon = atk.GetCombatWeapon();
             DamageInstance dmg = dungeon.DamageCreature(atk, def);
+            var attackerExp = new Dictionary<string, int>();
+            var defenderExp = new Dictionary<string, int>();
 
             // Attacker Exp
-            if (dmg.AttackSuccessful)
-                weaponExpGained += (int)dmg.Received;
+            int weaponExpGained = dmg.AttackSuccessful ? (int)dmg.Received : 1;
             atk.Fatigue.AddValue(-atk.GetAttackFatigueCost());
-            atk.Proficiencies.AddSkillExperience(weapon.WeaponType, weaponExpGained);
-            atk.Proficiencies.AddSkillExperience(weapon.ObjectName, weaponExpGained);
+            attackerExp.Add(weapon.WeaponType, weaponExpGained);
+            attackerExp.Add(weapon.ObjectName, weaponExpGained);
 
-            //Defender Exp
-            int baseExp = (int)(dmg.ArmorReduction);
+            // Defender Exp
+            if (dmg.ArmorReduction > 0)
+            {
+                // Armor XP is split amongst all armor types.
+                float totalXp = dmg.ArmorReduction;
+                float totalRating = def.GetArmorRating();
+                foreach (var slot in EnumExt<ArmorSlotType>.Values)
+                {
+                    int slotXp = Math.Max((int)((def.GetArmorSlotRating(slot) / totalRating) * totalXp), 1);
+                    ItemArmor slotArmor = def.Armor.ArmorSlots[slot];
+
+                    if (!defenderExp.ContainsKey(slotArmor.ArmorClass))
+                        defenderExp.Add(slotArmor.ArmorClass, slotXp);
+                    else defenderExp[slotArmor.ArmorClass] += slotXp;
+                }
+            }
+
+            // Apply Exp
+            foreach(var kvp in attackerExp)
+                atk.Proficiencies.AddSkillExperience(kvp.Key, kvp.Value);
+
+            foreach (var kvp in defenderExp)
+                def.Proficiencies.AddSkillExperience(kvp.Key, kvp.Value);
+
+            // Apply any costs to participants
+            atk.Fatigue.AddValue(-atk.GetAttackFatigueCost());
 
             return new FightResult()
             {
                 DI = dmg,
                 attackerWeapon = weapon,
-                WeaponExp = weaponExpGained,
-                ArmorExp = weaponExpGained,
+                AttackerExpGains = attackerExp,
+                DefenderExpGains = defenderExp
             };
         }
         private bool TakeCreatureTurn(Creature c)
         {
-            var dmg = dungeon.DamageCreature(c, player);
+            //var dmg = dungeon.DamageCreature(c, player);
+            FightResult fight = DungeonFight(c, player);
 
-            staticBuilder.Clear();
-            staticBuilder.NewlineAppend($"{c.ToString()} attacks for {dmg.Received} damage!");
-            staticBuilder.NewlineAppend($"HP Left: {player.Health.Value}/{player.Health.MaxValue}");
+            using (ManagedStringBuilder msb = new ManagedStringBuilder("PlayerFightResult"))
+            {
+                var builder = msb.Builder;
+                builder.NewlineAppend($"{c.ToString()} attacks for {fight.DI.Received} damage!");
+                builder.NewlineAppend($"HP Left: {player.Health.Value}/{player.Health.MaxValue}");
+
+                if (fight.DefenderExpGains.Any())
+                {
+                    builder.NewlineAppend("XP Gained: ");
+                    foreach (var kvp in fight.AttackerExpGains)
+                        builder.NewlineAppend(1, $"{kvp.Key}: {kvp.Value}xp");
+                }
+            }
             Console.WriteLine(staticBuilder.ToString());
 
-            return dmg.DefenderDies;
+            return fight.DI.DefenderDies;
         }
         private void OnPlayerDeath()
         {
@@ -649,18 +684,10 @@ namespace RogueCrawler
             if (BaseCreatureCommand(args, out var creature, out string errorMsg))
             {
                 ap = 1;
-                int weaponExpGained = 1; // Bruce Lee reference lmfao
-                ItemWeapon weapon = player.GetCombatWeapon();
-                DamageInstance playerDamage = dungeon.DamageCreature(player, creature);
+                FightResult fight = DungeonFight(player, creature);
+                DamageInstance playerDamage = fight.DI;
 
-                if (playerDamage.AttackSuccessful)
-                    weaponExpGained += (int)playerDamage.Received;
-
-                player.Fatigue.AddValue(-player.GetAttackFatigueCost());
-                player.Proficiencies.AddSkillExperience(weapon.WeaponType, weaponExpGained);
-                player.Proficiencies.AddSkillExperience(weapon.ObjectName, weaponExpGained);
-
-
+                // Print relevant results to screen
                 using (ManagedStringBuilder mb = new ManagedStringBuilder("PlayerFightResult"))
                 {
                     var builder = mb.Builder;
@@ -678,9 +705,14 @@ namespace RogueCrawler
                     builder.NewlineAppend($"Damage dealt: {playerDamage.Received.ToString("n1")}");
                     if (playerDamage.TotalReduction > 0.0f)
                         builder.Append($"[{playerDamage.BaseAmount.ToString("n1")} - {(playerDamage.TotalReduction).ToString("n1")}]");
-                    builder.NewlineAppend("XP Gained: ");
-                    builder.NewlineAppend(1, $"{weapon.WeaponType}: {weaponExpGained}xp");
-                    builder.NewlineAppend(1, $"{weapon.ObjectName}: {weaponExpGained}xp");
+
+                    if (fight.AttackerExpGains.Any())
+                    {
+                        builder.NewlineAppend("XP Gained: ");
+                        foreach (var kvp in fight.AttackerExpGains)
+                            builder.NewlineAppend(1, $"{kvp.Key}: {kvp.Value}xp");
+                    }
+
                     Console.WriteLine(builder.ToString());
                 }
             }

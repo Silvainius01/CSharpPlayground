@@ -22,7 +22,7 @@ namespace RogueCrawler
         public HashSet<int> BorderRooms = new HashSet<int>();
         public HashSet<int> CheckedRooms = new HashSet<int>();
         public HashSet<int> ExploredRooms = new HashSet<int>();
-        
+
         public bool RoomIsExplorable(DungeonRoom room)
         {
             return ExploredRooms.Contains(room.Index) || RoomBordersExploredRoom(room);
@@ -46,7 +46,7 @@ namespace RogueCrawler
 
         public override string InspectString(string prefix, int tabCount)
         {
-            SmartStringBuilder builder = new SmartStringBuilder(DungeonSettings.TabString);;
+            SmartStringBuilder builder = new SmartStringBuilder(DungeonSettings.TabString); ;
 
             if (prefix == string.Empty)
                 prefix = $"Stats for {ObjectName}:";
@@ -59,7 +59,7 @@ namespace RogueCrawler
             builder.NewlineAppend(tabCount, $"Damage: {GetCombatDamage().ToString("n1")}");
             builder.NewlineAppend(PrimaryWeapon.InspectString($"Weapon Stats:", tabCount));
             builder.NewlineAppend(tabCount, "Armor Stats:");
-            builder.NewlineAppend(tabCount+1, Armor.BriefString());
+            builder.NewlineAppend(tabCount + 1, $"Armor Rating: {GetArmorRating()} | Coverage: {Armor.ArmorCoverage}");
             builder.NewlineAppend(MaxAttributes.InspectString("Attributes:", tabCount));
             builder.NewlineAppend(Proficiencies.InspectString("Skills:", tabCount));
 
@@ -77,7 +77,7 @@ namespace RogueCrawler
             tabCount++;
             builder.NewlineAppend(tabCount, $"HP: {Health.Value}/{Health.MaxValue}");
             builder.NewlineAppend(tabCount, $"Level: {Level}");
-            builder.NewlineAppend(tabCount, $"Damage: {damage.ToString("n1")}, {GetDamageType()}");
+            builder.NewlineAppend(tabCount, $"Damage: {damage.ToString("n1")}, {GetDamageType().Name}");
 
             return builder.ToString();
         }

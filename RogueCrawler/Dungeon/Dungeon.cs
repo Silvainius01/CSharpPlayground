@@ -107,7 +107,8 @@ namespace RogueCrawler
 
         public DamageInstance DamageCreature(DamageInstance damage)
         {
-            damage.Defender.Health.AddValue(-damage.Received);
+            if(damage.AttackSuccessful)
+                damage.Defender.Health.AddValue(-damage.Received);
             return damage;
         }
         public DamageInstance DamageCreature(Creature attacker, Creature defender)
