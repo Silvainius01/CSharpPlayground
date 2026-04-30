@@ -7,18 +7,21 @@ Enchantments
 		- Innate ecchantments are a special class of passive enchantment. They are enchantments that are imbued into a weapon as a part of the forging process, and are poorly understood.
 		  These enchantments are often benign, producing largely cosmetic effects that dont affect the effectiveness of the weapon, but due to their nature, can still provide practical use.
 		  An example of an innate enchantment would be Sting and Glamdring from LotR, where the a specific elven kingdom of old hated Orcs so vehemetly that their weapons shine blue when they are nearby. 
+		  More powerful innate enchantments can be awuired through engraving magic directly into them. These are called Runic Enchantments, and are the only the way to create vampiric weapons.
 		- Active enchantments operate much like spells, they consume X amount of mana all at once to produce an effect.
 		- Hybrid enchantments are the most common, and blend the two types, a typical example being a damage enchantment that has a passive base effect, and an active burst.
 			- In world, hybrid enchantments are explained as a "weave", where two enchantments are woven together into a more effiecient, bonded pair. But as a mechanic, it is functionally a third type.
+			- Hybrid enchantments cannot be imbued after a runic engraving is applied; however an item with a hyrbid enchantment can be engraved after its creation. 
 
 
 Innate Enchantments
 	Innate enchantments are imbued into an item by the forger automatically as long as they meet specific conditions. A blacksmith cannot choose to imbue it, nor can they can choose not to. It is a fundamental part of life. 
 	Innate enchantments can be found at the end of any physical and creative process, most commonly forging or blacksmiting, but can include weaving, leatherworking, sewing, carpentry, carving, etc.
 	Innate enchantments *require* physical proxymity with the items creator. Designing something on blue prints and then having it made by machines even a few meters away will nullify this phenomena. 
-	Since innate enchanments are derived from proxmity, a famed engineer can design the most perfect tool for a given purpose, but the enchantment imbued onto it will come from the person who actually brings builds it.
+	Since innate enchanments are derived from proxmity, a famed engineer can design the most perfect tool for a given purpose, but the enchantment imbued onto it will come from the person who actually makes it.
 	Innate enchantments also require a significant amount of time invested into brining the item to life. This is why simple nails are rarely imbued, while intricate, complex weapons are commonly imbued.
-	Innate enchantments are more powerful when the creator is alone with it. This is why collaborative creations, regardless of intensity or duration, are rarely imbued; everyone's mana and conflicting passions, opinions, expereinces, and mana properties cancel out.
+	Innate enchantments are more powerful when the creator is alone with it. This is why collaborative creations, regardless of intensity or duration, are rarely imbued; everyone's conflicting passions, opinions, expereinces, and mana properties cancel out.
+	Innate enchantments are relatively weak and subtle. But enchanters can hijack their presence to create hybrid enchantments. This process almost always overwrites the innate enchantment's previous effects. Some master artiicers are capable of perserving some its properties, but never all or at full strength.
 	
 	Known innate enchantments:
 	- Hatred
@@ -30,7 +33,7 @@ Innate Enchantments
 			Sting and Glamdring shining blue in the presence of Orcs
 			A holy pendant glowing in the presence of sin (as understood by its creator)
 			A ring that glows in ultraviolet and causes spiders within a few feet to scitter away in fear
-			Clothes who's seams glow a cool seafom color when its hot outside
+			Clothing with seams that glow a cool seafom color when its hot outside
 			A mansion that causes members of the ruling class to feel uneasy and naeusous while inside.
 
 Natural Enchantment
@@ -43,6 +46,10 @@ Natural Enchantment
 		- Mythryl is actaully just naturally occuring, enchanted iron, and can be up to half its weight, and create alloys such as steel that are twice as strong. 
 		  Since its just normal iron, you can do anything with it that you would with mundane iron, and get similar results.
 		- Adamantine, similar to Mythryl, is enchanted titanium, and is the strongest known natural enchantment. It is effectively impossible to forge, and is typically casted before being refined using reductive techniques
-		- Scarlet Ore inherits the magical properties of the sun, and as a result is used to forge weapons to fight vampires, undead, and other fiends adverse to daylight. (Demon Slayer reference)
-		- Aether is enchanted mist, most often found around waterfalls in specific locations. This water can infuse the consumers with a variety of neurologic effects, such as faster learning, reflexes, and mental capacity. A downside is it makes one more sensitive to electricity.
+		- Scarlet Ore inherits the magical properties of the sun, and as a result is used to forge weapons to fight vampires, undead, and other fiends adverse to daylight.
+		- Osranium, unlike its cousin Scarlet, is silver instead of iron. It is naturally imbibed with properties of the moon, thus making it effective in harming or repelling creatures fearful of it. Alloys of Osranite, typically high-copper sterling silver, can be used for controled release of lycanthropic powers, as well as locating those with them. It is also useful in the creating of wards, and thus highly valuable to Rune Smiths in creating defensive engravings,and alchemists who can make warding tonics for short-term but powerful warding effects. Chronic ingestion to permanent, low-grade resistance to the dangers you are warding against at the cost of argyia.
+		- Oncanite is enchanted aluminum, and is incredibly rare. It can nullify powers of both the sun and moon. Lycanthropes struck by it are revereted to human form, and vampires can wear jewlery made of it to withstand the sun and protect themselves against Scarlet Weapons. While it is known that elemental magic can be used to isolate aluminum from some dissovled minerals, Oncanite has only been found in pure deposits from meteorites. 
+		- Aether is enchanted water, most often found around waterfalls or intense rapids where water is aerosolized. Unlike ores, this is trivial, though expensive, to create aritificially. Aether is the solvent for most potions, and high enough concentrations can infuse the consumers with a variety of additional neurologic effects, such as faster learning, reflexes, and mental capacity. A downside is it makes one more sensitive to electricity.
+		- Ichor is a catch all term for enchanted oils, which are also used in potions as well as applicants, cooking, enchanting, equipment maintenance, and basically any other application you can think of. Much like aether, it is easy, but expensive, to create artificially by aerosolizing it.
+		- 
 		
