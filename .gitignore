@@ -21,9 +21,10 @@ x64/
 x86/
 bld/
 [Bb]in/
-!RogueCrawler/bin/*/Saves
 [Oo]bj/
 [Ll]og/
+
+!RogueCrawler/bin/*/Saves
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
