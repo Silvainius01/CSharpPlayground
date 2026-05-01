@@ -94,7 +94,7 @@ namespace RogueCrawler
             int Qmin = (Qmax + 1) / 2 - 1;
 
 
-            Qmax = Mathc.Max(Qmax, DungeonSettings.MaxWeaponQuality);
+            Qmax = Mathc.Min(Qmax, DungeonSettings.MaxWeaponQuality);
             return new Vector2Int(Qmin, Qmax);
         }
         public static float GetBiasedRange(Vector2Int range, QualityLevel qualityBias)

@@ -29,7 +29,7 @@ namespace RogueCrawler
         public const int ExperiencePerCreatureOverLevel = 5;
         public const float FullClearBonus = 2.0f;
         public const float FullExploreBonus = 2.0f;
-        public const int LevelsPerDungeonSizeUnlock = 5;
+        public const int LevelsPerDungeonSizeUnlock = 10;
         #endregion
 
         #region Attribute Settings

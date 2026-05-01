@@ -40,13 +40,15 @@ namespace CommandEngine
             return new Vector2Int(Math.Max(value.X, min), Math.Min(value.Y, max));
         }
 
+        /// <summary>Can also be used for "At Most"</summary>
         public static Vector2Int Min(Vector2Int v, int minValue) 
             => new Vector2Int(Mathc.Min(v.X, minValue), Mathc.Min(v.Y, minValue));
-        public static Vector2Int Min(Vector2Int vFirst, Vector2Int vSecond)
+        public static Vector2Int MinMagnitude(Vector2Int vFirst, Vector2Int vSecond)
             => vFirst.SqrMagnitude < vSecond.SqrMagnitude ? vFirst : vSecond;
         public static Vector2Int MinValue(Vector2Int vFirst, Vector2Int vSecond)
             => new Vector2Int(Mathc.Min(vFirst.X, vSecond.X), Mathc.Min(vFirst.Y, vSecond.Y));
         
+        /// <summary>Can also be used for "At Least"</summary>
         public static Vector2Int Max(Vector2Int v2, int maxValue) 
             => new Vector2Int(Mathc.Max(v2.X, maxValue), Mathc.Max(v2.Y, maxValue));
         public static Vector2Int Max(Vector2Int vFirst, Vector2Int vSecond)

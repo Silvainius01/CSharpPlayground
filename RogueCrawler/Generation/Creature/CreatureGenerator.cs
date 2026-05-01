@@ -27,7 +27,8 @@ namespace RogueCrawler
             // Fill dungeon with the determined creature count
             for (int i = 0; i < roomManager.rooms.Count; ++i)
             {
-                if (CommandEngine.Random.NextFloat() < dParams.CreatureProbability)
+                float r = CommandEngine.Random.NextFloat();
+                if (r < dParams.CreatureProbability)
                 {
                     DungeonRoom room = validRooms.RandomItem();
                     Creature creature = Generate(cParams);

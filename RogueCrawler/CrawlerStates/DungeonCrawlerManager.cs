@@ -75,8 +75,8 @@ namespace RogueCrawler
                 RoomHeightRange = new Vector2Int(1, 1),
                 RoomWidthRange = new Vector2Int(1, 1),
                 MaxCreaturesPerRoom = 3,
-                CreatureProbability = 1f,//0.33f,
-                ChestProbability = 0.2f
+                CreatureProbability = 0f,//0.33f,
+                ChestProbability = 1.0f,//0.2f
             };
             return DungeonGenerator.GenerateDungeon(dParams);
         }

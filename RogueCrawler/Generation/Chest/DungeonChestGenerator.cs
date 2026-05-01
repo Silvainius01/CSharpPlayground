@@ -26,7 +26,10 @@ namespace RogueCrawler
 
         protected override bool ValidateInternal()
         {
-            ItemRange = Mathc.Min(ItemRange.Sort(), 0);
+            while (Qualities.Count < 2)
+                Qualities.Add(QualityLevel.Normal);
+
+            ItemRange = Mathc.Max(ItemRange.Sort(), 1);
             return true;
         }
     }
@@ -40,7 +43,8 @@ namespace RogueCrawler
             DungeonChestManager chestManager = new DungeonChestManager(roomManager);
             foreach (var room in roomManager.rooms)
             {
-                if (room.Index != roomManager.EntranceRoom.Index && CommandEngine.Random.NextFloat() < dParams.ChestProbability)
+                float r = CommandEngine.Random.NextFloat();
+                if (room.Index != roomManager.EntranceRoom.Index && r < dParams.ChestProbability)
                 {
                     DungeonChestGenerationParamerters cParams = new DungeonChestGenerationParamerters(
                         GetChestItemQuality(),
@@ -52,12 +56,18 @@ namespace RogueCrawler
                     };
                     chestManager.AddObject(DungeonGenerator.GenerateChest(cParams), room);
                 }
+                else if (room.Index != roomManager.EntranceRoom.Index)
+                {
+                    string huh = "huh";
+                }
             }
             return chestManager;
         }
 
         public override DungeonChest<IItem> Generate(DungeonChestGenerationParamerters cParams)
         {
+            cParams.Validate();
+
             DungeonChest<IItem> chest = new DungeonChest<IItem>()
             {
                 ID = NextId,
