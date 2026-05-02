@@ -8,7 +8,7 @@ using DaybreakGames.Census;
 using Websocket.Client;
 using DaybreakGames.Census.Operators;
 using System.Text.RegularExpressions;
-using System.Collections.Generic;z
+using System.Collections.Generic;
 
 namespace PlanetSide
 {
@@ -40,13 +40,8 @@ namespace PlanetSide
                 return true;
 
             // Char IDs are always odd numbers.
-            if (!"02468".Contains(id.Last())
-             && GetCharacterResponse(Tracker.Handler.GetCharacterQuery(id), out JsonElement result)
-             && ValidateCharacterResponse(result, out cData))
-            {
-                AddCharacter(cData);
-                return true;
-            }
+            if (!"02468".Contains(id.Last()))
+                return TryGetOrAddCharacter(Tracker.Handler.GetCharacterQuery(id), out cData);
 
             cData = default(CharacterData);
             return false;
@@ -56,9 +51,12 @@ namespace PlanetSide
         {
             if (TryGetCharacterByName(name, out cData))
                 return true;
-
-            if (GetCharacterResponse(Tracker.Handler.GetCharacterQueryByName(name), out JsonElement result)
-             && ValidateCharacterResponse(result, out cData))
+            return TryGetOrAddCharacter(Tracker.Handler.GetCharacterQueryByName(name), out cData);
+        }
+        static bool TryGetOrAddCharacter(CensusQuery query, out CharacterData cData)
+        {
+            if (GetCharacterResponse(query, out IEnumerable<JsonElement> results)
+             && ValidateCharacterResponse(results.First(), out cData))
             {
                 AddCharacter(cData);
                 return true;
@@ -69,35 +67,21 @@ namespace PlanetSide
         }
 
         public static bool TryAddCharacters(params string[] ids)
-        {
-            if (GetCharacterResponse(Tracker.Handler.GetCharactersQuery(ids), out JsonElement result))
-            {
-                var listParent = result.GetProperty("character_list");
-
-                foreach (JsonElement element in listParent.EnumerateArray())
-                {
-                    if (ValidateCharacterResponse(element, out var cData))
-                        AddCharacter(cData);
-                }
-                return true;
-            }
-
-            return false;
-        }
+            => TryAddCharacters(Tracker.Handler.GetCharactersQuery(ids));
         public static bool TryAddCharactersByName(params string[] names)
+            => TryAddCharacters(Tracker.Handler.GetCharactersQueryByName(names));
+        static bool TryAddCharacters(CensusQuery query)
         {
-            if (GetCharacterResponse(Tracker.Handler.GetCharactersQueryByName(names), out JsonElement result))
+            if (GetCharacterResponse(query, out IEnumerable<JsonElement> results))
             {
-                var listParent = result.GetProperty("character_list");
-
-                foreach (JsonElement element in listParent.EnumerateArray())
+                foreach (var result in results)
                 {
-                    if (ValidateCharacterResponse(element, out var cData))
-                        AddCharacter(cData);
+                    if (ValidateCharacterResponse(result, out var cData))
+                        if (!_characters.ContainsKey(cData.CensusId))
+                            AddCharacter(cData);
                 }
                 return true;
             }
-
             return false;
         }
 
@@ -107,11 +91,11 @@ namespace PlanetSide
             _nameToId[cData.Name] = cData.CensusId;
         }
 
-        static bool GetCharacterResponse(CensusQuery? query, out JsonElement result)
+        static bool GetCharacterResponse(CensusQuery? query, out IEnumerable<JsonElement> results)
         {
             int retry = 0;
             bool foundChar = false;
-            result = default(JsonElement);
+            results = default;
 
             if (query is null)
                 return false;
@@ -124,7 +108,7 @@ namespace PlanetSide
                 {
                     var queryTask = filteredQuery.GetListAsync();
                     queryTask.Wait();
-                    IEnumerable<JsonElement> r = queryTask.Result;
+                    results = queryTask.Result;
                     foundChar = true;
                 }
                 catch (Exception ex)
@@ -159,24 +143,12 @@ namespace PlanetSide
             }
             while (!foundChar && retry < playerRetry);
 
-            if (result.Equals(default(JsonElement)))
+            if (results is null || !results.Any())
             {
                 return false;
             }
 
-
-            // If getting a single character
-            if (result.TryGetProperty("name", out var nameParent))
-            {
-                return true;
-            }
-            // If getting multiple characters
-            else if (result.TryGetProperty("character_list", out var listParent))
-            {
-                return true;
-            }
-
-            return false;
+            return true;
         }
 
         static bool ValidateCharacterResponse(JsonElement result, out CharacterData cData)
