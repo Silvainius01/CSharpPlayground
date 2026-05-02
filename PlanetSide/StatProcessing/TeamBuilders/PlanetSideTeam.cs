@@ -19,10 +19,10 @@ namespace PlanetSide
     public abstract class PlanetSideTeam : IDisposable
     {
         public int TeamSize => TeamPlayers.Count;
-        public int WorldId { get; private set; }
+        public int WorldId { get; protected set; }
         public int ZoneId { get; protected set; }
-        public int FactionId { get; private set; }
-        public string TeamName { get; private set; }
+        public int FactionId { get; protected set; }
+        public string TeamName { get; protected set; }
         public PlanetStats TeamStats { get; private set; }
         public IReadOnlyDictionary<int, WeaponStats> TeamWeapons { get; private set; }
         public IReadOnlyDictionary<string, PlayerStats> TeamPlayers { get; private set; }

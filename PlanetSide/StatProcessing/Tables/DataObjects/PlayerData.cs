@@ -17,19 +17,4 @@ namespace PlanetSide
         public int FactionId { get; set; }
         public int TeamId { get; set; }
     }
-
-    public struct PlayerCsvEntry
-    {
-        public string Alias { get; set; }
-        public string CensusId { get; set; }
-    }
-
-    public class PlayerCsvEntryMap : ClassMap<PlayerCsvEntry>
-    {
-        public PlayerCsvEntryMap()
-        {
-            Map(m => m.Alias).Name("Alias");
-            Map(m => m.CensusId).Name("CensusId");
-        }
-    }
 }

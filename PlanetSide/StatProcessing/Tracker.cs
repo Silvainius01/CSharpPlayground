@@ -232,7 +232,7 @@ namespace PlanetSide
                 1 => abbreviated ? "VS" : "Vanu Sovereignty",
                 2 => abbreviated ? "NC" : "New Conglomerate",
                 3 => abbreviated ? "TR" : "Terran Republic",
-                _ => "Unknown"
+                _ => "Unknown Faction"
             };
         }
     }

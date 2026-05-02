@@ -132,12 +132,12 @@ namespace PlanetSide
 
                     if (matchId.Success)
                     {
-                        charId = matchId.Value;
+                        charId = matchId.Value.Split('=')[1];
                         Logger.LogError(ex, $"Exception when retrieving character(s) {charId}:\t\n{ex}");
                     }
                     else if (matchName.Success)
                     {
-                        charId = matchName.Value;
+                        charId = matchName.Value.Split('=')[1];
                         Logger.LogError(ex, $"Exception when retrieving character(s) {charId}:\t\n{ex}");
                     }
                     else

@@ -26,8 +26,8 @@ namespace PlanetSide.Websocket
         protected CancellationTokenSource ctUpdate = new CancellationTokenSource();
 
         protected string world;
-        protected EventLeaderboard leaderboard;
-        protected List<PlanetSideTeam> activeTeams;
+        protected EventLeaderboard? leaderboard;
+        protected List<PlanetSideTeam>? activeTeams;
         protected List<LeaderboardRequest> leaderboardRequests;
 
         CancellationTokenSource ctLeaderboardLoop;
@@ -37,9 +37,7 @@ namespace PlanetSide.Websocket
             this.world = world;
             this.ZoneId = zone;
             RoundPaused = true;
-            activeTeams = GenerateTeams();
             leaderboardRequests = GenerateLeaderboardRequests();
-            leaderboard = new EventLeaderboard(activeTeams.ToArray());
 
             serverCommands.Add(new ConsoleCommand("startRound", StartRound));
             serverCommands.Add(new ConsoleCommand("endRound", EndRound));
@@ -49,6 +47,8 @@ namespace PlanetSide.Websocket
         protected override bool OnServerStart()
         {
             Tracker.PopulateTables();
+            activeTeams = GenerateTeams();
+            leaderboard = new EventLeaderboard(activeTeams.ToArray());
 
             ctLeaderboardLoop = new CancellationTokenSource();
 

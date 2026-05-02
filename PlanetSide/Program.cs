@@ -4,7 +4,6 @@ using CsvHelper.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using PlanetSide.StatProcessing.TeamBuilders;
 using PlanetSide.Websocket;
 using PlanetSide.WebsocketServer;
 using System;
@@ -88,12 +87,14 @@ namespace PlanetSide
 
         private static void StartSocketServer(List<string> args)
         {
-            if(args.Count < 2)
+            int zone = -1;
+
+            if (args.Count < 2)
             {
                 Logger.LogError("Must supply a world id");
                 return;
             }
-            if (args.Count < 3 && !int.TryParse(args[2], out int zone))
+            if (args.Count < 3 && !int.TryParse(args[2], out zone))
             {
                 Logger.LogError("Must supply a valid zone id");
                 return;
@@ -123,14 +124,10 @@ namespace PlanetSide
                         return;
                     }
 
-                    reporter = new HammaBowlReporter(args[1], world, zone)
+                    reporter = new HammaBowlReporter(args[3], args[4], args[1], world, zone)
                     {
-                        DebugEventNames = true,
-                        TeamOneCsv = args[3],
-                        TeamTwoCsv = args[4]
+                        DebugEventNames = true
                     };
-
-                    
                     break;
                 default:
                     return;
@@ -261,10 +258,10 @@ namespace PlanetSide
                     csv.Context.RegisterClassMap<PlayerCsvEntryMap>();
                     var records = csv.GetRecords<PlayerCsvEntry>().ToArray();
 
-                    SetPlayerTeam teamHamma = new SetPlayerTeam("Hamma", 1, "19", records);
+                    SetPlayerTeam teamHamma = new SetPlayerTeam("Hamma", "19", records);
 
                     Console.WriteLine("\nTEAM HAMMA");
-                    
+
                     foreach (var player in teamHamma.TeamPlayers.Values)
                         Console.WriteLine($"  {player.Alias}: {player.Data.Name} ({player.Data.CensusId})");
                     Console.WriteLine("\n");
