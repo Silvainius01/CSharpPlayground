@@ -224,5 +224,16 @@ namespace PlanetSide
                 }
             }
         }
+
+        public static string FactionIdToName(int id, bool abbreviated = true)
+        {
+            return id switch
+            {
+                1 => abbreviated ? "VS" : "Vanu Sovereignty",
+                2 => abbreviated ? "NC" : "New Conglomerate",
+                3 => abbreviated ? "TR" : "Terran Republic",
+                _ => "Unknown"
+            };
+        }
     }
 }

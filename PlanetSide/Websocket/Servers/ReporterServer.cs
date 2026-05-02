@@ -8,6 +8,7 @@ using NetMQ;
 using NetMQ.Sockets;
 using Newtonsoft.Json;
 using Websocket.Client.Logging;
+using CommandEngine;
 
 namespace PlanetSide.Websocket
 {
@@ -20,6 +21,8 @@ namespace PlanetSide.Websocket
         private string port = "56854";
         private ServerType serverType;
         protected static ILogger Logger = Program.LoggerFactory.CreateLogger(typeof(ReportServer));
+
+        CommandModule serverCommands = new CommandModule("Enter Server Command");
 
         public ReportServer(string port, ServerType type)
         {

@@ -108,7 +108,8 @@ namespace PlanetSide
             return Task.CompletedTask;
         }
 
-        public void AddCallback(Func<SocketResponse, bool> callback) => _onMessageCallbacks.Add(callback);
+        public void AddCallback(Func<SocketResponse, bool> callback) 
+            => _onMessageCallbacks.Add(callback);
         public void RemoveCallback(int index)
         {
             _onMessageCallbacks.RemoveAt(index);

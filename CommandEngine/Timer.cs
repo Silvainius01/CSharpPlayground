@@ -75,7 +75,8 @@ namespace CommandEngine
         public void Deactivate(bool forceToFire = false)
         {
             isActive = false;
-            hasFired = forceToFire;
+            if(forceToFire)
+                hasFired = true;
         }
 
         public void SetPercentComplete(double percent)

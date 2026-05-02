@@ -40,11 +40,13 @@ namespace PlanetSide
                 return true;
 
             // Char IDs are always odd numbers.
-            if (!"02468".Contains(id.Last()))
-                return TryGetOrAddCharacter(Tracker.Handler.GetCharacterQuery(id), out cData);
+            if (!IsValidCharacterId(id))
+            {
+                cData = default(CharacterData);
+                return false;
+            }
 
-            cData = default(CharacterData);
-            return false;
+            return TryGetOrAddCharacter(Tracker.Handler.GetCharacterQuery(id), out cData);
         }
         /// <summary> Will retrieve character data from local cache, or query Census API if it is missing. </summary>
         public static bool TryGetOrAddCharacterByName(string name, out CharacterData cData)
@@ -67,7 +69,10 @@ namespace PlanetSide
         }
 
         public static bool TryAddCharacters(params string[] ids)
-            => TryAddCharacters(Tracker.Handler.GetCharactersQuery(ids));
+        {
+            var validIds = ids.Where(id => IsValidCharacterId(id)).ToArray();
+            return TryAddCharacters(Tracker.Handler.GetCharactersQuery(validIds));
+        }
         public static bool TryAddCharactersByName(params string[] names)
             => TryAddCharacters(Tracker.Handler.GetCharactersQueryByName(names));
         static bool TryAddCharacters(CensusQuery query)
@@ -172,6 +177,11 @@ namespace PlanetSide
             cData = default(CharacterData);
             Logger.LogError($"Received malformed character response: {result.ToString()}");
             return false;
+        }
+
+        public static bool IsValidCharacterId(string id)
+        {
+            return !string.IsNullOrEmpty(id) && !"02468".Contains(id.Last());
         }
 
         public static bool IsSameFaction(string characterId, string otherId)

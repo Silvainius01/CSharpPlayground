@@ -18,7 +18,7 @@ namespace PlanetSide
 {
     public abstract class PlanetSideTeam : IDisposable
     {
-        public int TeamSize { get; private set; }
+        public int TeamSize => TeamPlayers.Count;
         public int WorldId { get; private set; }
         public int ZoneId { get; protected set; }
         public int FactionId { get; private set; }
@@ -43,7 +43,6 @@ namespace PlanetSide
         {
             this.FactionId = faction;
             this.TeamName = teamName;
-            this.TeamSize = teamSize;
             worldString = world;
 
             TeamStats = new PlanetStats();
@@ -245,8 +244,8 @@ namespace PlanetSide
         protected abstract ConcurrentDictionary<string, PlayerStats> GetTeamDict();
         protected abstract void OnStreamStart();
         protected abstract void OnStreamStop();
-        protected abstract void OnEventProcessed(ICensusEvent payload);
-        protected abstract bool IsEventValid(ICensusEvent payload);
+        protected abstract void OnEventProcessed(ICensusEvent censusEvent);
+        protected abstract bool IsEventValid(ICensusEvent censusEvent);
         protected abstract CensusStreamSubscription GetStreamSubscription();
 
         public void Dispose()

@@ -15,6 +15,14 @@ namespace PlanetSide.Websocket
         public int ZoneId { get; set; } = -1;
         public float LeaderboardRefresh { get; set; } = 10.0f;
 
+        protected double RoundLength { get; set; } = 15 * 60;
+        protected bool RoundPaused { get; set; }
+        protected bool RoundStarted { get; set; }
+
+        protected DateTime lastTime = DateTime.Now;
+        protected CommandEngine.Timer roundTimer = new CommandEngine.Timer(TimeSpan.FromMinutes(10).TotalSeconds);
+        protected CancellationTokenSource ctUpdate = new CancellationTokenSource();
+
         protected string world;
         protected EventLeaderboard leaderboard;
         protected List<PlanetSideTeam> activeTeams;
@@ -26,6 +34,7 @@ namespace PlanetSide.Websocket
         {
             this.world = world;
             this.ZoneId = zone;
+            RoundPaused = true;
             activeTeams = GenerateTeams();
             leaderboardRequests = GenerateLeaderboardRequests();
             leaderboard = new EventLeaderboard(activeTeams.ToArray());
@@ -93,5 +102,61 @@ namespace PlanetSide.Websocket
 
         protected abstract List<PlanetSideTeam> GenerateTeams();
         protected abstract List<LeaderboardRequest> GenerateLeaderboardRequests();
+
+        public void SetRoundLength(int minutes)
+        {
+            RoundLength = minutes * 60;
+        }
+
+        public void StartRound()
+        {
+            RoundPaused = false;
+            roundTimer.Activate(RoundLength);
+
+            foreach (var team in activeTeams)
+                team.UnPauseStream();
+
+            ctUpdate = new CancellationTokenSource();
+            Task.Run(() => RoundUpdater(ctUpdate.Token));
+        }
+        public void PauseRound()
+        {
+            RoundPaused = true;
+            roundTimer.Deactivate();
+            foreach (var team in activeTeams)
+            {
+                team.PauseStream();
+            }
+        }
+        public void EndRound()
+        {
+            ctUpdate.Cancel();
+            roundTimer.Deactivate();
+            foreach (var team in activeTeams)
+            {
+                team.PauseStream();
+            }
+        }
+
+        protected async Task RoundUpdater(CancellationToken ct)
+        {
+            lastTime = DateTime.Now;
+            PeriodicTimer taskTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(100));
+
+            while (!ct.IsCancellationRequested)
+            {
+                if (!RoundPaused)
+                {
+                    double dt = (DateTime.Now - lastTime).TotalSeconds;
+                    lastTime = DateTime.Now;
+
+                    if (roundTimer.Update(dt))
+                    {
+                        EndRound();
+                    }
+                }
+                await taskTimer.WaitForNextTickAsync(ct);
+            }
+        }
     }
 }

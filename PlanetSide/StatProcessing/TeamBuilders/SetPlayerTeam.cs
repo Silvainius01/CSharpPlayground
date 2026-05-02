@@ -1,4 +1,5 @@
 ﻿using DaybreakGames.Census.Stream;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -11,27 +12,44 @@ namespace PlanetSide.StatProcessing.TeamBuilders
 {
     public class SetPlayerTeam : PlanetSideTeam
     {
-        string[] characterNames;
         ConcurrentDictionary<string, PlayerStats> playersConcurrent = new ConcurrentDictionary<string, PlayerStats>();
 
-        public SetPlayerTeam(string teamName, string world, params string[] playerNames)
-            : base(playerNames.Length, teamName, -1, world)
+        public SetPlayerTeam(string teamName, int faction, string world, params PlayerCsvEntry[] players)
+            : base(players.Length, teamName, faction, world)
         {
             ZoneId = -1;
             streamKey = $"{teamName}_CharacterEventStream";
-            characterNames = playerNames;
+
+            PlayerTable.TryAddCharacters(players.Select(p => p.CensusId).ToArray());
+
+            foreach (var player in players)
+            {
+                if (PlayerTable.TryGetCharacter(player.CensusId, out var cData))
+                {
+                    if (cData.FactionId == faction)
+                        playersConcurrent.TryAdd(cData.CensusId, new PlayerStats()
+                        {
+                            Alias = player.Alias,
+                            Data = cData,
+                            Stats = new PlanetStats()
+                        });
+                    else Logger.LogWarning("{0} is not on the correct faction for team {1} ({2})", player.Alias, teamName, Tracker.FactionIdToName(faction));
+                }
+                else
+                    Logger.LogError("Failed to find character data for {0} ({1})", player.Alias, player.CensusId);
+            }
+
+            if(playersConcurrent.Count < players.Length)
+            {
+                Logger.LogError("Team {0} was initialized with {1}/{2} players. Check previous logs for details.", teamName, playersConcurrent.Count, players.Length);
+            }
         }
 
         protected override CensusStreamSubscription GetStreamSubscription()
         {
-            foreach(var name in characterNames)
-            {
-               // PlayerTable.TryGetOrAddCharacter
-            }
-
             var sub = new CensusStreamSubscription()
             {
-                Characters = characterNames,
+                Characters = playersConcurrent.Values.Select(p => p.Data.CensusId),
                 Worlds = new[] { worldString },
                 EventNames = new[] { "Death", "GainExperience", "VehicleDestroy", "FacilityControl" },
                 LogicalAndCharactersWithWorlds = true
@@ -41,27 +59,22 @@ namespace PlanetSide.StatProcessing.TeamBuilders
 
         protected override ConcurrentDictionary<string, PlayerStats> GetTeamDict()
         {
-            throw new NotImplementedException();
+            return playersConcurrent;
         }
 
-        protected override bool IsEventValid(ICensusEvent payload)
-        {
-            throw new NotImplementedException();
-        }
+        protected override void OnStreamStart() { }
+        protected override void OnStreamStop() { }
+        protected override void OnEventProcessed(ICensusEvent censusEvent) { }
 
-        protected override void OnEventProcessed(ICensusEvent payload)
+        protected override bool IsEventValid(ICensusEvent censusEvent)
         {
-            throw new NotImplementedException();
-        }
+            ICensusCharacterEvent charEvent = censusEvent as ICensusCharacterEvent;
 
-        protected override void OnStreamStart()
-        {
-            throw new NotImplementedException();
-        }
+            if (charEvent is null)
+                return false;
 
-        protected override void OnStreamStop()
-        {
-            throw new NotImplementedException();
+            return TeamPlayers.ContainsKey(charEvent.CharacterId)
+                || TeamPlayers.ContainsKey(charEvent.OtherId);
         }
     }
 }

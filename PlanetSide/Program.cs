@@ -1,17 +1,22 @@
-﻿using System;
+﻿using CommandEngine;
+using CsvHelper;
+using CsvHelper.Configuration;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using PlanetSide.StatProcessing.TeamBuilders;
+using PlanetSide.Websocket;
+using PlanetSide.WebsocketServer;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using CommandEngine;
-using Microsoft.Extensions.Logging;
-using PlanetSide.Websocket;
-using PlanetSide.WebsocketServer;
-using Newtonsoft.Json;
 using System.Text.Json.Nodes;
-using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
 
 namespace PlanetSide
 {
@@ -31,6 +36,7 @@ namespace PlanetSide
             module.Add(new ConsoleCommand("client", StartSocketClient));
             module.Add(new ConsoleCommand("cam", WarpgateCam));
             module.Add(new ConsoleCommand("addChar", AddCharacterTest));
+            module.Add(new ConsoleCommand("csv", CsvTest));
 
             while (true)
             {
@@ -105,24 +111,15 @@ namespace PlanetSide
                         DebugEventNames = true
                     };
                     break;
+                case "hamma":
+                    reporter = new HammaBowlReporter(args[1], world, zone)
+                    {
+                        DebugEventNames = true
+                    };
+                    break;
                 default:
                     return;
             }
-
-            //for(int i = 4; i < args.Count; ++i)
-            //{
-            //    switch(args[i])
-            //    {
-            //        case "-load":
-            //            {
-            //                string fileTeam1 = $"./SavedTeamData/CommSmash11_TeamOne_TR.json";
-            //                string fileTeam2 = $"./SavedTeamData/CommSmash11_TeamTwo_NC.json";
-
-            //                //ReadTeamFile(fileTeam1);
-            //            }
-            //            break;
-            //    }
-            //}
 
             reporter.StartServer();
         }
@@ -232,6 +229,31 @@ namespace PlanetSide
 
                 builder.Append("\n");
                 builder.WriteLine(true);
+            }
+        }
+
+        private static void CsvTest(List<string> args)
+        {
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = false,
+            };
+
+            using (var reader = new StreamReader($"{Directory.GetCurrentDirectory()}\\_data\\csv.csv"))
+            {
+                using (var csv = new CsvReader(reader, config))
+                {
+                    csv.Context.RegisterClassMap<PlayerCsvEntryMap>();
+                    var records = csv.GetRecords<PlayerCsvEntry>().ToArray();
+
+                    SetPlayerTeam teamHamma = new SetPlayerTeam("Hamma", 1, "19", records);
+
+                    Console.WriteLine("\nTEAM HAMMA");
+                    
+                    foreach (var player in teamHamma.TeamPlayers.Values)
+                        Console.WriteLine($"  {player.Alias}: {player.Data.Name} ({player.Data.CensusId})");
+                    Console.WriteLine("\n");
+                }
             }
         }
     }

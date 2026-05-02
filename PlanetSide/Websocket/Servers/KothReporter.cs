@@ -12,48 +12,8 @@ namespace PlanetSide.Websocket
 {
     public class KothReporter : PlanetSideReporter
     {
-        const double defaultRoundLength = 10 * 60;
-
-        bool RoundPaused { get; set; }
-        bool RoundStarted { get; set; }
-
-        DateTime lastTime = DateTime.Now;
-        CommandEngine.Timer roundTimer = new CommandEngine.Timer(TimeSpan.FromMinutes(10).TotalSeconds);
-        CancellationTokenSource ctUpdate = new CancellationTokenSource();
-
         public KothReporter(string port, string world, int zone) : base(port, world, zone)
         {
-            this.ZoneId = zone;
-            RoundPaused = true;
-        }
-
-        public void StartRound(double lengthSeconds = defaultRoundLength)
-        {
-            RoundPaused = false;
-            roundTimer.Activate(lengthSeconds);
-
-            foreach (var team in activeTeams)
-                team.UnPauseStream();
-        }
-
-        public void PauseRound()
-        {
-            RoundPaused = true;
-            roundTimer.Deactivate();
-            foreach (var team in activeTeams)
-            {
-                team.PauseStream();
-            }
-        }
-
-        public void EndRound()
-        {
-            roundTimer.Deactivate();
-            foreach (var team in activeTeams)
-            {
-                team.PauseStream();
-                team.ResetStats();
-            }
         }
 
         protected override List<PlanetSideTeam> GenerateTeams()
@@ -132,23 +92,6 @@ namespace PlanetSide.Websocket
                 Topic = "koth_stats",
                 Data = JsonConvert.SerializeObject(report)
             };
-        }
-
-        private async Task RoundUpdater(CancellationToken ct)
-        {
-            lastTime = DateTime.Now;
-
-            while (!ct.IsCancellationRequested)
-            {
-                double dt = (DateTime.Now - lastTime).TotalSeconds;
-                lastTime = DateTime.Now;
-
-                if (roundTimer.Update(dt))
-                {
-                    foreach (var team in activeTeams)
-                        team.PauseStream();
-                }
-            }
         }
     }
 }
