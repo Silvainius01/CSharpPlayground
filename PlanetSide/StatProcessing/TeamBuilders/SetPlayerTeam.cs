@@ -26,7 +26,7 @@ namespace PlanetSide.StatProcessing.TeamBuilders
         {
             foreach(var name in characterNames)
             {
-                PlayerTable.TryGetOrAddCharacter
+               // PlayerTable.TryGetOrAddCharacter
             }
 
             var sub = new CensusStreamSubscription()

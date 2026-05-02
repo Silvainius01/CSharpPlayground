@@ -30,6 +30,7 @@ namespace PlanetSide
             module.Add(new ConsoleCommand("server", StartSocketServer));
             module.Add(new ConsoleCommand("client", StartSocketClient));
             module.Add(new ConsoleCommand("cam", WarpgateCam));
+            module.Add(new ConsoleCommand("addChar", AddCharacterTest));
 
             while (true)
             {
@@ -134,7 +135,7 @@ namespace PlanetSide
 
             SerializedTeam team = new SerializedTeam();
             var serializer = JsonSerializer.CreateDefault();
-            var jObject =  JsonConvert.DeserializeObject<JObject>(fileContents);
+            var jObject = JsonConvert.DeserializeObject<JObject>(fileContents);
             var tokenReader = new JTokenReader(jObject);
             object? obj = serializer.Deserialize(tokenReader);
 
@@ -191,6 +192,47 @@ namespace PlanetSide
             builder.NewlineAppend(1, $"M: {(camSouth - southWarpCenter).Magnitude}");
 
             Console.WriteLine(builder.ToString());
+        }
+
+        private static void AddCharacterTest(List<string> args)
+        {
+            using (ManagedColorBuilder mcb = new ManagedColorBuilder("character_test"))
+            {
+                ColorStringBuilder builder = mcb.Builder;
+
+                if (args.Count == 0)
+                {
+                    ConsoleExt.WriteError("Please enter a set of names");
+                    return;
+                }
+                else if (args.Count == 1)
+                {
+                    if (PlayerTable.TryGetOrAddCharacterByName(args[0], out var cData))
+                    {
+                        builder.AppendNewline(cData.Name, ConsoleColor.Gray);
+                        builder.AppendNewline(cData.CensusId);
+                        builder.AppendNewline(cData.FactionId.ToString());
+                    }
+                    else builder.AppendNewline($"Failed to add '{args[0]}'", ConsoleColor.Red);
+                }
+                else if (PlayerTable.TryAddCharactersByName(args.ToArray()))
+                {
+                    foreach (var name in args)
+                    {
+                        if (PlayerTable.TryGetCharacterByName(name, out var cData))
+                        {
+                            builder.AppendNewline(cData.Name, ConsoleColor.Gray);
+                            builder.AppendNewline(cData.CensusId);
+                            builder.AppendNewline(cData.FactionId.ToString());
+                        }
+                        else builder.AppendNewline($"Failed to add '{args[0]}'", ConsoleColor.Red);
+                    }
+                }
+                else builder.AppendNewline($"Failed to add any characters.", ConsoleColor.Red);
+
+                builder.Append("\n");
+                builder.WriteLine(true);
+            }
         }
     }
 }

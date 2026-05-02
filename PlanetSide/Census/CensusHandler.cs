@@ -112,7 +112,7 @@ namespace PlanetSide
         {
             var q = GetClientQuery("character");
             q.Where("character_id").Equals(characterIds);
-            return q;
+            return q.SetLimitPerDB(characterIds.Length);
         }
 
         public IEnumerable<JsonElement> GetCharactersByName(params string[] characterNames)
@@ -123,10 +123,12 @@ namespace PlanetSide
         }
         public CensusQuery GetCharactersQueryByName(params string[] characterNames)
         {
+            for (int i = 0; i < characterNames.Length; ++i)
+                characterNames[i] = characterNames[i].ToLower();
+
             var q = GetClientQuery("character");
             q.Where("name.first_lower").Equals(characterNames);
-            q.SetLimitPerDB(characterNames.Length);
-            return q;
+            return q.SetLimitPerDB(characterNames.Length);
         }
 
         private CensusClient CreateClient()

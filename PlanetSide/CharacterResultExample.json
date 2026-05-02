@@ -1,0 +1,19 @@
+{
+    "character_list": [
+        {
+            "character_id": "5428010618015189713",
+            "name": {
+                "first": "LiteBrite"
+            },
+            "faction_id": "1"
+        },
+        {
+            "character_id": "5428366106637846577",
+            "name": {
+                "first": "Silvainius"
+            },
+            "faction_id": "1"
+        }
+    ],
+    "returned": 2
+}
