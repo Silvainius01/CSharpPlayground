@@ -89,6 +89,19 @@ namespace PlanetSide
             return q;
         }
 
+        public JsonElement GetCharacterByName(string name)
+        {
+            var task = GetCharacterQueryByName(name).GetAsync();
+            task.Wait();
+            return task.Result;
+        }
+        public CensusQuery GetCharacterQueryByName(string name)
+        {
+            var q = GetClientQuery("character");
+            q.Where("name.first_lower").Equals(name.ToLower());
+            return q;
+        }
+
         public IEnumerable<JsonElement> GetCharacters(params string[] characterIds)
         {
             var task = GetCharactersQuery(characterIds).GetListAsync();
@@ -99,6 +112,20 @@ namespace PlanetSide
         {
             var q = GetClientQuery("character");
             q.Where("character_id").Equals(characterIds);
+            return q;
+        }
+
+        public IEnumerable<JsonElement> GetCharactersByName(params string[] characterNames)
+        {
+            var task = GetCharactersQueryByName(characterNames).GetListAsync();
+            task.Wait();
+            return task.Result;
+        }
+        public CensusQuery GetCharactersQueryByName(params string[] characterNames)
+        {
+            var q = GetClientQuery("character");
+            q.Where("name.first_lower").Equals(characterNames);
+            q.SetLimitPerDB(characterNames.Length);
             return q;
         }
 

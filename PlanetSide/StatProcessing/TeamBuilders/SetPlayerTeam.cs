@@ -24,10 +24,9 @@ namespace PlanetSide.StatProcessing.TeamBuilders
 
         protected override CensusStreamSubscription GetStreamSubscription()
         {
-            List<string> characterIDs = new List<string>();
             foreach(var name in characterNames)
             {
-
+                PlayerTable.TryGetOrAddCharacter
             }
 
             var sub = new CensusStreamSubscription()
