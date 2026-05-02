@@ -12,6 +12,9 @@ namespace PlanetSide.Websocket
 {
     public class HammaBowlReporter : PlanetSideReporter
     {
+        public string TeamOneCsv { get; set; }
+        public string TeamTwoCsv { get; set; }
+
         public HammaBowlReporter(string port, string world, int zone) : base(port, world, zone)
         {
 

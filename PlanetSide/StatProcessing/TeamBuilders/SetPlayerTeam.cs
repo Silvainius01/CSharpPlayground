@@ -12,6 +12,7 @@ namespace PlanetSide.StatProcessing.TeamBuilders
 {
     public class SetPlayerTeam : PlanetSideTeam
     {
+        
         ConcurrentDictionary<string, PlayerStats> playersConcurrent = new ConcurrentDictionary<string, PlayerStats>();
 
         public SetPlayerTeam(string teamName, int faction, string world, params PlayerCsvEntry[] players)

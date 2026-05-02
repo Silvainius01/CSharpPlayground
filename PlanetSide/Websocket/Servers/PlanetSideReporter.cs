@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Websocket.Client.Logging;
+using CommandEngine;
+using System.Linq;
 
 namespace PlanetSide.Websocket
 {
@@ -27,7 +29,7 @@ namespace PlanetSide.Websocket
         protected EventLeaderboard leaderboard;
         protected List<PlanetSideTeam> activeTeams;
         protected List<LeaderboardRequest> leaderboardRequests;
-        
+
         CancellationTokenSource ctLeaderboardLoop;
 
         public PlanetSideReporter(string port, string world, int zone) : base(port, ServerType.Publisher)
@@ -38,6 +40,10 @@ namespace PlanetSide.Websocket
             activeTeams = GenerateTeams();
             leaderboardRequests = GenerateLeaderboardRequests();
             leaderboard = new EventLeaderboard(activeTeams.ToArray());
+
+            serverCommands.Add(new ConsoleCommand("startRound", StartRound));
+            serverCommands.Add(new ConsoleCommand("endRound", EndRound));
+            serverCommands.Add(new ConsoleCommand("pauseRound", PauseRound));
         }
 
         protected override bool OnServerStart()
@@ -158,5 +164,16 @@ namespace PlanetSide.Websocket
                 await taskTimer.WaitForNextTickAsync(ct);
             }
         }
+
+        private void StartRound(List<string> args)
+        {
+            if(args.Any() && int.TryParse(args[0], out int minutes))
+                SetRoundLength(minutes);
+            StartRound();
+        }
+        private void EndRound(List<string> args)
+            => EndRound();
+        private void PauseRound(List<string> args)
+            => PauseRound();
     }
 }

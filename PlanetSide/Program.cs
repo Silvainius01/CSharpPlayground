@@ -88,14 +88,19 @@ namespace PlanetSide
 
         private static void StartSocketServer(List<string> args)
         {
-            int zone = -1;
-            string world = "all";
-            ReportServer reporter = null;
+            if(args.Count < 2)
+            {
+                Logger.LogError("Must supply a world id");
+                return;
+            }
+            if (args.Count < 3 && !int.TryParse(args[2], out int zone))
+            {
+                Logger.LogError("Must supply a valid zone id");
+                return;
+            }
 
-            if (args.Count > 2)
-                world = args[2];
-            if (args.Count > 3 && int.TryParse(args[3], out int intergerInput))
-                zone = intergerInput;
+            string world = args[1];
+            ReportServer reporter = null;
 
             switch (args[0])
             {
@@ -112,10 +117,20 @@ namespace PlanetSide
                     };
                     break;
                 case "hamma":
+                    if (args.Count < 5)
+                    {
+                        Logger.LogError("Hamma Bowl Reporter requires 2 team csv file names as arguments.");
+                        return;
+                    }
+
                     reporter = new HammaBowlReporter(args[1], world, zone)
                     {
-                        DebugEventNames = true
+                        DebugEventNames = true,
+                        TeamOneCsv = args[3],
+                        TeamTwoCsv = args[4]
                     };
+
+                    
                     break;
                 default:
                     return;
