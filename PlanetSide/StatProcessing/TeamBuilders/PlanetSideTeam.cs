@@ -168,42 +168,49 @@ namespace PlanetSide
                     case CensusEventType.Death:
                         var deathEvent = (DeathPayload)payload;
                         bool zoneId2 = ZoneId == -1 || deathEvent.ZoneId == ZoneId;
-                        if (zoneId2 && TeamPlayers.ContainsKey(deathEvent.OtherId))
+                        if (zoneId2)
                         {
-                            TeamStats.AddKill(ref deathEvent);
-                            TeamPlayers[deathEvent.OtherId].Stats.AddKill(ref deathEvent);
-                            if (TryGetOrAddWeaponStats(deathEvent.AttackerWeaponId, out var wstats))
-                                wstats.Stats.AddKill(ref deathEvent);
-                        }
-                        else if (TeamPlayers.ContainsKey(deathEvent.CharacterId))
-                        {
-                            TeamStats.AddDeath(ref deathEvent);
-                            TeamPlayers[deathEvent.CharacterId].Stats.AddDeath(ref deathEvent);
-                            if (TryGetOrAddWeaponStats(deathEvent.AttackerWeaponId, out var wstats))
-                                wstats.Stats.AddDeath(ref deathEvent);
+                            if (TeamPlayers.ContainsKey(deathEvent.OtherId))
+                            {
+                                TeamStats.AddKill(ref deathEvent);
+                                TeamPlayers[deathEvent.OtherId].Stats.AddKill(ref deathEvent);
+                                if (TryGetOrAddWeaponStats(deathEvent.AttackerWeaponId, out var wstats))
+                                    wstats.Stats.AddKill(ref deathEvent);
+                            }
+                            else if (TeamPlayers.ContainsKey(deathEvent.CharacterId))
+                            {
+                                TeamStats.AddDeath(ref deathEvent);
+                                TeamPlayers[deathEvent.CharacterId].Stats.AddDeath(ref deathEvent);
+                                if (TryGetOrAddWeaponStats(deathEvent.AttackerWeaponId, out var wstats))
+                                    wstats.Stats.AddDeath(ref deathEvent);
+                            }
                         }
                         break;
                     case CensusEventType.VehicleDestroy:
                         var destroyEvent = (VehicleDestroyPayload)payload;
                         bool zoneId3 = ZoneId == -1 || destroyEvent.ZoneId == ZoneId;
-                        if (zoneId3 && TeamPlayers.ContainsKey(destroyEvent.CharacterId))
+                        if (zoneId3)
                         {
-                            TeamStats.AddVehicleDeath(ref destroyEvent);
-                            TeamPlayers[destroyEvent.CharacterId].Stats.AddVehicleDeath(ref destroyEvent);
-                            if (TryGetOrAddWeaponStats(destroyEvent.AttackerWeaponId, out var wstats))
-                                wstats.Stats.AddVehicleDeath(ref destroyEvent);
-                        }
-                        else if (TeamPlayers.ContainsKey(destroyEvent.OtherId))
-                        {
-                            TeamStats.AddVehicleKill(ref destroyEvent);
-                            TeamPlayers[destroyEvent.OtherId].Stats.AddVehicleKill(ref destroyEvent);
-                            if (TryGetOrAddWeaponStats(destroyEvent.AttackerWeaponId, out var wstats))
-                                wstats.Stats.AddVehicleKill(ref destroyEvent);
+                            if (TeamPlayers.ContainsKey(destroyEvent.CharacterId))
+                            {
+                                TeamStats.AddVehicleDeath(ref destroyEvent);
+                                TeamPlayers[destroyEvent.CharacterId].Stats.AddVehicleDeath(ref destroyEvent);
+                                if (TryGetOrAddWeaponStats(destroyEvent.AttackerWeaponId, out var wstats))
+                                    wstats.Stats.AddVehicleDeath(ref destroyEvent);
+                            }
+                            else if (TeamPlayers.ContainsKey(destroyEvent.OtherId))
+                            {
+                                TeamStats.AddVehicleKill(ref destroyEvent);
+                                TeamPlayers[destroyEvent.OtherId].Stats.AddVehicleKill(ref destroyEvent);
+                                if (TryGetOrAddWeaponStats(destroyEvent.AttackerWeaponId, out var wstats))
+                                    wstats.Stats.AddVehicleKill(ref destroyEvent);
+                            }
                         }
                         break;
                     case CensusEventType.FacilityControl:
                         var facilityEvent = (FacilityControlEvent)payload;
-                        if(facilityEvent.NewFaction == FactionId)
+                        bool zoneId4 = ZoneId == -1 || facilityEvent.ZoneId == ZoneId;
+                        if (zoneId4 && facilityEvent.NewFaction == FactionId)
                             TeamStats.AddFacilityEvent(ref facilityEvent);
                         break;
                 }

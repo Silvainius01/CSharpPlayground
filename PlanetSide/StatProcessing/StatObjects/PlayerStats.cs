@@ -9,6 +9,7 @@ namespace PlanetSide
 {
     public class PlayerStats : IStatObject<CharacterData>
     {
+        public string Alias { get; set; } = string.Empty;
         public CharacterData Data { get; set; }
         public PlanetStats Stats { get; set; }
     }

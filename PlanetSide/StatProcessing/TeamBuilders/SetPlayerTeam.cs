@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,15 +11,33 @@ namespace PlanetSide.StatProcessing.TeamBuilders
 {
     public class SetPlayerTeam : PlanetSideTeam
     {
-        public SetPlayerTeam(string teamName, params string[] playerNames)
-            :   base(playerNames.Length, teamName, -1, "all")
+        string[] characterNames;
+        ConcurrentDictionary<string, PlayerStats> playersConcurrent = new ConcurrentDictionary<string, PlayerStats>();
+
+        public SetPlayerTeam(string teamName, string world, params string[] playerNames)
+            : base(playerNames.Length, teamName, -1, world)
         {
+            ZoneId = -1;
             streamKey = $"{teamName}_CharacterEventStream";
+            characterNames = playerNames;
         }
 
         protected override CensusStreamSubscription GetStreamSubscription()
         {
-            throw new NotImplementedException();
+            List<string> characterIDs = new List<string>();
+            foreach(var name in characterNames)
+            {
+
+            }
+
+            var sub = new CensusStreamSubscription()
+            {
+                Characters = characterNames,
+                Worlds = new[] { worldString },
+                EventNames = new[] { "Death", "GainExperience", "VehicleDestroy", "FacilityControl" },
+                LogicalAndCharactersWithWorlds = true
+            };
+            return sub;
         }
 
         protected override ConcurrentDictionary<string, PlayerStats> GetTeamDict()
