@@ -54,7 +54,7 @@ namespace PlanetSide
             }
 
             string world = args[1];
-            ReportServer reporter = null;
+            PlanetSideReporter reporter = null;
 
             switch (args[0])
             {
@@ -83,6 +83,8 @@ namespace PlanetSide
             {
                 Thread.Sleep(500);
                 reporter.serverCommands.NextCommand(false);
+                if(reporter.RoundStarted)
+                    reporter.
             }
             string bp = "string for a breakpoint :)";
         }

@@ -15,12 +15,11 @@ namespace PlanetSide.Websocket
 {
     public abstract class PlanetSideReporter : ReportServer
     {
-        public int ZoneId { get; set; } = -1;
-        public float LeaderboardRefresh { get; set; } = 10.0f;
-
-        protected double RoundLength { get; set; } = 15 * 60;
-        protected bool RoundPaused { get; set; }
-        protected bool RoundStarted { get; set; }
+        public int ZoneId { get; protected set; } = -1;
+        public float LeaderboardRefresh { get; protected set; } = 10.0f;
+        public double RoundLength { get; protected set; } = 15 * 60;
+        public bool RoundPaused { get; private set; }
+        public bool RoundStarted { get; private set; }
 
         protected DateTime lastTime = DateTime.Now;
         protected CommandEngine.Timer roundTimer;
@@ -35,18 +34,21 @@ namespace PlanetSide.Websocket
         ConcurrentQueue<ServerReport> _leaderboardReports = new ConcurrentQueue<ServerReport>();
         CancellationTokenSource ctLeaderboardLoop;
 
+        public CommandModule roundCommands { get; private set; }
+
         public PlanetSideReporter(string port, string world, int zone) : base(port, ServerType.Publisher)
         {
             this.world = world;
             this.ZoneId = zone;
             roundTimer = new CommandEngine.Timer(TimeSpan.FromSeconds(RoundLength).TotalSeconds);
 
-            serverCommands.Add(new ConsoleCommand("startRound", StartRoundCommand));
-            serverCommands.Add(new ConsoleCommand("endRound", EndRoundCommand));
-            serverCommands.Add(new ConsoleCommand("pauseRound", PauseRoundCommand));
-            serverCommands.Add(new ConsoleCommand("resumeRound", StartRoundCommand));
-            serverCommands.Add(new ConsoleCommand("saveStats", SaveStatsCommand));
-            serverCommands.Add(new ConsoleCommand("setRoundLength", SetRoundLengthCommand));
+            roundCommands = new CommandModule("Enter Round Command");
+            roundCommands.Add(new ConsoleCommand("start", StartRoundCommand));
+            roundCommands.Add(new ConsoleCommand("end", EndRoundCommand));
+            roundCommands.Add(new ConsoleCommand("pause", PauseRoundCommand));
+            roundCommands.Add(new ConsoleCommand("resume", ResumeRoundCommand));
+            roundCommands.Add(new ConsoleCommand("saveStats", SaveStatsCommand));
+            roundCommands.Add(new ConsoleCommand("setRoundLength", SetRoundLengthCommand));
         }
 
         protected override void OnInitialize()
@@ -283,6 +285,8 @@ namespace PlanetSide.Websocket
             => EndRound();
         private void PauseRoundCommand(List<string> args)
             => PauseRound();
+        private void ResumeRoundCommand(List<string> args)
+            => ResumeRound();
         private void SaveStatsCommand(List<string> args)
         {
             bool printFull = false;
