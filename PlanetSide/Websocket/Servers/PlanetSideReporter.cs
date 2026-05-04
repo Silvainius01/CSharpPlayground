@@ -26,8 +26,8 @@ namespace PlanetSide.Websocket
         protected CancellationTokenSource ctUpdate = new CancellationTokenSource();
 
         protected string world;
-        protected EventLeaderboard? leaderboard;
-        protected List<PlanetSideTeam>? activeTeams;
+        protected EventLeaderboard leaderboard;
+        protected List<PlanetSideTeam> activeTeams;
         protected List<LeaderboardRequest> leaderboardRequests;
 
         List<ServerReport> _reportList = new List<ServerReport>();

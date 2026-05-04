@@ -37,7 +37,7 @@ namespace PlanetSide.Websocket
         {
             this.port = port;
             serverType = type;
-            IsClosed = false;
+            IsClosed = true;
             IsReporting = false;
             IsInitialized = false;
 
@@ -50,27 +50,64 @@ namespace PlanetSide.Websocket
 
         public void Initialize()
         {
+            if (IsInitialized)
+                return;
+
             OnInitialize();
             IsInitialized = true;
+            Logger.LogInformation("Server initialized.");
         }
         public void StartServer()
         {
+            if(!IsInitialized)
+            {
+                Logger.LogWarning("Server is not initialized.");
+                return;
+            }
+            if(!IsClosed)
+            {
+                Logger.LogWarning("Server is already running.");
+                return;
+            }
+
             OnServerStart();
+            IsClosed = false;
             IsReporting = true;
             serverTask = Task.Run(() => ServerLoop(ctServer.Token), ctServer.Token);
+            Logger.LogInformation("Server started on port {0}.", port);
         }
         public void PauseServer()
         {
+            if(!IsInitialized)
+            {
+                Logger.LogWarning("Server is not initialized.");
+                return;
+            }
+            else if (IsClosed)
+            {
+                Logger.LogWarning("Cannot pause a closed server.");
+                return;
+            }
+
             OnServerPause();
             IsReporting = false;
         }
         public void CloseServer()
         {
+            if(!IsInitialized)
+            {
+                Logger.LogWarning("Server is not initialized.");
+                return;
+            }
+            if (IsClosed)
+                return; 
+
             ctServer.Cancel();
             serverTask.Wait();
             IsReporting = false;
             OnServerStop();
             IsClosed = true;
+            Logger.LogInformation("Server closed.");
         }
 
         private async Task ServerLoop(CancellationToken ct)
@@ -93,9 +130,9 @@ namespace PlanetSide.Websocket
                             .SendFrame(report.Data); // Message
 
                         if (DebugEventDetails)
-                            Console.WriteLine($"Sent report '{report.Topic}': {report.Data}");
+                            Logger.LogDebug($"Sent report '{report.Topic}': {report.Data}");
                         else if (DebugEventNames)
-                            Console.WriteLine($"Sent report '{report.Topic}'");
+                            Logger.LogDebug($"Sent report '{report.Topic}'");
                     }
 
                     await reportTimer.WaitForNextTickAsync(ct);
@@ -126,7 +163,7 @@ namespace PlanetSide.Websocket
 
             StartServer();
             if (pauseOnStart)
-                PauseServer(true);
+                PauseServer();
         }
         private void StopServerCommand(List<string> args)
         {
