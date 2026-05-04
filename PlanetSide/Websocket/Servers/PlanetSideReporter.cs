@@ -50,16 +50,15 @@ namespace PlanetSide.Websocket
 
         protected override void OnInitialize()
         {
+            Tracker.PopulateTables();
+            activeTeams = GenerateTeams();
             leaderboardRequests = GenerateLeaderboardRequests();
         }
         protected override void OnServerStart()
         {
-            Tracker.PopulateTables();
-            activeTeams = GenerateTeams();
+            // Start calculating leaderboards in the back ground.
             leaderboard = new EventLeaderboard(activeTeams.ToArray());
             ctLeaderboardLoop = new CancellationTokenSource();
-
-            // Start calculating leaderboards in the back ground.
             Task.Run(() => LeaderboardCalcLoop(ctLeaderboardLoop.Token));
 
             foreach (var team in activeTeams)

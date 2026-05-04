@@ -21,17 +21,21 @@ namespace PlanetSide
 {
     public class FactionTeam : PlanetSideTeam
     {
-        ConcurrentDictionary<string, byte> nonFactionPlayers = new ConcurrentDictionary<string, byte>();
-        ConcurrentDictionary<string, PlayerStats> playersConcurrent = new ConcurrentDictionary<string, PlayerStats>();
         static Dictionary<string, CensusStreamSubscription> WorldSubscriptions = new Dictionary<string, CensusStreamSubscription>();
 
-        public FactionTeam(string teamName, int faction, string world, int zone=-1)
+        public FactionTeam(string teamName, int faction, string world, int zone = -1)
             : base(faction, teamName, faction, world)
         {
             ZoneId = zone;
             streamKey = $"World{world}_CharacterEventStream";
         }
 
+        // Players are dynamically added in IsEventFromTeam.
+        public override void GetPlayers() { }
+
+        protected override void OnStreamStart() { }
+        protected override void OnStreamStop() { }
+        protected override void OnEventProcessed(ICensusEvent payload) { }
         protected override CensusStreamSubscription GetStreamSubscription()
         {
             if (!WorldSubscriptions.ContainsKey(worldString))
@@ -45,18 +49,9 @@ namespace PlanetSide
             return WorldSubscriptions[worldString];
         }
 
-        protected override ConcurrentDictionary<string, PlayerStats> GetTeamDict()
-        {
-            return playersConcurrent;
-        }
-
-        protected override void OnStreamStart() { }
-        protected override void OnStreamStop() { }
-        protected override void OnEventProcessed(ICensusEvent payload){ }
-
         protected override bool IsEventValid(ICensusEvent payload)
         {
-            switch(payload.EventType)
+            switch (payload.EventType)
             {
                 case CensusEventType.Death:
                 case CensusEventType.GainExperience:
@@ -71,8 +66,8 @@ namespace PlanetSide
 
             ICensusCharacterEvent charEvent = payload as ICensusCharacterEvent;
 
-            if (playersConcurrent.ContainsKey(charEvent.CharacterId)
-            || playersConcurrent.ContainsKey(charEvent.OtherId))
+            if (_teamPlayerStats.ContainsKey(charEvent.CharacterId)
+            || _teamPlayerStats.ContainsKey(charEvent.OtherId))
                 return true;
 
             return IsEventFromTeam(charEvent);
@@ -86,7 +81,7 @@ namespace PlanetSide
             {
                 teamPlayerFound = true;
                 cData1.TeamId = FactionId;
-                playersConcurrent.TryAdd(payload.CharacterId, new PlayerStats()
+                _teamPlayerStats.TryAdd(payload.CharacterId, new PlayerStats()
                 {
                     Data = cData1,
                     Stats = new PlanetStats()
@@ -96,7 +91,7 @@ namespace PlanetSide
             {
                 teamPlayerFound = true;
                 cData2.TeamId = FactionId;
-                playersConcurrent.TryAdd(payload.OtherId, new PlayerStats()
+                _teamPlayerStats.TryAdd(payload.OtherId, new PlayerStats()
                 {
                     Data = cData2,
                     Stats = new PlanetStats()

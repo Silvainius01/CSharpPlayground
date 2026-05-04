@@ -43,6 +43,8 @@ namespace PlanetSide.Websocket
             teams.Add(ReadTeamCsv(2, TeamTwoName));
 
             foreach (var team in teams)
+            {
+                team.GetPlayers();
                 using (ManagedStringBuilder msb = new ManagedStringBuilder("HammaBowlTeam"))
                 {
                     var builder = msb.Builder;
@@ -55,6 +57,7 @@ namespace PlanetSide.Websocket
 
                     Console.WriteLine(builder.ToString());
                 }
+            }
 
             return teams;
         }
@@ -67,7 +70,7 @@ namespace PlanetSide.Websocket
         {
             return GenerateBowlReport();
         }
-        private ServerReport GenerateBowlReport()
+        ServerReport GenerateBowlReport()
         {
             var report = new HammaReport()
             {

@@ -237,6 +237,7 @@ namespace PlanetSide
             IsProccessing = false;
         }
 
+        public abstract void GetPlayers();
         protected abstract void OnStreamStart();
         protected abstract void OnStreamStop();
         protected abstract void OnEventProcessed(ICensusEvent censusEvent);

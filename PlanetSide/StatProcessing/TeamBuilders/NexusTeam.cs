@@ -26,6 +26,11 @@ namespace PlanetSide
             streamKey = $"NexusTeam_{teamName}_PlayerEventStream";
         }
 
+        public override void GetPlayers()
+        {
+            throw new NotImplementedException();
+        }
+
         // TODO: Figure tf is happening here.
         // I know it generates a team of 48 by adding unique characters as they appear in the event stream.
         public async Task GenerateRandomTeam(string streamKey, CensusHandler handler)

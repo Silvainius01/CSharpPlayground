@@ -254,7 +254,7 @@ namespace PlanetSide
                     csv.Context.RegisterClassMap<PlayerCsvEntryMap>();
                     var records = csv.GetRecords<PlayerCsvEntry>().ToArray();
 
-                    SetPlayerTeam teamHamma = new SetPlayerTeam("Hamma", "19", records);
+                    SetPlayerTeam teamHamma = new SetPlayerTeam(0, "Hamma", "19", records);
 
                     Console.WriteLine("\nTEAM HAMMA");
 

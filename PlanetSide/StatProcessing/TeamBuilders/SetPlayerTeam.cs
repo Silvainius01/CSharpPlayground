@@ -14,23 +14,39 @@ namespace PlanetSide
 {
     public class SetPlayerTeam : PlanetSideTeam
     {
-        ConcurrentDictionary<string, PlayerStats> playersConcurrent = new ConcurrentDictionary<string, PlayerStats>();
+        PlayerCsvEntry[] _inputPlayers;
 
         public SetPlayerTeam(int teamId, string teamName, string world, params PlayerCsvEntry[] players)
             : base(teamId, teamName, -1, world)
         {
             ZoneId = -1;
             FactionId = -1;
+            _inputPlayers = players;
             streamKey = $"{teamName}_CharacterEventStream";
+        }
 
-            PlayerTable.TryAddCharacters(players.Select(p => p.CensusId).ToArray());
+        protected override CensusStreamSubscription GetStreamSubscription()
+        {
+            var sub = new CensusStreamSubscription()
+            {
+                Characters = _teamPlayerStats.Values.Select(p => p.Data.CensusId),
+                Worlds = new[] { worldString },
+                EventNames = new[] { "Death", "GainExperience", "VehicleDestroy", "FacilityControl" },
+                LogicalAndCharactersWithWorlds = true
+            };
+            return sub;
+        }
+
+        public override void GetPlayers()
+        {
+            PlayerTable.TryAddCharacters(_inputPlayers.Select(p => p.CensusId).ToArray());
 
             bool first = true;
-            foreach (var player in players)
+            foreach (var player in _inputPlayers)
             {
                 if (PlayerTable.TryGetCharacter(player.CensusId, out var cData))
                 {
-                    if(first)
+                    if (first)
                     {
                         first = false;
                         FactionId = cData.FactionId;
@@ -39,35 +55,23 @@ namespace PlanetSide
                     if (cData.FactionId == FactionId)
                     {
                         cData.TeamId = TeamId;
-                        playersConcurrent.TryAdd(cData.CensusId, new PlayerStats()
+                        _teamPlayerStats.TryAdd(cData.CensusId, new PlayerStats()
                         {
                             Alias = player.Alias,
                             Data = cData,
                             Stats = new PlanetStats()
                         });
                     }
-                    else Logger.LogWarning("{0} is not on the correct faction for team {1} ({2})", player.Alias, teamName, Tracker.FactionIdToName(FactionId));
+                    else Logger.LogWarning("{0} is not on the correct faction for team {1} ({2})", player.Alias, TeamName, Tracker.FactionIdToName(FactionId));
                 }
                 else
                     Logger.LogError("Failed to find character data for {0} ({1})", player.Alias, player.CensusId);
             }
 
-            if (playersConcurrent.Count < players.Length)
+            if (_teamPlayerStats.Count < _inputPlayers.Length)
             {
-                Logger.LogError("Team {0} was initialized with {1}/{2} players. Check previous logs for details.", teamName, playersConcurrent.Count, players.Length);
+                Logger.LogError("Team {0} was initialized with {1}/{2} players. Check previous logs for details.", TeamName, _teamPlayerStats.Count, _inputPlayers.Length);
             }
-        }
-
-        protected override CensusStreamSubscription GetStreamSubscription()
-        {
-            var sub = new CensusStreamSubscription()
-            {
-                Characters = playersConcurrent.Values.Select(p => p.Data.CensusId),
-                Worlds = new[] { worldString },
-                EventNames = new[] { "Death", "GainExperience", "VehicleDestroy", "FacilityControl" },
-                LogicalAndCharactersWithWorlds = true
-            };
-            return sub;
         }
 
         protected override void OnStreamStart() { }
