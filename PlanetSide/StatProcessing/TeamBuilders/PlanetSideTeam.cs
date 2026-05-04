@@ -22,6 +22,7 @@ namespace PlanetSide
         public int TeamSize => TeamPlayers.Count;
         public int WorldId { get; protected set; }
         public int ZoneId { get; protected set; }
+        public int TeamId { get; protected set; }
         public int FactionId { get; protected set; }
         public string TeamName { get; protected set; }
         public PlanetStats TeamStats { get; private set; }
@@ -38,17 +39,19 @@ namespace PlanetSide
 
         [JsonIgnore] private ConcurrentQueue<ICensusEvent> events;
         [JsonIgnore] private CancellationTokenSource ctQueueProcess;
-        [JsonIgnore] private ConcurrentDictionary<int, WeaponStats> _teamWeaponStats = new ConcurrentDictionary<int, WeaponStats>(8, 128);
+        [JsonIgnore] protected ConcurrentDictionary<string, PlayerStats> _teamPlayerStats;
+        [JsonIgnore] protected ConcurrentDictionary<int, WeaponStats> _teamWeaponStats = new ConcurrentDictionary<int, WeaponStats>(8, 128);
 
-        public PlanetSideTeam(int teamSize, string teamName, int faction, string world)
+        public PlanetSideTeam(int teamId, string teamName, int faction, string world)
         {
+            this.TeamId = teamId;
             this.FactionId = faction;
             this.TeamName = teamName;
             worldString = world;
 
             TeamStats = new PlanetStats();
             TeamWeapons = _teamWeaponStats;
-            TeamPlayers = GetTeamDict();
+            TeamPlayers = _teamPlayerStats;
 
             events = new ConcurrentQueue<ICensusEvent>();
             Logger = Program.LoggerFactory.CreateLogger<PlanetSideTeam>();
@@ -234,7 +237,6 @@ namespace PlanetSide
             IsProccessing = false;
         }
 
-        protected abstract ConcurrentDictionary<string, PlayerStats> GetTeamDict();
         protected abstract void OnStreamStart();
         protected abstract void OnStreamStop();
         protected abstract void OnEventProcessed(ICensusEvent censusEvent);

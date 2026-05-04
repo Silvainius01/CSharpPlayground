@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using Websocket.Client.Logging;
 using CommandEngine;
 using System.Linq;
+using System.ComponentModel;
 
 namespace PlanetSide.Websocket
 {
@@ -38,7 +39,7 @@ namespace PlanetSide.Websocket
         {
             this.world = world;
             this.ZoneId = zone;
-            
+
             serverCommands.Add(new ConsoleCommand("startRound", StartRoundCommand));
             serverCommands.Add(new ConsoleCommand("endRound", EndRoundCommand));
             serverCommands.Add(new ConsoleCommand("pauseRound", PauseRoundCommand));
@@ -47,7 +48,7 @@ namespace PlanetSide.Websocket
             serverCommands.Add(new ConsoleCommand("setRoundLength", SetRoundLengthCommand));
         }
 
-        protected override void OnInitialize() 
+        protected override void OnInitialize()
         {
             leaderboardRequests = GenerateLeaderboardRequests();
         }
@@ -120,11 +121,13 @@ namespace PlanetSide.Websocket
 
         protected override IEnumerable<ServerReport> GenerateReports()
         {
-            int numPlayers = activeTeams[0].TeamPlayers.Count + activeTeams[1].TeamPlayers.Count;
+            int numPlayers = 0;
+            foreach (var team in activeTeams)
+                numPlayers += team.TeamPlayers.Count;
 
             _reportList.Clear();
 
-            if (numPlayers >= 10)
+            if (_leaderboardReports.Count > 0)
             {
                 Console.WriteLine($"Leaderboard Queue: {_leaderboardReports.Count}");
                 while (_leaderboardReports.Count > 0)
@@ -133,6 +136,8 @@ namespace PlanetSide.Websocket
                         _reportList.Add(report);
                 }
             }
+
+            _reportList.Add(GenerateReport());
 
             return _reportList;
         }
@@ -164,8 +169,15 @@ namespace PlanetSide.Websocket
 
             while (!ct.IsCancellationRequested)
             {
+                int numPlayers = 0;
+                foreach (var team in activeTeams)
+                    numPlayers += team.TeamPlayers.Count;
+
                 foreach (var request in leaderboardRequests)
                 {
+                    if (numPlayers < request.BoardSize)
+                        continue;
+
                     var board = leaderboard.CalculateLeaderboard(request);
                     _leaderboardReports.Enqueue(new ServerReport()
                     {
@@ -183,6 +195,7 @@ namespace PlanetSide.Websocket
 
         protected abstract List<PlanetSideTeam> GenerateTeams();
         protected abstract List<LeaderboardRequest> GenerateLeaderboardRequests();
+        protected abstract ServerReport GenerateReport();
 
         private void StartRoundCommand(List<string> args)
         {

@@ -26,7 +26,7 @@ namespace PlanetSide
         static Dictionary<string, CensusStreamSubscription> WorldSubscriptions = new Dictionary<string, CensusStreamSubscription>();
 
         public FactionTeam(string teamName, int faction, string world, int zone=-1)
-            : base(-1, teamName, faction, world)
+            : base(faction, teamName, faction, world)
         {
             ZoneId = zone;
             streamKey = $"World{world}_CharacterEventStream";

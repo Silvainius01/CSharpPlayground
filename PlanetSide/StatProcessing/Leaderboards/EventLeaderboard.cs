@@ -82,6 +82,7 @@ namespace PlanetSide
     public struct LeaderboardEntry
     {
         public int TeamId { get; set; }
+        public int FactionId { get; set; }
         public float Score { get; set; }
         public string EntryName { get; set; }
     }

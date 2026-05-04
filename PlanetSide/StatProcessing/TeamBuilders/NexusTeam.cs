@@ -18,28 +18,24 @@ namespace PlanetSide
 {
     public class NexusTeam : PlanetSideTeam
     {
-        ConcurrentDictionary<string, PlayerStats> nexusTeamPlayers;
+        ConcurrentDictionary<string, PlayerStats> playersConcurrent;
 
-        public NexusTeam(int teamSize, string teamName, int faction, string world)
-            : base(teamSize, teamName, faction, world)
+        public NexusTeam(int teamId, string teamName, int faction, string world)
+            : base(teamId, teamName, faction, world)
         {
             streamKey = $"NexusTeam_{teamName}_PlayerEventStream";
         }
 
-        protected override ConcurrentDictionary<string, PlayerStats> GetTeamDict()
-        {
-            nexusTeamPlayers = new ConcurrentDictionary<string, PlayerStats>();
-            return nexusTeamPlayers;
-        }
-
+        // TODO: Figure tf is happening here.
+        // I know it generates a team of 48 by adding unique characters as they appear in the event stream.
         public async Task GenerateRandomTeam(string streamKey, CensusHandler handler)
         {
             bool filled = false;
             object fillLock = new object();
             object charLock = new object();
-            ConcurrentDictionary<string, PlayerStats> playersConcurrent = new ConcurrentDictionary<string, PlayerStats>(4, TeamSize);
+            ConcurrentDictionary<string, PlayerStats> players = new ConcurrentDictionary<string, PlayerStats>(4, TeamSize);
 
-            Logger.LogInformation("Genrating NexusTeam {0}...", TeamName);           
+            Logger.LogInformation("Generating NexusTeam {0}...", TeamName);           
 
             // Add a callback to generate the team. Returns true when the team is full.
             handler.AddActionToSubscription(streamKey, response =>
@@ -59,10 +55,10 @@ namespace PlanetSide
                                 ICensusDeathEvent deathEvent = censusEvent as ICensusDeathEvent;
 
                                 if (deathEvent.TeamId == this.FactionId)
-                                    playersConcurrent.TryAdd(deathEvent.CharacterId, new PlayerStats());
+                                    players.TryAdd(deathEvent.CharacterId, new PlayerStats());
 
                                 if (deathEvent.AttackerTeamId == this.FactionId)
-                                    playersConcurrent.TryAdd(deathEvent.OtherId, new PlayerStats());
+                                    players.TryAdd(deathEvent.OtherId, new PlayerStats());
                             }
                             break;
                         case CensusEventType.GainExperience:
@@ -70,23 +66,23 @@ namespace PlanetSide
                                 ICensusCharacterEvent charEvent = censusEvent as ICensusCharacterEvent;
 
                                 if (charEvent is not null)
-                                    playersConcurrent.TryAdd(charEvent.CharacterId, new PlayerStats());
+                                    players.TryAdd(charEvent.CharacterId, new PlayerStats());
                             }
                             break;
                     }
                 }
 
-                if(playersConcurrent.Count >= TeamSize)
+                if(players.Count >= TeamSize)
                 {
                     lock (fillLock)
                     {
                         filled = true;
 
-                        nexusTeamPlayers.Clear();
-                        foreach (var kvp in playersConcurrent)
-                            nexusTeamPlayers.TryAdd(kvp.Key, kvp.Value);
+                        playersConcurrent.Clear();
+                        foreach (var kvp in players)
+                            playersConcurrent.TryAdd(kvp.Key, kvp.Value);
 
-                        Logger.LogInformation("Genrated NexusTeam {0} with {1} players", TeamName, TeamSize);
+                        Logger.LogInformation("Genrated NexusTeam {0} with {1} players", TeamName, this.playersConcurrent.Count);
                     }
 
                     return true;
@@ -102,7 +98,7 @@ namespace PlanetSide
         {
             return new CensusStreamSubscription()
             {
-                Characters = nexusTeamPlayers.Keys,
+                Characters = playersConcurrent.Keys,
                 Worlds = new[] { worldString },
                 EventNames = new[] { "Death", "GainExperience", "VehicleDestroy" },
                 LogicalAndCharactersWithWorlds = true

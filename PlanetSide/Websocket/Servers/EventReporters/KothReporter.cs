@@ -32,12 +32,8 @@ namespace PlanetSide.Websocket
                 LeaderboardRequest.TeamKills("koth-leaderboard-team-kills", 10)
             };
         }
-        protected override IEnumerable<ServerReport> GenerateReports()
-        {
-            return base.GenerateReports().Append(GenerateKothReport());
-        }
 
-        private ServerReport GenerateKothReport()
+        protected override ServerReport GenerateReport()
         {
             var report = new KothReport()
             {

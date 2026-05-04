@@ -14,13 +14,13 @@ namespace PlanetSide
 {
     public class SetPlayerTeam : PlanetSideTeam
     {
-
         ConcurrentDictionary<string, PlayerStats> playersConcurrent = new ConcurrentDictionary<string, PlayerStats>();
 
-        public SetPlayerTeam(string teamName, string world, params PlayerCsvEntry[] players)
-            : base(players.Length, teamName, -1, world)
+        public SetPlayerTeam(int teamId, string teamName, string world, params PlayerCsvEntry[] players)
+            : base(teamId, teamName, -1, world)
         {
             ZoneId = -1;
+            FactionId = -1;
             streamKey = $"{teamName}_CharacterEventStream";
 
             PlayerTable.TryAddCharacters(players.Select(p => p.CensusId).ToArray());
@@ -30,10 +30,15 @@ namespace PlanetSide
             {
                 if (PlayerTable.TryGetCharacter(player.CensusId, out var cData))
                 {
-                    if (cData.FactionId == FactionId || first)
+                    if(first)
                     {
                         first = false;
                         FactionId = cData.FactionId;
+                    }
+
+                    if (cData.FactionId == FactionId)
+                    {
+                        cData.TeamId = TeamId;
                         playersConcurrent.TryAdd(cData.CensusId, new PlayerStats()
                         {
                             Alias = player.Alias,
@@ -63,11 +68,6 @@ namespace PlanetSide
                 LogicalAndCharactersWithWorlds = true
             };
             return sub;
-        }
-
-        protected override ConcurrentDictionary<string, PlayerStats> GetTeamDict()
-        {
-            return playersConcurrent;
         }
 
         protected override void OnStreamStart() { }

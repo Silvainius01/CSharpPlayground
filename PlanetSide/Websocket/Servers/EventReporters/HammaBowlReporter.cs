@@ -39,8 +39,8 @@ namespace PlanetSide.Websocket
         {
             List<PlanetSideTeam> teams = new List<PlanetSideTeam>(2);
 
-            teams.Add(ReadTeamCsv(TeamOneName));
-            teams.Add(ReadTeamCsv(TeamTwoName));
+            teams.Add(ReadTeamCsv(1, TeamOneName));
+            teams.Add(ReadTeamCsv(2, TeamTwoName));
 
             foreach (var team in teams)
                 using (ManagedStringBuilder msb = new ManagedStringBuilder("HammaBowlTeam"))
@@ -62,33 +62,11 @@ namespace PlanetSide.Websocket
         {
             return new List<LeaderboardRequest>();
         }
-        protected override IEnumerable<ServerReport> GenerateReports()
+
+        protected override ServerReport GenerateReport()
         {
-            return base.GenerateReports().Append(GenerateBowlReport());
+            return GenerateBowlReport();
         }
-
-        private SetPlayerTeam ReadTeamCsv(string teamName)
-        {
-            string teamCsvName = "team" + teamName;
-            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
-            {
-                HasHeaderRecord = false,
-            };
-
-            using (var reader = new StreamReader($"{Directory.GetCurrentDirectory()}\\_data\\{teamCsvName}.csv"))
-            {
-                using (var csv = new CsvReader(reader, config))
-                {
-                    csv.Context.RegisterClassMap<PlayerCsvEntryMap>();
-                    var records = csv.GetRecords<PlayerCsvEntry>().ToArray();
-
-                    SetPlayerTeam team = new SetPlayerTeam(teamName, world, records);
-
-                    return team;
-                }
-            }
-        }
-
         private ServerReport GenerateBowlReport()
         {
             var report = new HammaReport()
@@ -103,5 +81,28 @@ namespace PlanetSide.Websocket
                 Data = JsonConvert.SerializeObject(report)
             };
         }
+
+        private SetPlayerTeam ReadTeamCsv(int teamId, string teamName)
+        {
+            string teamCsvName = "team" + teamName;
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = false,
+            };
+
+            using (var reader = new StreamReader($"{Directory.GetCurrentDirectory()}\\_data\\{teamCsvName}.csv"))
+            {
+                using (var csv = new CsvReader(reader, config))
+                {
+                    csv.Context.RegisterClassMap<PlayerCsvEntryMap>();
+                    var records = csv.GetRecords<PlayerCsvEntry>().ToArray();
+
+                    SetPlayerTeam team = new SetPlayerTeam(teamId, teamName, world, records);
+
+                    return team;
+                }
+            }
+        }
+
     }
 }

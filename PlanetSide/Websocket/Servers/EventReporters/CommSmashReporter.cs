@@ -76,12 +76,6 @@ namespace PlanetSide.Websocket
                 }
             };
         }
-
-        protected override IEnumerable<ServerReport> GenerateReports()
-        {
-            return base.GenerateReports().Append(GetCommsSmashReport());
-        }
-
         protected override List<PlanetSideTeam> GenerateTeams()
         {
             return new List<PlanetSideTeam>() {
@@ -90,6 +84,10 @@ namespace PlanetSide.Websocket
             };
         }
 
+        protected override ServerReport GenerateReport()
+        {
+            return GetCommsSmashReport();
+        }
         ServerReport GetCommsSmashReport()
         {
             var csReport = new CommSmashTeamReport()
@@ -104,6 +102,5 @@ namespace PlanetSide.Websocket
                 Data = JsonConvert.SerializeObject(csReport)
             };
         }
-
     }
 }

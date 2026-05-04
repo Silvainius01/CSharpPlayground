@@ -92,7 +92,7 @@ namespace PlanetSide
             : base(request, (team) => team.TeamWeapons.Values, teams)
         {
             if (request.LeaderboardType != LeaderboardType.Weapon)
-                throw new ArgumentException($"Cannot create a PlayerLeaderboard with type {request.LeaderboardType}");
+                throw new ArgumentException($"Cannot create a WeaponLeaderboard with type {request.LeaderboardType}");
         }
     }
 }
