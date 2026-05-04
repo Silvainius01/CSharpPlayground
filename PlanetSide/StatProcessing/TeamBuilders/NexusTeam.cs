@@ -31,72 +31,9 @@ namespace PlanetSide
             throw new NotImplementedException();
         }
 
-        // TODO: Figure tf is happening here.
-        // I know it generates a team of 48 by adding unique characters as they appear in the event stream.
         public async Task GenerateRandomTeam(string streamKey, CensusHandler handler)
         {
-            bool filled = false;
-            object fillLock = new object();
-            object charLock = new object();
-            ConcurrentDictionary<string, PlayerStats> players = new ConcurrentDictionary<string, PlayerStats>(4, TeamSize);
-
-            Logger.LogInformation("Generating NexusTeam {0}...", TeamName);           
-
-            // Add a callback to generate the team. Returns true when the team is full.
-            handler.AddActionToSubscription(streamKey, response =>
-            {
-                if (filled)
-                    return true;
-
-                ICensusEvent censusEvent = Tracker.ProcessCensusEvent(response);
-
-                if (censusEvent is not null)
-                {
-                    switch (censusEvent.EventType)
-                    {
-                        case CensusEventType.Death:
-                        case CensusEventType.VehicleDestroy:
-                            {
-                                ICensusDeathEvent deathEvent = censusEvent as ICensusDeathEvent;
-
-                                if (deathEvent.TeamId == this.FactionId)
-                                    players.TryAdd(deathEvent.CharacterId, new PlayerStats());
-
-                                if (deathEvent.AttackerTeamId == this.FactionId)
-                                    players.TryAdd(deathEvent.OtherId, new PlayerStats());
-                            }
-                            break;
-                        case CensusEventType.GainExperience:
-                            {
-                                ICensusCharacterEvent charEvent = censusEvent as ICensusCharacterEvent;
-
-                                if (charEvent is not null)
-                                    players.TryAdd(charEvent.CharacterId, new PlayerStats());
-                            }
-                            break;
-                    }
-                }
-
-                if(players.Count >= TeamSize)
-                {
-                    lock (fillLock)
-                    {
-                        filled = true;
-
-                        playersConcurrent.Clear();
-                        foreach (var kvp in players)
-                            playersConcurrent.TryAdd(kvp.Key, kvp.Value);
-
-                        Logger.LogInformation("Genrated NexusTeam {0} with {1} players", TeamName, this.playersConcurrent.Count);
-                    }
-
-                    return true;
-                }
-
-                return false;
-            });
-
-            await Task.Run(() => { while (!filled) ; return true; });
+            // TODO: Generate a team of 48 players using the first ones to show up in the event stream.
         }
 
         protected override CensusStreamSubscription GetStreamSubscription()

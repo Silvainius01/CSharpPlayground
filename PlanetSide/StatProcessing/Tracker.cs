@@ -147,11 +147,8 @@ namespace PlanetSide
                         || !payload.TryGetCensusInteger("duration_held", out int durationHeld)
                         || !payload.TryGetCensusInteger("new_faction_id", out int newFaction)
                         || !payload.TryGetCensusInteger("old_faction_id", out int oldFaction)
-                        || !payload.TryGetStringElement("outfit_id", out string outfitId)
-                        || !payload.TryGetCensusInteger("timestamp", out int unixTime))
-                        {
+                        || !payload.TryGetStringElement("outfit_id", out string outfitId))
                             break;
-                        }
 
                         facilityEvent.FacilityId = facilityId;
                         facilityEvent.DurationHeld = durationHeld;
@@ -160,10 +157,7 @@ namespace PlanetSide
                         facilityEvent.OutfitId = outfitId;
                         return facilityEvent;
                     }
-                    break;
             }
-
-
 
             return null;
         }
