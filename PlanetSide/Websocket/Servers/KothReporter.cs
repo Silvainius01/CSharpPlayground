@@ -2,10 +2,6 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using CommandEngine;
-using System.Threading.Tasks;
-using System.Threading;
-using System.Net.Http.Headers;
-using Newtonsoft.Json.Bson;
 using System.Linq;
 
 namespace PlanetSide.Websocket
@@ -25,43 +21,15 @@ namespace PlanetSide.Websocket
                 new FactionTeam("TR", 3, world, this.ZoneId),
             };
 
-            // Pre-pause streams so they dont start before the game does.
-            foreach (var team in teams)
-                team.PauseStream();
-
             return teams;
         }
         protected override List<LeaderboardRequest> GenerateLeaderboardRequests()
         {
             return new List<LeaderboardRequest>()
             {
-                new LeaderboardRequest()
-                {
-                    Name = "koth-leaderboard-kills",
-                    LeaderboardType = LeaderboardType.Player,
-                    BoardSize = 10,
-                    GetStat = stats => stats.Kills
-                },
-                new LeaderboardRequest()
-                {
-                    Name = "koth-leaderboard-revives",
-                    LeaderboardType = LeaderboardType.Player,
-                    BoardSize = 10,
-                    GetStat = stats =>
-                    {
-                        int count = 0;
-                        foreach(var id in ExperienceTable.ReviveIds)
-                            count += stats.GetExp(id).NumEvents;
-                        return count;
-                    }
-                },
-                new LeaderboardRequest()
-                {
-                    Name = "leaderboard-team-kills",
-                    LeaderboardType = LeaderboardType.Player,
-                    BoardSize = 10,
-                    GetStat = stats => stats.TeamKills
-                }
+                LeaderboardRequest.Kills("koth-leaderboard-kills", 10),
+                LeaderboardRequest.Revives("koth-leaderboard-revives", 10),
+                LeaderboardRequest.TeamKills("koth-leaderboard-team-kills", 10)
             };
         }
         protected override IEnumerable<ServerReport> GenerateReports()

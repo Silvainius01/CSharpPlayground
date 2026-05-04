@@ -30,88 +30,49 @@ namespace PlanetSide.Websocket
         protected List<PlanetSideTeam>? activeTeams;
         protected List<LeaderboardRequest> leaderboardRequests;
 
+        List<ServerReport> _reportList = new List<ServerReport>();
+        ConcurrentQueue<ServerReport> _leaderboardReports = new ConcurrentQueue<ServerReport>();
         CancellationTokenSource ctLeaderboardLoop;
 
         public PlanetSideReporter(string port, string world, int zone) : base(port, ServerType.Publisher)
         {
             this.world = world;
             this.ZoneId = zone;
-            RoundPaused = true;
-            leaderboardRequests = GenerateLeaderboardRequests();
-
-            serverCommands.Add(new ConsoleCommand("startRound", StartRound));
-            serverCommands.Add(new ConsoleCommand("endRound", EndRound));
-            serverCommands.Add(new ConsoleCommand("pauseRound", PauseRound));
+            
+            serverCommands.Add(new ConsoleCommand("startRound", StartRoundCommand));
+            serverCommands.Add(new ConsoleCommand("endRound", EndRoundCommand));
+            serverCommands.Add(new ConsoleCommand("pauseRound", PauseRoundCommand));
+            serverCommands.Add(new ConsoleCommand("resumeRound", StartRoundCommand));
+            serverCommands.Add(new ConsoleCommand("saveStats", SaveStatsCommand));
+            serverCommands.Add(new ConsoleCommand("setRoundLength", SetRoundLengthCommand));
         }
 
-        protected override bool OnServerStart()
+        protected override void OnInitialize() 
+        {
+            leaderboardRequests = GenerateLeaderboardRequests();
+        }
+        protected override void OnServerStart()
         {
             Tracker.PopulateTables();
             activeTeams = GenerateTeams();
             leaderboard = new EventLeaderboard(activeTeams.ToArray());
-
             ctLeaderboardLoop = new CancellationTokenSource();
-
-            foreach (var team in activeTeams)
-            {
-                team.StartStream();
-            }
 
             // Start calculating leaderboards in the back ground.
             Task.Run(() => LeaderboardCalcLoop(ctLeaderboardLoop.Token));
 
-            return true;
+            foreach (var team in activeTeams)
+                team.StartStream();
+
+            PauseRound();
         }
-
-        List<ServerReport> _reportList = new List<ServerReport>();
-        ConcurrentQueue<ServerReport> _leaderboardReports = new ConcurrentQueue<ServerReport>();
-        protected override IEnumerable<ServerReport> GenerateReports()
+        protected override void OnServerPause()
         {
-            int numPlayers = activeTeams[0].TeamPlayers.Count + activeTeams[1].TeamPlayers.Count;
-
-            if (numPlayers >= 10)
-            {
-                Console.WriteLine($"Leaderboard Queue: {_leaderboardReports.Count}");
-                while (_leaderboardReports.Count > 0)
-                {
-                    if (_leaderboardReports.TryDequeue(out var report))
-                        _reportList.Add(report);
-                }
-            }
-
-            return _reportList;
+            PauseRound();
         }
-
-        private async Task LeaderboardCalcLoop(CancellationToken ct)
+        protected override void OnServerStop()
         {
-            float waitTime = LeaderboardRefresh / leaderboardRequests.Count;
-            PeriodicTimer boardtimer = new PeriodicTimer(TimeSpan.FromSeconds(waitTime));
-
-            while (!ct.IsCancellationRequested)
-            {
-                foreach (var request in leaderboardRequests)
-                {
-                    var board = leaderboard.CalculateLeaderboard(request);
-                    _leaderboardReports.Enqueue(new ServerReport()
-                    {
-                        Data = JsonConvert.SerializeObject(board),
-                        Topic = request.Name,
-                    });
-                    await boardtimer.WaitForNextTickAsync(ct);
-                }
-            }
-
-            if (!ct.IsCancellationRequested)
-                Logger.LogError("Leaderboard calculations routine exited!");
-            Logger.LogDebug("Leaderboard calculation routine exited.");
-        }
-
-        protected abstract List<PlanetSideTeam> GenerateTeams();
-        protected abstract List<LeaderboardRequest> GenerateLeaderboardRequests();
-
-        public void SetRoundLength(int minutes)
-        {
-            RoundLength = minutes * 60;
+            SaveStats(true);
         }
 
         public void StartRound()
@@ -144,6 +105,36 @@ namespace PlanetSide.Websocket
             }
         }
 
+        public void SaveStats(bool printFull)
+        {
+            foreach (var team in activeTeams)
+                if (printFull)
+                    team.SaveFullStats();
+                else team.SaveStats();
+        }
+
+        public void SetRoundLength(int minutes)
+        {
+            RoundLength = minutes * 60;
+        }
+
+        protected override IEnumerable<ServerReport> GenerateReports()
+        {
+            int numPlayers = activeTeams[0].TeamPlayers.Count + activeTeams[1].TeamPlayers.Count;
+
+            if (numPlayers >= 10)
+            {
+                Console.WriteLine($"Leaderboard Queue: {_leaderboardReports.Count}");
+                while (_leaderboardReports.Count > 0)
+                {
+                    if (_leaderboardReports.TryDequeue(out var report))
+                        _reportList.Add(report);
+                }
+            }
+
+            return _reportList;
+        }
+
         protected async Task RoundUpdater(CancellationToken ct)
         {
             lastTime = DateTime.Now;
@@ -164,16 +155,62 @@ namespace PlanetSide.Websocket
                 await taskTimer.WaitForNextTickAsync(ct);
             }
         }
-
-        private void StartRound(List<string> args)
+        private async Task LeaderboardCalcLoop(CancellationToken ct)
         {
-            if(args.Any() && int.TryParse(args[0], out int minutes))
+            float waitTime = LeaderboardRefresh / leaderboardRequests.Count;
+            PeriodicTimer boardtimer = new PeriodicTimer(TimeSpan.FromSeconds(waitTime));
+
+            while (!ct.IsCancellationRequested)
+            {
+                foreach (var request in leaderboardRequests)
+                {
+                    var board = leaderboard.CalculateLeaderboard(request);
+                    _leaderboardReports.Enqueue(new ServerReport()
+                    {
+                        Data = JsonConvert.SerializeObject(board),
+                        Topic = request.Name,
+                    });
+                    await boardtimer.WaitForNextTickAsync(ct);
+                }
+            }
+
+            if (!ct.IsCancellationRequested)
+                Logger.LogError("Leaderboard calculations routine exited!");
+            Logger.LogDebug("Leaderboard calculation routine exited.");
+        }
+
+        protected abstract List<PlanetSideTeam> GenerateTeams();
+        protected abstract List<LeaderboardRequest> GenerateLeaderboardRequests();
+
+        private void StartRoundCommand(List<string> args)
+        {
+            if (args.Any() && int.TryParse(args[0], out int minutes))
                 SetRoundLength(minutes);
             StartRound();
         }
-        private void EndRound(List<string> args)
+        private void EndRoundCommand(List<string> args)
             => EndRound();
-        private void PauseRound(List<string> args)
+        private void PauseRoundCommand(List<string> args)
             => PauseRound();
+        private void SaveStatsCommand(List<string> args)
+        {
+            bool printFull = false;
+            if (args.Any())
+            {
+                string lowerArg = args[0].ToLower();
+                printFull = (lowerArg == "full" || lowerArg == "f");
+            }
+
+            foreach (var team in activeTeams)
+                if (printFull)
+                    team.SaveFullStats();
+                else team.SaveStats();
+        }
+        private void SetRoundLengthCommand(List<string> args)
+        {
+            if (args.Any() && int.TryParse(args[0], out int minutes))
+                SetRoundLength(minutes);
+            else ConsoleExt.WriteErrorLine("Usage: setRoundLength <minutes>");
+        }
     }
 }

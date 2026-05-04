@@ -181,6 +181,20 @@ namespace CommandEngine
             result = default(T);
             return false;
         }
+
+        public static bool TryParseBoolean(string arg, out bool result)
+        {
+            if (bool.TryParse(arg, out result))
+                return true;
+            else if (int.TryParse(arg, out int intValue))
+            {
+                result = intValue > 0;
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
         #endregion
     }
 }

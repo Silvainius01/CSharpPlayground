@@ -57,6 +57,7 @@ namespace PlanetSide
         //public float CohesionScore { get; set; }
         //public float LogisticScore { get; set; }
 
+        [JsonIgnore] public bool allowExpSerialization = false;
         [JsonIgnore] Dictionary<int, CumulativeExperience> _allExperience;
 
         public PlanetStats()
@@ -108,6 +109,7 @@ namespace PlanetSide
                 ++Kills;
                 if (deathEvent.IsHeadshot)
                     ++Headshots;
+                
             }
         }
         public void AddDeath(ref DeathPayload deathEvent)
@@ -152,6 +154,7 @@ namespace PlanetSide
                     break;
             }
         }
+        
         public void AddVehicleTeamKill(ref VehicleDestroyPayload destroyEvent)
         {
             switch (VehicleTable.VehicleData[destroyEvent.VehicleId].Type)
@@ -166,7 +169,6 @@ namespace PlanetSide
                     break;
             }
         }
-
         public void AddFacilityEvent(ref FacilityControlEvent facilityEvent)
         {
             if (facilityEvent.OldFaction == facilityEvent.NewFaction)
@@ -196,5 +198,8 @@ namespace PlanetSide
                 cxp.CumulativeScore = 0;
             }
         }
+
+        public bool ShouldSerialize_allExperience()
+            => allowExpSerialization;
     }
 }

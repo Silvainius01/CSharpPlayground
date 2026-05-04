@@ -1,18 +1,7 @@
-﻿using Newtonsoft.Json;
-using PlanetSide.StatProcessing.StatObjects;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http.Headers;
-using System.Reflection.Metadata.Ecma335;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
-namespace PlanetSide.Websocket
+namespace PlanetSide
 {
     public enum LeaderboardType { Player, Weapon }
     public struct LeaderboardRequest
@@ -21,6 +10,73 @@ namespace PlanetSide.Websocket
         public string Name { get; set; }
         public LeaderboardType LeaderboardType { get; set; }
         public Func<PlanetStats, float> GetStat { get; set; }
+
+        public static LeaderboardRequest Kills(string name, int boardSize)
+        {
+            return new LeaderboardRequest()
+            {
+                Name = name,
+                BoardSize = boardSize,
+                LeaderboardType = LeaderboardType.Player,
+                GetStat = stats => stats.Kills
+            };
+        }
+        public static LeaderboardRequest VehicleKills(string name, int boardSize)
+        {
+            return new LeaderboardRequest()
+            {
+                Name = name,
+                BoardSize = boardSize,
+                LeaderboardType = LeaderboardType.Player,
+                GetStat = stats => stats.VehicleKills
+            };
+        }
+        public static LeaderboardRequest AirKills(string name, int boardSize)
+        {
+            return new LeaderboardRequest()
+            {
+                Name = name,
+                BoardSize = boardSize,
+                LeaderboardType = LeaderboardType.Player,
+                GetStat = stats => stats.AirKills
+            };
+        }
+        public static LeaderboardRequest Revives(string name, int boardSize)
+        {
+            return new LeaderboardRequest()
+            {
+                Name = name,
+                BoardSize = boardSize,
+                LeaderboardType = LeaderboardType.Player,
+                GetStat = stats =>
+                {
+                    int count = 0;
+                    foreach (var id in ExperienceTable.ReviveIds)
+                        count += stats.GetExp(id).NumEvents;
+                    return count;
+                }
+            };
+        }
+        public static LeaderboardRequest TeamKills(string name, int boardSize)
+        {
+            return new LeaderboardRequest()
+            {
+                Name = name,
+                BoardSize = boardSize,
+                LeaderboardType = LeaderboardType.Player,
+                GetStat = stats => stats.TeamKills
+            };
+        }
+        public static LeaderboardRequest WeaponKills(string name, int boardSize)
+        {
+            return new LeaderboardRequest()
+            {
+                Name = name,
+                BoardSize = boardSize,
+                LeaderboardType = LeaderboardType.Weapon,
+                GetStat = stats => stats.Kills
+            };
+        }
     }
 
     public struct LeaderboardEntry
@@ -87,5 +143,7 @@ namespace PlanetSide.Websocket
             }
             return board;
         }
+
     }
+
 }

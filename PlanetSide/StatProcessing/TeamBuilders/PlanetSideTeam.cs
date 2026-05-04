@@ -13,6 +13,7 @@ using System.Runtime.CompilerServices;
 using PlanetSide.StatProcessing.Events;
 using System.IO;
 using Newtonsoft.Json;
+using System.Data;
 
 namespace PlanetSide
 {
@@ -78,25 +79,28 @@ namespace PlanetSide
             if (!IsStreaming)
                 return;
 
+            // Stop processing
             ctQueueProcess.Cancel();
+            IsProccessing = false;
+
+            // Stop strreaming
             Tracker.Handler.DisconnectSocketAsync(streamKey).Wait();
             IsStreaming = false;
 
-            SaveStats();
+            // Set to unpaused
+            IsPaused = false;
         }
-
+        
         public void PauseStream()
         {
-            if (!IsStreaming || !IsPaused)
-                return;
-
+            //if (!IsStreaming)
+            //    return;
             IsPaused = true;
         }
         public void UnPauseStream()
         {
-            if (!IsStreaming || IsPaused)
-                return;
-
+            //if (!IsStreaming)
+            //    return;
             IsPaused = false;
         }
 
@@ -104,26 +108,40 @@ namespace PlanetSide
         {
             TeamStats.Reset();
 
-            foreach(var w in TeamWeapons.Values)
+            foreach (var w in TeamWeapons.Values)
                 w.Stats.Reset();
 
-            foreach(var p in TeamPlayers.Values)
+            foreach (var p in TeamPlayers.Values)
                 p.Stats.Reset();
         }
         public void SaveStats()
         {
             if (!Directory.Exists("./SavedTeamData"))
                 Directory.CreateDirectory("./SavedTeamData");
-            using (StreamWriter writer = new StreamWriter($"./SavedTeamData/{TeamName}.json"))
+
+            string timeStr = DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss");
+            using (StreamWriter writer = new StreamWriter($"./SavedTeamData/Team_{TeamName}_{timeStr}.json"))
             {
                 writer.WriteLine(JsonConvert.SerializeObject(this));
             }
+        }
+        public void SaveFullStats()
+        {
+            TeamStats.allowExpSerialization = true;
+            foreach (var p in TeamPlayers.Values)
+                p.Stats.allowExpSerialization = true;
+
+            SaveStats();
+
+            TeamStats.allowExpSerialization = false;
+            foreach (var p in TeamPlayers.Values)
+                p.Stats.allowExpSerialization = false;
         }
 
         private bool ProcessCensusEvent(SocketResponse response)
         {
             // Drop all events while paused.
-            if (IsPaused)
+            if (IsPaused || !IsProccessing)
                 return false;
 
             ICensusEvent? censusEvent = Tracker.ProcessCensusEvent(response);
@@ -140,6 +158,26 @@ namespace PlanetSide
             IsProccessing = true;
             using PeriodicTimer pTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(1));
 
+            bool AddStat(string characterId, int weaponId, Action<PlanetStats> action)
+            {
+                if (TeamPlayers.ContainsKey(characterId))
+                {
+                    action.Invoke(TeamStats);
+                    action.Invoke(TeamPlayers[characterId].Stats);
+
+                    if (weaponId > 0)
+                    {
+                        if (_teamWeaponStats.TryGetOrAddWeaponStats(weaponId, out var wstats))
+                            action.Invoke(wstats.Stats);
+                        if (TeamPlayers[characterId].WeaponStats.TryGetOrAddWeaponStats(weaponId, out var pwstats))
+                            action.Invoke(pwstats.Stats);
+                    }
+
+                    return true;
+                }
+                return false;
+            }
+
             while (!ct.IsCancellationRequested)
             {
                 // Yield if we burn through the queue or fail a dequeue
@@ -153,92 +191,47 @@ namespace PlanetSide
 
                 OnEventProcessed(payload);
 
+                bool validZone = ZoneId == -1;
+                if (!validZone && payload is ICensusZoneEvent zoneEvent)
+                    validZone = zoneEvent.ZoneId == ZoneId;
+
                 switch (payload.EventType)
                 {
                     case CensusEventType.GainExperience:
-                        var expEvent = (ExperiencePayload)payload;
-                        bool zoneId = ZoneId == -1 || expEvent.ZoneId == ZoneId;
-                        if (zoneId && TeamPlayers.ContainsKey(expEvent.CharacterId))
+                        if (validZone)
                         {
-                            TeamStats.AddExperience(ref expEvent);
-                            TeamPlayers[expEvent.CharacterId].Stats.AddExperience(ref expEvent);
+                            var expEvent = (ExperiencePayload)payload;
+                            AddStat(expEvent.CharacterId, -1, stats => stats.AddExperience(ref expEvent));
                         }
                         break;
                     case CensusEventType.Death:
-                        var deathEvent = (DeathPayload)payload;
-                        bool zoneId2 = ZoneId == -1 || deathEvent.ZoneId == ZoneId;
-                        if (zoneId2)
+                        if (validZone)
                         {
-                            if (TeamPlayers.ContainsKey(deathEvent.OtherId))
-                            {
-                                TeamStats.AddKill(ref deathEvent);
-                                TeamPlayers[deathEvent.OtherId].Stats.AddKill(ref deathEvent);
-                                if (TryGetOrAddWeaponStats(deathEvent.AttackerWeaponId, out var wstats))
-                                    wstats.Stats.AddKill(ref deathEvent);
-                            }
-                            else if (TeamPlayers.ContainsKey(deathEvent.CharacterId))
-                            {
-                                TeamStats.AddDeath(ref deathEvent);
-                                TeamPlayers[deathEvent.CharacterId].Stats.AddDeath(ref deathEvent);
-                                if (TryGetOrAddWeaponStats(deathEvent.AttackerWeaponId, out var wstats))
-                                    wstats.Stats.AddDeath(ref deathEvent);
-                            }
+                            var deathEvent = (DeathPayload)payload;
+
+                            // If not a death, add a kill.
+                            if (!AddStat(deathEvent.CharacterId, deathEvent.AttackerWeaponId, stats => stats.AddDeath(ref deathEvent)))
+                                AddStat(deathEvent.OtherId, deathEvent.AttackerWeaponId, stats => stats.AddKill(ref deathEvent));
                         }
                         break;
                     case CensusEventType.VehicleDestroy:
                         var destroyEvent = (VehicleDestroyPayload)payload;
-                        bool zoneId3 = ZoneId == -1 || destroyEvent.ZoneId == ZoneId;
-                        if (zoneId3)
+                        if (validZone)
                         {
-                            if (TeamPlayers.ContainsKey(destroyEvent.CharacterId))
-                            {
-                                TeamStats.AddVehicleDeath(ref destroyEvent);
-                                TeamPlayers[destroyEvent.CharacterId].Stats.AddVehicleDeath(ref destroyEvent);
-                                if (TryGetOrAddWeaponStats(destroyEvent.AttackerWeaponId, out var wstats))
-                                    wstats.Stats.AddVehicleDeath(ref destroyEvent);
-                            }
-                            else if (TeamPlayers.ContainsKey(destroyEvent.OtherId))
-                            {
-                                TeamStats.AddVehicleKill(ref destroyEvent);
-                                TeamPlayers[destroyEvent.OtherId].Stats.AddVehicleKill(ref destroyEvent);
-                                if (TryGetOrAddWeaponStats(destroyEvent.AttackerWeaponId, out var wstats))
-                                    wstats.Stats.AddVehicleKill(ref destroyEvent);
-                            }
+                            // If not a death, add a kill.
+                            if (!AddStat(destroyEvent.CharacterId, destroyEvent.AttackerWeaponId, stats => stats.AddVehicleDeath(ref destroyEvent)))
+                                AddStat(destroyEvent.OtherId, destroyEvent.AttackerWeaponId, stats => stats.AddVehicleKill(ref destroyEvent));
                         }
                         break;
                     case CensusEventType.FacilityControl:
                         var facilityEvent = (FacilityControlEvent)payload;
-                        bool zoneId4 = ZoneId == -1 || facilityEvent.ZoneId == ZoneId;
-                        if (zoneId4 && facilityEvent.NewFaction == FactionId)
+                        if (validZone && facilityEvent.NewFaction == FactionId)
                             TeamStats.AddFacilityEvent(ref facilityEvent);
                         break;
                 }
             }
 
             IsProccessing = false;
-        }
-
-        private bool TryGetOrAddWeaponStats(int itemId, out WeaponStats weaponStats)
-        {
-            if (WeaponTable.TryGetWeapon(itemId, out var wData))
-            {
-                if (TeamWeapons.ContainsKey(itemId))
-                    weaponStats = TeamWeapons[itemId];
-                else
-                {
-                    wData.TeamId = FactionId;
-                    weaponStats = new WeaponStats()
-                    {
-                        Data = wData,
-                        Stats = new PlanetStats()
-                    };
-                    _teamWeaponStats[itemId] = weaponStats;
-                };
-                return true;
-            }
-
-            weaponStats = null;
-            return false;
         }
 
         protected abstract ConcurrentDictionary<string, PlayerStats> GetTeamDict();

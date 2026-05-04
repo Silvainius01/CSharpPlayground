@@ -13,10 +13,6 @@ namespace PlanetSide.Websocket
 {
     public class CommSmashReporter : PlanetSideReporter
     {
-        Action saveAction;
-        Dictionary<string, PlanetStats> statsDict;
-        CancellationTokenSource ctLeaderboardLoop;
-
         public CommSmashReporter(string port, string world, int zone=-1) : base(port, world, zone)
         {
 
@@ -26,46 +22,18 @@ namespace PlanetSide.Websocket
         {
             return new List<LeaderboardRequest>()
             {
-                new LeaderboardRequest()
-                {
-                    Name = "leaderboard-kills-infantry",
-                    LeaderboardType = LeaderboardType.Player,
-                    BoardSize = 10,
-                    GetStat = stats => stats.Kills
-                },
-                new LeaderboardRequest()
-                {
-                    Name = "leaderboard-kills-vehicle",
-                    LeaderboardType = LeaderboardType.Player,
-                    BoardSize = 10,
-                    GetStat = stats => stats.VehicleKills
-                },
-                new LeaderboardRequest()
-                {
-                    Name = "leaderboard-kills-air",
-                    LeaderboardType = LeaderboardType.Player,
-                    BoardSize = 10,
-                    GetStat = stats => stats.AirKills
-                },
+                LeaderboardRequest.Kills("leaderboard-kills-infantry", 10),
+                LeaderboardRequest.VehicleKills("leaderboard-kills-vehicle", 10),
+                LeaderboardRequest.AirKills("leaderboard-kills-air", 10),
+                LeaderboardRequest.Revives("leaderboard-revives", 10),
+                LeaderboardRequest.TeamKills("leaderboard-team-kills", 10),
+                LeaderboardRequest.WeaponKills("leaderboard-kills-weapon", 10),
                 new LeaderboardRequest()
                 {
                     Name = "leaderboard-kills-max",
                     LeaderboardType = LeaderboardType.Player,
                     BoardSize = 10,
                     GetStat = stats => stats.GetExp(ExperienceTable.KillMAX).NumEvents,
-                },
-                new LeaderboardRequest()
-                {
-                    Name = "leaderboard-revives",
-                    LeaderboardType = LeaderboardType.Player,
-                    BoardSize = 10,
-                    GetStat = stats =>
-                    {
-                        int count = 0;
-                        foreach(var id in ExperienceTable.ReviveIds)
-                            count += stats.GetExp(id).NumEvents;
-                        return count;
-                    }
                 },
                 new LeaderboardRequest()
                 {
@@ -105,20 +73,6 @@ namespace PlanetSide.Websocket
                             count += stats.GetExp(id).CumulativeScore;
                         return count;
                     }
-                },
-                new LeaderboardRequest()
-                {
-                    Name = "leaderboard-weapons",
-                    LeaderboardType = LeaderboardType.Weapon,
-                    BoardSize = 10,
-                    GetStat = stats => stats.Kills
-                },
-                new LeaderboardRequest()
-                {
-                    Name = "leaderboard-team-kills",
-                    LeaderboardType = LeaderboardType.Player,
-                    BoardSize = 10,
-                    GetStat = stats => stats.TeamKills
                 }
             };
         }
@@ -143,18 +97,6 @@ namespace PlanetSide.Websocket
                 TeamOneStats = activeTeams[0].TeamStats,
                 TeamTwoStats = activeTeams[1].TeamStats,
             };
-
-            // Start a task to save teams.
-            if (saveAction is null)
-            {
-                saveAction = () =>
-                {
-                    foreach (var team in activeTeams)
-                        team.SaveStats();
-                    saveAction = null;
-                };
-                Task.Run(saveAction);
-            }
 
             return new ServerReport()
             {

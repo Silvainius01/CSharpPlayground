@@ -124,7 +124,7 @@ namespace PlanetSide
                         return;
                     }
 
-                    reporter = new HammaBowlReporter(args[3], args[4], args[1], world, zone)
+                    reporter = new HammaBowlReporter(args[3], args[4], "56854", world, zone)
                     {
                         DebugEventNames = true
                     };
@@ -133,7 +133,10 @@ namespace PlanetSide
                     return;
             }
 
-            reporter.StartServer();
+            reporter.Initialize();
+
+            while(!reporter.IsClosed)
+                reporter.serverCommands.NextCommand(false);
         }
 
         static void ReadTeamFile(string file)

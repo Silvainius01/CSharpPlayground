@@ -81,5 +81,29 @@ namespace PlanetSide
                 Logger.LogWarning($"Tried to get an unknown weapon item ID: {itemId}");
             return false;
         }
+
+        public static bool TryGetOrAddWeaponStats(this IDictionary<int, WeaponStats> _weaponStats, int itemId, out WeaponStats weaponStats)
+        {
+            if (TryGetWeapon(itemId, out var wData))
+            {
+                if (_weaponStats.ContainsKey(itemId))
+                    weaponStats = _weaponStats[itemId];
+                else
+                {
+                    //wData.TeamId = wData.FactionId;
+                    weaponStats = new WeaponStats()
+                    {
+                        Data = wData,
+                        Stats = new PlanetStats()
+                    };
+                    _weaponStats[itemId] = weaponStats;
+                }
+                ;
+                return true;
+            }
+
+            weaponStats = null;
+            return false;
+        }
     }
 }

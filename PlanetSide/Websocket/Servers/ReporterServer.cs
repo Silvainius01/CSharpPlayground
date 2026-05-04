@@ -10,56 +10,82 @@ using Newtonsoft.Json;
 using Websocket.Client.Logging;
 using CommandEngine;
 using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace PlanetSide.Websocket
 {
     public enum ServerType { Publisher }
     public abstract class ReportServer
     {
-        public bool IsReporting { get; set; }
+        public bool IsInitialized { get; private set; }
+        public bool IsReporting { get; private set; }
+        public bool IsClosed { get; private set; }
+
         public bool DebugEventNames { get; set; }
         public bool DebugEventDetails { get; set; }
 
+        public CommandModule serverCommands { get; protected set; }
+
+        protected static ILogger Logger = Program.LoggerFactory.CreateLogger(typeof(ReportServer));
+        
         private string port = "56854";
         private ServerType serverType;
-        protected static ILogger Logger = Program.LoggerFactory.CreateLogger(typeof(ReportServer));
-
-        protected CommandModule serverCommands = new CommandModule("Enter Server Command");
-        protected CancellationTokenSource ctServer = new CancellationTokenSource();
+        private Task serverTask;
+        private CancellationTokenSource ctServer = new CancellationTokenSource();
 
         public ReportServer(string port, ServerType type)
         {
             this.port = port;
             serverType = type;
+            IsClosed = false;
+            IsReporting = false;
+            IsInitialized = false;
 
-            serverCommands.Add(new ConsoleCommand("stop", CloseServer));
+            serverCommands = new CommandModule("Enter Server Command");
+            serverCommands.Add(new ConsoleCommand("start", StartServerCommand));
+            serverCommands.Add(new ConsoleCommand("stop", StopServerCommand));
+            serverCommands.Add(new ConsoleCommand("pause", PauseServerCommand));
+            serverCommands.Add(new ConsoleCommand("debug", DebugServerCommand));
         }
 
-        protected async Task CommandHandlerTask(CancellationToken ct)
+        public void Initialize()
         {
-            PeriodicTimer t = new PeriodicTimer(TimeSpan.FromMilliseconds(1));
-
-            while (!ct.IsCancellationRequested)
-            {
-                serverCommands.NextCommand(false);
-                await t.WaitForNextTickAsync(ct);
-            }
+            OnInitialize();
+            IsInitialized = true;
         }
-
         public void StartServer()
         {
-            IsReporting = true;
             OnServerStart();
+            IsReporting = true;
+            serverTask = Task.Run(() => ServerLoop(ctServer.Token), ctServer.Token);
+        }
+        public void PauseServer()
+        {
+            OnServerPause();
+            IsReporting = false;
+        }
+        public void CloseServer()
+        {
+            ctServer.Cancel();
+            serverTask.Wait();
+            IsReporting = false;
+            OnServerStop();
+            IsClosed = true;
+        }
+
+        private async Task ServerLoop(CancellationToken ct)
+        {
+            PeriodicTimer reportTimer = new PeriodicTimer(TimeSpan.FromSeconds(10));
 
             using (var publisher = new PublisherSocket())
             {
                 publisher.Bind($"tcp://*:{port}");
 
-                while (IsReporting)
+                while (!ct.IsCancellationRequested)
                 {
                     foreach (var report in GenerateReports())
                     {
-                        if (report.DontPublish)
+                        if (!IsReporting || report.DontPublish)
                             continue;
 
                         publisher
@@ -72,19 +98,74 @@ namespace PlanetSide.Websocket
                             Console.WriteLine($"Sent report '{report.Topic}'");
                     }
 
-                    Thread.Sleep(1000);
+                    await reportTimer.WaitForNextTickAsync(ct);
                 }
             }
         }
-        public void CloseServer()
-        {
-            ctServer.Cancel();
-        }
 
-        protected abstract bool OnServerStart();
+        protected abstract void OnInitialize();
+        protected abstract void OnServerStop();
+        protected abstract void OnServerStart();
+        protected abstract void OnServerPause();
         protected abstract IEnumerable<ServerReport> GenerateReports();
 
-        private void CloseServer(List<string> args)
-            => CloseServer();
+        private void StartServerCommand(List<string> args)
+        {
+            bool pauseOnStart = false;
+
+            foreach (var arg in args)
+            {
+                switch (arg)
+                {
+                    case "-p":
+                    case "-pause":
+                        pauseOnStart = true;
+                        break;
+                }
+            }
+
+            StartServer();
+            if (pauseOnStart)
+                PauseServer(true);
+        }
+        private void StopServerCommand(List<string> args)
+        {
+            CloseServer();
+        }
+        private void PauseServerCommand(List<string> args)
+        {
+            PauseServer();
+        }
+        private void DebugServerCommand(List<string> args)
+        {
+            for (int i = 0; i < args.Count; i++)
+            {
+                string? arg = args[i];
+
+                switch (arg)
+                {
+                    case "-n":
+                    case "-en":
+                    case "-eventNames":
+                        if (i < args.Count - 1 && CommandManager.TryParseBoolean(args[i + 1], out bool bv1))
+                        {
+                            ++i; // Skip the next argument since it's the value for this flag
+                            DebugEventNames = bv1;
+                        }
+                        Logger.LogInformation($"DebugEventNames: {DebugEventNames}");
+                        break;
+                    case "-d":
+                    case "-ed":
+                    case "-eventDetails":
+                        if (i < args.Count - 1 && CommandManager.TryParseBoolean(args[i + 1], out bool bv2))
+                        {
+                            ++i; // Skip the next argument since it's the value for this flag
+                            DebugEventDetails = bv2;
+                        }
+                        Logger.LogInformation($"Set DebugEventDetails: {DebugEventDetails}");
+                        break;
+                }
+            }
+        }
     }
 }

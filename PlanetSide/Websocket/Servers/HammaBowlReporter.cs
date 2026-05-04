@@ -1,18 +1,12 @@
 ﻿using CommandEngine;
 using CsvHelper;
 using CsvHelper.Configuration;
-using NetMQ;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Bson;
-using PlanetSide;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace PlanetSide.Websocket
 {
@@ -41,11 +35,6 @@ namespace PlanetSide.Websocket
             TeamTwoName = team2;
         }
 
-        protected override List<LeaderboardRequest> GenerateLeaderboardRequests()
-        {
-            return new List<LeaderboardRequest>();
-        }
-
         protected override List<PlanetSideTeam> GenerateTeams()
         {
             List<PlanetSideTeam> teams = new List<PlanetSideTeam>(2);
@@ -69,7 +58,10 @@ namespace PlanetSide.Websocket
 
             return teams;
         }
-
+        protected override List<LeaderboardRequest> GenerateLeaderboardRequests()
+        {
+            return new List<LeaderboardRequest>();
+        }
         protected override IEnumerable<ServerReport> GenerateReports()
         {
             return base.GenerateReports().Append(GenerateBowlReport());
