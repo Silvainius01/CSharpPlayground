@@ -119,6 +119,7 @@ namespace PlanetSide.Websocket
         private async Task ServerLoop(CancellationToken ct)
         {
             PeriodicTimer reportTimer = new PeriodicTimer(TimeSpan.FromSeconds(10));
+            PeriodicTimer pausedTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(100));
 
             using (var publisher = new PublisherSocket())
             {
@@ -126,9 +127,16 @@ namespace PlanetSide.Websocket
 
                 while (!ct.IsCancellationRequested)
                 {
+                    // Dont generate reports if we arent sending them.
+                    if(!IsReporting)
+                    {
+                        await pausedTimer.WaitForNextTickAsync(ct);
+                        continue;
+                    }
+
                     foreach (var report in GenerateReports())
                     {
-                        if (!IsReporting || report.DontPublish)
+                        if (report.DontPublish)
                             continue;
 
                         publisher

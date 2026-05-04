@@ -122,6 +122,8 @@ namespace PlanetSide.Websocket
         {
             int numPlayers = activeTeams[0].TeamPlayers.Count + activeTeams[1].TeamPlayers.Count;
 
+            _reportList.Clear();
+
             if (numPlayers >= 10)
             {
                 Console.WriteLine($"Leaderboard Queue: {_leaderboardReports.Count}");
