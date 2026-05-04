@@ -34,15 +34,6 @@ namespace PlanetSide.Websocket
         }
         protected override IEnumerable<ServerReport> GenerateReports()
         {
-            //if (!roundTimer.hasFired)
-            //{
-            //    if (roundTimer.Update((DateTime.Now - lastTime).TotalSeconds))
-            //    {
-            //        foreach (var team in activeTeams)
-            //            team.PauseStream();
-            //    }
-            //}
-
             return base.GenerateReports().Append(GenerateKothReport());
         }
 
