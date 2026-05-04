@@ -1,8 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,7 +12,7 @@ using System.Threading.Tasks;
 namespace PlanetSide
 {
     public enum VehicleType { Unknown = 0, Air = 1, Hover = 2, Ground = 5, Turret = 7, DropPod = 8 }
-    
+
 
 
     public static class VehicleTable
@@ -22,6 +24,7 @@ namespace PlanetSide
 
 
         public static async Task Populate()
+
         {
             var handler = Tracker.Handler;
 
@@ -65,6 +68,17 @@ namespace PlanetSide
                 if (!_vehicleData.TryAdd(vData.Id, vData))
                     Logger.LogError($"Failed to add vehicle to table: {vData}");
             }
+
+            if (!Directory.Exists("./CensusData"))
+                Directory.CreateDirectory("./CensusData");
+            using (StreamWriter writer = new StreamWriter("./CensusData/Vehicles.json"))
+            {
+                var sorted = _vehicleData.Values.OrderBy(v => v.Id);    
+                writer.Write(JsonConvert.SerializeObject(sorted));
+                writer.Close();
+            }
+
+            Logger.LogInformation("Vehicle Table Populated");
         }
     }
 }

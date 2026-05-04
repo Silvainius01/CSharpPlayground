@@ -171,7 +171,7 @@ namespace PlanetSide.Websocket
 
             if (_leaderboardReports.Count > 0)
             {
-                Console.WriteLine($"Leaderboard Queue: {_leaderboardReports.Count}");
+                Logger.LogDebug($"Leaderboard Queue: {_leaderboardReports.Count}");
                 while (_leaderboardReports.Count > 0)
                 {
                     if (_leaderboardReports.TryDequeue(out var report))
@@ -202,18 +202,16 @@ namespace PlanetSide.Websocket
                     {
                         EndRound();
                     }
-                    else if (currentMinute * 60 - roundTimer.timeLeft >= 60)
-                    {
-                        currentMinute = (int)Math.Ceiling(roundTimer.timeLeft / 60);
-                        Console.WriteLine($"Round Time Left: {currentMinute} minutes");
-                    }
-                    else if (currentMinute == 1)
+                    else if (currentMinute <= 2)
                     {
                         switch (warnState)
                         {
                             case 0:
-                                ++warnState;
-                                Console.WriteLine("60 seconds left!");
+                                if (roundTimer.timeLeft <= 60)
+                                {
+                                    ++warnState;
+                                    Console.WriteLine("60 seconds left!");
+                                }
                                 break;
                             case 1:
                                 if (roundTimer.timeLeft <= 30)
@@ -230,6 +228,11 @@ namespace PlanetSide.Websocket
                                 }
                                 break;
                         }
+                    }
+                    else if (currentMinute * 60 - roundTimer.timeLeft >= 60)
+                    {
+                        currentMinute = (int)Math.Ceiling(roundTimer.timeLeft / 60);
+                        Console.WriteLine($"Round Time Left: {currentMinute} minutes");
                     }
                 }
                 await taskTimer.WaitForNextTickAsync(ct);

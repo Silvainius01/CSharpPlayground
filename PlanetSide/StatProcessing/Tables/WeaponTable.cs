@@ -1,13 +1,15 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Text;
-using Microsoft.Extensions.Logging;
-using System.Collections.Concurrent;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace PlanetSide
 {
@@ -70,6 +72,14 @@ namespace PlanetSide
                     Logger.LogError($"Failed to add weapon to table: {weaponData}");
             }
 
+            if (!Directory.Exists("./CensusData"))
+                Directory.CreateDirectory("./CensusData");
+            using (StreamWriter writer = new StreamWriter("./CensusData/Weapons.json"))
+            {
+                var sorted = _weaponMap.Values.OrderBy(w => w.Id);
+                writer.Write(JsonConvert.SerializeObject(sorted));
+                writer.Close();
+            }
             Logger.LogInformation("Weapon Table Populated");
         }
         public static bool TryGetWeapon(int itemId, out WeaponData weaponData)

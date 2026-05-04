@@ -107,12 +107,13 @@ namespace PlanetSide.Websocket
             if (IsClosed)
                 return; 
 
-            ctServer.Cancel();
-            serverTask.Wait();
-            IsReporting = false;
-            OnServerStop();
+            // Set state flags
             IsActive = false;
             IsClosed = true;
+            IsReporting = false;
+            serverTask.Wait();
+            OnServerStop();
+
             Logger.LogInformation("Server closed.");
         }
 
@@ -125,7 +126,7 @@ namespace PlanetSide.Websocket
             {
                 publisher.Bind($"tcp://*:{port}");
 
-                while (!ct.IsCancellationRequested)
+                while (!IsClosed)
                 {
                     // Dont generate reports if we arent sending them.
                     if(!IsReporting)
