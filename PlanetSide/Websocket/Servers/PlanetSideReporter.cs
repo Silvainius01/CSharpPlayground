@@ -23,7 +23,7 @@ namespace PlanetSide.Websocket
         protected bool RoundStarted { get; set; }
 
         protected DateTime lastTime = DateTime.Now;
-        protected CommandEngine.Timer roundTimer = new CommandEngine.Timer(TimeSpan.FromMinutes(10).TotalSeconds);
+        protected CommandEngine.Timer roundTimer;
         protected CancellationTokenSource ctUpdate = new CancellationTokenSource();
 
         protected string world;
@@ -39,6 +39,7 @@ namespace PlanetSide.Websocket
         {
             this.world = world;
             this.ZoneId = zone;
+            roundTimer = new CommandEngine.Timer(TimeSpan.FromSeconds(RoundLength).TotalSeconds);
 
             serverCommands.Add(new ConsoleCommand("startRound", StartRoundCommand));
             serverCommands.Add(new ConsoleCommand("endRound", EndRoundCommand));
@@ -77,14 +78,23 @@ namespace PlanetSide.Websocket
 
         public void StartRound()
         {
+            if (RoundStarted)
+            {
+                Logger.LogWarning("Round already started");
+                return;
+            }
+
             RoundPaused = false;
+            RoundStarted = true;
             roundTimer.Activate(RoundLength);
 
             foreach (var team in activeTeams)
-                team.UnPauseStream();
+                team.ResumeStream();
 
             ctUpdate = new CancellationTokenSource();
             Task.Run(() => RoundUpdater(ctUpdate.Token));
+
+            Console.WriteLine($"Round Started with {RoundLength / 60} minutes");
         }
         public void PauseRound()
         {
@@ -94,15 +104,43 @@ namespace PlanetSide.Websocket
             {
                 team.PauseStream();
             }
+
+            double timeLeft = roundTimer.timeLeft;
+            int minutes = (int)(roundTimer.timeLeft / 60);
+            Console.WriteLine($"Round Paused. Time left: {minutes}:{(int)(timeLeft - minutes * 60)}");
+        }
+        public void ResumeRound()
+        {
+            if (!roundTimer.Resume())
+            {
+                Logger.LogError("Round timer failed to resume.");
+                return;
+            }
+
+            RoundPaused = false;
+            foreach (var team in activeTeams)
+                team.ResumeStream();
+
+            double timeLeft = roundTimer.timeLeft;
+            int minutes = (int)(roundTimer.timeLeft / 60);
+            Console.WriteLine($"Round Resumed. Time left: {minutes}:{(int)(timeLeft - minutes * 60)}");
         }
         public void EndRound()
         {
-            ctUpdate.Cancel();
-            roundTimer.Deactivate();
-            foreach (var team in activeTeams)
+            if (!RoundStarted)
             {
-                team.PauseStream();
+                Logger.LogWarning("Round already over.");
+                return;
             }
+
+            RoundPaused = false;
+            RoundStarted = false;
+            ctUpdate.Cancel();
+            ctLeaderboardLoop.Cancel();
+            roundTimer.Deactivate(true);
+            foreach (var team in activeTeams)
+                team.PauseStream();
+            Console.WriteLine("Round Over!");
         }
 
         public void SaveStats(bool printFull)
@@ -115,6 +153,11 @@ namespace PlanetSide.Websocket
 
         public void SetRoundLength(int minutes)
         {
+            if (RoundStarted)
+            {
+                Logger.LogWarning("Cannot edit round length after it has started.");
+                return;
+            }
             RoundLength = minutes * 60;
         }
 
@@ -143,8 +186,10 @@ namespace PlanetSide.Websocket
 
         protected async Task RoundUpdater(CancellationToken ct)
         {
-            lastTime = DateTime.Now;
+            int warnState = 0;
+            int currentMinute = (int)(RoundLength / 60.0);
             PeriodicTimer taskTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(100));
+            lastTime = DateTime.Now;
 
             while (!ct.IsCancellationRequested)
             {
@@ -156,6 +201,35 @@ namespace PlanetSide.Websocket
                     if (roundTimer.Update(dt))
                     {
                         EndRound();
+                    }
+                    else if (currentMinute * 60 - roundTimer.timeLeft >= 60)
+                    {
+                        currentMinute = (int)Math.Ceiling(roundTimer.timeLeft / 60);
+                        Console.WriteLine($"Round Time Left: {currentMinute} minutes");
+                    }
+                    else if (currentMinute == 1)
+                    {
+                        switch (warnState)
+                        {
+                            case 0:
+                                ++warnState;
+                                Console.WriteLine("60 seconds left!");
+                                break;
+                            case 1:
+                                if (roundTimer.timeLeft <= 30)
+                                {
+                                    ++warnState;
+                                    Console.WriteLine("30 seconds left!");
+                                }
+                                break;
+                            case 2:
+                                if (roundTimer.timeLeft <= 10)
+                                {
+                                    ++warnState;
+                                    Console.WriteLine("10 seconds left!");
+                                }
+                                break;
+                        }
                     }
                 }
                 await taskTimer.WaitForNextTickAsync(ct);

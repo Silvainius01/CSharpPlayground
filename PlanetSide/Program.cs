@@ -20,7 +20,7 @@ namespace PlanetSide
     {
         public static readonly ILoggerFactory LoggerFactory =
             Microsoft.Extensions.Logging.LoggerFactory.Create(builder => 
-                builder.SetMinimumLevel(LogLevel.Debug).AddConsole());
+                builder.SetMinimumLevel(LogLevel.Warning).AddConsole());
 
         private static readonly ILogger<Program> Logger = LoggerFactory.CreateLogger<Program>();
 

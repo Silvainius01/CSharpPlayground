@@ -39,7 +39,7 @@ namespace PlanetSide
 
         [JsonIgnore] private ConcurrentQueue<ICensusEvent> events;
         [JsonIgnore] private CancellationTokenSource ctQueueProcess;
-        [JsonIgnore] protected ConcurrentDictionary<string, PlayerStats> _teamPlayerStats = new ConcurrentDictionary<string, PlayerStats>(64);
+        [JsonIgnore] protected ConcurrentDictionary<string, PlayerStats> _teamPlayerStats = new ConcurrentDictionary<string, PlayerStats>(8, 64);
         [JsonIgnore] protected ConcurrentDictionary<int, WeaponStats> _teamWeaponStats = new ConcurrentDictionary<int, WeaponStats>(8, 128);
 
         public PlanetSideTeam(int teamId, string teamName, int faction, string world)
@@ -100,7 +100,7 @@ namespace PlanetSide
             //    return;
             IsPaused = true;
         }
-        public void UnPauseStream()
+        public void ResumeStream()
         {
             //if (!IsStreaming)
             //    return;

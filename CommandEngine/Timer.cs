@@ -70,6 +70,15 @@ namespace CommandEngine
             return Activate();
         }
 
+        /// <summary> Resumes the timer if it hasnt fired. </summary>
+        public bool Resume()
+        {
+            if (hasFired)
+                return false;
+            isActive = true;
+            return true;
+        }
+
         /// <summary>  Stop the timer. </summary>
         /// <param name="forceToFire"> If true, the timer sets its state as if it fired normally. </param>
         public void Deactivate(bool forceToFire = false)
