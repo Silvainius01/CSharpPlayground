@@ -7,22 +7,20 @@ using Newtonsoft.Json.Linq;
 using PlanetSide.Websocket;
 using PlanetSide.WebsocketServer;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Nodes;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace PlanetSide
 {
     public class Program
     {
         public static readonly ILoggerFactory LoggerFactory =
-            Microsoft.Extensions.Logging.LoggerFactory.Create(builder => builder.AddConsole());
+            Microsoft.Extensions.Logging.LoggerFactory.Create(builder => 
+                builder.SetMinimumLevel(LogLevel.Debug).AddConsole());
 
         private static readonly ILogger<Program> Logger = LoggerFactory.CreateLogger<Program>();
 
@@ -106,16 +104,10 @@ namespace PlanetSide
             switch (args[0])
             {
                 case "cs":
-                    reporter = new CommSmashReporter(args[1], world, zone)
-                    {
-                        DebugEventNames = false
-                    };
+                    reporter = new CommSmashReporter("56854", world, zone);
                     break;
                 case "koth":
-                    reporter = new KothReporter(args[1], world, zone)
-                    {
-                        DebugEventNames = true
-                    };
+                    reporter = new KothReporter("56854", world, zone);
                     break;
                 case "hamma":
                     if (args.Count < 5)
@@ -124,10 +116,7 @@ namespace PlanetSide
                         return;
                     }
 
-                    reporter = new HammaBowlReporter(args[3], args[4], "56854", world, zone)
-                    {
-                        DebugEventNames = true
-                    };
+                    reporter = new HammaBowlReporter(args[3], args[4], "56854", world, zone);
                     break;
                 default:
                     return;
@@ -135,8 +124,12 @@ namespace PlanetSide
 
             reporter.Initialize();
 
-            while(!reporter.IsClosed)
+            while (reporter.IsActive)
+            {
+                Thread.Sleep(500);
                 reporter.serverCommands.NextCommand(false);
+            }
+            string bp = "string for a breakpoint :)";
         }
 
         static void ReadTeamFile(string file)

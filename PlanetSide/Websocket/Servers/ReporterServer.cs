@@ -17,11 +17,15 @@ namespace PlanetSide.Websocket
     public enum ServerType { Publisher }
     public abstract class ReportServer
     {
+        /// <summary> Is set to true after initialization. </summary>
         public bool IsInitialized { get; private set; }
+        /// <summary> True after initialization, false while server is closed. </summary>
+        public bool IsActive { get; private set; }
+        /// <summary> True while generating and sending reports. </summary>
         public bool IsReporting { get; private set; }
+        /// <summary> True while the server is closed. </summary>
         public bool IsClosed { get; private set; }
 
-        public bool DebugEventNames { get; set; }
         public bool DebugEventDetails { get; set; }
 
         public CommandModule serverCommands { get; protected set; }
@@ -54,6 +58,7 @@ namespace PlanetSide.Websocket
                 return;
 
             OnInitialize();
+            IsActive = true;
             IsInitialized = true;
             Logger.LogInformation("Server initialized.");
         }
@@ -106,6 +111,7 @@ namespace PlanetSide.Websocket
             serverTask.Wait();
             IsReporting = false;
             OnServerStop();
+            IsActive = false;
             IsClosed = true;
             Logger.LogInformation("Server closed.");
         }
@@ -129,10 +135,10 @@ namespace PlanetSide.Websocket
                             .SendMoreFrame(report.Topic) // Topic
                             .SendFrame(report.Data); // Message
 
+                        Logger.LogInformation($"Sent report '{report.Topic}'");
+
                         if (DebugEventDetails)
-                            Logger.LogDebug($"Sent report '{report.Topic}': {report.Data}");
-                        else if (DebugEventNames)
-                            Logger.LogDebug($"Sent report '{report.Topic}'");
+                            Logger.LogDebug($"Report Data: {report.Data}");
                     }
 
                     await reportTimer.WaitForNextTickAsync(ct);
@@ -181,18 +187,7 @@ namespace PlanetSide.Websocket
 
                 switch (arg)
                 {
-                    case "-n":
-                    case "-en":
-                    case "-eventNames":
-                        if (i < args.Count - 1 && CommandManager.TryParseBoolean(args[i + 1], out bool bv1))
-                        {
-                            ++i; // Skip the next argument since it's the value for this flag
-                            DebugEventNames = bv1;
-                        }
-                        Logger.LogInformation($"DebugEventNames: {DebugEventNames}");
-                        break;
                     case "-d":
-                    case "-ed":
                     case "-eventDetails":
                         if (i < args.Count - 1 && CommandManager.TryParseBoolean(args[i + 1], out bool bv2))
                         {
