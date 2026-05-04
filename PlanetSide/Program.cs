@@ -84,7 +84,7 @@ namespace PlanetSide
                 Thread.Sleep(500);
                 reporter.serverCommands.NextCommand(false);
                 if(reporter.RoundStarted)
-                    reporter.
+                    reporter.roundCommands.NextCommand(false);
             }
             string bp = "string for a breakpoint :)";
         }

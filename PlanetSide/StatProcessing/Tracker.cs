@@ -53,37 +53,46 @@ namespace PlanetSide
             // Skip if malformed
             if (!response.Message.RootElement.TryGetProperty("payload", out payload)
             || !payload.TryGetStringElement("event_name", out string eventTypeStr)
+            || !payload.TryGetCensusInteger("timestamp", out int censusTimestamp)
             || (eventType = GetEventType(eventTypeStr)) == CensusEventType.Unknown)
                 return null;
 
+            // Save any valid events to disk.
             payloadSaveQueue.Enqueue(payload);
 
             switch (eventType)
             {
                 case CensusEventType.GainExperience:
                     {
+                        var expEvent = new ExperiencePayload()
+                        {
+                            EventType = eventType,
+                            CensusTimestamp = censusTimestamp
+                        };
+
                         // Skip if malformed
-                        if (!payload.TryGetStringElement("other_id", out string otherId)
-                        || !payload.TryGetCensusInteger("experience_id", out int experienceId)
-                        || !payload.TryGetCensusFloat("amount", out float scoreAmount)
-                        || !payload.TryGetCensusInteger("zone_id", out int zoneId)
-                        || !payload.TryGetStringElement("character_id", out characterId))
+                        if (!TryProcessZoneEvent(payload, eventType, ref expEvent)
+                         || !TryProcessCharacterEvent(payload, eventType, ref expEvent)
+                         || !payload.TryGetCensusInteger("experience_id", out int experienceId)
+                         || !payload.TryGetCensusFloat("amount", out float scoreAmount))
                             break;
 
-                        return new ExperiencePayload()
-                        {
-                            CharacterId = characterId,
-                            EventType = eventType,
-                            OtherId = otherId,
-                            ExperienceId = experienceId,
-                            ScoreAmount = scoreAmount,
-                            ZoneId = zoneId
-                        };
+                        expEvent.ExperienceId = experienceId;
+                        expEvent.ScoreAmount = scoreAmount;
+                        return expEvent;
                     }
                 case CensusEventType.Death:
                     {
-                        if (!payload.TryGetCensusBool("is_headshot", out bool isHeadshot)
-                        || !TryProcessDeathEvent(payload, eventType, out DeathPayload deathEvent))
+                        var deathEvent = new DeathPayload()
+                        {
+                            EventType = eventType,
+                            CensusTimestamp = censusTimestamp
+                        };
+
+                        if (!TryProcessZoneEvent(payload, eventType, ref deathEvent)
+                         || !TryProcessCharacterEvent(payload, eventType, ref deathEvent)
+                         || !TryProcessDeathEvent(payload, eventType, ref deathEvent)
+                         || payload.TryGetCensusBool("is_headshot", out bool isHeadshot))
                             break;
 
                         deathEvent.IsHeadshot = isHeadshot;
@@ -91,35 +100,49 @@ namespace PlanetSide
                     }
                 case CensusEventType.VehicleDestroy:
                     {
-                        // Skip if malformed
-                        if (!payload.TryGetCensusInteger("faction_id", out int factionId)
-                        || !payload.TryGetCensusInteger("vehicle_id", out int vehicleId)
-                        || !TryProcessDeathEvent(payload, eventType, out VehicleDestroyPayload vKillEvent))
+                        var vDestroyEvent = new VehicleDestroyPayload()
+                        {
+                            EventType = eventType,
+                            CensusTimestamp = censusTimestamp
+                        };
+
+                        if (!TryProcessZoneEvent(payload, eventType, ref vDestroyEvent)
+                         || !TryProcessCharacterEvent(payload, eventType, ref vDestroyEvent)
+                         || !TryProcessDeathEvent(payload, eventType, ref vDestroyEvent)
+                         || !payload.TryGetCensusInteger("faction_id", out int factionId)
+                         || !payload.TryGetCensusInteger("vehicle_id", out int vehicleId))
                             break;
+
 
                         if (!VehicleTable.VehicleData.ContainsKey(vehicleId))
                         {
                             Logger.LogWarning($"Dropped VehicleDestroy event due to missing vehicle ID: {vehicleId}");
                             break;
                         }
-                        else if (!VehicleTable.VehicleData.ContainsKey(vKillEvent.AttackerVehicleId))
+                        else if (!VehicleTable.VehicleData.ContainsKey(vDestroyEvent.AttackerVehicleId))
                         {
-                            Logger.LogWarning($"Dropped VehicleDestroy event due to missing attacker vehicle ID: {vKillEvent.AttackerVehicleId}");
+                            Logger.LogWarning($"Dropped VehicleDestroy event due to missing attacker vehicle ID: {vDestroyEvent.AttackerVehicleId}");
                             break;
                         }
                         else if (vehicleId != 0 && VehicleTable.VehicleData[vehicleId].Type == VehicleType.Unknown)
                         {
-                            Logger.LogWarning($"Dropped VehicleDestroy event due to vehicle ID of unkown type: {vehicleId}");
+                            Logger.LogWarning($"Dropped VehicleDestroy event due to vehicle ID of unknown type: {vehicleId}");
                             break;
                         }
 
-                        vKillEvent.FactionId = factionId;
-                        vKillEvent.VehicleId = vehicleId;
-                        return vKillEvent;
+                        vDestroyEvent.FactionId = factionId;
+                        vDestroyEvent.VehicleId = vehicleId;
+                        return vDestroyEvent;
                     }
                 case CensusEventType.FacilityControl:
                     {
-                        if (!TryProcessZoneEvent(payload, CensusEventType.FacilityControl, out FacilityControlEvent facilityEvent)
+                        var facilityEvent = new FacilityControlEvent()
+                        {
+                            EventType = eventType,
+                            CensusTimestamp = censusTimestamp
+                        };
+
+                        if (!TryProcessZoneEvent(payload, CensusEventType.FacilityControl, ref facilityEvent)
                         || !payload.TryGetCensusInteger("facility_id", out int facilityId)
                         || !payload.TryGetCensusInteger("duration_held", out int durationHeld)
                         || !payload.TryGetCensusInteger("new_faction_id", out int newFaction)
@@ -130,20 +153,17 @@ namespace PlanetSide
                             break;
                         }
 
-                        DateTime timeStamp = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(unixTime);
-
                         facilityEvent.FacilityId = facilityId;
                         facilityEvent.DurationHeld = durationHeld;
                         facilityEvent.NewFaction = newFaction;
                         facilityEvent.OldFaction = oldFaction;
                         facilityEvent.OutfitId = outfitId;
-                        facilityEvent.Timestamp = timeStamp;
                         return facilityEvent;
                     }
                     break;
             }
 
-            
+
 
             return null;
         }
@@ -157,31 +177,44 @@ namespace PlanetSide
             _ => CensusEventType.Unknown
         };
 
-        static bool TryProcessZoneEvent<T>(JsonElement payload, CensusEventType type, out T zoneEvent) where T : ICensusZoneEvent, new()
+        static bool TryProcessZoneEvent<T>(JsonElement payload, CensusEventType type, ref T zoneEvent) where T : ICensusZoneEvent, new()
         {
             if (!payload.TryGetCensusInteger("zone_id", out int zoneId)
             || !payload.TryGetCensusInteger("world_id", out int worldId))
             {
                 Logger.LogWarning($"Zone event failed validation!\n\tExpected type: {type.ToString()}\n\tPayload: {payload.ToString()}");
-                zoneEvent = default(T);
                 return false;
             }
 
-            zoneEvent = new T()
-            {
-                EventType = type,
-                ZoneId = zoneId,
-                WorldId = worldId
-            };
+            zoneEvent.ZoneId = zoneId;
+            zoneEvent.WorldId = worldId;
             return true;
         }
 
-        static bool TryProcessDeathEvent<T>(JsonElement payload, CensusEventType type, out T deathEvent) where T : ICensusDeathEvent, new()
+        static bool TryProcessCharacterEvent<T>(JsonElement payload, CensusEventType type, ref T charEvent) where T : ICensusCharacterEvent, new()
+        {
+            string otherId = string.Empty;
+
+            if (!payload.TryGetStringElement("character_id", out string characterId))
+            {
+                // Some character events get OtherId from different properties.
+                if (type != CensusEventType.VehicleDestroy)
+                    if (!payload.TryGetStringElement("other_id", out otherId))
+                    {
+                        Logger.LogWarning($"Character event failed validation!\n\tExpected type: {type.ToString()}\n\tPayload: {payload.ToString()}");
+                        return false;
+                    }
+            }
+
+            charEvent.CharacterId = characterId;
+            charEvent.OtherId = otherId;
+            return true;
+        }
+
+        static bool TryProcessDeathEvent<T>(JsonElement payload, CensusEventType type, ref T deathEvent) where T : ICensusDeathEvent, new()
         {
             // Might as well perform validation.
-            if (!TryProcessZoneEvent<T>(payload, type, out deathEvent)
-            || !payload.TryGetStringElement("character_id", out string characterId)
-            || !payload.TryGetStringElement("attacker_character_id", out string attackerId)
+            if (!payload.TryGetStringElement("attacker_character_id", out string attackerId)
             || !payload.TryGetCensusInteger("attacker_weapon_id", out int attackerWeaponId)
             || !payload.TryGetCensusInteger("attacker_vehicle_id", out int attackerVehicleId)
             || !payload.TryGetCensusInteger("attacker_loadout_id", out int attackerLoadoutId)
@@ -189,17 +222,16 @@ namespace PlanetSide
             || !payload.TryGetCensusInteger("team_id", out int teamId))
             {
                 Logger.LogWarning($"Death event failed validation!\n\tExpected type: {type.ToString()}\n\tPayload: {payload.ToString()}");
-                deathEvent = default(T);
                 return false;
             }
 
+            // Set by previous validators
+            //deathEvent.EventType = type;
+            //deathEvent.CharacterId = characterId;
 
-            deathEvent.CharacterId = characterId;
-            deathEvent.EventType = type;
             deathEvent.OtherId = attackerId;
 
             deathEvent.TeamId = teamId;
-
             deathEvent.AttackerWeaponId = attackerWeaponId;
             deathEvent.AttackerVehicleId = attackerVehicleId;
             deathEvent.AttackerLoadoutId = attackerLoadoutId;

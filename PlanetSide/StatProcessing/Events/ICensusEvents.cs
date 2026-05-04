@@ -14,6 +14,7 @@ namespace PlanetSide
     public interface ICensusEvent
     {
         public CensusEventType EventType { get; set; }
+        public int CensusTimestamp { get; set; }
     }
 
     public interface ICensusZoneEvent : ICensusEvent
@@ -31,7 +32,6 @@ namespace PlanetSide
     public interface ICensusDeathEvent : ICensusCharacterEvent
     {
         public int TeamId { get; set; }
-
         public int AttackerWeaponId { get; set; }
         public int AttackerVehicleId { get; set; }
         public int AttackerLoadoutId { get; set; }
