@@ -12,12 +12,12 @@ namespace CommandEngine
         public static T Last<T>(this T[] array) => array[array.Length - 1];
         /// <returns>Returns the last object in <paramref name="list"/>. Throws an exception if <paramref name="list"/> is null or empty</returns>
         public static T Last<T>(this IList<T> list) => list[list.Count - 1];
-        
+
         /// <returns>Returns the last index for <paramref name="array"/></returns>
         public static int LastIndex<T>(this T[] array) => array.Length - 1;
         /// <returns>Returns the last index for <paramref name="list"/></returns>
         public static int LastIndex<T>(this IList<T> list) => list.Count - 1;
-        
+
         /// <summary>Sets the last index for <paramref name="array"/> to <paramref name="value"/></summary>
         public static void SetLast<T>(this T[] array, T value)
         {
@@ -47,7 +47,7 @@ namespace CommandEngine
         public static void AddRange<TKey, TValue>(this IDictionary<TKey, TValue> dict, IEnumerable<TKey> keys, IEnumerable<TValue> values)
         {
             int length = keys.Count();
-            
+
             if (length != values.Count())
                 throw new ArgumentException("There must be equal amounts of keys and values.");
 
@@ -55,6 +55,28 @@ namespace CommandEngine
             {
                 dict.Add(pair.First, pair.Second);
             }
+        }
+
+        public static bool Contains<T>(this T[] array, Func<T, bool> predicate)
+        {
+            for (int i = 0; i < array.Length; i++)
+                if (predicate.Invoke(array[i]))
+                    return true;
+            return false;
+        }
+        public static bool Contains<T>(this IList<T> list, Func<T, bool> predicate)
+        {
+            for (int i = 0; i < list.Count; i++)
+                if (predicate.Invoke(list[i]))
+                    return true;
+            return false;
+        }
+        public static bool Contains<T>(this IEnumerable<T> enumerable, Func<T, bool> predicate)
+        {
+            foreach (var item in enumerable)
+                if (predicate.Invoke(item))
+                    return true;
+            return false;
         }
 
         /// <summary>Create a string with a <paramref name="seperator"/> between the items./// </summary>
@@ -67,7 +89,7 @@ namespace CommandEngine
             StringBuilder builder = new StringBuilder((count * seperator.Length) + (first.Length * count));
 
             builder.Append(first);
-            foreach(var item in enumerable.Skip(1))
+            foreach (var item in enumerable.Skip(1))
             {
                 builder.Append($"{seperator}{item}");
             }

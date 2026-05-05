@@ -15,7 +15,7 @@ namespace PlanetSide
         public int FactionId { get; set; }
         public string Name { get; set; }
         public bool IsVehicleWeapon { get; set; }
-
+        
         public override string ToString()
             => $"[{Id}][{WeaponId}] {Name}";
     }

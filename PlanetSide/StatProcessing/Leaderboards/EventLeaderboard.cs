@@ -4,12 +4,15 @@ using System.Collections.Concurrent;
 namespace PlanetSide
 {
     public enum LeaderboardType { Player, Weapon }
+    public enum LeaderboardSort { Descending, Ascending }
+
     public struct LeaderboardRequest
     {
         public int BoardSize { get; set; }
         public string Name { get; set; }
         public LeaderboardType LeaderboardType { get; set; }
-        public Func<PlanetStats, float> GetStat { get; set; }
+        public LeaderboardSort LeaderboardSort { get; set; }
+        public Func<ITeamDataObject, PlanetStats, float> GetStat { get; set; }
 
         public static LeaderboardRequest Kills(string name, int boardSize)
         {
@@ -18,7 +21,7 @@ namespace PlanetSide
                 Name = name,
                 BoardSize = boardSize,
                 LeaderboardType = LeaderboardType.Player,
-                GetStat = stats => stats.Kills
+                GetStat = (data, stats) => stats.Kills
             };
         }
         public static LeaderboardRequest VehicleKills(string name, int boardSize)
@@ -28,7 +31,7 @@ namespace PlanetSide
                 Name = name,
                 BoardSize = boardSize,
                 LeaderboardType = LeaderboardType.Player,
-                GetStat = stats => stats.VehicleKills
+                GetStat = (data, stats) => stats.VehicleKills
             };
         }
         public static LeaderboardRequest AirKills(string name, int boardSize)
@@ -38,7 +41,7 @@ namespace PlanetSide
                 Name = name,
                 BoardSize = boardSize,
                 LeaderboardType = LeaderboardType.Player,
-                GetStat = stats => stats.AirKills
+                GetStat = (data, stats) => stats.AirKills
             };
         }
         public static LeaderboardRequest Revives(string name, int boardSize)
@@ -48,7 +51,7 @@ namespace PlanetSide
                 Name = name,
                 BoardSize = boardSize,
                 LeaderboardType = LeaderboardType.Player,
-                GetStat = stats =>
+                GetStat = (data, stats) =>
                 {
                     int count = 0;
                     foreach (var id in ExperienceTable.ReviveIds)
@@ -64,7 +67,7 @@ namespace PlanetSide
                 Name = name,
                 BoardSize = boardSize,
                 LeaderboardType = LeaderboardType.Player,
-                GetStat = stats => stats.TeamKills
+                GetStat = (data, stats) => stats.TeamKills
             };
         }
         public static LeaderboardRequest WeaponKills(string name, int boardSize)
@@ -74,7 +77,21 @@ namespace PlanetSide
                 Name = name,
                 BoardSize = boardSize,
                 LeaderboardType = LeaderboardType.Weapon,
-                GetStat = stats => stats.Kills
+                GetStat = (data, stats) => stats.Kills
+            };
+        }
+        public static LeaderboardRequest InfantryDamage(string name, int boardSize)
+        {
+            return new LeaderboardRequest()
+            {
+                Name = name,
+                BoardSize = boardSize,
+                LeaderboardType = LeaderboardType.Player,
+                GetStat = (data, stats) =>
+                {
+                    CharacterData cData = (CharacterData)data;
+                    return DamageTracker.GetCharacterDamage(cData.CensusId);
+                }
             };
         }
     }

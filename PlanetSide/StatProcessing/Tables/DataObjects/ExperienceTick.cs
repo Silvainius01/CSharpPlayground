@@ -7,6 +7,7 @@ namespace PlanetSide
         public int Id { get; set; }
         public string Name { get; set; }
         public float ScoreAmount { get; set; }
+        public bool IsSquad { get; set; }
 
         public override string ToString()
         {
@@ -19,8 +20,9 @@ namespace PlanetSide
     {
         public int Id { get; set; }
         public int NumEvents { get; set; }
-        public float CumulativeScore {  get; set; }
         public string Name { get; set; }
+        public float CumulativeScore {  get; set; }
+        public bool IsSquad { get;set; }
 
         public override string ToString()
         {

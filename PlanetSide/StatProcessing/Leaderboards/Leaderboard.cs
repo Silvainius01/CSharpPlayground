@@ -3,6 +3,7 @@ using PlanetSide.Websocket;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,8 +26,9 @@ namespace PlanetSide
             GetStatCollection = getStatCollection;
             calculatedBoard = new LeaderboardEntry[request.BoardSize];
             topStats = new List<TStats>(request.BoardSize * teams.Length);
-            statComparer = (a, b)
-                => -this.request.GetStat(a.Stats).CompareTo(this.request.GetStat(b.Stats));
+            statComparer = request.LeaderboardSort == LeaderboardSort.Ascending
+                ? (a, b) => this.request.GetStat(a.Data, a.Stats).CompareTo(this.request.GetStat(b.Data, b.Stats))
+                : (a, b) => a.Data.Id -this.request.GetStat(a.Data, a.Stats).CompareTo(this.request.GetStat(b.Data, b.Stats));
 
             statTuples = new List<(PlanetSideTeam team, List<TStats> sortedStats)>(teams.Length);
             foreach (var team in teams)
@@ -37,9 +39,10 @@ namespace PlanetSide
         {
             calculatedBoard = new LeaderboardEntry[request.BoardSize];
 
+            // Update and sort the stats of each team
             foreach (var tuple in statTuples)
             {
-                if (tuple.sortedStats.Count != tuple.team.TeamPlayers.Count)
+                if (tuple.sortedStats.Count != tuple.team.GetPlayerCount())
                 {
                     tuple.sortedStats.Clear();
                     tuple.sortedStats.AddRange(GetStatCollection(tuple.team));
@@ -48,31 +51,33 @@ namespace PlanetSide
                 tuple.sortedStats.Sort(statComparer);
             }
 
+            // Add the top X players of each team
+            // TOOD: If performance is a problem here, update to create the board in place.
             topStats.Clear();
             for (int i = 0; i < request.BoardSize; ++i)
             {
                 foreach (var tuple in statTuples)
-                    if(i < tuple.sortedStats.Count)
+                    if (i < tuple.sortedStats.Count)
                         topStats.Add(tuple.sortedStats[i]);
             }
             topStats.Sort(statComparer);
 
+            // Copy data of the top X entries into the final board.
             for (int i = 0; i < request.BoardSize && i < topStats.Count; ++i)
             {
-                float score = request.GetStat(topStats[i].Stats);
-                if (score > 0) // Only add players with a score to begin with.
-                    calculatedBoard[i] = new LeaderboardEntry()
-                    {
-                        Score = score,
-                        EntryName = topStats[i].Data.Name,
-                        TeamId = topStats[i].Data.TeamId
-                    };
+                float score = request.GetStat(topStats[i].Data, topStats[i].Stats);
+                calculatedBoard[i] = new LeaderboardEntry()
+                {
+                    Score = score,
+                    EntryName = topStats[i].Data.Name,
+                    TeamId = topStats[i].Data.TeamId
+                };
             }
 
             return calculatedBoard;
         }
 
-        public LeaderboardEntry[] Get() 
+        public LeaderboardEntry[] Get()
             => calculatedBoard;
     }
 

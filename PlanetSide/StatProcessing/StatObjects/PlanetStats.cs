@@ -72,29 +72,20 @@ namespace PlanetSide
 
             _allExperience[id] = new CumulativeExperience()
             {
+                Id = id,
                 NumEvents = 0,
                 CumulativeScore = 0,
-                Id = id
+                IsSquad = ExperienceTable.ExperienceMap[id].IsSquad
             };
             return _allExperience[id];
         }
 
         public void AddExperience(ref ExperiencePayload expEvent)
         {
-            int experienceId = expEvent.ExperienceId;
-            float score = expEvent.ScoreAmount;
+            CumulativeExperience cxp = GetExp(expEvent.ExperienceId);
 
-            if (_allExperience.ContainsKey(experienceId))
-            {
-                _allExperience[experienceId].NumEvents += 1;
-                _allExperience[experienceId].CumulativeScore += score;
-            }
-            else _allExperience.Add(experienceId, new CumulativeExperience()
-            {
-                NumEvents = 1,
-                CumulativeScore = score,
-                Id = experienceId
-            });
+            cxp.NumEvents += 1;
+            cxp.CumulativeScore += expEvent.ScoreAmount;
         }
 
         public void AddKill(ref DeathPayload deathEvent)

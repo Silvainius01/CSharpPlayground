@@ -33,14 +33,14 @@ namespace PlanetSide.Websocket
                     Name = "leaderboard-kills-max",
                     LeaderboardType = LeaderboardType.Player,
                     BoardSize = 10,
-                    GetStat = stats => stats.GetExp(ExperienceTable.KillMAX).NumEvents,
+                    GetStat = (data, stats) => stats.GetExp(ExperienceTable.KillMAX).NumEvents,
                 },
                 new LeaderboardRequest()
                 {
                     Name = "leaderboard-resupplies",
                     LeaderboardType = LeaderboardType.Player,
                     BoardSize = 10,
-                    GetStat = stats =>
+                    GetStat = (data, stats) =>
                     {
                         int count = 0;
                         foreach(var id in ExperienceTable.ResupplyIds)
@@ -53,7 +53,7 @@ namespace PlanetSide.Websocket
                     Name = "leaderboard-repair-vehicle",
                     LeaderboardType = LeaderboardType.Player,
                     BoardSize = 10,
-                    GetStat = stats =>
+                    GetStat = (data, stats) =>
                     {
                         float count = 0;
                         foreach(var id in ExperienceTable.VehicleRepairIds)
@@ -66,7 +66,7 @@ namespace PlanetSide.Websocket
                     Name = "leaderboard-repair-max",
                     LeaderboardType = LeaderboardType.Player,
                     BoardSize = 10,
-                    GetStat = stats =>
+                    GetStat = (data, stats) =>
                     {
                         float count = 0;
                         foreach(var id in ExperienceTable.MaxRepairIds)

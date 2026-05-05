@@ -14,14 +14,21 @@ namespace PlanetSide
 {
     public static class ExperienceTable
     {
-        public const int Revive = 7;
         public const int KillMAX = 29;
-        public const int InfantryKillAssist = 2;
+        public const float HealthPerExp = 10;
+        public const float HealthPerSquadXp = (1f / 15f) * 100;
+        public const float ShieldPerExp = 10;
+        public const float ShieldPerSquadExp = (1f / 15f) * 100;
+        public const float RepairPerExp = 24;
+        public const float RepairPerSquadExp = (1f / 10f) * 120;
+
         public static ReadOnlyCollection<int> ReviveIds;
         public static ReadOnlyCollection<int> ResupplyIds;
         public static ReadOnlyCollection<int> MaxRepairIds;
         public static ReadOnlyCollection<int> VehicleRepairIds;
+        public static ReadOnlyCollection<int> InfantryAssistIds;
         public static ReadOnlyDictionary<int, ExperienceTick> ExperienceMap;
+
 
         static List<int> _reviveIds = new List<int> { 7, 53 };
         static List<int> _resupplyIds = new List<int>();
@@ -41,6 +48,7 @@ namespace PlanetSide
             ResupplyIds = new ReadOnlyCollection<int>(_resupplyIds);
             MaxRepairIds = new ReadOnlyCollection<int>(_maxRepairIds);
             VehicleRepairIds = new ReadOnlyCollection<int>(_vehicleRepairIds);
+            InfantryAssistIds = new ReadOnlyCollection<int>(_infantryAssistIds);
 
             _experienceMap = new ConcurrentDictionary<int, ExperienceTick>(8, queryData.Count());
             ExperienceMap = new ReadOnlyDictionary<int, ExperienceTick>(_experienceMap);
@@ -49,15 +57,14 @@ namespace PlanetSide
             {
                 var exp = new ExperienceTick();
 
-                exp.Id = expType.TryGetProperty("experience_id", out var idProp)
-                    ? int.Parse(idProp.GetString())
-                    : 0;
+                exp.Id = expType.TryGetCensusInteger("experience_id", out int id)
+                    ? id: 0;
                 exp.Name = expType.TryGetProperty("description", out var descProp)
                     ? (descProp.GetString() ?? "Invalid Description")
                     : "Invalid Description";
-                exp.ScoreAmount = expType.TryGetProperty("xp", out var expProp)
-                    ? float.Parse(expProp.GetString())
-                    : 0;
+                exp.ScoreAmount = expType.TryGetCensusFloat("xp", out float scoreAmount)
+                    ? scoreAmount : 0;
+                exp.IsSquad = exp.Name.Contains("Squad");
 
                 if(_experienceMap.TryAdd(exp.Id, exp) && !exp.Name.Contains("HIVE"))
                 {
