@@ -262,15 +262,15 @@ namespace PlanetSide.Websocket
                 for (int i = 0; i < leaderboardRequests.Count; i++)
                 {
                     LeaderboardRequest request = leaderboardRequests[i];
-                    if (numPlayers < request.BoardSize)
-                        continue;
-
-                    var board = leaderboard.CalculateLeaderboard(request);
-                    _leaderboardReports.Enqueue(new ServerReport()
+                    if (numPlayers >= request.BoardSize)
                     {
-                        Data = JsonConvert.SerializeObject(board),
-                        Topic = request.Name,
-                    });
+                        var board = leaderboard.CalculateLeaderboard(request);
+                        _leaderboardReports.Enqueue(new ServerReport()
+                        {
+                            Data = JsonConvert.SerializeObject(board),
+                            Topic = request.Name,
+                        });
+                    }
                     await boardtimer.WaitForNextTickAsync(ct);
                 }
             }

@@ -27,7 +27,7 @@ namespace PlanetSide
         static List<int> _resupplyIds = new List<int>();
         static List<int> _maxRepairIds = new List<int>() { 6, 142 };
         static List<int> _vehicleRepairIds = new List<int>();
-        static List<int> _assistIds = new List<int>() { 2, 371, 372 };
+        static List<int> _infantryAssistIds = new List<int>() { 2, 371, 372 };
         static ConcurrentDictionary<int, ExperienceTick> _experienceMap;
 
         static ILogger Logger = Program.LoggerFactory.CreateLogger(typeof(ExperienceTable));

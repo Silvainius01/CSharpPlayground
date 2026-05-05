@@ -14,7 +14,7 @@ namespace PlanetSide
     {
         public string KillerId { get; set; }
         public string VictimId { get; set; }
-        public List<string> AssistIds { get; set; }
+        public List<ExperiencePayload> Assists { get; set; }
         public string CensusTimestamp { get; set; }
 
         public InfantryDeath(string killerId, string victimId, string timeStamp)
@@ -22,7 +22,7 @@ namespace PlanetSide
             KillerId = killerId;
             VictimId = victimId;
             CensusTimestamp = timeStamp;
-            AssistIds = new List<string>();
+            Assists = new List<ExperiencePayload>();
         }
     }
 
@@ -42,7 +42,7 @@ namespace PlanetSide
                 {
                     if (matchingDeath.KillerId != string.Empty)
                     {
-                        Logger.LogError("Recieved a duplicate death.\t\nTimestamp: {0}, Victim: {1}\t\nOG Killer: {2}, Dupe Killer: {3}", timestamp, victimId, matchingDeath.KillerId, killerId);
+                        // Logger.LogError("Recieved a duplicate death.\t\nTimestamp: {0}, Victim: {1}\t\nOG Killer: {2}, Dupe Killer: {3}", timestamp, victimId, matchingDeath.KillerId, killerId);
                         return;
                     }
 
