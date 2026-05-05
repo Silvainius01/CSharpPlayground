@@ -12,9 +12,7 @@ using System.Threading.Tasks;
 namespace PlanetSide
 {
     public enum VehicleType { Unknown = 0, Air = 1, Hover = 2, Ground = 5, Turret = 7, DropPod = 8 }
-
-
-
+    
     public static class VehicleTable
     {
         static ConcurrentDictionary<int, VehicleData> _vehicleData;
@@ -69,9 +67,9 @@ namespace PlanetSide
                     Logger.LogError($"Failed to add vehicle to table: {vData}");
             }
 
-            if (!Directory.Exists("./CensusData"))
-                Directory.CreateDirectory("./CensusData");
-            using (StreamWriter writer = new StreamWriter("./CensusData/Vehicles.json"))
+            if (!Directory.Exists(Tracker.CenusDataTablesPath))
+                Directory.CreateDirectory(Tracker.CenusDataTablesPath);
+            using (StreamWriter writer = new StreamWriter($"{Tracker.CenusDataTablesPath}/Vehicles.json"))
             {
                 var sorted = _vehicleData.Values.OrderBy(v => v.Id);    
                 writer.Write(JsonConvert.SerializeObject(sorted));

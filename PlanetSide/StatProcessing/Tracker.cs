@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Security.Policy;
 using System.Text;
@@ -52,7 +53,9 @@ namespace PlanetSide
         public static CensusHandler Handler = new CensusHandler();
         public static readonly ILogger<Tracker> Logger = Program.LoggerFactory.CreateLogger<Tracker>();
 
-        private static string TeamStatsJsonPath = $"./ChartTest/TeamStats.json";
+        public const string TeamStatsJsonPath = $"./ChartTest/TeamStats.json";
+        public const string CenusDataEventsPath = "./CensusData/Events";
+        public const string CenusDataTablesPath = "./CensusData/Tables";
 
         private static CancellationTokenSource ctSaveRoutine = new CancellationTokenSource();
         private static ConcurrentQueue<JsonElement> payloadSaveQueue = new ConcurrentQueue<JsonElement>();
@@ -286,9 +289,12 @@ namespace PlanetSide
 
         static async Task SaveEventsToDiskRoutine(string source, CancellationToken ct, Func<bool> condition)
         {
+            if (!Directory.Exists(CenusDataEventsPath))
+                Directory.CreateDirectory(CenusDataEventsPath);
+
             string dataPath = !string.IsNullOrEmpty(source)
-                ? $"./CensusData/{source}_Events_{DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss")}.json"
-                : $"./CensusData/Events_{DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss")}.json";
+                ? $"{CenusDataEventsPath}/{source}_Events_{DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss")}.json"
+                : $"{CenusDataEventsPath}/Events_{DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss")}.json";
 
             using PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMilliseconds(100));
             using (var stream = new StreamWriter(dataPath, false))

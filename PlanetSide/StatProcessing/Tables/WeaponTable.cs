@@ -72,9 +72,9 @@ namespace PlanetSide
                     Logger.LogError($"Failed to add weapon to table: {weaponData}");
             }
 
-            if (!Directory.Exists("./CensusData"))
-                Directory.CreateDirectory("./CensusData");
-            using (StreamWriter writer = new StreamWriter("./CensusData/Weapons.json"))
+            if (!Directory.Exists(Tracker.CenusDataTablesPath))
+                Directory.CreateDirectory(Tracker.CenusDataTablesPath);
+            using (StreamWriter writer = new StreamWriter($"{Tracker.CenusDataTablesPath}/Weapons.json"))
             {
                 var sorted = _weaponMap.Values.OrderBy(w => w.Id);
                 writer.Write(JsonConvert.SerializeObject(sorted));

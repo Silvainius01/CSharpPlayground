@@ -68,9 +68,9 @@ namespace PlanetSide
                 }
             }
 
-            if (!Directory.Exists("./CensusData"))
-                Directory.CreateDirectory("./CensusData");
-            using (StreamWriter writer = new StreamWriter("./CensusData/Experience.json"))
+            if (!Directory.Exists(Tracker.CenusDataTablesPath))
+                Directory.CreateDirectory(Tracker.CenusDataTablesPath);
+            using (StreamWriter writer = new StreamWriter($"{Tracker.CenusDataTablesPath}/Experience.json"))
             {
                 var sorted = _experienceMap.Values.OrderBy(e => e.Id);
                 writer.Write(JsonConvert.SerializeObject(sorted));
