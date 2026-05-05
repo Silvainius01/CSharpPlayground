@@ -76,6 +76,12 @@ namespace PlanetSide.Websocket
         }
         protected override void OnServerStop()
         {
+            if (RoundStarted)
+                EndRound();
+            
+            foreach (var team in activeTeams)
+                team.StopStream();
+
             SaveStats(true);
         }
 
@@ -111,7 +117,7 @@ namespace PlanetSide.Websocket
 
             double timeLeft = roundTimer.timeLeft;
             int minutes = (int)(roundTimer.timeLeft / 60);
-            Console.WriteLine($"Round Paused. Time left: {minutes}:{(int)(timeLeft - minutes * 60)}");
+            Console.WriteLine($"Round Paused. Time left: {minutes}:{((int)(timeLeft - minutes * 60)).ToString("DD")}");
         }
         public void ResumeRound()
         {
@@ -241,9 +247,9 @@ namespace PlanetSide.Websocket
                 await taskTimer.WaitForNextTickAsync(ct);
             }
 
-            if (!ct.IsCancellationRequested)
+            if (ct.IsCancellationRequested)
                 Logger.LogError("Round timer routine cancelled!");
-            Logger.LogInformation("Round timer routine exited.");
+            else Logger.LogInformation("Round timer routine exited.");
         }
         private async Task LeaderboardCalcLoop(CancellationToken ct)
         {
@@ -272,9 +278,9 @@ namespace PlanetSide.Websocket
                 }
             }
 
-            if (!ct.IsCancellationRequested)
+            if (ct.IsCancellationRequested)
                 Logger.LogError("Leaderboard calculations routine cancelled!");
-            Logger.LogInformation("Leaderboard calculation routine exited.");
+            else Logger.LogInformation("Leaderboard calculation routine exited.");
         }
 
         protected abstract List<PlanetSideTeam> GenerateTeams();

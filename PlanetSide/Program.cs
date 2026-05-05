@@ -78,6 +78,7 @@ namespace PlanetSide
             }
 
             reporter.Initialize();
+            reporter.StartServer();
 
             while (reporter.IsActive)
             {

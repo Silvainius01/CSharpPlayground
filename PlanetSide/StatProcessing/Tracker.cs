@@ -320,6 +320,7 @@ namespace PlanetSide
 
             if (ct.IsCancellationRequested)
                 Logger.LogError($"{source} Events save process was cancelled!");
+
         }
 
         public static string FactionIdToName(int id, bool abbreviated = true)
