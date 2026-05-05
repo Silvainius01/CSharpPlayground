@@ -19,12 +19,10 @@ namespace PlanetSide.Websocket
     {
         /// <summary> Is set to true after initialization. </summary>
         public bool IsInitialized { get; private set; }
-        /// <summary> True after start, false while server is closed. </summary>
+        /// <summary> True while the server has an open and bound socket, false while server is closed. </summary>
         public bool IsActive { get; private set; }
         /// <summary> True while generating and sending reports. </summary>
         public bool IsReporting { get; private set; }
-        /// <summary> True while the server is closed. </summary>
-        public bool IsClosed { get; private set; }
 
         public bool DebugEventNames { get; set; }
         public bool DebugEventDetails { get; set; }
@@ -42,7 +40,7 @@ namespace PlanetSide.Websocket
         {
             this.port = port;
             serverType = type;
-            IsClosed = true;
+            IsActive = false;
             IsReporting = false;
             IsInitialized = false;
 
@@ -60,7 +58,7 @@ namespace PlanetSide.Websocket
 
             OnInitialize();
             IsInitialized = true;
-            IsClosed = true;
+            IsActive = false;
             Logger.LogInformation("Server initialized.");
         }
         public void StartServer()
@@ -70,13 +68,12 @@ namespace PlanetSide.Websocket
                 Logger.LogWarning("Server is not initialized.");
                 return;
             }
-            if(!IsClosed)
+            if(IsActive)
             {
                 Logger.LogWarning("Server is already running.");
                 return;
             }
 
-            IsClosed = false;
             IsActive = true;
             IsReporting = true;
             OnServerStart();
@@ -90,7 +87,7 @@ namespace PlanetSide.Websocket
                 Logger.LogWarning("Server is not initialized.");
                 return;
             }
-            else if (IsClosed)
+            else if (!IsActive)
             {
                 Logger.LogWarning("Cannot pause a closed server.");
                 return;
@@ -106,12 +103,11 @@ namespace PlanetSide.Websocket
                 Logger.LogWarning("Server is not initialized.");
                 return;
             }
-            if (IsClosed)
+            if (!IsActive)
                 return; 
 
             // Set state flags
             IsActive = false;
-            IsClosed = true;
             IsReporting = false;
             serverTask.Wait();
             OnServerStop();
@@ -128,7 +124,7 @@ namespace PlanetSide.Websocket
             {
                 publisher.Bind($"tcp://*:{port}");
 
-                while (!IsClosed)
+                while (IsActive)
                 {
                     // Dont generate reports if we arent sending them.
                     if(!IsReporting)
@@ -156,6 +152,8 @@ namespace PlanetSide.Websocket
                     await reportTimer.WaitForNextTickAsync(ct);
                 }
             }
+
+            Logger.LogInformation("Server loop resolved");
         }
 
         protected abstract void OnInitialize();

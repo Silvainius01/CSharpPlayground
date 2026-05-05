@@ -36,8 +36,6 @@ namespace PlanetSide.Websocket
         ConcurrentQueue<ServerReport> _leaderboardReports = new ConcurrentQueue<ServerReport>();
         CancellationTokenSource ctLeaderboardLoop;
 
-        public CommandModule roundCommands { get; private set; }
-
         public PlanetSideReporter(string port, string world, int zone) : base(port, ServerType.Publisher)
         {
             this.world = world;
@@ -45,14 +43,13 @@ namespace PlanetSide.Websocket
             roundTimer = new CommandEngine.Timer(TimeSpan.FromSeconds(RoundLength).TotalSeconds);
             ctRoundUpdate = new CancellationTokenSource();
 
-            serverCommands.Add(new ConsoleCommand("startRound", StartRoundCommand));
 
-            roundCommands = new CommandModule("Enter Round Command");
-            roundCommands.Add(new ConsoleCommand("end", EndRoundCommand));
-            roundCommands.Add(new ConsoleCommand("pause", PauseRoundCommand));
-            roundCommands.Add(new ConsoleCommand("resume", ResumeRoundCommand));
-            roundCommands.Add(new ConsoleCommand("saveStats", SaveStatsCommand));
-            roundCommands.Add(new ConsoleCommand("setRoundLength", SetRoundLengthCommand));
+            serverCommands.Add(new ConsoleCommand("startRound", StartRoundCommand));
+            serverCommands.Add(new ConsoleCommand("endRound", EndRoundCommand));
+            serverCommands.Add(new ConsoleCommand("pauseRound", PauseRoundCommand));
+            serverCommands.Add(new ConsoleCommand("resumeRound", ResumeRoundCommand));
+            serverCommands.Add(new ConsoleCommand("saveStats", SaveStatsCommand));
+            serverCommands.Add(new ConsoleCommand("setRoundLength", SetRoundLengthCommand));
         }
 
         protected override void OnInitialize()
@@ -286,16 +283,50 @@ namespace PlanetSide.Websocket
 
         private void StartRoundCommand(List<string> args)
         {
+            if (!IsActive)
+            {
+                Logger.LogWarning("Server is closed.");
+                return;
+            }
+            if (RoundStarted)
+            {
+                Logger.LogWarning("Round already started.");
+                return;
+            }
+
             if (args.Any() && int.TryParse(args[0], out int minutes))
                 SetRoundLength(minutes);
             StartRound();
         }
         private void EndRoundCommand(List<string> args)
-            => EndRound();
+        {
+            if (!IsActive)
+            {
+                Logger.LogWarning("Server is clsoed.");
+                return;
+            }
+
+            EndRound();
+        }
         private void PauseRoundCommand(List<string> args)
-            => PauseRound();
+        {
+            if (!IsActive)
+            {
+                Logger.LogWarning("Server is clsoed.");
+                return;
+            }
+
+            PauseRound();
+        }
         private void ResumeRoundCommand(List<string> args)
-            => ResumeRound();
+        {
+            if (!IsActive)
+            {
+                Logger.LogWarning("Server is clsoed.");
+                return;
+            }
+            ResumeRound();
+        }
         private void SaveStatsCommand(List<string> args)
         {
             bool printFull = false;

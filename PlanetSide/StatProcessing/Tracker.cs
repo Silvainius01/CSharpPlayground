@@ -58,8 +58,6 @@ namespace PlanetSide
         public const string CenusDataTablesPath = "./CensusData/Tables";
 
         private static CancellationTokenSource ctSaveRoutine = new CancellationTokenSource();
-        private static ConcurrentQueue<JsonElement> payloadSaveQueue = new ConcurrentQueue<JsonElement>();
-
         private static ConcurrentDictionary<string, bool> sourceWarnings = new ConcurrentDictionary<string, bool>();
         private static ConcurrentDictionary<string, EventSaver> payloadSaveQueues = new ConcurrentDictionary<string, EventSaver>(8, 4);
 
@@ -149,7 +147,7 @@ namespace PlanetSide
                         if (!TryProcessZoneEvent(payload, eventType, ref deathEvent)
                          || !TryProcessCharacterEvent(payload, eventType, ref deathEvent)
                          || !TryProcessDeathEvent(payload, eventType, ref deathEvent)
-                         || payload.TryGetCensusBool("is_headshot", out bool isHeadshot))
+                         || !payload.TryGetCensusBool("is_headshot", out bool isHeadshot))
                             break;
 
                         deathEvent.IsHeadshot = isHeadshot;
@@ -296,21 +294,32 @@ namespace PlanetSide
                 ? $"{CenusDataEventsPath}/{source}_Events_{DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss")}.json"
                 : $"{CenusDataEventsPath}/Events_{DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss")}.json";
 
-            using PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMilliseconds(100));
-            using (var stream = new StreamWriter(dataPath, false))
+            if (payloadSaveQueues.TryGetValue(source, out EventSaver? saver))
             {
-                while (!ct.IsCancellationRequested && condition.Invoke())
+                using PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMilliseconds(100));
+                using (var stream = new StreamWriter(dataPath, false))
                 {
-                    if (payloadSaveQueue.TryDequeue(out JsonElement payload))
-                        stream.WriteLine(payload.ToString());
-                    else await timer.WaitForNextTickAsync(ct);
+                    while (!ct.IsCancellationRequested && condition.Invoke())
+                    {
+                        if (saver.PayloadQueue.TryDequeue(out JsonElement payload))
+                            stream.WriteLine(payload.ToString());
+                        else await timer.WaitForNextTickAsync(ct);
+                    }
                 }
             }
+            else Logger.LogError($"{source} does not have a registered EventSaver!");
 
-            // Attempt to remove ourself from the registered queues
-            if (payloadSaveQueues.TryRemove(source, out EventSaver? saver))
-                Logger.LogInformation($"{source} Events save process ended and removed.");
-            Logger.LogWarning($"{source} Events save process ended, but failed to remove.");
+            // Dont print warnings/errors that the above log doesnt cover.
+            if (saver is not null)
+            {
+                // Attempt to remove ourself from the registered queues
+                if (payloadSaveQueues.TryRemove(source, out saver))
+                    Logger.LogInformation($"{source} Events save process ended and removed.");
+                Logger.LogWarning($"{source} Events save process ended, but failed to remove.");
+            }
+
+            if (ct.IsCancellationRequested)
+                Logger.LogError($"{source} Events save process was cancelled!");
         }
 
         public static string FactionIdToName(int id, bool abbreviated = true)

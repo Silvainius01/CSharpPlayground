@@ -79,16 +79,11 @@ namespace PlanetSide
 
             reporter.Initialize();
 
-            do
+            while (reporter.IsActive)
             {
                 Thread.Sleep(500);
                 reporter.serverCommands.NextCommand(false);
-                if (reporter.RoundStarted)
-                    reporter.roundCommands.NextCommand(false);
             }
-            while (reporter.IsActive);
-
-            string bp = "string for a breakpoint :)";
         }
 
         private static void StartSocketClient(List<string> args)
