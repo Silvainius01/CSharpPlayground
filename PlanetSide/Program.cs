@@ -20,7 +20,7 @@ namespace PlanetSide
     {
         public static readonly ILoggerFactory LoggerFactory =
             Microsoft.Extensions.Logging.LoggerFactory.Create(builder => 
-                builder.SetMinimumLevel(LogLevel.Warning).AddConsole());
+                builder.SetMinimumLevel(LogLevel.Information).AddConsole());
 
         private static readonly ILogger<Program> Logger = LoggerFactory.CreateLogger<Program>();
 
@@ -79,13 +79,15 @@ namespace PlanetSide
 
             reporter.Initialize();
 
-            while (reporter.IsActive)
+            do
             {
                 Thread.Sleep(500);
                 reporter.serverCommands.NextCommand(false);
-                if(reporter.RoundStarted)
+                if (reporter.RoundStarted)
                     reporter.roundCommands.NextCommand(false);
             }
+            while (reporter.IsActive);
+
             string bp = "string for a breakpoint :)";
         }
 

@@ -49,7 +49,6 @@ namespace PlanetSide
         {
             return _client.DisconnectAsync();
         }
-
         public Task OnApplicationStartup(CancellationToken cancellationToken)
         {
             return _client.ConnectAsync();
@@ -70,7 +69,12 @@ namespace PlanetSide
 
             return Task.CompletedTask;
         }
+        private Task OnDisconnect(DisconnectionInfo info)
+        {
+            _logger.LogInformation($"Websocket Client Disconnected: {info.Type}");
 
+            return Task.CompletedTask;
+        }
         private async Task OnMessage(string message)
         {
             if (message == null)
@@ -99,13 +103,6 @@ namespace PlanetSide
             {
                 _logger.LogError(91097, "Failed to parse message: {0}", e);
             }
-        }
-
-        private Task OnDisconnect(DisconnectionInfo info)
-        {
-            _logger.LogInformation($"Websocket Client Disconnected: {info.Type}");
-
-            return Task.CompletedTask;
         }
 
         public void AddCallback(Func<SocketResponse, bool> callback) 

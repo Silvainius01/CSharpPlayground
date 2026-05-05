@@ -25,7 +25,7 @@ namespace PlanetSide.Websocket
 
         protected DateTime lastTime = DateTime.Now;
         protected CommandEngine.Timer roundTimer;
-        protected CancellationTokenSource ctRoundUpdate = new CancellationTokenSource();
+        protected CancellationTokenSource ctRoundUpdate;
 
         protected string world;
         protected EventLeaderboard leaderboard;
@@ -43,6 +43,7 @@ namespace PlanetSide.Websocket
             this.world = world;
             this.ZoneId = zone;
             roundTimer = new CommandEngine.Timer(TimeSpan.FromSeconds(RoundLength).TotalSeconds);
+            ctRoundUpdate = new CancellationTokenSource();
 
             serverCommands.Add(new ConsoleCommand("startRound", StartRoundCommand));
 
@@ -96,7 +97,8 @@ namespace PlanetSide.Websocket
             foreach (var team in activeTeams)
                 team.ResumeStream();
 
-            ctRoundUpdate = new CancellationTokenSource();
+            if (ctRoundUpdate.IsCancellationRequested)
+                ctRoundUpdate = new CancellationTokenSource();
             Task.Run(() => RoundUpdater(ctRoundUpdate.Token));
 
             Console.WriteLine($"Round Started with {RoundLength / 60} minutes");
@@ -140,8 +142,7 @@ namespace PlanetSide.Websocket
 
             RoundPaused = false;
             RoundStarted = false;
-            ctRoundUpdate.Cancel();
-            ctLeaderboardLoop.Cancel();
+
             roundTimer.Deactivate(true);
             foreach (var team in activeTeams)
                 team.PauseStream();
@@ -196,7 +197,7 @@ namespace PlanetSide.Websocket
             using PeriodicTimer taskTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(100));
             lastTime = DateTime.Now;
 
-            while (!ct.IsCancellationRequested)
+            while (!ct.IsCancellationRequested && RoundStarted)
             {
                 if (!RoundPaused)
                 {
@@ -242,20 +243,25 @@ namespace PlanetSide.Websocket
                 }
                 await taskTimer.WaitForNextTickAsync(ct);
             }
+
+            if (!ct.IsCancellationRequested)
+                Logger.LogError("Round timer routine cancelled!");
+            Logger.LogInformation("Round timer routine exited.");
         }
         private async Task LeaderboardCalcLoop(CancellationToken ct)
         {
             float waitTime = LeaderboardRefresh / leaderboardRequests.Count;
             using PeriodicTimer boardtimer = new PeriodicTimer(TimeSpan.FromSeconds(waitTime));
 
-            while (!ct.IsCancellationRequested)
+            while (!ct.IsCancellationRequested && IsActive)
             {
                 int numPlayers = 0;
-                foreach (var team in activeTeams)
-                    numPlayers += team.TeamPlayers.Count;
+                for (int i = 0; i < activeTeams.Count; i++)
+                    numPlayers += activeTeams[i].GetPlayerCount();
 
-                foreach (var request in leaderboardRequests)
+                for (int i = 0; i < leaderboardRequests.Count; i++)
                 {
+                    LeaderboardRequest request = leaderboardRequests[i];
                     if (numPlayers < request.BoardSize)
                         continue;
 
@@ -270,8 +276,8 @@ namespace PlanetSide.Websocket
             }
 
             if (!ct.IsCancellationRequested)
-                Logger.LogError("Leaderboard calculations routine exited!");
-            Logger.LogDebug("Leaderboard calculation routine exited.");
+                Logger.LogError("Leaderboard calculations routine cancelled!");
+            Logger.LogInformation("Leaderboard calculation routine exited.");
         }
 
         protected abstract List<PlanetSideTeam> GenerateTeams();

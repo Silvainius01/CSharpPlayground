@@ -21,6 +21,7 @@ namespace PlanetSide
 {
     public class FactionTeam : PlanetSideTeam
     {
+        bool newPlayerAdded = false;
         static Dictionary<string, CensusStreamSubscription> WorldSubscriptions = new Dictionary<string, CensusStreamSubscription>();
 
         public FactionTeam(string teamName, int faction, string world, int zone = -1)
@@ -30,8 +31,15 @@ namespace PlanetSide
             streamKey = $"World{world}_CharacterEventStream";
         }
 
-        // Players are dynamically added in IsEventFromTeam.
-        public override void GetPlayers() { }
+        public override int GetPlayerCount()
+        {
+            if (newPlayerAdded)
+            {
+                newPlayerAdded = false;
+                _teamSize = _teamPlayerStats.Count;
+            }
+            return _teamSize;
+        }
 
         protected override void OnStreamStart() { }
         protected override void OnStreamStop() { }
@@ -81,21 +89,27 @@ namespace PlanetSide
             {
                 teamPlayerFound = true;
                 cData1.TeamId = FactionId;
-                _teamPlayerStats.TryAdd(payload.CharacterId, new PlayerStats()
+                PlayerStats stats = new PlayerStats()
                 {
                     Data = cData1,
                     Stats = new PlanetStats()
-                });
+                };
+
+                if (_teamPlayerStats.TryAdd(payload.CharacterId, stats))
+                    newPlayerAdded = true;
             }
             if (PlayerTable.TryGetOrAddCharacter(payload.OtherId, out var cData2) && cData2.FactionId == FactionId)
             {
                 teamPlayerFound = true;
                 cData2.TeamId = FactionId;
-                _teamPlayerStats.TryAdd(payload.OtherId, new PlayerStats()
+                PlayerStats stats = new PlayerStats()
                 {
                     Data = cData2,
                     Stats = new PlanetStats()
-                });
+                };
+
+                if(_teamPlayerStats.TryAdd(payload.OtherId, stats))
+                    newPlayerAdded = true;
             }
 
             return teamPlayerFound;

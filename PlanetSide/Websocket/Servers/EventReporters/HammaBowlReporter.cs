@@ -44,7 +44,6 @@ namespace PlanetSide.Websocket
 
             foreach (var team in teams)
             {
-                team.GetPlayers();
                 using (ManagedStringBuilder msb = new ManagedStringBuilder("HammaBowlTeam"))
                 {
                     var builder = msb.Builder;

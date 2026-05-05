@@ -84,8 +84,12 @@ namespace PlanetSide
             else if (old.SaveRoutine is null || old.SaveRoutine.IsCompleted)
                 success = payloadSaveQueues.TryUpdate(source, saver, old);
 
-            if (!success)
-                Logger.LogWarning($"Failed to register event saving process for {source}");
+            if (success)
+            {
+                saver.Start(condition);
+                Logger.LogInformation($"Registered event saver for source {source}");
+            }
+            else Logger.LogWarning($"Failed to register event saving process for {source}");
         }
 
         public static ICensusEvent? ProcessCensusEvent(SocketResponse response, string source)

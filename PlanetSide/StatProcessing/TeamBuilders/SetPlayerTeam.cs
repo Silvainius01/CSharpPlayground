@@ -37,7 +37,7 @@ namespace PlanetSide
             return sub;
         }
 
-        public override void GetPlayers()
+        protected override void AddPlayersInternal()
         {
             PlayerTable.TryAddCharacters(_inputPlayers.Select(p => p.CensusId).ToArray());
 
@@ -68,10 +68,17 @@ namespace PlanetSide
                     Logger.LogError("Failed to find character data for {0} ({1})", player.Alias, player.CensusId);
             }
 
-            if (_teamPlayerStats.Count < _inputPlayers.Length)
+            _teamSize = _teamPlayerStats.Count;
+            if (_teamSize < _inputPlayers.Length)
             {
                 Logger.LogError("Team {0} was initialized with {1}/{2} players. Check previous logs for details.", TeamName, _teamPlayerStats.Count, _inputPlayers.Length);
             }
+        }
+
+        public override int GetPlayerCount()
+        {
+            // Set during AddPlayersInternal
+            return _teamSize;
         }
 
         protected override void OnStreamStart() { }

@@ -26,9 +26,9 @@ namespace PlanetSide
             streamKey = $"NexusTeam_{teamName}_PlayerEventStream";
         }
 
-        public override void GetPlayers()
+        public override int GetPlayerCount()
         {
-            throw new NotImplementedException();
+            return 48;
         }
 
         public async Task GenerateRandomTeam(string streamKey, CensusHandler handler)

@@ -19,7 +19,6 @@ namespace PlanetSide
 {
     public abstract class PlanetSideTeam : IDisposable
     {
-        public int TeamSize => TeamPlayers.Count;
         public int WorldId { get; protected set; }
         public int ZoneId { get; protected set; }
         public int TeamId { get; protected set; }
@@ -28,6 +27,7 @@ namespace PlanetSide
         public PlanetStats TeamStats { get; private set; }
         public IReadOnlyDictionary<int, WeaponStats> TeamWeapons { get; private set; }
         public IReadOnlyDictionary<string, PlayerStats> TeamPlayers { get; private set; }
+        protected int _teamSize;
 
         // Event Processing state data
         [JsonIgnore] public bool IsStreaming { get; private set; }
@@ -42,6 +42,7 @@ namespace PlanetSide
         [JsonIgnore] private CancellationTokenSource ctEventSaving;
         [JsonIgnore] private CancellationTokenSource ctEventProcessing;
 
+        [JsonIgnore] private bool playersAdded;
         [JsonIgnore] protected ConcurrentDictionary<string, PlayerStats> _teamPlayerStats = new ConcurrentDictionary<string, PlayerStats>(8, 64);
         [JsonIgnore] protected ConcurrentDictionary<int, WeaponStats> _teamWeaponStats = new ConcurrentDictionary<int, WeaponStats>(8, 128);
 
@@ -75,17 +76,18 @@ namespace PlanetSide
 
             IsStreaming = true;
 
+            // Start processing tasks
+            Tracker.RegisterEventSaveRoutine(TeamName, ctEventSaving.Token, () => IsStreaming);
+            Task.Run(() => ProcessQueue(ctEventProcessing.Token), ctEventProcessing.Token);
+
+            // Create the event stream
             var handler = Tracker.Handler;
             handler.AddSubscription(streamKey, GetStreamSubscription());
             handler.AddActionToSubscription(streamKey, ProcessCensusEvent);
             handler.ConnectClientAsync(streamKey).Wait();
 
-            Tracker.RegisterEventSaveRoutine(TeamName, ctEventSaving.Token, () => IsStreaming);
-            Task.Run(() => ProcessQueue(ctEventProcessing.Token), ctEventProcessing.Token);
-
             Logger.LogInformation("Team {0} Began processing player events", TeamName);
         }
-
         public void StopStream()
         {
             if (!IsStreaming)
@@ -144,6 +146,16 @@ namespace PlanetSide
             TeamStats.allowExpSerialization = false;
             foreach (var p in TeamPlayers.Values)
                 p.Stats.allowExpSerialization = false;
+        }
+
+        public void AddPlayers()
+        {
+            if (playersAdded)
+                return;
+
+            AddPlayersInternal();
+            _teamSize = GetPlayerCount();
+            playersAdded = true;
         }
 
         private bool ProcessCensusEvent(SocketResponse response)
@@ -239,12 +251,22 @@ namespace PlanetSide
             }
         }
 
-        public abstract void GetPlayers();
+        /// <summary> 
+        /// It is reccomended that implementations AVOID <see cref="ConcurrentDictionary{TKey, TValue}.Count"/>
+        /// since it must lock the object, which stalls any Task hoping to access it.
+        /// </summary>
+        public abstract int GetPlayerCount();
         protected abstract void OnStreamStart();
         protected abstract void OnStreamStop();
         protected abstract void OnEventProcessed(ICensusEvent censusEvent);
         protected abstract bool IsEventValid(ICensusEvent censusEvent);
         protected abstract CensusStreamSubscription GetStreamSubscription();
+
+        /// <summary>
+        /// This method is called when the reporter is ready to add players, and only once.
+        /// <para>Reccomended if your reporter needs to make API calls to initialize players</para>
+        /// </summary>
+        protected virtual void AddPlayersInternal() { }
 
         public void Dispose()
         {

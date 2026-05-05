@@ -19,13 +19,14 @@ namespace PlanetSide.Websocket
     {
         /// <summary> Is set to true after initialization. </summary>
         public bool IsInitialized { get; private set; }
-        /// <summary> True after initialization, false while server is closed. </summary>
+        /// <summary> True after start, false while server is closed. </summary>
         public bool IsActive { get; private set; }
         /// <summary> True while generating and sending reports. </summary>
         public bool IsReporting { get; private set; }
         /// <summary> True while the server is closed. </summary>
         public bool IsClosed { get; private set; }
 
+        public bool DebugEventNames { get; set; }
         public bool DebugEventDetails { get; set; }
 
         public CommandModule serverCommands { get; protected set; }
@@ -58,8 +59,8 @@ namespace PlanetSide.Websocket
                 return;
 
             OnInitialize();
-            IsActive = true;
             IsInitialized = true;
+            IsClosed = true;
             Logger.LogInformation("Server initialized.");
         }
         public void StartServer()
@@ -75,9 +76,10 @@ namespace PlanetSide.Websocket
                 return;
             }
 
-            OnServerStart();
             IsClosed = false;
+            IsActive = true;
             IsReporting = true;
+            OnServerStart();
             serverTask = Task.Run(() => ServerLoop(ctServer.Token), ctServer.Token);
             Logger.LogInformation("Server started on port {0}.", port);
         }
@@ -144,10 +146,11 @@ namespace PlanetSide.Websocket
                             .SendMoreFrame(report.Topic) // Topic
                             .SendFrame(report.Data); // Message
 
-                        Logger.LogInformation($"Sent report '{report.Topic}'");
 
                         if (DebugEventDetails)
-                            Logger.LogDebug($"Report Data: {report.Data}");
+                            Logger.LogDebug($"Report '{report.Topic}' Data: {report.Data}");
+                        else if(DebugEventNames)
+                            Logger.LogInformation($"Sent report '{report.Topic}'");
                     }
 
                     await reportTimer.WaitForNextTickAsync(ct);
