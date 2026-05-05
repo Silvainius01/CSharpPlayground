@@ -17,13 +17,14 @@ namespace PlanetSide.Websocket
     {
         public int ZoneId { get; protected set; } = -1;
         public float LeaderboardRefresh { get; protected set; } = 10.0f;
+
+        // Round state data
         public double RoundLength { get; protected set; } = 15 * 60;
         public bool RoundPaused { get; private set; }
         public bool RoundStarted { get; private set; }
-
         protected DateTime lastTime = DateTime.Now;
         protected CommandEngine.Timer roundTimer;
-        protected CancellationTokenSource ctUpdate = new CancellationTokenSource();
+        protected CancellationTokenSource ctRoundUpdate = new CancellationTokenSource();
 
         protected string world;
         protected EventLeaderboard leaderboard;
@@ -93,8 +94,8 @@ namespace PlanetSide.Websocket
             foreach (var team in activeTeams)
                 team.ResumeStream();
 
-            ctUpdate = new CancellationTokenSource();
-            Task.Run(() => RoundUpdater(ctUpdate.Token));
+            ctRoundUpdate = new CancellationTokenSource();
+            Task.Run(() => RoundUpdater(ctRoundUpdate.Token));
 
             Console.WriteLine($"Round Started with {RoundLength / 60} minutes");
         }
@@ -137,7 +138,7 @@ namespace PlanetSide.Websocket
 
             RoundPaused = false;
             RoundStarted = false;
-            ctUpdate.Cancel();
+            ctRoundUpdate.Cancel();
             ctLeaderboardLoop.Cancel();
             roundTimer.Deactivate(true);
             foreach (var team in activeTeams)
@@ -190,7 +191,7 @@ namespace PlanetSide.Websocket
         {
             int warnState = 0;
             int currentMinute = (int)(RoundLength / 60.0);
-            PeriodicTimer taskTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(100));
+            using PeriodicTimer taskTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(100));
             lastTime = DateTime.Now;
 
             while (!ct.IsCancellationRequested)
@@ -243,7 +244,7 @@ namespace PlanetSide.Websocket
         private async Task LeaderboardCalcLoop(CancellationToken ct)
         {
             float waitTime = LeaderboardRefresh / leaderboardRequests.Count;
-            PeriodicTimer boardtimer = new PeriodicTimer(TimeSpan.FromSeconds(waitTime));
+            using PeriodicTimer boardtimer = new PeriodicTimer(TimeSpan.FromSeconds(waitTime));
 
             while (!ct.IsCancellationRequested)
             {

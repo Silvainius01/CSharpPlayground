@@ -119,8 +119,8 @@ namespace PlanetSide.Websocket
 
         private async Task ServerLoop(CancellationToken ct)
         {
-            PeriodicTimer reportTimer = new PeriodicTimer(TimeSpan.FromSeconds(10));
-            PeriodicTimer pausedTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(100));
+            using PeriodicTimer reportTimer = new PeriodicTimer(TimeSpan.FromSeconds(10));
+            using PeriodicTimer pausedTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(100));
 
             using (var publisher = new PublisherSocket())
             {

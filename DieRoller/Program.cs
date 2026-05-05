@@ -38,7 +38,7 @@ namespace DieRoller
 
         static async Task FishingTimer(CancellationToken ct)
         {
-            PeriodicTimer t = new PeriodicTimer(TimeSpan.FromSeconds(3.5));
+            using PeriodicTimer t = new PeriodicTimer(TimeSpan.FromSeconds(3.5));
 
             while (!ct.IsCancellationRequested)
             {

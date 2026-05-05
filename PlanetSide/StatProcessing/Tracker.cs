@@ -18,14 +18,47 @@ namespace PlanetSide
 {
     public class Tracker
     {
+        private class EventSaver : IDisposable
+        {
+            public bool IsStarted { get; private set; }
+            public string Source { get; private set; }
+            public Task? SaveRoutine { get; private set; }
+            public ConcurrentQueue<JsonElement> PayloadQueue { get; private set; }
+
+            CancellationToken ctExternal;
+            CancellationTokenSource? ctLinkedSource;
+
+            public EventSaver(string source, CancellationToken ct)
+            {
+                Source = source;
+                ctExternal = ct;
+                PayloadQueue = new ConcurrentQueue<JsonElement>();
+            }
+
+            public void Start(Func<bool> condition)
+            {
+                ctLinkedSource = CancellationTokenSource.CreateLinkedTokenSource(ctExternal, ctSaveRoutine.Token);
+                var ct = ctLinkedSource.Token;
+                SaveRoutine = Task.Run(() => SaveEventsToDiskRoutine(Source, ct, condition), ct);
+            }
+
+            public void Dispose()
+            {
+                SaveRoutine?.Dispose();
+                ctLinkedSource?.Dispose();
+            }
+        }
+
         public static CensusHandler Handler = new CensusHandler();
         public static readonly ILogger<Tracker> Logger = Program.LoggerFactory.CreateLogger<Tracker>();
 
         private static string TeamStatsJsonPath = $"./ChartTest/TeamStats.json";
-        private static string DataStreamBackUpPath = "./CensusData/Events.json";
 
         private static CancellationTokenSource ctSaveRoutine = new CancellationTokenSource();
         private static ConcurrentQueue<JsonElement> payloadSaveQueue = new ConcurrentQueue<JsonElement>();
+
+        private static ConcurrentDictionary<string, bool> sourceWarnings = new ConcurrentDictionary<string, bool>();
+        private static ConcurrentDictionary<string, EventSaver> payloadSaveQueues = new ConcurrentDictionary<string, EventSaver>(8, 4);
 
         public static void PopulateTables()
         {
@@ -39,16 +72,27 @@ namespace PlanetSide
 
             foreach (var task in tableTasks)
                 task.Wait();
-
-            Task.Run(() => SaveEventsToDiskRoutine(ctSaveRoutine.Token));
         }
 
-        public static ICensusEvent? ProcessCensusEvent(SocketResponse response)
+        public static void RegisterEventSaveRoutine(string source, CancellationToken ct, Func<bool> condition)
+        {
+            bool success = false;
+            EventSaver saver = new EventSaver(source, ct);
+
+            if (!payloadSaveQueues.TryGetValue(source, out EventSaver? old))
+                success = payloadSaveQueues.TryAdd(source, saver);
+            else if (old.SaveRoutine.IsCompleted)
+                success = payloadSaveQueues.TryUpdate(source, saver, old);
+
+            if (!success)
+                Logger.LogWarning($"Failed to register event saving process for {source}");
+        }
+
+        public static ICensusEvent? ProcessCensusEvent(SocketResponse response, string source)
         {
             string characterId;
             JsonElement payload;
             CensusEventType eventType = CensusEventType.Unknown;
-
 
             // Skip if malformed
             if (!response.Message.RootElement.TryGetProperty("payload", out payload)
@@ -58,7 +102,14 @@ namespace PlanetSide
                 return null;
 
             // Save any valid events to disk.
-            payloadSaveQueue.Enqueue(payload);
+
+            if (payloadSaveQueues.ContainsKey(source))
+                payloadSaveQueues[source].PayloadQueue.Enqueue(payload);
+            else if (!sourceWarnings.ContainsKey(source))
+            {
+                sourceWarnings.TryAdd(source, true);
+                Logger.LogError($"No registered save process for events from {source}.");
+            }
 
             switch (eventType)
             {
@@ -170,7 +221,6 @@ namespace PlanetSide
             "FacilityControl" => CensusEventType.FacilityControl,
             _ => CensusEventType.Unknown
         };
-
         static bool TryProcessZoneEvent<T>(JsonElement payload, CensusEventType type, ref T zoneEvent) where T : ICensusZoneEvent, new()
         {
             if (!payload.TryGetCensusInteger("zone_id", out int zoneId)
@@ -184,7 +234,6 @@ namespace PlanetSide
             zoneEvent.WorldId = worldId;
             return true;
         }
-
         static bool TryProcessCharacterEvent<T>(JsonElement payload, CensusEventType type, ref T charEvent) where T : ICensusCharacterEvent, new()
         {
             string otherId = string.Empty;
@@ -204,7 +253,6 @@ namespace PlanetSide
             charEvent.OtherId = otherId;
             return true;
         }
-
         static bool TryProcessDeathEvent<T>(JsonElement payload, CensusEventType type, ref T deathEvent) where T : ICensusDeathEvent, new()
         {
             // Might as well perform validation.
@@ -233,22 +281,27 @@ namespace PlanetSide
             return true;
         }
 
-        static async Task SaveEventsToDiskRoutine(CancellationToken ct)
+        static async Task SaveEventsToDiskRoutine(string source, CancellationToken ct, Func<bool> condition)
         {
-            PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMilliseconds(1));
-            using (var stream = new StreamWriter(DataStreamBackUpPath, true))
-            {
-                while (!ct.IsCancellationRequested)
-                {
-                    if (payloadSaveQueue.Count == 0 || !payloadSaveQueue.TryDequeue(out JsonElement payload))
-                    {
-                        await timer.WaitForNextTickAsync();
-                        continue;
-                    }
+            string dataPath = !string.IsNullOrEmpty(source)
+                ? $"./CensusData/{source}_Events_{DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss")}.json"
+                : $"./CensusData/Events_{DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss")}.json";
 
-                    stream.WriteLine(payload.ToString());
+            using PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMilliseconds(100));
+            using (var stream = new StreamWriter(dataPath, false))
+            {
+                while (!ct.IsCancellationRequested && condition.Invoke())
+                {
+                    if (payloadSaveQueue.TryDequeue(out JsonElement payload))
+                        stream.WriteLine(payload.ToString());
+                    else await timer.WaitForNextTickAsync(ct);
                 }
             }
+
+            // Attempt to remove ourself from the registered queues
+            if (payloadSaveQueues.TryRemove(source, out EventSaver saver))
+                Logger.LogInformation($"{source} Events save process ended and removed.");
+            Logger.LogWarning($"{source} Events save process ended, but failed to remove.");
         }
 
         public static string FactionIdToName(int id, bool abbreviated = true)

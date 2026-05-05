@@ -29,8 +29,9 @@ namespace PlanetSide
         public IReadOnlyDictionary<int, WeaponStats> TeamWeapons { get; private set; }
         public IReadOnlyDictionary<string, PlayerStats> TeamPlayers { get; private set; }
 
+        // Event Processing state data
         [JsonIgnore] public bool IsStreaming { get; private set; }
-        [JsonIgnore] public bool IsProccessing { get; private set; }
+        [JsonIgnore] public bool IsProcessing { get; private set; }
         [JsonIgnore] public bool IsPaused { get; set; }
 
         [JsonIgnore] protected string worldString;
@@ -38,7 +39,9 @@ namespace PlanetSide
         [JsonIgnore] protected readonly ILogger<PlanetSideTeam> Logger;
 
         [JsonIgnore] private ConcurrentQueue<ICensusEvent> events;
-        [JsonIgnore] private CancellationTokenSource ctQueueProcess;
+        [JsonIgnore] private CancellationTokenSource ctEventSaving;
+        [JsonIgnore] private CancellationTokenSource ctEventProcessing;
+
         [JsonIgnore] protected ConcurrentDictionary<string, PlayerStats> _teamPlayerStats = new ConcurrentDictionary<string, PlayerStats>(8, 64);
         [JsonIgnore] protected ConcurrentDictionary<int, WeaponStats> _teamWeaponStats = new ConcurrentDictionary<int, WeaponStats>(8, 128);
 
@@ -57,7 +60,8 @@ namespace PlanetSide
             Logger = Program.LoggerFactory.CreateLogger<PlanetSideTeam>();
 
             streamKey = $"PlanetSideTeam_{teamName}_PlayerEventStream";
-            ctQueueProcess = new CancellationTokenSource();
+            ctEventProcessing = new CancellationTokenSource();
+            ctEventSaving = new CancellationTokenSource();
 
             if (int.TryParse(worldString, out int worldId))
                 this.WorldId = worldId;
@@ -69,31 +73,32 @@ namespace PlanetSide
             if (IsStreaming)
                 return;
 
+            IsStreaming = true;
+
             var handler = Tracker.Handler;
             handler.AddSubscription(streamKey, GetStreamSubscription());
             handler.AddActionToSubscription(streamKey, ProcessCensusEvent);
             handler.ConnectClientAsync(streamKey).Wait();
-            Task.Run(() => ProcessQueue(ctQueueProcess.Token), ctQueueProcess.Token);
+
+            Tracker.RegisterEventSaveRoutine(TeamName, ctEventSaving.Token, () => IsStreaming);
+            Task.Run(() => ProcessQueue(ctEventProcessing.Token), ctEventProcessing.Token);
+
             Logger.LogInformation("Team {0} Began processing player events", TeamName);
-            IsStreaming = true;
         }
+
         public void StopStream()
         {
             if (!IsStreaming)
                 return;
 
-            // Stop processing
-            ctQueueProcess.Cancel();
-            IsProccessing = false;
-
-            // Stop strreaming
+            // Stop streaming
             Tracker.Handler.DisconnectSocketAsync(streamKey).Wait();
             IsStreaming = false;
 
             // Set to unpaused
             IsPaused = false;
         }
-        
+
         public void PauseStream()
         {
             //if (!IsStreaming)
@@ -144,10 +149,10 @@ namespace PlanetSide
         private bool ProcessCensusEvent(SocketResponse response)
         {
             // Drop all events while paused.
-            if (IsPaused || !IsProccessing)
+            if (IsPaused)
                 return false;
 
-            ICensusEvent? censusEvent = Tracker.ProcessCensusEvent(response);
+            ICensusEvent? censusEvent = Tracker.ProcessCensusEvent(response, TeamName);
 
             // Only queue event if it is considered valid by the child class.
             if (censusEvent is not null && IsEventValid(censusEvent))
@@ -158,8 +163,7 @@ namespace PlanetSide
 
         private async void ProcessQueue(CancellationToken ct)
         {
-            IsProccessing = true;
-            using PeriodicTimer pTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(1));
+            using PeriodicTimer pTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(100));
 
             bool AddStat(string characterId, int weaponId, Action<PlanetStats> action)
             {
@@ -181,14 +185,14 @@ namespace PlanetSide
                 return false;
             }
 
-            while (!ct.IsCancellationRequested)
+            while (!ct.IsCancellationRequested && IsStreaming)
             {
                 // Yield if we burn through the queue or fail a dequeue
                 if (events.Count == 0 || !events.TryDequeue(out var payload))
                 {
                     // Using a periodic timer is WAY MORE cpu effiecient. Usage down from 65% idle to like 0.3% 
                     // await Task.Yield();
-                    await pTimer.WaitForNextTickAsync(ct);
+                    await pTimer.WaitForNextTickAsync();
                     continue;
                 }
 
@@ -233,8 +237,6 @@ namespace PlanetSide
                         break;
                 }
             }
-
-            IsProccessing = false;
         }
 
         public abstract void GetPlayers();
@@ -247,7 +249,7 @@ namespace PlanetSide
         public void Dispose()
         {
             StopStream();
-            ctQueueProcess.Dispose();
+            ctEventProcessing.Dispose();
         }
     }
 }
