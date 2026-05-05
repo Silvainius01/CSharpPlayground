@@ -81,7 +81,7 @@ namespace PlanetSide
 
             if (!payloadSaveQueues.TryGetValue(source, out EventSaver? old))
                 success = payloadSaveQueues.TryAdd(source, saver);
-            else if (old.SaveRoutine.IsCompleted)
+            else if (old.SaveRoutine is null || old.SaveRoutine.IsCompleted)
                 success = payloadSaveQueues.TryUpdate(source, saver, old);
 
             if (!success)
@@ -90,7 +90,6 @@ namespace PlanetSide
 
         public static ICensusEvent? ProcessCensusEvent(SocketResponse response, string source)
         {
-            string characterId;
             JsonElement payload;
             CensusEventType eventType = CensusEventType.Unknown;
 
@@ -299,7 +298,7 @@ namespace PlanetSide
             }
 
             // Attempt to remove ourself from the registered queues
-            if (payloadSaveQueues.TryRemove(source, out EventSaver saver))
+            if (payloadSaveQueues.TryRemove(source, out EventSaver? saver))
                 Logger.LogInformation($"{source} Events save process ended and removed.");
             Logger.LogWarning($"{source} Events save process ended, but failed to remove.");
         }

@@ -22,6 +22,7 @@ namespace PlanetSide.Websocket
         public double RoundLength { get; protected set; } = 15 * 60;
         public bool RoundPaused { get; private set; }
         public bool RoundStarted { get; private set; }
+
         protected DateTime lastTime = DateTime.Now;
         protected CommandEngine.Timer roundTimer;
         protected CancellationTokenSource ctRoundUpdate = new CancellationTokenSource();
@@ -43,8 +44,9 @@ namespace PlanetSide.Websocket
             this.ZoneId = zone;
             roundTimer = new CommandEngine.Timer(TimeSpan.FromSeconds(RoundLength).TotalSeconds);
 
+            serverCommands.Add(new ConsoleCommand("startRound", StartRoundCommand));
+
             roundCommands = new CommandModule("Enter Round Command");
-            roundCommands.Add(new ConsoleCommand("start", StartRoundCommand));
             roundCommands.Add(new ConsoleCommand("end", EndRoundCommand));
             roundCommands.Add(new ConsoleCommand("pause", PauseRoundCommand));
             roundCommands.Add(new ConsoleCommand("resume", ResumeRoundCommand));
