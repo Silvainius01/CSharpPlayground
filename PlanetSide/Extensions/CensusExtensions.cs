@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PlanetSide.Extensions
+namespace PlanetSide
 {
-    internal static class CensusExtensions
+    public static class CensusExtensions
     {
         /// <summary>
         /// Merge character, world, and event filteres from one subscription into this one.
@@ -16,9 +16,9 @@ namespace PlanetSide.Extensions
         /// <param name="other"></param>
         public static void Merge(this CensusStreamSubscription subscription, CensusStreamSubscription other)
         {
-            subscription.Characters = subscription.Characters.Union(other.Characters).ToArray();
-            subscription.Worlds = subscription.Worlds.Union(other.Worlds).ToArray();
-            subscription.EventNames = subscription.EventNames.Union(other.EventNames).ToArray();
+            subscription.Characters = subscription.Characters.Union(other.Characters);
+            subscription.Worlds = subscription.Worlds.Union(other.Worlds);
+            subscription.EventNames = subscription.EventNames.Union(other.EventNames);
         }
     }
 }

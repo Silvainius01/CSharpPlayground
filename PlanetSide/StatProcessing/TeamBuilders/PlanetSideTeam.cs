@@ -30,11 +30,9 @@ namespace PlanetSide
         protected int _teamSize;
 
         // Event Processing state data
-        [JsonIgnore] public bool IsStreaming { get; private set; }
         [JsonIgnore] public bool IsProcessing { get; private set; }
         [JsonIgnore] public bool IsPaused { get; set; }
 
-        [JsonIgnore] protected string worldString;
         [JsonIgnore] protected string streamKey = string.Empty;
         [JsonIgnore] protected readonly ILogger<PlanetSideTeam> Logger;
 
@@ -46,12 +44,12 @@ namespace PlanetSide
         [JsonIgnore] protected ConcurrentDictionary<string, PlayerStats> _teamPlayerStats = new ConcurrentDictionary<string, PlayerStats>(8, 64);
         [JsonIgnore] protected ConcurrentDictionary<int, WeaponStats> _teamWeaponStats = new ConcurrentDictionary<int, WeaponStats>(8, 128);
 
-        public PlanetSideTeam(int teamId, string teamName, int faction, string world)
+        public PlanetSideTeam(int teamId, string teamName, int faction, int world)
         {
             this.TeamId = teamId;
             this.FactionId = faction;
             this.TeamName = teamName;
-            worldString = world;
+            this.WorldId = world;
 
             TeamStats = new PlanetStats();
             TeamWeapons = _teamWeaponStats;
@@ -63,51 +61,40 @@ namespace PlanetSide
             streamKey = $"PlanetSideTeam_{teamName}_PlayerEventStream";
             ctEventProcessing = new CancellationTokenSource();
             ctEventSaving = new CancellationTokenSource();
-
-            if (int.TryParse(worldString, out int worldId))
-                this.WorldId = worldId;
-            else WorldId = -1;
         }
 
-        public void StartStream()
+        public void StartProcessing()
         {
-            if (IsStreaming)
+            if (IsProcessing)
                 return;
 
-            IsStreaming = true;
+            IsProcessing = true;
 
             // Start processing tasks
-            Tracker.RegisterEventSaveRoutine(TeamName, ctEventSaving.Token, () => IsStreaming);
+            Tracker.RegisterEventSaveRoutine(TeamName, ctEventSaving.Token, () => IsProcessing);
             Task.Run(() => ProcessQueue(ctEventProcessing.Token), ctEventProcessing.Token);
-
-            // Create the event stream
-            var handler = Tracker.Handler;
-            handler.AddSubscription(streamKey, GetStreamSubscription());
-            handler.AddActionToSubscription(streamKey, ProcessCensusEvent);
-            handler.ConnectClientAsync(streamKey).Wait();
-
-            Logger.LogInformation("Team {0} Began processing player events", TeamName);
+            
         }
-        public void StopStream()
+        public void StopProcessing()
         {
-            if (!IsStreaming)
+            if (!IsProcessing)
                 return;
 
             // Stop streaming
             Tracker.Handler.DisconnectSocketAsync(streamKey).Wait();
-            IsStreaming = false;
+            IsProcessing = false;
 
             // Set to unpaused
             IsPaused = false;
         }
 
-        public void PauseStream()
+        public void PauseProcessing()
         {
             //if (!IsStreaming)
             //    return;
             IsPaused = true;
         }
-        public void ResumeStream()
+        public void ResumeProcessing()
         {
             //if (!IsStreaming)
             //    return;
@@ -129,6 +116,7 @@ namespace PlanetSide
             if (!Directory.Exists("./SavedTeamData"))
                 Directory.CreateDirectory("./SavedTeamData");
 
+            UpdateDamage();
             string timeStr = DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss");
             using (StreamWriter writer = new StreamWriter($"./SavedTeamData/Team_{TeamName}_{timeStr}.json"))
             {
@@ -157,18 +145,32 @@ namespace PlanetSide
             _teamSize = GetPlayerCount();
             playersAdded = true;
         }
+        public void UpdateDamage()
+        {
+            float totalDamage = 0;
+            foreach (var player in _teamPlayerStats.Values)
+            {
+                float damage = DamageTracker.GetCharacterDamage(player.Data.CensusId);
+                player.Stats.InfantryDamage = damage;
+                totalDamage += damage;
+            }
+            TeamStats.InfantryDamage = totalDamage;
+        }
 
-        private bool ProcessCensusEvent(SocketResponse response)
+        public bool ProcessCensusEvent(SocketResponse response)
         {
             // Drop all events while paused.
             if (IsPaused)
                 return false;
 
-            ICensusEvent? censusEvent = Tracker.ProcessCensusEvent(response, TeamName);
+            ICensusEvent? censusEvent = Tracker.ProcessCensusEvent(response);
 
             // Only queue event if it is considered valid by the child class.
             if (censusEvent is not null && IsEventValid(censusEvent))
+            {
                 events.Enqueue(censusEvent);
+                Tracker.SaveCensusEvent(response.Message.RootElement.GetProperty("payload"), TeamName);
+            }
 
             return false;
         }
@@ -197,7 +199,9 @@ namespace PlanetSide
                 return false;
             }
 
-            while (!ct.IsCancellationRequested && IsStreaming)
+            Logger.LogInformation("Team {0} Began processing player events", TeamName);
+
+            while (!ct.IsCancellationRequested && IsProcessing)
             {
                 // Yield if we burn through the queue or fail a dequeue
                 if (events.Count == 0 || !events.TryDequeue(out var payload))
@@ -221,6 +225,7 @@ namespace PlanetSide
                         {
                             var expEvent = (ExperiencePayload)payload;
                             AddStat(expEvent.CharacterId, -1, stats => stats.AddExperience(ref expEvent));
+                            DamageTracker.AddAssist(expEvent);
                         }
                         break;
                     case CensusEventType.Death:
@@ -230,7 +235,10 @@ namespace PlanetSide
 
                             // If not a death, add a kill.
                             if (!AddStat(deathEvent.CharacterId, deathEvent.AttackerWeaponId, stats => stats.AddDeath(ref deathEvent)))
+                            {
+                                bool check = DamageTracker.AddKill(deathEvent);
                                 AddStat(deathEvent.OtherId, deathEvent.AttackerWeaponId, stats => stats.AddKill(ref deathEvent));
+                            }
                         }
                         break;
                     case CensusEventType.VehicleDestroy:
@@ -256,11 +264,11 @@ namespace PlanetSide
         /// since it must lock the object, which stalls any Task hoping to access it.
         /// </summary>
         public abstract int GetPlayerCount();
-        protected abstract void OnStreamStart();
-        protected abstract void OnStreamStop();
+        protected abstract void OnProcessStart();
+        protected abstract void OnProcessStop();
         protected abstract void OnEventProcessed(ICensusEvent censusEvent);
         protected abstract bool IsEventValid(ICensusEvent censusEvent);
-        protected abstract CensusStreamSubscription GetStreamSubscription();
+        public abstract CensusStreamSubscription GetStreamSubscription();
 
         /// <summary>
         /// This method is called when the reporter is ready to add players, and only once.
@@ -270,7 +278,7 @@ namespace PlanetSide
 
         public void Dispose()
         {
-            StopStream();
+            StopProcessing();
             ctEventProcessing.Dispose();
         }
     }

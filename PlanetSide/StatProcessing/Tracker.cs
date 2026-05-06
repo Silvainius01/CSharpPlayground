@@ -56,7 +56,18 @@ namespace PlanetSide
         public const string TeamStatsJsonPath = $"./ChartTest/TeamStats.json";
         public const string CenusDataEventsPath = "./CensusData/Events";
         public const string CenusDataTablesPath = "./CensusData/Tables";
+        public static bool SaveAllEvents
+        {
+            get => saveAllEvents; 
+            set
+            {
+                if(value && !saveAllEvents)
+                    RegisterEventSaveRoutine(string.Empty, ctSaveRoutine.Token, () => SaveAllEvents);
+                saveAllEvents = value;
+            }
+        }
 
+        private static bool saveAllEvents = false;
         private static CancellationTokenSource ctSaveRoutine = new CancellationTokenSource();
         private static ConcurrentDictionary<string, bool> sourceWarnings = new ConcurrentDictionary<string, bool>();
         private static ConcurrentDictionary<string, EventSaver> payloadSaveQueues = new ConcurrentDictionary<string, EventSaver>(8, 4);
@@ -75,7 +86,7 @@ namespace PlanetSide
                 task.Wait();
         }
 
-        public static void RegisterEventSaveRoutine(string source, CancellationToken ct, Func<bool> condition)
+        public static bool RegisterEventSaveRoutine(string source, CancellationToken ct, Func<bool> condition)
         {
             bool success = false;
             EventSaver saver = new EventSaver(source, ct);
@@ -91,9 +102,25 @@ namespace PlanetSide
                 Logger.LogInformation($"Registered event saver for source {source}");
             }
             else Logger.LogWarning($"Failed to register event saving process for {source}");
+
+            return success;
         }
 
-        public static ICensusEvent? ProcessCensusEvent(SocketResponse response, string source)
+        public static bool SaveCensusEvent(JsonElement payload, string source)
+        {
+            if (payloadSaveQueues.ContainsKey(source))
+            {
+                payloadSaveQueues[source].PayloadQueue.Enqueue(payload);
+                return true;
+            }
+            else if (!sourceWarnings.ContainsKey(source))
+            {
+                sourceWarnings.TryAdd(source, true);
+                Logger.LogError($"No registered save process for events from {source}.");
+            }
+            return false;
+        }
+        public static ICensusEvent? ProcessCensusEvent(SocketResponse response)
         {
             JsonElement payload;
             CensusEventType eventType = CensusEventType.Unknown;
@@ -105,15 +132,8 @@ namespace PlanetSide
             || (eventType = GetEventType(eventTypeStr)) == CensusEventType.Unknown)
                 return null;
 
-            // Save any valid events to disk.
-
-            if (payloadSaveQueues.ContainsKey(source))
-                payloadSaveQueues[source].PayloadQueue.Enqueue(payload);
-            else if (!sourceWarnings.ContainsKey(source))
-            {
-                sourceWarnings.TryAdd(source, true);
-                Logger.LogError($"No registered save process for events from {source}.");
-            }
+            if(saveAllEvents)
+                SaveCensusEvent(payload, string.Empty);
 
             switch (eventType)
             {
@@ -315,12 +335,11 @@ namespace PlanetSide
                 // Attempt to remove ourself from the registered queues
                 if (payloadSaveQueues.TryRemove(source, out saver))
                     Logger.LogInformation($"{source} Events save process ended and removed.");
-                Logger.LogWarning($"{source} Events save process ended, but failed to remove.");
+                else Logger.LogWarning($"{source} Events save process ended, but failed to remove.");
             }
 
             if (ct.IsCancellationRequested)
                 Logger.LogError($"{source} Events save process was cancelled!");
-
         }
 
         public static string FactionIdToName(int id, bool abbreviated = true)

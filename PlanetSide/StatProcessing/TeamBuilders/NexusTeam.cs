@@ -20,7 +20,7 @@ namespace PlanetSide
     {
         ConcurrentDictionary<string, PlayerStats> playersConcurrent;
 
-        public NexusTeam(int teamId, string teamName, int faction, string world)
+        public NexusTeam(int teamId, string teamName, int faction, int world)
             : base(teamId, teamName, faction, world)
         {
             streamKey = $"NexusTeam_{teamName}_PlayerEventStream";
@@ -36,19 +36,19 @@ namespace PlanetSide
             // TODO: Generate a team of 48 players using the first ones to show up in the event stream.
         }
 
-        protected override CensusStreamSubscription GetStreamSubscription()
+        public override CensusStreamSubscription GetStreamSubscription()
         {
             return new CensusStreamSubscription()
             {
                 Characters = playersConcurrent.Keys,
-                Worlds = new[] { worldString },
+                Worlds = new[] { WorldId == -1 ? "all" : WorldId.ToString() },
                 EventNames = new[] { "Death", "GainExperience", "VehicleDestroy" },
                 LogicalAndCharactersWithWorlds = true
             };
         }
 
-        protected override void OnStreamStart() { }
-        protected override void OnStreamStop() { }
+        protected override void OnProcessStart() { }
+        protected override void OnProcessStop() { }
         protected override void OnEventProcessed(ICensusEvent payload) { }
 
         protected override bool IsEventValid(ICensusEvent censusEvent)

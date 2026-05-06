@@ -89,8 +89,11 @@ namespace PlanetSide
                 LeaderboardType = LeaderboardType.Player,
                 GetStat = (data, stats) =>
                 {
+                    // TODO: Update to stats.InfantryDamage if performance sucks
+                    // I have it like this since where I set that damage is jank.
                     CharacterData cData = (CharacterData)data;
-                    return DamageTracker.GetCharacterDamage(cData.CensusId);
+                    float damage = DamageTracker.GetCharacterDamage(cData.CensusId);
+                    return damage;
                 }
             };
         }

@@ -16,7 +16,7 @@ namespace PlanetSide
     {
         PlayerCsvEntry[] _inputPlayers;
 
-        public SetPlayerTeam(int teamId, string teamName, string world, params PlayerCsvEntry[] players)
+        public SetPlayerTeam(int teamId, string teamName, int world, params PlayerCsvEntry[] players)
             : base(teamId, teamName, -1, world)
         {
             ZoneId = -1;
@@ -25,12 +25,12 @@ namespace PlanetSide
             streamKey = $"{teamName}_CharacterEventStream";
         }
 
-        protected override CensusStreamSubscription GetStreamSubscription()
+        public override CensusStreamSubscription GetStreamSubscription()
         {
             var sub = new CensusStreamSubscription()
             {
                 Characters = _teamPlayerStats.Values.Select(p => p.Data.CensusId),
-                Worlds = new[] { worldString },
+                Worlds = new[] { WorldId == -1 ? "all" : WorldId.ToString() },
                 EventNames = new[] { "Death", "GainExperience", "VehicleDestroy", "FacilityControl" },
                 LogicalAndCharactersWithWorlds = true
             };
@@ -81,8 +81,8 @@ namespace PlanetSide
             return _teamSize;
         }
 
-        protected override void OnStreamStart() { }
-        protected override void OnStreamStop() { }
+        protected override void OnProcessStart() { }
+        protected override void OnProcessStop() { }
         protected override void OnEventProcessed(ICensusEvent censusEvent) { }
 
         protected override bool IsEventValid(ICensusEvent censusEvent)

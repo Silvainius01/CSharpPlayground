@@ -29,7 +29,7 @@ namespace PlanetSide.Websocket
         public string TeamOneName;
         public string TeamTwoName;
 
-        public HammaBowlReporter(string team1, string team2, string port, string world, int zone) : base(port, world, zone)
+        public HammaBowlReporter(string team1, string team2, string port, int world, int zone) : base(port, world, zone)
         {
             TeamOneName = team1;
             TeamTwoName = team2;
@@ -99,7 +99,7 @@ namespace PlanetSide.Websocket
                     csv.Context.RegisterClassMap<PlayerCsvEntryMap>();
                     var records = csv.GetRecords<PlayerCsvEntry>().ToArray();
 
-                    SetPlayerTeam team = new SetPlayerTeam(teamId, teamName, world, records);
+                    SetPlayerTeam team = new SetPlayerTeam(teamId, teamName, WorldId, records);
 
                     return team;
                 }

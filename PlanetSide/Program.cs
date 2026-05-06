@@ -41,20 +41,22 @@ namespace PlanetSide
         private static void StartSocketServer(List<string> args)
         {
             int zone = -1;
+            int world = -1;
+            PlanetSideReporter reporter = null;
 
-            if (args.Count < 2)
+            if (args.Count < 2 && !int.TryParse(args[2], out world))
             {
-                Logger.LogError("Must supply a world id");
-                return;
+                if (args[1] != "all")
+                {
+                    Logger.LogError("Must supply a world id");
+                    return;
+                }
             }
             if (args.Count < 3 && !int.TryParse(args[2], out zone))
             {
                 Logger.LogError("Must supply a valid zone id");
                 return;
             }
-
-            string world = args[1];
-            PlanetSideReporter reporter = null;
 
             switch (args[0])
             {
@@ -70,7 +72,6 @@ namespace PlanetSide
                         Logger.LogError("Hamma Bowl Reporter requires 2 team csv file names as arguments.");
                         return;
                     }
-
                     reporter = new HammaBowlReporter(args[3], args[4], "56854", world, zone);
                     break;
                 default:
@@ -106,7 +107,7 @@ namespace PlanetSide
                     csv.Context.RegisterClassMap<PlayerCsvEntryMap>();
                     var records = csv.GetRecords<PlayerCsvEntry>().ToArray();
 
-                    SetPlayerTeam teamHamma = new SetPlayerTeam(0, "Hamma", "19", records);
+                    SetPlayerTeam teamHamma = new SetPlayerTeam(0, "Hamma", 19, records);
 
                     Console.WriteLine("\nTEAM HAMMA");
 

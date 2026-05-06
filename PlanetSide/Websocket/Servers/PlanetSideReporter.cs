@@ -10,12 +10,14 @@ using Websocket.Client.Logging;
 using CommandEngine;
 using System.Linq;
 using System.ComponentModel;
+using DaybreakGames.Census.Stream;
 
 namespace PlanetSide.Websocket
 {
     public abstract class PlanetSideReporter : ReportServer
     {
         public int ZoneId { get; protected set; } = -1;
+        public int WorldId { get; protected set; }
         public float LeaderboardRefresh { get; protected set; } = 10.0f;
 
         // Round state data
@@ -27,7 +29,6 @@ namespace PlanetSide.Websocket
         protected CommandEngine.Timer roundTimer;
         protected CancellationTokenSource ctRoundUpdate;
 
-        protected string world;
         protected EventLeaderboard leaderboard;
         protected List<PlanetSideTeam> activeTeams;
         protected List<LeaderboardRequest> leaderboardRequests;
@@ -36,9 +37,9 @@ namespace PlanetSide.Websocket
         ConcurrentQueue<ServerReport> _leaderboardReports = new ConcurrentQueue<ServerReport>();
         CancellationTokenSource ctLeaderboardLoop;
 
-        public PlanetSideReporter(string port, string world, int zone) : base(port, ServerType.Publisher)
+        public PlanetSideReporter(string port, int world, int zone) : base(port, ServerType.Publisher)
         {
-            this.world = world;
+            this.WorldId = world;
             this.ZoneId = zone;
             roundTimer = new CommandEngine.Timer(TimeSpan.FromSeconds(RoundLength).TotalSeconds);
             ctRoundUpdate = new CancellationTokenSource();
@@ -65,10 +66,28 @@ namespace PlanetSide.Websocket
             ctLeaderboardLoop = new CancellationTokenSource();
             Task.Run(() => LeaderboardCalcLoop(ctLeaderboardLoop.Token));
 
+            CensusStreamSubscription subscription = new CensusStreamSubscription()
+            {
+                Characters = new List<string>(),
+                Worlds = new List<string>(),
+                EventNames = new List<string>(),
+                LogicalAndCharactersWithWorlds = true
+            };
+
+            var handler = Tracker.Handler;
+            handler.AddSubscription("Reporter", subscription);
+
             foreach (var team in activeTeams)
-                team.StartStream();
+            {
+                subscription.Merge(team.GetStreamSubscription());
+                handler.AddActionToSubscription("Reporter", team.ProcessCensusEvent);
+                team.StartProcessing();
+            }
 
             PauseRound();
+
+            // Create the event stream
+            handler.ConnectClientAsync("Reporter").Wait();
         }
         protected override void OnServerPause()
         {
@@ -80,7 +99,7 @@ namespace PlanetSide.Websocket
                 EndRound();
             
             foreach (var team in activeTeams)
-                team.StopStream();
+                team.StopProcessing();
 
             SaveStats(true);
         }
@@ -98,7 +117,7 @@ namespace PlanetSide.Websocket
             roundTimer.Activate(RoundLength);
 
             foreach (var team in activeTeams)
-                team.ResumeStream();
+                team.ResumeProcessing();
 
             if (ctRoundUpdate.IsCancellationRequested)
                 ctRoundUpdate = new CancellationTokenSource();
@@ -112,7 +131,7 @@ namespace PlanetSide.Websocket
             roundTimer.Deactivate();
             foreach (var team in activeTeams)
             {
-                team.PauseStream();
+                team.PauseProcessing();
             }
 
             double timeLeft = roundTimer.timeLeft;
@@ -129,7 +148,7 @@ namespace PlanetSide.Websocket
 
             RoundPaused = false;
             foreach (var team in activeTeams)
-                team.ResumeStream();
+                team.ResumeProcessing();
 
             double timeLeft = roundTimer.timeLeft;
             int minutes = (int)(roundTimer.timeLeft / 60);
@@ -148,7 +167,7 @@ namespace PlanetSide.Websocket
 
             roundTimer.Deactivate(true);
             foreach (var team in activeTeams)
-                team.PauseStream();
+                team.PauseProcessing();
             Console.WriteLine("Round Over!");
         }
 
@@ -200,6 +219,7 @@ namespace PlanetSide.Websocket
             using PeriodicTimer taskTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(100));
             lastTime = DateTime.Now;
 
+            Logger.LogInformation("Began round timer routine");
             while (!ct.IsCancellationRequested && RoundStarted)
             {
                 if (!RoundPaused)
@@ -256,11 +276,15 @@ namespace PlanetSide.Websocket
             float waitTime = LeaderboardRefresh / leaderboardRequests.Count;
             using PeriodicTimer boardtimer = new PeriodicTimer(TimeSpan.FromSeconds(waitTime));
 
+            Logger.LogInformation("Began leaderboard processing");
             while (!ct.IsCancellationRequested && IsActive)
             {
                 int numPlayers = 0;
                 for (int i = 0; i < activeTeams.Count; i++)
+                {
+                    activeTeams[i].UpdateDamage(); // Shoving this here since it'll be consistent 
                     numPlayers += activeTeams[i].GetPlayerCount();
+                }
 
                 for (int i = 0; i < leaderboardRequests.Count; i++)
                 {

@@ -13,7 +13,7 @@ namespace PlanetSide.Websocket
 {
     public class CommSmashReporter : PlanetSideReporter
     {
-        public CommSmashReporter(string port, string world, int zone=-1) : base(port, world, zone)
+        public CommSmashReporter(string port, int world, int zone=-1) : base(port, world, zone)
         {
 
         }
@@ -79,8 +79,8 @@ namespace PlanetSide.Websocket
         protected override List<PlanetSideTeam> GenerateTeams()
         {
             return new List<PlanetSideTeam>() {
-                 new FactionTeam("CommSmash11_TeamOne_TR", 3, world),
-                 new FactionTeam("CommSmash11_TeamTwo_NC", 2, world)
+                 new FactionTeam("CommSmash11_TeamOne_TR", 3, WorldId),
+                 new FactionTeam("CommSmash11_TeamTwo_NC", 2, WorldId)
             };
         }
 

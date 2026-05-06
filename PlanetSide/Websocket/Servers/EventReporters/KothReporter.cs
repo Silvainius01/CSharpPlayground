@@ -8,7 +8,7 @@ namespace PlanetSide.Websocket
 {
     public class KothReporter : PlanetSideReporter
     {
-        public KothReporter(string port, string world, int zone) : base(port, world, zone)
+        public KothReporter(string port, int world, int zone) : base(port, world, zone)
         {
         }
 
@@ -16,9 +16,9 @@ namespace PlanetSide.Websocket
         {
             var teams = new List<PlanetSideTeam>()
             {
-                new FactionTeam("VS", 1, world, this.ZoneId),
-                new FactionTeam("NC", 2, world, this.ZoneId),
-                new FactionTeam("TR", 3, world, this.ZoneId),
+                new FactionTeam("VS", 1, WorldId, this.ZoneId),
+                new FactionTeam("NC", 2, WorldId, this.ZoneId),
+                //new FactionTeam("TR", 3, world, this.ZoneId),
             };
 
             return teams;
@@ -27,9 +27,7 @@ namespace PlanetSide.Websocket
         {
             return new List<LeaderboardRequest>()
             {
-                LeaderboardRequest.Kills("koth-leaderboard-kills", 10),
-                LeaderboardRequest.Revives("koth-leaderboard-revives", 10),
-                LeaderboardRequest.TeamKills("koth-leaderboard-team-kills", 10)
+                LeaderboardRequest.Kills("koth-leaderboard-damage", 10),
             };
         }
 
@@ -37,9 +35,9 @@ namespace PlanetSide.Websocket
         {
             var report = new KothReport()
             {
-                VS_Stats = activeTeams[0].TeamStats,
-                NC_Stats = activeTeams[1].TeamStats,
-                TR_Stats = activeTeams[2].TeamStats,
+                //VS_Stats = activeTeams[0].TeamStats,
+                //NC_Stats = activeTeams[1].TeamStats,
+                //TR_Stats = activeTeams[2].TeamStats,
             };
 
             return new ServerReport()

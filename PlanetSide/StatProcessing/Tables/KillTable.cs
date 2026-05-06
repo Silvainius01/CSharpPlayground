@@ -17,6 +17,7 @@ namespace PlanetSide
 {
     internal class InfantryDeath
     {
+        public bool IsTeamKill { get; set; }
         public string KillerId { get; set; }
         public string VictimId { get; private set; }
         public int CensusTimestamp { get; private set; }
@@ -54,7 +55,7 @@ namespace PlanetSide
 
         public float GetDamageEstimate(string characterId)
         {
-            if (characterId == KillerId)
+            if (characterId == KillerId && !IsTeamKill)
                 return (1 - assistPercent) * 1000f;
             if (characterDamage.ContainsKey(characterId))
                 return characterDamage[characterId] * 1000f;
@@ -80,28 +81,32 @@ namespace PlanetSide
             return 0.0f;
         }
 
-        public static bool AddKill(string killerId, string victimId, int timestamp)
+        public static bool AddKill(DeathPayload deathEvent)
         {
-            InfantryDeath? death = GetDeath(victimId, timestamp);
+            InfantryDeath? death = GetDeath(deathEvent.CharacterId, deathEvent.CensusTimestamp);
 
             if (death is not null)
             {
                 // Possible to recieve assist before kill
                 if (!string.IsNullOrEmpty(death.KillerId))
                 {
-                    // Logger.LogError("Recieved a duplicate death.\t\nTimestamp: {0}, Victim: {1}\t\nOG Killer: {2}, Dupe Killer: {3}", timestamp, victimId, matchingDeath.KillerId, killerId);
+                    Logger.LogError("Recieved a duplicate death.\t\nTimestamp: {0}, Victim: {1}\t\nOG Killer: {2}, Dupe Killer: {3}", 
+                        deathEvent.CensusTimestamp, deathEvent.CharacterId, death.KillerId, deathEvent.OtherId);
                     return false;
                 }
+
                 // If not a duplicate, this is the killer.
-                death.KillerId = killerId;
+                death.KillerId = deathEvent.CharacterId;
+                death.IsTeamKill = deathEvent.TeamId == deathEvent.AttackerTeamId;
             }
             else
             {
-                death = new InfantryDeath(killerId, victimId, timestamp);
-                deaths[timestamp].Add(death);
+                death = new InfantryDeath(deathEvent.OtherId, deathEvent.CharacterId, deathEvent.CensusTimestamp);
+                death.IsTeamKill = deathEvent.TeamId == deathEvent.AttackerTeamId;
+                deaths[deathEvent.CensusTimestamp].Add(death);
             }
 
-            AddParticipation(killerId, death);
+            AddParticipation(deathEvent.OtherId, death);
             return true;
         }
 
@@ -132,14 +137,19 @@ namespace PlanetSide
         static InfantryDeath? GetDeath(string victimId, int timestamp, bool addIfMissing = false)
         {
             if (deaths.ContainsKey(timestamp))
-                return deaths[timestamp].First(d => d.VictimId == victimId);
-            deaths.TryAdd(timestamp, new ConcurrentBag<InfantryDeath>());
+            {
+                if (deaths[timestamp].TryFirst(d => d.VictimId == victimId, out InfantryDeath death))
+                    return death;
+            }
+            else deaths.TryAdd(timestamp, new ConcurrentBag<InfantryDeath>());
 
             if (addIfMissing)
             {
                 var death = new InfantryDeath(string.Empty, victimId, timestamp);
+                deaths[timestamp].Add(death);
                 return death;
             }
+
             return null;
         }
     }

@@ -18,7 +18,16 @@ namespace PlanetSide
     public class PlanetStats
     {
         public int Kills { get; set; }
-        public int Assists { get; set; }
+        public int Assists
+        {
+            get
+            {
+                int assistCount = 0;
+                foreach (var id in ExperienceTable.InfantryAssistIds)
+                    assistCount += GetExp(id).NumEvents;
+                return assistCount;
+            }
+        }
         public int Deaths { get; set; }
         public int TeamKills { get; set; }
         public int Headshots { get; set; }
@@ -32,6 +41,7 @@ namespace PlanetSide
                 return rezCount;
             }
         }
+        public float InfantryDamage { get; set; }
 
         public int VehicleKills { get; set; }
         public int VehicleDeaths { get; set; }
@@ -100,7 +110,7 @@ namespace PlanetSide
                 ++Kills;
                 if (deathEvent.IsHeadshot)
                     ++Headshots;
-                
+
             }
         }
         public void AddDeath(ref DeathPayload deathEvent)
@@ -126,35 +136,35 @@ namespace PlanetSide
         }
         public void AddVehicleDeath(ref VehicleDestroyPayload destroyEvent)
         {
-            if(destroyEvent.TeamId == destroyEvent.AttackerTeamId)
+            if (destroyEvent.TeamId == destroyEvent.AttackerTeamId)
             {
                 AddVehicleTeamKill(ref destroyEvent);
                 return;
             }
 
-            switch(VehicleTable.VehicleData[destroyEvent.VehicleId].Type)
+            switch (VehicleTable.VehicleData[destroyEvent.VehicleId].Type)
             {
                 case VehicleType.Air: // Note: includes bastions
                     ++AirDeaths;
                     break;
                 case VehicleType.Hover: // Magriders, Javelins.
                 case VehicleType.Ground: // Corsairs, hilariously.
-                    ++VehicleDeaths; 
+                    ++VehicleDeaths;
                     break;
                 case VehicleType.Unknown:
                     break;
             }
         }
-        
+
         public void AddVehicleTeamKill(ref VehicleDestroyPayload destroyEvent)
         {
             switch (VehicleTable.VehicleData[destroyEvent.VehicleId].Type)
             {
                 case VehicleType.Air:
-                    ++AirTeamKills; 
+                    ++AirTeamKills;
                     break;
                 case VehicleType.Ground:
-                    ++VehicleTeamKills; 
+                    ++VehicleTeamKills;
                     break;
                 case VehicleType.Unknown:
                     break;
@@ -170,10 +180,10 @@ namespace PlanetSide
         public void Reset()
         {
             Kills = 0;
-            Assists = 0;
             Deaths = 0;
             TeamKills = 0;
             Headshots = 0;
+            InfantryDamage = 0;
 
             VehicleKills = 0;
             VehicleDeaths = 0;
@@ -182,6 +192,9 @@ namespace PlanetSide
             AirKills = 0;
             AirDeaths = 0;
             AirTeamKills = 0;
+
+            FacilityCaptures = 0;
+            FacilityDefenses = 0;
 
             foreach (var cxp in _allExperience.Values)
             {

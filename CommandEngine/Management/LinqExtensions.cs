@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -76,6 +77,40 @@ namespace CommandEngine
             foreach (var item in enumerable)
                 if (predicate.Invoke(item))
                     return true;
+            return false;
+        }
+
+        public static bool TryFirst<T>(this T[] array, Func<T, bool> predicate, out T firstItem)
+        {
+            for (int i = 0; i < array.Length; i++)
+                if (predicate.Invoke(array[i]))
+                {
+                    firstItem = array[i];
+                    return true;
+                }
+            firstItem = default(T);
+            return false;
+        }
+        public static bool TryFirst<T>(this IList<T> list, Func<T, bool> predicate, out T firstItem)
+        {
+            for (int i = 0; i < list.Count; i++)
+                if (predicate.Invoke(list[i]))
+                {
+                    firstItem = list[i];
+                    return true;
+                }
+            firstItem = default(T);
+            return false;
+        }
+        public static bool TryFirst<T>(this IEnumerable<T> enumberable, Func<T, bool> predicate, out T firstItem)
+        {
+            foreach(var item in enumberable)
+                if(predicate.Invoke(item))
+                {
+                    firstItem = item;
+                    return true;
+                }
+            firstItem = default(T);
             return false;
         }
 

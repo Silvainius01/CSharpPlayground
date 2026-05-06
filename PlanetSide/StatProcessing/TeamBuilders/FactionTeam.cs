@@ -22,9 +22,8 @@ namespace PlanetSide
     public class FactionTeam : PlanetSideTeam
     {
         bool newPlayerAdded = false;
-        static Dictionary<string, CensusStreamSubscription> WorldSubscriptions = new Dictionary<string, CensusStreamSubscription>();
 
-        public FactionTeam(string teamName, int faction, string world, int zone = -1)
+        public FactionTeam(string teamName, int faction, int world, int zone = -1)
             : base(faction, teamName, faction, world)
         {
             ZoneId = zone;
@@ -41,20 +40,18 @@ namespace PlanetSide
             return _teamSize;
         }
 
-        protected override void OnStreamStart() { }
-        protected override void OnStreamStop() { }
+        protected override void OnProcessStart() { }
+        protected override void OnProcessStop() { }
         protected override void OnEventProcessed(ICensusEvent payload) { }
-        protected override CensusStreamSubscription GetStreamSubscription()
+        public override CensusStreamSubscription GetStreamSubscription()
         {
-            if (!WorldSubscriptions.ContainsKey(worldString))
-                WorldSubscriptions.Add(worldString, new CensusStreamSubscription()
-                {
-                    Characters = new[] { "all" },
-                    Worlds = new[] { worldString },
-                    EventNames = new[] { "Death", "GainExperience", "VehicleDestroy", "FacilityControl" },
-                    LogicalAndCharactersWithWorlds = true
-                });
-            return WorldSubscriptions[worldString];
+            return new CensusStreamSubscription()
+            {
+                Characters = new[] { "all" },
+                Worlds = new[] { WorldId == -1 ? "all" : WorldId.ToString() },
+                EventNames = new[] { "Death", "GainExperience", "VehicleDestroy", "FacilityControl" },
+                LogicalAndCharactersWithWorlds = true
+            };
         }
 
         protected override bool IsEventValid(ICensusEvent payload)
@@ -85,34 +82,32 @@ namespace PlanetSide
         {
             bool teamPlayerFound = false;
 
-            if (PlayerTable.TryGetOrAddCharacter(payload.CharacterId, out var cData1) && cData1.FactionId == FactionId)
+            bool IsTeamCharacter(string id)
             {
-                teamPlayerFound = true;
-                cData1.TeamId = FactionId;
-                PlayerStats stats = new PlayerStats()
+                if (PlayerTable.TryGetOrAddCharacter(id, out var cData) && cData.FactionId == FactionId)
                 {
-                    Data = cData1,
-                    Stats = new PlanetStats()
-                };
+                    if (!_teamPlayerStats.ContainsKey(id))
+                    {
+                        cData.TeamId = FactionId;
+                        PlayerStats stats = new PlayerStats()
+                        {
+                            Data = cData,
+                            Stats = new PlanetStats()
+                        };
 
-                if (_teamPlayerStats.TryAdd(payload.CharacterId, stats))
-                    newPlayerAdded = true;
-            }
-            if (PlayerTable.TryGetOrAddCharacter(payload.OtherId, out var cData2) && cData2.FactionId == FactionId)
-            {
-                teamPlayerFound = true;
-                cData2.TeamId = FactionId;
-                PlayerStats stats = new PlayerStats()
-                {
-                    Data = cData2,
-                    Stats = new PlanetStats()
-                };
-
-                if(_teamPlayerStats.TryAdd(payload.OtherId, stats))
-                    newPlayerAdded = true;
+                        if (_teamPlayerStats.TryAdd(id, stats))
+                        {
+                            newPlayerAdded = true;
+                            Logger.LogDebug($"Added character {cData.Name} to {Tracker.FactionIdToName(FactionId, false)}");
+                        }
+                        else Logger.LogWarning($"Failed to add character {id} to {Tracker.FactionIdToName(FactionId, false)}");
+                    }
+                    return true;
+                }
+                return false;
             }
 
-            return teamPlayerFound;
+            return IsTeamCharacter(payload.CharacterId) || IsTeamCharacter(payload.OtherId);
         }
     }
 }
