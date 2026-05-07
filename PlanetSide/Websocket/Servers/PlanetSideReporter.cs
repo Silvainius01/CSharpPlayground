@@ -11,6 +11,7 @@ using CommandEngine;
 using System.Linq;
 using System.ComponentModel;
 using DaybreakGames.Census.Stream;
+using System.Text.Json;
 
 namespace PlanetSide.Websocket
 {
@@ -51,60 +52,6 @@ namespace PlanetSide.Websocket
             serverCommands.Add(new ConsoleCommand("resumeRound", ResumeRoundCommand));
             serverCommands.Add(new ConsoleCommand("saveStats", SaveStatsCommand));
             serverCommands.Add(new ConsoleCommand("setRoundLength", SetRoundLengthCommand));
-        }
-
-        protected override void OnInitialize()
-        {
-            Tracker.PopulateTables();
-            Tracker.SaveAllEvents = true;
-            activeTeams = GenerateTeams();
-            leaderboardRequests = GenerateLeaderboardRequests();
-        }
-        protected override void OnServerStart()
-        {
-            // Start calculating leaderboards in the back ground.
-            leaderboard = new EventLeaderboard(activeTeams.ToArray());
-            ctLeaderboardLoop = new CancellationTokenSource();
-            Task.Run(() => LeaderboardCalcLoop(ctLeaderboardLoop.Token));
-
-            CensusStreamSubscription subscription = new CensusStreamSubscription()
-            {
-                Characters = new List<string>(),
-                Worlds = new List<string>(),
-                EventNames = new List<string>(),
-                LogicalAndCharactersWithWorlds = true
-            };
-
-            // Create the event stream
-
-            // Pre-emptively pause the round
-            PauseRound();
-
-            foreach (var team in activeTeams)
-            {
-                subscription.Merge(team.GetStreamSubscription());
-                team.StartProcessing();
-            }
-
-            var handler = Tracker.Handler;
-            handler.GetOrAddSubscription("Reporter", subscription);
-            foreach(var team in activeTeams)
-                handler.AddActionToSubscription("Reporter", team.ProcessCensusEvent);
-            handler.ConnectClientAsync("Reporter").Wait();
-        }
-        protected override void OnServerPause()
-        {
-            PauseRound();
-        }
-        protected override void OnServerStop()
-        {
-            if (RoundStarted)
-                EndRound();
-            
-            foreach (var team in activeTeams)
-                team.StopProcessing();
-
-            SaveStats(true);
         }
 
         public void StartRound()
@@ -171,6 +118,7 @@ namespace PlanetSide.Websocket
             roundTimer.Deactivate(true);
             foreach (var team in activeTeams)
                 team.PauseProcessing();
+
             Console.WriteLine("Round Over!");
         }
 
@@ -189,6 +137,78 @@ namespace PlanetSide.Websocket
                 return;
             }
             RoundLength = minutes * 60;
+        }
+
+        public bool ProcessCensusEvent(SocketResponse response)
+        {
+            // Drop all events while paused or stopped.
+            if (!RoundStarted || RoundPaused)
+                return false;
+
+            // Parse the event here so each team can focus on filtering instead of deserializing.
+            ICensusEvent? censusEvent = Tracker.ProcessCensusEvent(response);
+            // Give the event object to each team
+            if (censusEvent is not null)
+            {
+                // Jank, but task that writes to disk only accepts the JsonElement rn
+                JsonElement payload = response.Message.RootElement.GetProperty("payload");
+                foreach (var team in activeTeams)
+                    team.ProcessCensusEvent(censusEvent, payload);
+            }
+
+            return false;
+        }
+
+        protected override void OnInitialize()
+        {
+            Tracker.PopulateTables();
+            Tracker.SaveAllEvents = true;
+            activeTeams = GenerateTeams();
+            leaderboardRequests = GenerateLeaderboardRequests();
+        }
+        protected override void OnServerStart()
+        {
+            // Start calculating leaderboards in the back ground.
+            leaderboard = new EventLeaderboard(activeTeams.ToArray());
+            ctLeaderboardLoop = new CancellationTokenSource();
+            Task.Run(() => LeaderboardCalcLoop(ctLeaderboardLoop.Token));
+
+            CensusStreamSubscription subscription = new CensusStreamSubscription()
+            {
+                Characters = new List<string>(),
+                Worlds = new List<string>(),
+                EventNames = new List<string>(),
+                LogicalAndCharactersWithWorlds = true
+            };
+
+            foreach (var team in activeTeams)
+            {
+                subscription.Merge(team.GetStreamSubscription());
+                team.StartProcessing();
+            }
+
+            // Pre-emptively pause the round. Prevents any events from leaking through.
+            PauseRound();
+
+            // Create the event stream
+            var handler = Tracker.Handler;
+            handler.GetOrAddSubscription("Reporter", subscription);
+            handler.AddActionToSubscription("Reporter", ProcessCensusEvent);
+            handler.ConnectClientAsync("Reporter").Wait();
+        }
+        protected override void OnServerPause()
+        {
+            PauseRound();
+        }
+        protected override void OnServerStop()
+        {
+            if (RoundStarted)
+                EndRound();
+            
+            foreach (var team in activeTeams)
+                team.StopProcessing();
+
+            SaveStats(true);
         }
 
         protected override IEnumerable<ServerReport> GenerateReports()

@@ -56,6 +56,13 @@ namespace PlanetSide
             }
             return websockets[key];
         }
+
+        /// <summary>
+        /// Adds a callback to a websocket that gets called when a message is received.
+        /// </summary>
+        /// <param name="key">Key of the websockets</param>
+        /// <param name="action">Function to perform. This function should return true to cancel and remove its self.</param>
+        /// <returns></returns>
         public bool AddActionToSubscription(string key, Func<SocketResponse, bool> action)
         {
             if (!websockets.ContainsKey(key))

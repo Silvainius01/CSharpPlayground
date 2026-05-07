@@ -1,4 +1,5 @@
-﻿using DaybreakGames.Census.Stream;
+﻿using CommandEngine;
+using DaybreakGames.Census.Stream;
 using Microsoft.Extensions.Logging;
 using PlanetSide.StatProcessing.Events;
 using System;
@@ -110,13 +111,13 @@ namespace PlanetSide
         {
             if (payloadSaveQueues.ContainsKey(source))
             {
-                sourceWarnings.AddOrUpdate(source, true, (src, v) => true);
+                sourceWarnings.TryAddOrUpdate(source, true);
                 payloadSaveQueues[source].PayloadQueue.Enqueue(payload);
                 return true;
             }
             else if (!sourceWarnings.ContainsKey(source))
             {
-                sourceWarnings.update(source, false, (src, v) => false);
+                sourceWarnings.TryAddOrUpdate(source, false);
                 Logger.LogWarning($"No registered save process for events from {source}.");
             }
             return false;

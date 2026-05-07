@@ -157,19 +157,17 @@ namespace PlanetSide
             TeamStats.InfantryDamage = totalDamage;
         }
 
-        public bool ProcessCensusEvent(SocketResponse response)
+        public bool ProcessCensusEvent(ICensusEvent censusEvent, JsonElement payload)
         {
             // Drop all events while paused.
             if (IsPaused)
                 return false;
-
-            ICensusEvent? censusEvent = Tracker.ProcessCensusEvent(response);
-
+            
             // Only queue event if it is considered valid by the child class.
             if (censusEvent is not null && IsEventValid(censusEvent))
             {
                 events.Enqueue(censusEvent);
-                Tracker.SaveCensusEvent(response.Message.RootElement.GetProperty("payload"), TeamName);
+                Tracker.SaveCensusEvent(payload, TeamName);
             }
 
             return false;

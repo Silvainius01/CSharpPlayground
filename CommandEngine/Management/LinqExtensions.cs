@@ -63,11 +63,11 @@ namespace CommandEngine
         /// Adds a key value pair, or updates it to the passed value.
         /// </summary>
         /// <param name="key">The key associated with the value being added or updated.</param>
-        /// <param name="value">Teh value that will be added or replacing the existing one</param>
-        /// <returns></returns>
+        /// <param name="value">The value that will be added or replacing the existing one</param>
+        /// <returns>true if the value was added or updated, false otherwise. </returns>
         public static bool TryAddOrUpdate<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> dict, TKey key, TValue value)
         {
-            if (dict.ContainsKey(key))
+            if (!dict.TryAdd(key, value))
                 return dict.TryUpdate(key, value, dict[key]);
             return dict.TryAdd(key, value);
         }
