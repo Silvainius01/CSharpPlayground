@@ -77,10 +77,8 @@ namespace PlanetSide
         }
         private async Task OnMessage(string message)
         {
-            if (message == null)
-            {
+            if (message is null)
                 return;
-            }
 
             try
             {

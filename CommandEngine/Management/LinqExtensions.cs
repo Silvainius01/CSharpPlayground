@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
@@ -56,6 +57,19 @@ namespace CommandEngine
             {
                 dict.Add(pair.First, pair.Second);
             }
+        }
+
+        /// <summary>
+        /// Adds a key value pair, or updates it to the passed value.
+        /// </summary>
+        /// <param name="key">The key associated with the value being added or updated.</param>
+        /// <param name="value">Teh value that will be added or replacing the existing one</param>
+        /// <returns></returns>
+        public static bool TryAddOrUpdate<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> dict, TKey key, TValue value)
+        {
+            if (dict.ContainsKey(key))
+                return dict.TryUpdate(key, value, dict[key]);
+            return dict.TryAdd(key, value);
         }
 
         public static bool Contains<T>(this T[] array, Func<T, bool> predicate)

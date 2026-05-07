@@ -39,7 +39,7 @@ namespace PlanetSide
         //        await kvp.Value.Connect();
         //}
 
-        public CensusWebsocket AddSubscription(string key, CensusStreamSubscription subscription)
+        public CensusWebsocket GetOrAddSubscription(string key, CensusStreamSubscription subscription)
         {
             if (!websockets.ContainsKey(key))
             {

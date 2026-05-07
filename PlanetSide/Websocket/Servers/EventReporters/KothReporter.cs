@@ -18,7 +18,7 @@ namespace PlanetSide.Websocket
             {
                 new FactionTeam("VS", 1, WorldId, this.ZoneId),
                 new FactionTeam("NC", 2, WorldId, this.ZoneId),
-                //new FactionTeam("TR", 3, world, this.ZoneId),
+                new FactionTeam("TR", 3, WorldId, this.ZoneId),
             };
 
             return teams;

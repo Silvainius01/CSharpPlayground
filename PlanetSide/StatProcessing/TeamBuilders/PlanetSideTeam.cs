@@ -73,7 +73,7 @@ namespace PlanetSide
             // Start processing tasks
             Tracker.RegisterEventSaveRoutine(TeamName, ctEventSaving.Token, () => IsProcessing);
             Task.Run(() => ProcessQueue(ctEventProcessing.Token), ctEventProcessing.Token);
-            
+
         }
         public void StopProcessing()
         {
@@ -257,6 +257,10 @@ namespace PlanetSide
                         break;
                 }
             }
+
+            if (ct.IsCancellationRequested)
+                Logger.LogError("Team {0} processing routine cancelled!", TeamName);
+            else Logger.LogInformation("Team {0} processing routine ended.", TeamName);
         }
 
         /// <summary> 

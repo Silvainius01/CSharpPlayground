@@ -110,13 +110,14 @@ namespace PlanetSide
         {
             if (payloadSaveQueues.ContainsKey(source))
             {
+                sourceWarnings.AddOrUpdate(source, true, (src, v) => true);
                 payloadSaveQueues[source].PayloadQueue.Enqueue(payload);
                 return true;
             }
             else if (!sourceWarnings.ContainsKey(source))
             {
-                sourceWarnings.TryAdd(source, true);
-                Logger.LogError($"No registered save process for events from {source}.");
+                sourceWarnings.update(source, false, (src, v) => false);
+                Logger.LogWarning($"No registered save process for events from {source}.");
             }
             return false;
         }

@@ -30,6 +30,7 @@ namespace PlanetSide
         public static ReadOnlyDictionary<int, ExperienceTick> ExperienceMap;
 
 
+        static bool isPopulated = false;
         static List<int> _reviveIds = new List<int> { 7, 53 };
         static List<int> _resupplyIds = new List<int>();
         static List<int> _maxRepairIds = new List<int>() { 6, 142 };
@@ -41,6 +42,9 @@ namespace PlanetSide
 
         public static async Task Populate()
         {
+            if (isPopulated)
+                return;
+
             var handler = Tracker.Handler;
             var queryData = await handler.GetClientQuery("experience").SetLimit(5000).GetListAsync();
 
@@ -84,6 +88,7 @@ namespace PlanetSide
                 writer.Close();
             }
 
+            isPopulated = true;
             Logger.LogInformation("Experience Table Populated");
         }
     }

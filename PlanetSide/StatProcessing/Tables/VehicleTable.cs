@@ -15,15 +15,19 @@ namespace PlanetSide
     
     public static class VehicleTable
     {
-        static ConcurrentDictionary<int, VehicleData> _vehicleData;
         public static ReadOnlyDictionary<int, VehicleData> VehicleData;
+
+        static bool isPopulated = false;
+        static ConcurrentDictionary<int, VehicleData> _vehicleData;
 
         static ILogger Logger = Program.LoggerFactory.CreateLogger(typeof(VehicleTable));
 
 
         public static async Task Populate()
-
         {
+            if (isPopulated)
+                return;
+
             var handler = Tracker.Handler;
 
             var vehicleQuery = handler.GetClientQuery("vehicle").SetLimit(5000).ShowFields("name.en", "vehicle_id", "type_id");
@@ -76,6 +80,7 @@ namespace PlanetSide
                 writer.Close();
             }
 
+            isPopulated = true;
             Logger.LogInformation("Vehicle Table Populated");
         }
     }

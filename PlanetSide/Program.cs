@@ -44,7 +44,7 @@ namespace PlanetSide
             int world = -1;
             PlanetSideReporter reporter = null;
 
-            if (args.Count < 2 && !int.TryParse(args[2], out world))
+            if (args.Count < 2 || !int.TryParse(args[1], out world))
             {
                 if (args[1] != "all")
                 {
@@ -52,7 +52,7 @@ namespace PlanetSide
                     return;
                 }
             }
-            if (args.Count < 3 && !int.TryParse(args[2], out zone))
+            if (args.Count < 3 || !int.TryParse(args[2], out zone))
             {
                 Logger.LogError("Must supply a valid zone id");
                 return;

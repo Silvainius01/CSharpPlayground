@@ -56,6 +56,7 @@ namespace PlanetSide.Websocket
         protected override void OnInitialize()
         {
             Tracker.PopulateTables();
+            Tracker.SaveAllEvents = true;
             activeTeams = GenerateTeams();
             leaderboardRequests = GenerateLeaderboardRequests();
         }
@@ -74,19 +75,21 @@ namespace PlanetSide.Websocket
                 LogicalAndCharactersWithWorlds = true
             };
 
-            var handler = Tracker.Handler;
-            handler.AddSubscription("Reporter", subscription);
+            // Create the event stream
+
+            // Pre-emptively pause the round
+            PauseRound();
 
             foreach (var team in activeTeams)
             {
                 subscription.Merge(team.GetStreamSubscription());
-                handler.AddActionToSubscription("Reporter", team.ProcessCensusEvent);
                 team.StartProcessing();
             }
 
-            PauseRound();
-
-            // Create the event stream
+            var handler = Tracker.Handler;
+            handler.GetOrAddSubscription("Reporter", subscription);
+            foreach(var team in activeTeams)
+                handler.AddActionToSubscription("Reporter", team.ProcessCensusEvent);
             handler.ConnectClientAsync("Reporter").Wait();
         }
         protected override void OnServerPause()
@@ -136,7 +139,7 @@ namespace PlanetSide.Websocket
 
             double timeLeft = roundTimer.timeLeft;
             int minutes = (int)(roundTimer.timeLeft / 60);
-            Console.WriteLine($"Round Paused. Time left: {minutes}:{((int)(timeLeft - minutes * 60)).ToString("DD")}");
+            Console.WriteLine($"Round Paused. Time left: {minutes}:{(int)(timeLeft - minutes * 60)}");
         }
         public void ResumeRound()
         {
@@ -178,7 +181,6 @@ namespace PlanetSide.Websocket
                     team.SaveFullStats();
                 else team.SaveStats();
         }
-
         public void SetRoundLength(int minutes)
         {
             if (RoundStarted)

@@ -15,16 +15,21 @@ namespace PlanetSide
 {
     public static class WeaponTable
     {
+        public static ReadOnlyDictionary<int, WeaponData> WeaponMap;
+
+        static bool isPopulated = false;
         static ConcurrentDictionary<int, int> _itemToWeapon;
         static ConcurrentDictionary<int, int> _weaponToItem;
         static ConcurrentDictionary<int, WeaponData> _weaponMap;
-        public static ReadOnlyDictionary<int, WeaponData> WeaponMap;
 
         static ILogger Logger = Program.LoggerFactory.CreateLogger(typeof(WeaponTable));
 
 
         public static async Task Populate()
         {
+            if (isPopulated)
+                return;
+
             var handler = Tracker.Handler;
 
             var itemToWeaponQuery = handler.GetClientQuery("item_to_weapon").SetLimit(5000);
@@ -80,6 +85,8 @@ namespace PlanetSide
                 writer.Write(JsonConvert.SerializeObject(sorted));
                 writer.Close();
             }
+
+            isPopulated = true;
             Logger.LogInformation("Weapon Table Populated");
         }
         public static bool TryGetWeapon(int itemId, out WeaponData weaponData)
