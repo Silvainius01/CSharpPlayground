@@ -97,6 +97,90 @@ namespace PlanetSide
                 }
             };
         }
+        public static LeaderboardRequest InfantryHeals(string name, int boardSize)
+        {
+            return new LeaderboardRequest()
+            {
+                Name = name,
+                BoardSize = boardSize,
+                LeaderboardType = LeaderboardType.Player,
+                GetStat = (data, stats) =>
+                {
+                    float heals = 0;
+                    foreach (var id in ExperienceTable.InfantryHealingIds)
+                    {
+                        float xp = stats.GetExp(id).CumulativeScore;
+                        heals += ExperienceTable.ExperienceMap[id].IsSquad
+                            ? xp * ExperienceTable.HealthPerExp
+                            : xp * ExperienceTable.HealthPerSquadExp;
+                    }
+                    return heals;
+                }
+            };
+        }
+        public static LeaderboardRequest InfantryShields(string name, int boardSize)
+        {
+            return new LeaderboardRequest()
+            {
+                Name = name,
+                BoardSize = boardSize,
+                LeaderboardType = LeaderboardType.Player,
+                GetStat = (data, stats) =>
+                {
+                    float heals = 0;
+                    foreach (var id in ExperienceTable.InfantryShieldRepairIds)
+                    {
+                        float xp = stats.GetExp(id).CumulativeScore;
+                        heals += ExperienceTable.ExperienceMap[id].IsSquad
+                            ? xp * ExperienceTable.ShieldPerExp
+                            : xp * ExperienceTable.ShieldPerSquadExp;
+                    }
+                    return heals;
+                }
+            };
+        }
+        public static LeaderboardRequest MAXRepairs(string name, int boardSize)
+        {
+            return new LeaderboardRequest()
+            {
+                Name = name,
+                BoardSize = boardSize,
+                LeaderboardType = LeaderboardType.Player,
+                GetStat = (data, stats) =>
+                {
+                    float heals = 0;
+                    foreach (var id in ExperienceTable.MaxRepairIds)
+                    {
+                        float xp = stats.GetExp(id).CumulativeScore;
+                        heals += ExperienceTable.ExperienceMap[id].IsSquad
+                            ? xp * ExperienceTable.RepairPerExp
+                            : xp * ExperienceTable.RepairPerSquadExp;
+                    }
+                    return heals;
+                }
+            };
+        }
+        public static LeaderboardRequest VehicleRepairs(string name, int boardSize)
+        {
+            return new LeaderboardRequest()
+            {
+                Name = name,
+                BoardSize = boardSize,
+                LeaderboardType = LeaderboardType.Player,
+                GetStat = (data, stats) =>
+                {
+                    float heals = 0;
+                    foreach (var id in ExperienceTable.VehicleRepairIds)
+                    {
+                        float xp = stats.GetExp(id).CumulativeScore;
+                        heals += ExperienceTable.ExperienceMap[id].IsSquad
+                            ? xp * ExperienceTable.RepairPerExp
+                            : xp * ExperienceTable.RepairPerSquadExp;
+                    }
+                    return heals;
+                }
+            };
+        }
     }
 
     public struct LeaderboardEntry

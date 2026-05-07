@@ -35,9 +35,9 @@ namespace PlanetSide.Websocket
         {
             var report = new KothReport()
             {
-                //VS_Stats = activeTeams[0].TeamStats,
-                //NC_Stats = activeTeams[1].TeamStats,
-                //TR_Stats = activeTeams[2].TeamStats,
+                VS_Stats = activeTeams[0].TeamStats,
+                NC_Stats = activeTeams[1].TeamStats,
+                TR_Stats = activeTeams[2].TeamStats,
             };
 
             return new ServerReport()

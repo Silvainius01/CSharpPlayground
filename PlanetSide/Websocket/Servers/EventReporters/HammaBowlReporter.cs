@@ -62,7 +62,13 @@ namespace PlanetSide.Websocket
         }
         protected override List<LeaderboardRequest> GenerateLeaderboardRequests()
         {
-            return new List<LeaderboardRequest>();
+            return new List<LeaderboardRequest>()
+            {
+                LeaderboardRequest.Kills("leaderboard-kills", 10),
+                LeaderboardRequest.Revives("leaderboard-revives", 10),       
+                LeaderboardRequest.InfantryDamage("leaderboard-damage", 10),
+                LeaderboardRequest.WeaponKills("leaderboard-weapons", 10),
+            };
         }
 
         protected override ServerReport GenerateReport()

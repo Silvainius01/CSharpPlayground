@@ -15,20 +15,32 @@ namespace PlanetSide
     public static class ExperienceTable
     {
         public const int KillMAX = 29;
-        public const float HealthPerExp = 10;
-        public const float HealthPerSquadXp = (1f / 15f) * 100;
-        public const float ShieldPerExp = 10;
+
+        // MangoBean confirmed these numbers.
+        // Follow patern of (amountRestored / constant) * baseXp
+        public const float HealthPerExp = 10; // (1 / 10) * 100
+        public const float HealthPerSquadExp = (1f / 15f) * 100;
+        public const float ShieldPerExp = 10; // (1 / 10) * 100
         public const float ShieldPerSquadExp = (1f / 15f) * 100;
-        public const float RepairPerExp = 24;
-        public const float RepairPerSquadExp = (1f / 10f) * 120;
+        public const float RepairPerExp = 24; // (1 / 5) * 120
+        public const float RepairPerSquadExp = 12; // (1f / 10f) * 120;
+
+        // Unknown if these share repair values
+        public const float ConstructionRepairPerExp = RepairPerExp;
+        public const float ConstructionRepairPerSquadExp = RepairPerSquadExp;
+        
+        // Cortium values entirely unknown
+        public const float CortiumMinedPerExp = 100;
+        public const float CortiumDepositedPerExp = 100;
 
         public static ReadOnlyCollection<int> ReviveIds;
         public static ReadOnlyCollection<int> ResupplyIds;
         public static ReadOnlyCollection<int> MaxRepairIds;
         public static ReadOnlyCollection<int> VehicleRepairIds;
         public static ReadOnlyCollection<int> InfantryAssistIds;
+        public static ReadOnlyCollection<int> InfantryHealingIds;
+        public static ReadOnlyCollection<int> InfantryShieldRepairIds;
         public static ReadOnlyDictionary<int, ExperienceTick> ExperienceMap;
-
 
         static bool isPopulated = false;
         static List<int> _reviveIds = new List<int> { 7, 53 };
@@ -36,6 +48,8 @@ namespace PlanetSide
         static List<int> _maxRepairIds = new List<int>() { 6, 142 };
         static List<int> _vehicleRepairIds = new List<int>();
         static List<int> _infantryAssistIds = new List<int>() { 2, 371, 372 };
+        static List<int> _infantryHealingIds = new List<int>() { 4, 51 };
+        static List<int> _infantryShieldRepairIds = new List<int>() { 438, 439 };
         static ConcurrentDictionary<int, ExperienceTick> _experienceMap;
 
         static ILogger Logger = Program.LoggerFactory.CreateLogger(typeof(ExperienceTable));
@@ -53,6 +67,8 @@ namespace PlanetSide
             MaxRepairIds = new ReadOnlyCollection<int>(_maxRepairIds);
             VehicleRepairIds = new ReadOnlyCollection<int>(_vehicleRepairIds);
             InfantryAssistIds = new ReadOnlyCollection<int>(_infantryAssistIds);
+            InfantryHealingIds = new ReadOnlyCollection<int>(_infantryHealingIds);
+            InfantryShieldRepairIds = new ReadOnlyCollection<int>(_infantryShieldRepairIds);
 
             _experienceMap = new ConcurrentDictionary<int, ExperienceTick>(8, queryData.Count());
             ExperienceMap = new ReadOnlyDictionary<int, ExperienceTick>(_experienceMap);

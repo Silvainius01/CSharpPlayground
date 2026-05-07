@@ -35,6 +35,7 @@ namespace PlanetSide
             characterDamage = new Dictionary<string, float>();
         }
 
+        // TODO: look into if driver and gunner infantry assists matter
         public bool AddAssist(ExperiencePayload expEvent)
         {
             if (expEvent.OtherId != VictimId
