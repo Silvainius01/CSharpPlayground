@@ -85,7 +85,7 @@ namespace PlanetSide.Websocket
 
             return new ServerReport()
             {
-                Topic = "bowl_stats",
+                Topic = "team-stats",
                 Data = JsonConvert.SerializeObject(report)
             };
         }

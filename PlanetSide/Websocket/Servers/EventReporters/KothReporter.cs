@@ -27,7 +27,10 @@ namespace PlanetSide.Websocket
         {
             return new List<LeaderboardRequest>()
             {
-                LeaderboardRequest.Kills("koth-leaderboard-damage", 10),
+                LeaderboardRequest.Kills("leaderboard-kills", 10),
+                LeaderboardRequest.Revives("leaderboard-revives", 10),
+                LeaderboardRequest.InfantryDamage("leaderboard-damage", 10),
+                LeaderboardRequest.WeaponKills("leaderboard-weapons", 10),
             };
         }
 
@@ -42,7 +45,7 @@ namespace PlanetSide.Websocket
 
             return new ServerReport()
             {
-                Topic = "koth_stats",
+                Topic = "team-stats",
                 Data = JsonConvert.SerializeObject(report)
             };
         }

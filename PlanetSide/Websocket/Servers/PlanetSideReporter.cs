@@ -183,6 +183,7 @@ namespace PlanetSide.Websocket
 
             foreach (var team in activeTeams)
             {
+                team.AddPlayers();
                 subscription.Merge(team.GetStreamSubscription());
                 team.StartProcessing();
             }
