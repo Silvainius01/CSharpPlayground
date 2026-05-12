@@ -29,7 +29,7 @@ namespace PlanetSide.Websocket
             {
                 LeaderboardRequest.Kills("leaderboard-kills", 10),
                 LeaderboardRequest.Revives("leaderboard-revives", 10),
-                LeaderboardRequest.InfantryDamage("leaderboard-damage", 10),
+                LeaderboardRequest.InfantryDamageDealt("leaderboard-damage", 10),
                 LeaderboardRequest.WeaponKills("leaderboard-weapons", 10),
             };
         }

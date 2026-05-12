@@ -80,7 +80,7 @@ namespace PlanetSide
                 GetStat = (data, stats) => stats.Kills
             };
         }
-        public static LeaderboardRequest InfantryDamage(string name, int boardSize)
+        public static LeaderboardRequest InfantryDamageDealt(string name, int boardSize)
         {
             return new LeaderboardRequest()
             {
@@ -93,6 +93,21 @@ namespace PlanetSide
                     // I have it like this since where I set that damage is jank.
                     CharacterData cData = (CharacterData)data;
                     float damage = DamageTracker.GetCharacterDamageDealt(cData.CensusId);
+                    return damage;
+                }
+            };
+        }
+        public static LeaderboardRequest InfantryDamageReceived(string name, int boardSize)
+        {
+            return new LeaderboardRequest()
+            {
+                Name = name,
+                BoardSize = boardSize,
+                LeaderboardType = LeaderboardType.Player,
+                GetStat = (data, stats) =>
+                {
+                    CharacterData cData = (CharacterData)data;
+                    float damage = DamageTracker.GetCharacterDamageReceived(cData.CensusId);
                     return damage;
                 }
             };
