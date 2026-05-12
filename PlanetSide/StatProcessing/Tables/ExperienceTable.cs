@@ -33,6 +33,7 @@ namespace PlanetSide
         public const float CortiumMinedPerExp = 100;
         public const float CortiumDepositedPerExp = 100;
 
+        public static bool IsPopulated => isPopulated;
         public static ReadOnlyCollection<int> ReviveIds;
         public static ReadOnlyCollection<int> ResupplyIds;
         public static ReadOnlyCollection<int> MaxRepairIds;

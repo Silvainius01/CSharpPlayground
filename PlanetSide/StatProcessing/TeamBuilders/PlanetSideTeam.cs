@@ -150,7 +150,7 @@ namespace PlanetSide
             float totalDamage = 0;
             foreach (var player in _teamPlayerStats.Values)
             {
-                float damage = DamageTracker.GetCharacterDamage(player.Data.CensusId);
+                float damage = DamageTracker.GetCharacterDamageDealt(player.Data.CensusId);
                 player.Stats.InfantryDamage = damage;
                 totalDamage += damage;
             }
@@ -162,12 +162,22 @@ namespace PlanetSide
             // Drop all events while paused.
             if (IsPaused)
                 return false;
-            
+
+
+
             // Only queue event if it is considered valid by the child class.
-            if (censusEvent is not null && IsEventValid(censusEvent))
+            if (censusEvent is not null)
             {
-                events.Enqueue(censusEvent);
-                Tracker.SaveCensusEvent(payload, TeamName);
+                bool validZone = ZoneId == -1;
+                if (!validZone && censusEvent is ICensusZoneEvent zoneEvent)
+                    validZone = zoneEvent.ZoneId == ZoneId;
+
+                if (validZone && IsEventValid(censusEvent))
+                {
+                    events.Enqueue(censusEvent);
+                    Tracker.SaveCensusEvent(payload, TeamName);
+                    return true;
+                }
             }
 
             return false;
@@ -212,45 +222,30 @@ namespace PlanetSide
 
                 OnEventProcessed(payload);
 
-                bool validZone = ZoneId == -1;
-                if (!validZone && payload is ICensusZoneEvent zoneEvent)
-                    validZone = zoneEvent.ZoneId == ZoneId;
-
                 switch (payload.EventType)
                 {
                     case CensusEventType.GainExperience:
-                        if (validZone)
-                        {
-                            var expEvent = (ExperiencePayload)payload;
-                            AddStat(expEvent.CharacterId, -1, stats => stats.AddExperience(ref expEvent));
-                            DamageTracker.AddAssist(expEvent);
-                        }
+                        var expEvent = (ExperiencePayload)payload;
+                        AddStat(expEvent.CharacterId, -1, stats => stats.AddExperience(ref expEvent));
                         break;
                     case CensusEventType.Death:
-                        if (validZone)
-                        {
-                            var deathEvent = (DeathPayload)payload;
+                        var deathEvent = (DeathPayload)payload;
 
-                            // If not a death, add a kill.
-                            if (!AddStat(deathEvent.CharacterId, deathEvent.AttackerWeaponId, stats => stats.AddDeath(ref deathEvent)))
-                            {
-                                bool check = DamageTracker.AddKill(deathEvent);
-                                AddStat(deathEvent.OtherId, deathEvent.AttackerWeaponId, stats => stats.AddKill(ref deathEvent));
-                            }
+                        // If not a death, add a kill.
+                        if (!AddStat(deathEvent.CharacterId, deathEvent.AttackerWeaponId, stats => stats.AddDeath(ref deathEvent)))
+                        {
+                            AddStat(deathEvent.OtherId, deathEvent.AttackerWeaponId, stats => stats.AddKill(ref deathEvent));
                         }
                         break;
                     case CensusEventType.VehicleDestroy:
                         var destroyEvent = (VehicleDestroyPayload)payload;
-                        if (validZone)
-                        {
-                            // If not a death, add a kill.
-                            if (!AddStat(destroyEvent.CharacterId, destroyEvent.AttackerWeaponId, stats => stats.AddVehicleDeath(ref destroyEvent)))
-                                AddStat(destroyEvent.OtherId, destroyEvent.AttackerWeaponId, stats => stats.AddVehicleKill(ref destroyEvent));
-                        }
+                        // If not a death, add a kill.
+                        if (!AddStat(destroyEvent.CharacterId, destroyEvent.AttackerWeaponId, stats => stats.AddVehicleDeath(ref destroyEvent)))
+                            AddStat(destroyEvent.OtherId, destroyEvent.AttackerWeaponId, stats => stats.AddVehicleKill(ref destroyEvent));
                         break;
                     case CensusEventType.FacilityControl:
                         var facilityEvent = (FacilityControlEvent)payload;
-                        if (validZone && facilityEvent.NewFaction == FactionId)
+                        if (facilityEvent.NewFaction == FactionId)
                             TeamStats.AddFacilityEvent(ref facilityEvent);
                         break;
                 }

@@ -92,7 +92,7 @@ namespace PlanetSide
                     // TODO: Update to stats.InfantryDamage if performance sucks
                     // I have it like this since where I set that damage is jank.
                     CharacterData cData = (CharacterData)data;
-                    float damage = DamageTracker.GetCharacterDamage(cData.CensusId);
+                    float damage = DamageTracker.GetCharacterDamageDealt(cData.CensusId);
                     return damage;
                 }
             };

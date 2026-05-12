@@ -32,16 +32,13 @@
     <None Update="ChartTest\TeamStats.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="_data\teamBlessed.csv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="_data\teamHamma.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="_data\teamNiceu.csv">
+    <None Update="_data\teamOne.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="_data\teamSilv.csv">
+    <None Update="_data\teamTwo.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

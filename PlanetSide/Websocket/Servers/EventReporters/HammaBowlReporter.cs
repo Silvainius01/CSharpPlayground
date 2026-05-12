@@ -42,21 +42,21 @@ namespace PlanetSide.Websocket
             teams.Add(ReadTeamCsv(1, TeamOneName));
             teams.Add(ReadTeamCsv(2, TeamTwoName));
 
-            foreach (var team in teams)
-            {
-                using (ManagedStringBuilder msb = new ManagedStringBuilder("HammaBowlTeam"))
-                {
-                    var builder = msb.Builder;
+            //foreach (var team in teams)
+            //{
+            //    using (ManagedStringBuilder msb = new ManagedStringBuilder("HammaBowlTeam"))
+            //    {
+            //        var builder = msb.Builder;
 
-                    builder.NewlineAppend($"TEAM {team.TeamName.ToUpper()} [{Tracker.FactionIdToName(team.FactionId)}]");
+            //        builder.NewlineAppend($"TEAM {team.TeamName.ToUpper()} [{Tracker.FactionIdToName(team.FactionId)}]");
 
-                    foreach (var player in team.TeamPlayers.Values)
-                        builder.NewlineAppend($"  {player.Alias}: {player.Data.Name} ({player.Data.CensusId})");
-                    builder.Append("\n");
+            //        foreach (var player in team.TeamPlayers.Values)
+            //            builder.NewlineAppend($"  {player.Alias}: {player.Data.Name} ({player.Data.CensusId})");
+            //        builder.Append("\n");
 
-                    Console.WriteLine(builder.ToString());
-                }
-            }
+            //        Console.WriteLine(builder.ToString());
+            //    }
+            //}
 
             return teams;
         }
@@ -111,6 +111,5 @@ namespace PlanetSide.Websocket
                 }
             }
         }
-
     }
 }

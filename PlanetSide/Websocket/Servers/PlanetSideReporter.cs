@@ -147,13 +147,34 @@ namespace PlanetSide.Websocket
 
             // Parse the event here so each team can focus on filtering instead of deserializing.
             ICensusEvent? censusEvent = Tracker.ProcessCensusEvent(response);
+
             // Give the event object to each team
             if (censusEvent is not null)
             {
                 // Jank, but task that writes to disk only accepts the JsonElement rn
+                bool eventIsValid = false;
                 JsonElement payload = response.Message.RootElement.GetProperty("payload");
+
+                // Send event to teams, and mark if it was accepted by any of them.
                 foreach (var team in activeTeams)
-                    team.ProcessCensusEvent(censusEvent, payload);
+                    eventIsValid |= team.ProcessCensusEvent(censusEvent, payload);
+
+                // Send any accepted events to other systems that care. 
+                if (eventIsValid)
+                {
+                    switch (censusEvent.EventType)
+                    {
+                        case CensusEventType.GainExperience:
+                            var expEvent = (ExperiencePayload)censusEvent;
+                            DamageTracker.AddAssist(expEvent);
+                            DamageTracker.AddHeals(expEvent);
+                            break;
+                        case CensusEventType.Death:
+                            var deathEvent = (DeathPayload)censusEvent;
+                            DamageTracker.AddKill(deathEvent);
+                            break;
+                    }
+                }
             }
 
             return false;
@@ -205,7 +226,7 @@ namespace PlanetSide.Websocket
         {
             if (RoundStarted)
                 EndRound();
-            
+
             foreach (var team in activeTeams)
                 team.StopProcessing();
 

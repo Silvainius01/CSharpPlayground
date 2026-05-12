@@ -79,14 +79,7 @@ namespace PlanetSide
         {
             if (_allExperience.TryGetValue(id, out var exp))
                 return exp;
-
-            _allExperience[id] = new CumulativeExperience()
-            {
-                Id = id,
-                NumEvents = 0,
-                CumulativeScore = 0,
-                IsSquad = ExperienceTable.ExperienceMap[id].IsSquad
-            };
+            _allExperience[id] = new CumulativeExperience(id);
             return _allExperience[id];
         }
 

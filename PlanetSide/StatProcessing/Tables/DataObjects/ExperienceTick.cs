@@ -19,14 +19,31 @@ namespace PlanetSide
     public class CumulativeExperience : IDataObject
     {
         public int Id { get; set; }
-        public int NumEvents { get; set; }
         public string Name { get; set; }
-        public float CumulativeScore {  get; set; }
-        public bool IsSquad { get;set; }
+        public bool IsSquad { get; set; }
+        public int NumEvents { get; set; }
+        public float CumulativeScore { get; set; }
 
         public override string ToString()
         {
             return Name;
+        }
+
+        public CumulativeExperience() { }
+        public CumulativeExperience(int id)
+        {
+            if (!ExperienceTable.IsPopulated)
+                throw new Exception("Experience table isnt populated.");
+            else if (!ExperienceTable.ExperienceMap.ContainsKey(id))
+                throw new ArgumentException($"{id} is not a valid experience ID");
+
+            var xpData = ExperienceTable.ExperienceMap[id];
+
+            Id = id;
+            Name = xpData.Name;
+            IsSquad = xpData.IsSquad;
+            NumEvents = 0;
+            CumulativeScore = 0;
         }
     }
 }
