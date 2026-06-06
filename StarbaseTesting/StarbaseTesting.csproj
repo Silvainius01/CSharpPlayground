@@ -34,11 +34,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CommandEngine\CommandEngine.csproj" />
+    <ProjectReference Include="..\..\CommandEngine\CommandEngine\CommandEngine.csproj" />
   </ItemGroup>
 
 </Project>
