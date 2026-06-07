@@ -41,13 +41,13 @@ namespace Morrowind
         public float MinorSkillSpecWeight { get; set; } = 1.5f;
 
         public float MinimumRaceScore { get; set; } = 0.0f;
-        public float MinimumFactionScore { get; set; } = 3.0f;
+        public float MinimumFactionScore { get; set; } = 2.5f;
 
         /// <summary> Allows factions pairs that require specific quest completion orders and/or game knowledge to complete. </summary>
         public bool AllowAdvancedFactionPairs { get; set; } = false;
 
         /// <summary> If enabled, at least one skill that can open locks will be included. </summary>
-        public bool ForceLockpickingSkill { get; private set; } = false;
+        public bool ForceLockpickingSkill { get; private set; } = true;
         /// <summary> If enabled, at least one weapon skill will be included. </summary>
         public bool ForceWeaponSkill { get; private set; } = true;
         /// <summary> If enabled, at least one armor skill will be included. </summary>
@@ -82,6 +82,7 @@ namespace Morrowind
             SkillManager.SkillNameShortBlade,
             SkillManager.SkillNameSpear,
         };
+        public List<string> DisabledSkills = new List<string>();
 
         public RandomizerOptions(
             bool unarmoredIsArmor = true,
@@ -93,11 +94,11 @@ namespace Morrowind
             DestructionCountsAsWeapon = destructionIsWeapon;
 
             if (UnarmoredCountsAsArmor)
-                WeaponSkills.Add(SkillManager.SkillNameUnarmored);
+                ArmorSkills.Add(SkillManager.SkillNameUnarmored);
             if (MarksmanCountsAsWeapon)
-                WeaponSkills.Add(SkillManager.SkillNameUnarmored);
+                WeaponSkills.Add(SkillManager.SkillNameMarksman);
             if (DestructionCountsAsWeapon)
-                WeaponSkills.Add(SkillManager.SkillNameUnarmored);
+                WeaponSkills.Add(SkillManager.SkillNameDestruction);
         }
     }
 
@@ -126,17 +127,18 @@ namespace Morrowind
         {
             List<string> attributes = GetCharacterAttributes(options.NumAttributes);
             List<Skill> charSkills = GetCharacterSkills(attributes, options);
+            // Update attributes in case some the skill generator does weird stuff
+            attributes = GetCharacterAttributes(charSkills, options.NumAttributes);
+
             List<(string race, float score)> raceDistro = GetCharacterRaceDistro(attributes, charSkills, options);
             string specialization = GetSpecializaton(charSkills, options);
-            string selectedRace = SelectRandomEntry(raceDistro);
+            string selectedRace = SelectRandomEntry(raceDistro, options.MinimumRaceScore);
 
             List<(string faction, float score)> factionPrimaryDistro = GetCharacterFactionDistro(attributes, charSkills, options);
-            string factionPrimary = SelectRandomEntry(factionPrimaryDistro, out int pIndex);
+            string factionPrimary = SelectRandomEntry(factionPrimaryDistro, options.MinimumFactionScore, out int pIndex);
 
             List<(string faction, float score)> factionSecondaryDistro = GetCharacterSecondaryFactionDistro(factionPrimaryDistro, pIndex, factionPrimary, options);
-            string factionSecondary = SelectRandomEntry(factionSecondaryDistro);
-
-            factionSecondary = SelectRandomEntry(factionSecondaryDistro);
+            string factionSecondary = SelectRandomEntry(factionSecondaryDistro, options.MinimumFactionScore);
 
             using (ManagedColorBuilder mcb = new ManagedColorBuilder("CharacterRandomizer", string.Empty, "  "))
             {
@@ -157,31 +159,31 @@ namespace Morrowind
                     builder.Append(charSkills[i].Name, SpecColors[charSkills[i].Specialization]);
                 }
 
-                builder.NewlineAppend("Specialization:");
-                builder.NewlineAppend(1, specialization);
+                builder.NewlineAppend("\nSpecialization:", defaultColor);
+                builder.NewlineAppend(1, specialization, SpecColors[specialization]);
 
                 if (debug)
                 {
-                    void BuildDistroString(List<(string entry, float score)> distro, string selected)
+                    void BuildDistroString(List<(string entry, float score)> distro, float minScore, string selected)
                     {
-                        float totalScore = distro.Aggregate(0.0f, (total, tuple) => total + Math.Max(tuple.score, 0.0f));
+                        float totalScore = distro.Aggregate(0.0f, (total, tuple) => total + Math.Max(tuple.score - minScore, 0.0f));
                         foreach (var tuple in distro)
                         {
                             string tabs = tuple.entry.Length > 12 ? "\t" : "\t\t";
-                            float chance = Math.Max(tuple.score, 0.0f) / totalScore;
+                            float chance = Math.Max(tuple.score - minScore, 0.0f) / totalScore;
                             ConsoleColor c = tuple.entry == selected ? ConsoleColor.Yellow : defaultColor;
                             builder.NewlineAppend(1, $"{tuple.entry}:{tabs}{chance.ToString("P")} ({tuple.score})", c);
                         }
                     }
 
                     builder.NewlineAppend("\nRace Chances:", defaultColor);
-                    BuildDistroString(raceDistro, selectedRace);
+                    BuildDistroString(raceDistro, options.MinimumRaceScore, selectedRace);
 
                     builder.NewlineAppend("\nPrimary Faction Chances:", defaultColor);
-                    BuildDistroString(factionPrimaryDistro, factionPrimary);
+                    BuildDistroString(factionPrimaryDistro, options.MinimumFactionScore, factionPrimary);
 
                     builder.NewlineAppend("\nSecondary Faction Chances:", defaultColor);
-                    BuildDistroString(factionSecondaryDistro, factionSecondary);
+                    BuildDistroString(factionSecondaryDistro, options.MinimumFactionScore, factionSecondary);
                 }
                 else
                 {
@@ -225,7 +227,10 @@ namespace Morrowind
                     : options.MinorSkillSpecWeight;
 
                 if (specCount[skill.Specialization] > most)
+                {
                     spec = skill.Specialization;
+                    most = specCount[skill.Specialization];
+                }
             }
 
             return spec;
@@ -236,6 +241,28 @@ namespace Morrowind
             // Select random attributes
             List<string> attributes = SkillManager.SkillsByAttribute.Keys.ToList();
             attributes.Shuffle();
+            attributes.RemoveRange(numAttributes, attributes.Count - numAttributes);
+
+            Console.WriteLine("Selecting initial attributes:");
+            foreach (string attr in attributes)
+                Console.WriteLine("  " + attr);
+
+            return attributes;
+        }
+        static List<string> GetCharacterAttributes(List<Skill> skills, int numAttributes)
+        {
+            Dictionary<string, int> attrCount = new();
+
+            foreach (var skill in skills)
+            {
+                string attr = skill.GoverningAttribute;
+                if (!attrCount.ContainsKey(attr))
+                    attrCount.Add(attr, 0);
+                attrCount[attr]++;
+            }
+
+            List<string> attributes = attrCount.Keys.ToList();
+            attributes.Sort((a1, a2) => -attrCount[a1].CompareTo(attrCount[a2]));
             attributes.RemoveRange(numAttributes, attributes.Count - numAttributes);
             return attributes;
         }
@@ -251,11 +278,22 @@ namespace Morrowind
             Dictionary<string, int> attrCount = attributes.ToDictionary(s => s, s => 0);
 
             // Split skills into primary and secondary pools
+            Console.WriteLine("\nSorting skills");
             foreach (string attr in SkillManager.SkillsByAttribute.Keys)
             {
+                IEnumerable<Skill> skills = SkillManager.SkillsByAttribute[attr];
+
+                // Filter out disabled skills
+                foreach (string dSkillName in options.DisabledSkills)
+                    if (SkillManager.SkillDict.TryGetValue(dSkillName, out Skill dSkill) && attr == dSkill.GoverningAttribute)
+                    {
+                        skills = skills.Where(s => s.Name != dSkillName);
+                        ConsoleExt.WriteWarningLine($"Filtered skill {dSkillName}");
+                    }
+
                 if (attributes.Contains(attr))
-                    attrSkills.AddRange(SkillManager.SkillsByAttribute[attr]);
-                else otherSkills.AddRange(SkillManager.SkillsByAttribute[attr]);
+                    attrSkills.AddRange(skills);
+                else otherSkills.AddRange(skills);
             }
 
             attrSkills.Shuffle();
@@ -264,10 +302,10 @@ namespace Morrowind
             // Skill validity util.
             bool AtCategoryCapacity(Skill skill)
             {
-                return
-                    !(numLocks < options.MaxLockSkills || !options.LockSkills.Contains(skill.Name)) &&
-                    !(numArmors < options.MaxArmorSkills || !options.ArmorSkills.Contains(skill.Name)) &&
-                    !(numWeapons < options.MaxWeaponSkills || !options.WeaponSkills.Contains(skill.Name));
+                return // True if numCategory is at/above limit AND this skill belong to Category
+                    (numLocks >= options.MaxLockSkills && options.LockSkills.Contains(skill.Name)) ||
+                    (numArmors >= options.MaxArmorSkills && options.ArmorSkills.Contains(skill.Name)) ||
+                    (numWeapons >= options.MaxWeaponSkills && options.WeaponSkills.Contains(skill.Name));
             }
             bool AtAttributeCapacity(Skill skill)
             {
@@ -286,6 +324,11 @@ namespace Morrowind
                 if (AtAttributeCapacity(skill))
                 {
                     ConsoleExt.WriteWarningLine($"Skipped {skill.Name}: attribute limit reached");
+                    return false;
+                }
+                if (charSkills.Contains(s => s.Name == skill.Name))
+                {
+                    ConsoleExt.WriteWarningLine($"Skipped {skill.Name}: already added");
                     return false;
                 }
                 return true;
@@ -329,7 +372,7 @@ namespace Morrowind
             int missingWeapons = options.ForceWeaponSkill ? Math.Max(1 - numWeapons, 0) : 0;
             int mReqs = missingLocks + missingArmors + missingWeapons;
 
-            if(charSkills.Count > options.NumSkills - mReqs)
+            if (charSkills.Count > options.NumSkills - mReqs)
                 Console.WriteLine("\nTrimming primary skills");
             while (charSkills.Count > options.NumSkills - mReqs)
             {
@@ -352,27 +395,27 @@ namespace Morrowind
                     (missingArmors > 0 && options.ArmorSkills.Contains(skill.Name)) ||
                     (missingWeapons > 0 && options.WeaponSkills.Contains(skill.Name));
             }
-            bool AddIfMissing(Skill skill, string source)
+            bool AddIfMissing(Skill skill)
             {
                 if (missingLocks > 0 && options.LockSkills.Contains(skill.Name))
                 {
                     AddSkill(skill);
                     --missingLocks;
-                    ConsoleExt.WriteWarningLine($"Added {skill.Name} from {source}: required lock skill");
+                    ConsoleExt.WriteWarningLine($"Added {skill.Name}: required lock skill");
                     return true;
                 }
                 else if (missingArmors > 0 && options.ArmorSkills.Contains(skill.Name))
                 {
                     AddSkill(skill);
                     --missingArmors;
-                    ConsoleExt.WriteWarningLine($"Added {skill.Name} from {source}: required armor skill");
+                    ConsoleExt.WriteWarningLine($"Added {skill.Name}: required armor skill");
                     return true;
                 }
                 else if (missingWeapons > 0 && options.WeaponSkills.Contains(skill.Name))
                 {
                     AddSkill(skill);
                     --missingWeapons;
-                    ConsoleExt.WriteWarningLine($"Added {skill.Name} from {source}: required weapon skill");
+                    ConsoleExt.WriteWarningLine($"Added {skill.Name}: required weapon skill");
                     return true;
                 }
                 return false;
@@ -433,20 +476,22 @@ namespace Morrowind
             }
 
             // Scan over secondary skills for anything missing
-            for (int i = 0; i < otherSkills.Count && charSkills.Count < options.NumSkills; i++)
+            Console.WriteLine("\nFilling missing from secondary skills");
+            for (int i = 0; i < otherSkills.Count && charSkills.Count < options.NumSkills; ++i)
             {
                 Skill skill = otherSkills[i];
-                AddIfMissing(skill, "secondary");
+                AddIfMissing(skill);
             }
 
             // Fill any gaps from the remaining skills
+            Console.WriteLine("\nFilling gaps from secondary skills");
             for (int i = 0; i < otherSkills.Count && charSkills.Count < options.NumSkills; ++i)
             {
                 var skill = otherSkills[i];
                 if (IsValidSkill(skill))
                 {
                     AddSkill(skill);
-                    Console.WriteLine($"Adding {skill.Name} from secondary: gap filling");
+                    Console.WriteLine($"Adding {skill.Name}: gap filling");
                 }
             }
 
@@ -456,7 +501,6 @@ namespace Morrowind
         static List<(string race, float score)> GetCharacterRaceDistro(List<string> attributes, List<Skill> skills, RandomizerOptions options)
         {
             // Build a weighted distrubtion of races based on how well they compliment selected skills
-            float totalScores = 0.0f;
             List<(string race, float score)> raceScores = new();
             foreach (CharacterRace race in CharacterRaceManager.RaceList)
             {
@@ -479,9 +523,6 @@ namespace Morrowind
 
                 raceScores.Add(($"Male {race.Name}", totalScoreMale));
                 raceScores.Add(($"Female {race.Name}", totalScoreFemale));
-
-                // Scores < 0 are not added to total and are ignored
-                totalScores += Math.Max(totalScoreMale, 0.0f) + Math.Max(totalScoreFemale, 0.0f);
             }
 
             // Sort scores by descending order
@@ -492,7 +533,6 @@ namespace Morrowind
         static List<(string faction, float score)> GetCharacterFactionDistro(List<string> attributes, List<Skill> skills, RandomizerOptions options)
         {
             // Build a weighted distrubtion of races based on how well they compliment selected skills
-            float totalScores = 0.0f;
             List<(string faction, float score)> factionScores = new();
             foreach (Faction faction in FactionManager.FactionList)
             {
@@ -508,15 +548,7 @@ namespace Morrowind
                     if (attributes.Contains(attr))
                         factionScore += 1.0f * options.FactionAttributeWeight;
 
-                if (factionScore < options.MinimumFactionScore)
-                {
-                    //ConsoleExt.WriteWarningLine($"Faction {faction.Name} excluded. Score was {factionScore}");
-                    factionScore = -factionScore;
-                }
-
-                // Scores < 0 are not added to total and are ignored
                 factionScores.Add((faction.Name, factionScore));
-                totalScores += Math.Max(factionScore, 0.0f);
             }
 
             // Sort scores by descending order
@@ -528,6 +560,7 @@ namespace Morrowind
             List<(string faction, float score)> factionSecondaryDistro = new(primaryDistro);
             Faction pFaction = FactionManager.FactionDict[primary];
 
+            Console.WriteLine("\nDetermining Secondary Factions");
             factionSecondaryDistro.RemoveAt(pIndex);
             for (int i = 0; i < factionSecondaryDistro.Count; ++i)
             {
@@ -547,17 +580,17 @@ namespace Morrowind
             return factionSecondaryDistro;
         }
 
-        static string SelectRandomEntry(List<(string entry, float score)> distribution)
-            => SelectRandomEntry(distribution, out int swallow);
-        static string SelectRandomEntry(List<(string entry, float score)> distribution, out int index)
+        static string SelectRandomEntry(List<(string entry, float score)> distribution, float minScore)
+            => SelectRandomEntry(distribution, minScore, out int swallow);
+        static string SelectRandomEntry(List<(string entry, float score)> distribution, float minScore, out int index)
         {
             float chance = 0.0f;
-            float totalScore = distribution.Aggregate(0.0f, (total, tuple) => total + Math.Max(tuple.score, 0.0f));
+            float totalScore = distribution.Aggregate(0.0f, (total, tuple) => total + Math.Max(tuple.score - minScore, 0.0f));
             double r = CommandEngine.Random.NormalDouble;
             string selectedRace = string.Empty;
             for (index = 0; index < distribution.Count; index++)
             {
-                chance += distribution[index].score / totalScore;
+                chance += Math.Max(distribution[index].score - minScore, 0.0f) / totalScore;
                 if (r < chance)
                 {
                     selectedRace = distribution[index].entry;
@@ -567,7 +600,7 @@ namespace Morrowind
 
             return selectedRace;
         }
-        static void TestDistribution(List<(string entry, float score)> distribution)
+        static void TestDistribution(List<(string entry, float score)> distribution, float minScore)
         {
             int totalPulls = 100000;
             Dictionary<int, int> pullsPerIndex = new Dictionary<int, int>();
@@ -577,7 +610,7 @@ namespace Morrowind
 
             for (int i = 0; i < totalPulls; ++i)
             {
-                string selected = SelectRandomEntry(distribution, out int index);
+                string selected = SelectRandomEntry(distribution, minScore, out int index);
                 pullsPerIndex[index] += 1;
             }
 
@@ -599,7 +632,7 @@ namespace Morrowind
                         continue;
 
                     string tabs = tuple.entry.Length > 12 ? "\t" : "\t\t";
-                    float expected = Math.Max(tuple.score, 0.0f) / totalScore;
+                    float expected = Math.Max(tuple.score - minScore, 0.0f) / totalScore;
                     float actual = pullsPerIndex[i] / (float)totalPulls;
                     int ePulls = (int)(expected * totalPulls);
 

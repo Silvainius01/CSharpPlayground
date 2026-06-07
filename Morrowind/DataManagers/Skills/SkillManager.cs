@@ -28,7 +28,7 @@ namespace Morrowind
         public const string SkillNameConjuration     = "Conjuration";
         public const string SkillNameDestruction     = "Destruction";
         public const string SkillNameEnchant         = "Enchant";
-        public const string SkillNameHandToHand      = "Hand To Hand";
+        public const string SkillNameHandToHand      = "Hand to Hand";
         public const string SkillNameHeavyArmor      = "Heavy Armor";
         public const string SkillNameIllusion        = "Illusion";
         public const string SkillNameLightArmor      = "Light Armor";

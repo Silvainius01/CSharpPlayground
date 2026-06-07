@@ -31,7 +31,14 @@ namespace Morrowind
 
         public static void GenerateRandomCharacter(List<string> args)
         {
-            RandomizerOptions options = new RandomizerOptions();
+            RandomizerOptions options = new RandomizerOptions()
+            {
+                DisabledSkills = new List<string>()
+                {
+                    SkillManager.SkillNameArmorer,
+                    SkillManager.SkillNameHandToHand,
+                }
+            };
             var character = CharacterRandomizer.GenerateCharacter(options, true);
         }
     }
