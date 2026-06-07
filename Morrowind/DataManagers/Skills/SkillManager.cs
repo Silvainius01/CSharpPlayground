@@ -16,6 +16,36 @@ namespace Morrowind
         public static Dictionary<string, List<Skill>> SkillsByAttribute { get; private set; } = new Dictionary<string, List<Skill>>();
         public static Dictionary<string, List<Skill>> SkillsBySpecialization { get; private set; } = new Dictionary<string, List<Skill>>();
 
+        #region Skill Names
+        public const string SkillNameAcrobatics      = "Acrobatics";
+        public const string SkillNameAlchemy         = "Alchemy";
+        public const string SkillNameAlteration      = "Alteration";
+        public const string SkillNameArmorer         = "Armorer";
+        public const string SkillNameAthletics       = "Athletics";
+        public const string SkillNameAxe             = "Axe";
+        public const string SkillNameBlock           = "Block";
+        public const string SkillNameBluntWeapon     = "Blunt Weapon";
+        public const string SkillNameConjuration     = "Conjuration";
+        public const string SkillNameDestruction     = "Destruction";
+        public const string SkillNameEnchant         = "Enchant";
+        public const string SkillNameHandToHand      = "Hand To Hand";
+        public const string SkillNameHeavyArmor      = "Heavy Armor";
+        public const string SkillNameIllusion        = "Illusion";
+        public const string SkillNameLightArmor      = "Light Armor";
+        public const string SkillNameLongBlade       = "Long Blade";
+        public const string SkillNameMarksman        = "Marksman";
+        public const string SkillNameMediumArmor     = "Medium Armor";
+        public const string SkillNameMercantile      = "Mercantile";
+        public const string SkillNameMysticism       = "Mysticism";
+        public const string SkillNameRestoration     = "Restoration";
+        public const string SkillNameSecurity        = "Security";
+        public const string SkillNameShortBlade      = "Short Blade";
+        public const string SkillNameSneak           = "Sneak";
+        public const string SkillNameSpear           = "Spear";
+        public const string SkillNameSpeechcraft     = "Speechcraft";
+        public const string SkillNameUnarmored       = "Unarmored";
+        #endregion
+
         protected override string GetDataPath()
             => $"{Directory.GetCurrentDirectory()}\\Data\\Skills.json";
 
@@ -40,139 +70,139 @@ namespace Morrowind
         {
             List<Skill> skills = new List<Skill>()
             {
-                new Skill("Acrobatics")
+                new Skill(SkillNameAcrobatics)
                 { 
-                    GoverningAttribute = "Strength", 
+                    GoverningAttribute = CharacterAttribute.Strength, 
                     Specialization = "Stealth",
                 },
-                new Skill("Alchemy")
+                new Skill(SkillNameAlchemy)
                 {
-                    GoverningAttribute = "Intelligence",
+                    GoverningAttribute = CharacterAttribute.Intelligence,
                     Specialization = "Magic",
                 },
-                new Skill("Alteration")
+                new Skill(SkillNameAlteration)
                 {
-                    GoverningAttribute = "Willpower",
+                    GoverningAttribute = CharacterAttribute.Willpower,
                     Specialization = "Magic",
                 },
-                new Skill("Armorer")
+                new Skill(SkillNameArmorer)
                 {
-                    GoverningAttribute = "Strength", 
+                    GoverningAttribute = CharacterAttribute.Strength, 
                     Specialization = "Combat",
                 },
-                new Skill("Athletics")
+                new Skill(SkillNameAthletics)
                 { 
-                    GoverningAttribute = "Speed",
+                    GoverningAttribute = CharacterAttribute.Speed,
                     Specialization = "Combat",
                 },
-                new Skill("Axe")
+                new Skill(SkillNameAxe)
                 { 
-                    GoverningAttribute = "Strength", 
+                    GoverningAttribute = CharacterAttribute.Strength, 
                     Specialization = "Combat",
                 },
-                new Skill("Block")
+                new Skill(SkillNameBlock)
                 { 
-                    GoverningAttribute = "Agility", 
+                    GoverningAttribute = CharacterAttribute.Agility, 
                     Specialization = "Combat",
                 },
-                new Skill("Blunt Weapon")
+                new Skill(SkillNameBluntWeapon)
                 {  
-                    GoverningAttribute = "Strength", 
+                    GoverningAttribute = CharacterAttribute.Strength, 
                     Specialization = "Combat",
                 },
-                new Skill("Conjuration")
+                new Skill(SkillNameConjuration)
                 {
-                    GoverningAttribute = "Intelligence",
+                    GoverningAttribute = CharacterAttribute.Intelligence,
                     Specialization = "Magic",
                 },
-                new Skill("Destruction")
+                new Skill(SkillNameDestruction)
                 {
-                    GoverningAttribute = "Willpower",
+                    GoverningAttribute = CharacterAttribute.Willpower,
                     Specialization = "Magic",
                 },
-                new Skill("Enchant")
+                new Skill(SkillNameEnchant)
                 {
-                    GoverningAttribute = "Intelligence",
+                    GoverningAttribute = CharacterAttribute.Intelligence,
                     Specialization = "Magic",
                 },
-                new Skill("Hand to Hand")
+                new Skill(SkillNameHandToHand)
                 {  
-                    GoverningAttribute = "Speed", 
+                    GoverningAttribute = CharacterAttribute.Speed, 
                     Specialization = "Stealth",
                 },
-                new Skill("Heavy Armor")
+                new Skill(SkillNameHeavyArmor)
                 { 
-                    GoverningAttribute = "Endurance", 
+                    GoverningAttribute = CharacterAttribute.Endurance, 
                     Specialization = "Combat",
                 },
-                new Skill("Illusion")
+                new Skill(SkillNameIllusion)
                 {
-                    GoverningAttribute = "Personality",
+                    GoverningAttribute = CharacterAttribute.Personality,
                     Specialization = "Magic",
                 },
-                new Skill("Light Armor")
+                new Skill(SkillNameLightArmor)
                 { 
-                    GoverningAttribute = "Agility", 
+                    GoverningAttribute = CharacterAttribute.Agility, 
                     Specialization = "Stealth",
                 },
-                new Skill("Long Blade")
+                new Skill(SkillNameLongBlade)
                 {  
-                    GoverningAttribute = "Strength", 
+                    GoverningAttribute = CharacterAttribute.Strength, 
                     Specialization = "Combat",
                 },
-                new Skill("Marksman")
+                new Skill(SkillNameMarksman)
                 {  
-                    GoverningAttribute = "Agility", 
+                    GoverningAttribute = CharacterAttribute.Agility, 
                     Specialization = "Stealth",
                 },
-                new Skill("Medium Armor")
+                new Skill(SkillNameMediumArmor)
                 { 
-                    GoverningAttribute = "Endurance", 
+                    GoverningAttribute = CharacterAttribute.Endurance, 
                     Specialization = "Combat",
                 },
-                new Skill("Mercantile")
+                new Skill(SkillNameMercantile)
                 {
-                    GoverningAttribute = "Personality",
+                    GoverningAttribute = CharacterAttribute.Personality,
                     Specialization = "Stealth",
                 },
-                new Skill("Mysticism")
+                new Skill(SkillNameMysticism)
                 {
-                    GoverningAttribute = "Willpower",
+                    GoverningAttribute = CharacterAttribute.Willpower,
                     Specialization = "Magic",
                 },
-                new Skill("Restoration")
+                new Skill(SkillNameRestoration)
                 {
-                    GoverningAttribute = "Willpower",
+                    GoverningAttribute = CharacterAttribute.Willpower,
                     Specialization = "Magic",
                 },
-                new Skill("Security")
+                new Skill(SkillNameSecurity)
                 {
-                    GoverningAttribute = "Intelligence",
+                    GoverningAttribute = CharacterAttribute.Intelligence,
                     Specialization = "Stealth",
                 },
-                new Skill("Short Blade")
+                new Skill(SkillNameShortBlade)
                 {  
-                    GoverningAttribute = "Speed",
+                    GoverningAttribute = CharacterAttribute.Speed,
                     Specialization = "Stealth",
                 },
-                new Skill("Sneak")
+                new Skill(SkillNameSneak)
                 {
-                    GoverningAttribute = "Agility",
+                    GoverningAttribute = CharacterAttribute.Agility,
                     Specialization = "Stealth",
                 },
-                new Skill("Spear")
+                new Skill(SkillNameSpear)
                 {  
-                    GoverningAttribute = "Endurance",
+                    GoverningAttribute = CharacterAttribute.Endurance,
                     Specialization = "Combat",
                 },
-                new Skill("Speechcraft")
+                new Skill(SkillNameSpeechcraft)
                 {
-                    GoverningAttribute = "Personality",
+                    GoverningAttribute = CharacterAttribute.Personality,
                     Specialization = "Stealth",
                 },
-                new Skill("Unarmored")
+                new Skill(SkillNameUnarmored)
                 {
-                    GoverningAttribute = "Speed",
+                    GoverningAttribute = CharacterAttribute.Speed,
                     Specialization = "Magic",
                 }
             };

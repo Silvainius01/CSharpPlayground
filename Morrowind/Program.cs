@@ -19,6 +19,7 @@ namespace Morrowind
             SpellEffectManager.LoadTypes();
             IngredientManager.LoadTypes();
 
+            FactionManager.LoadTypes();
             CharacterRaceManager.LoadTypes();
             MerchantManager.LoadTypes();
 
@@ -30,7 +31,8 @@ namespace Morrowind
 
         public static void GenerateRandomCharacter(List<string> args)
         {
-            CharacterRandomizer.GenerateCharacter();
+            RandomizerOptions options = new RandomizerOptions();
+            var character = CharacterRandomizer.GenerateCharacter(options, true);
         }
     }
 }

@@ -13,5 +13,7 @@ namespace Morrowind
         public string Specialization { get; set; }
 
         public Skill(string name) { Name = name; }
+
+        public override string ToString() { return Name; }
     }
 }

@@ -55,50 +55,55 @@ namespace Morrowind
                 {
                     SkillBonuses = new Dictionary<string, int>()
                     {
-                        { "Alchemy", 5 },
-                        { "Athletics", 15 },
-                        { "Illusion", 5 },
-                        { "Medium Armor", 5 },
-                        { "Mysticism", 5 },
-                        { "Spear", 5 },
-                        { "Unarmored", 5 },
+                        { SkillManager.SkillNameAlchemy, 5 },
+                        { SkillManager.SkillNameAthletics, 15 },
+                        { SkillManager.SkillNameIllusion, 5 },
+                        { SkillManager.SkillNameMediumArmor, 5 },
+                        { SkillManager.SkillNameMysticism, 5 },
+                        { SkillManager.SkillNameSpear, 5 },
+                        { SkillManager.SkillNameUnarmored, 5 },
                     },
                     AttributeBonusesMale = new Dictionary<string, int>()
                     {
-                        { "Willpower", -10 },
-                        { "Agility", 10 },
-                        { "Speed", 10 },
-                        { "Endurance", -10 },
-                        { "Personality", -10 },
+                        { CharacterAttribute.Willpower, -10 },
+                        { CharacterAttribute.Agility, 10 },
+                        { CharacterAttribute.Speed, 10 },
+                        { CharacterAttribute.Endurance, -10 },
+                        { CharacterAttribute.Personality, -10 },
                     },
                     AttributeBonusesFemale = new Dictionary<string, int>()
                     {
-                        { "Intelligence", 10 },
-                        { "Endurance", -10 },
-                        { "Personality", -10 },
+                        { CharacterAttribute.Intelligence, 10 },
+                        { CharacterAttribute.Endurance, -10 },
+                        { CharacterAttribute.Personality, -10 },
                     }
                 },
                 new CharacterRace("Breton")
                 {
                     SkillBonuses = new Dictionary<string, int>()
                     {
-                        
+                        { SkillManager.SkillNameAlchemy, 5 },
+                        { SkillManager.SkillNameAlteration, 5 },
+                        { SkillManager.SkillNameConjuration, 10 },
+                        { SkillManager.SkillNameIllusion, 5 },
+                        { SkillManager.SkillNameMysticism, 10 },
+                        { SkillManager.SkillNameRestoration, 10 },
                     },
                     AttributeBonusesMale = new Dictionary<string, int>()
                     {
-                        { "Intelligence",   10 },
-                        { "Willpower",      10 },
-                        { "Agility",        -10 },
-                        { "Speed",          -10 },
-                        { "Endurance",      -10 },
+                        { CharacterAttribute.Intelligence,   10 },
+                        { CharacterAttribute.Willpower,      10 },
+                        { CharacterAttribute.Agility,        -10 },
+                        { CharacterAttribute.Speed,          -10 },
+                        { CharacterAttribute.Endurance,      -10 },
                     },
                     AttributeBonusesFemale = new Dictionary<string, int>()
                     {
-                        { "Strength",       -10 },
-                        { "Intelligence",   10 },
-                        { "Willpower",      10 },
-                        { "Agility",        -10 },
-                        { "Endurance",      -10 },
+                        { CharacterAttribute.Strength,       -10 },
+                        { CharacterAttribute.Intelligence,   10 },
+                        { CharacterAttribute.Willpower,      10 },
+                        { CharacterAttribute.Agility,        -10 },
+                        { CharacterAttribute.Endurance,      -10 },
                     }
                 },
                 new CharacterRace("Dark Elf")
@@ -106,209 +111,209 @@ namespace Morrowind
                     SkillBonuses = new Dictionary<string, int>()
                     {
                         { "Atheltics", 5},
-                        { "Destruction", 10},
-                        { "Light Armor", 5},
-                        { "Long Blade", 5},
-                        { "Marksman", 5},
-                        { "Mysticism", 5},
-                        { "Short Blade", 10},
+                        { SkillManager.SkillNameDestruction, 10},
+                        { SkillManager.SkillNameLightArmor, 5},
+                        { SkillManager.SkillNameLongBlade, 5},
+                        { SkillManager.SkillNameMarksman, 5},
+                        { SkillManager.SkillNameMysticism, 5},
+                        { SkillManager.SkillNameShortBlade, 10},
                     },
                     AttributeBonusesMale = new Dictionary<string, int>()
                     {
-                        { "Willpower",      -10 },
-                        { "Speed",          10 },
-                        { "Personality",    -10 },
+                        { CharacterAttribute.Willpower,      -10 },
+                        { CharacterAttribute.Speed,          10 },
+                        { CharacterAttribute.Personality,    -10 },
                     },
                     AttributeBonusesFemale = new Dictionary<string, int>()
                     {
-                        { "Willpower",      -10 },
-                        { "Speed",          10 },
-                        { "Endurance",      -10 },
+                        { CharacterAttribute.Willpower,      -10 },
+                        { CharacterAttribute.Speed,          10 },
+                        { CharacterAttribute.Endurance,      -10 },
                     }
                 },
                 new CharacterRace("High Elf")
                 {
                     SkillBonuses = new Dictionary<string, int>()
                     {
-                        { "Alchemy", 10 },
-                        { "Alteration", 5 },
-                        { "Conjuration", 5 },
-                        { "Destruction", 10 },
-                        { "Enchant", 10 },
-                        { "Illusion", 5 },
+                        { SkillManager.SkillNameAlchemy, 10 },
+                        { SkillManager.SkillNameAlteration, 5 },
+                        { SkillManager.SkillNameConjuration, 5 },
+                        { SkillManager.SkillNameDestruction, 10 },
+                        { SkillManager.SkillNameEnchant, 10 },
+                        { SkillManager.SkillNameIllusion, 5 },
                     },
                     AttributeBonusesMale = new Dictionary<string, int>()
                     {
-                        { "Strength",       -10 },
-                        { "Intelligence",   10 },
-                        { "Speed",          -10 },
+                        { CharacterAttribute.Strength,       -10 },
+                        { CharacterAttribute.Intelligence,   10 },
+                        { CharacterAttribute.Speed,          -10 },
                     },
                     AttributeBonusesFemale = new Dictionary<string, int>()
                     {
-                        { "Strength",       -10 },
-                        { "Intelligence",   10 },
-                        { "Endurance",      -10 },
+                        { CharacterAttribute.Strength,       -10 },
+                        { CharacterAttribute.Intelligence,   10 },
+                        { CharacterAttribute.Endurance,      -10 },
                     }
                 },
                 new CharacterRace("Imperial")
                 {
                     SkillBonuses = new Dictionary<string, int>()
                     {
-                        { "Blunt Weapon", 5 },
-                        { "Hand to Hand", 5 },
-                        { "Light Armor", 5 },
-                        { "Long Blade", 10 },
-                        { "Mercantile", 10 },
-                        { "Speechcraft", 10 },
+                        { SkillManager.SkillNameBluntWeapon, 5 },
+                        { SkillManager.SkillNameHandToHand, 5 },
+                        { SkillManager.SkillNameLightArmor, 5 },
+                        { SkillManager.SkillNameLongBlade, 10 },
+                        { SkillManager.SkillNameMercantile, 10 },
+                        { SkillManager.SkillNameSpeechcraft, 10 },
                     },
                     AttributeBonusesMale = new Dictionary<string, int>()
                     {
-                        { "Willpower",      -10 },
-                        { "Agility",        -10 },
-                        { "Personality",    10 },
+                        { CharacterAttribute.Willpower,      -10 },
+                        { CharacterAttribute.Agility,        -10 },
+                        { CharacterAttribute.Personality,    10 },
                     },
                     AttributeBonusesFemale = new Dictionary<string, int>()
                     {
-                        { "Agility",        -10 },
-                        { "Speed",          -10 },
-                        { "Personality",    10 },
+                        { CharacterAttribute.Agility,        -10 },
+                        { CharacterAttribute.Speed,          -10 },
+                        { CharacterAttribute.Personality,    10 },
                     }
                 },
                 new CharacterRace("Khajiit")
                 {
                     SkillBonuses = new Dictionary<string, int>()
                     {
-                        { "Acrobatics", 15 },
-                        { "Athletics", 5 },
-                        { "Hand to Hand", 5 },
-                        { "Light Armor", 5 },
-                        { "Security", 5 },
-                        { "Short Blade", 5 },
-                        { "Sneak", 5 },
+                        { SkillManager.SkillNameAcrobatics, 15 },
+                        { SkillManager.SkillNameAthletics, 5 },
+                        { SkillManager.SkillNameHandToHand, 5 },
+                        { SkillManager.SkillNameLightArmor, 5 },
+                        { SkillManager.SkillNameSecurity, 5 },
+                        { SkillManager.SkillNameShortBlade, 5 },
+                        { SkillManager.SkillNameSneak, 5 },
                     },
                     AttributeBonusesMale = new Dictionary<string, int>()
                     {
-                        { "Willpower",      -10 },
-                        { "Agility",        10 },
-                        { "Endurance",      -10 },
+                        { CharacterAttribute.Willpower,      -10 },
+                        { CharacterAttribute.Agility,        10 },
+                        { CharacterAttribute.Endurance,      -10 },
                     },
                     AttributeBonusesFemale = new Dictionary<string, int>()
                     {
-                        { "Strength",       -10 },
-                        { "Willpower",      -10 },
-                        { "Agility",        10 },
+                        { CharacterAttribute.Strength,       -10 },
+                        { CharacterAttribute.Willpower,      -10 },
+                        { CharacterAttribute.Agility,        10 },
                     }
                 },
                 new CharacterRace("Nord")
                 {
                     SkillBonuses = new Dictionary<string, int>()
                     {
-                        { "Axe", 10 },
-                        { "Blunt Weapon", 10 },
-                        { "Heavy Armor", 5 },
-                        { "Long Blade", 5 },
-                        { "Medium Armor", 10 },
-                        { "Spear", 5 },
+                        { SkillManager.SkillNameAxe, 10 },
+                        { SkillManager.SkillNameBluntWeapon, 10 },
+                        { SkillManager.SkillNameHeavyArmor, 5 },
+                        { SkillManager.SkillNameLongBlade, 5 },
+                        { SkillManager.SkillNameMediumArmor, 10 },
+                        { SkillManager.SkillNameSpear, 5 },
                     },
                     AttributeBonusesMale = new Dictionary<string, int>()
                     {
-                        { "Strength",       10 },
-                        { "Intelligence",   -10 },
-                        { "Agility",        -10 },
-                        { "Endurance",      10 },
-                        { "Personality",    -10 },
+                        { CharacterAttribute.Strength,       10 },
+                        { CharacterAttribute.Intelligence,   -10 },
+                        { CharacterAttribute.Agility,        -10 },
+                        { CharacterAttribute.Endurance,      10 },
+                        { CharacterAttribute.Personality,    -10 },
                     },
                     AttributeBonusesFemale = new Dictionary<string, int>()
                     {
-                        { "Strength",       10 },
-                        { "Intelligence",   -10 },
-                        { "Willpower",      10 },
-                        { "Agility",        -10 },
-                        { "Personality",    -10 },
+                        { CharacterAttribute.Strength,       10 },
+                        { CharacterAttribute.Intelligence,   -10 },
+                        { CharacterAttribute.Willpower,      10 },
+                        { CharacterAttribute.Agility,        -10 },
+                        { CharacterAttribute.Personality,    -10 },
                     }
                 },
                 new CharacterRace("Orc")
                 {
                     SkillBonuses = new Dictionary<string, int>()
                     {
-                        { "Armorer", 10 },
-                        { "Axe", 5 },
-                        { "Block", 10 },
-                        { "Heavy Armor", 10 },
-                        { "Medium Armor", 10 },
+                        { SkillManager.SkillNameArmorer, 10 },
+                        { SkillManager.SkillNameAxe, 5 },
+                        { SkillManager.SkillNameBlock, 10 },
+                        { SkillManager.SkillNameHeavyArmor, 10 },
+                        { SkillManager.SkillNameMediumArmor, 10 },
                     },
                     AttributeBonusesMale = new Dictionary<string, int>()
                     {
-                        { "Strength",       5 },
-                        { "Intelligence",   -10 },
-                        { "Willpower",      10 },
-                        { "Agility",        -5 },
-                        { "Speed",          -10 },
-                        { "Endurance",      10 },
-                        { "Personality",    -10 },
+                        { CharacterAttribute.Strength,       5 },
+                        { CharacterAttribute.Intelligence,   -10 },
+                        { CharacterAttribute.Willpower,      10 },
+                        { CharacterAttribute.Agility,        -5 },
+                        { CharacterAttribute.Speed,          -10 },
+                        { CharacterAttribute.Endurance,      10 },
+                        { CharacterAttribute.Personality,    -10 },
                     },
                     AttributeBonusesFemale = new Dictionary<string, int>()
                     {
-                        { "Strength",       5 },
-                        { "Willpower",      5 },
-                        { "Agility",        -5 },
-                        { "Speed",          -10 },
-                        { "Endurance",      10 },
-                        { "Personality",    -15 },
+                        { CharacterAttribute.Strength,       5 },
+                        { CharacterAttribute.Willpower,      5 },
+                        { CharacterAttribute.Agility,        -5 },
+                        { CharacterAttribute.Speed,          -10 },
+                        { CharacterAttribute.Endurance,      10 },
+                        { CharacterAttribute.Personality,    -15 },
                     }
                 },
                 new CharacterRace("Redguard")
                 {
                     SkillBonuses = new Dictionary<string, int>()
                     {
-                        { "Athletics", 5 },
-                        { "Axe", 5 },
-                        { "Blunt Weapon", 5 },
-                        { "Heavy Armor", 5 },
-                        { "Long Blade", 15 },
-                        { "Medium Armor", 5 },
-                        { "Short Blade", 5 },
+                        { SkillManager.SkillNameAthletics, 5 },
+                        { SkillManager.SkillNameAxe, 5 },
+                        { SkillManager.SkillNameBluntWeapon, 5 },
+                        { SkillManager.SkillNameHeavyArmor, 5 },
+                        { SkillManager.SkillNameLongBlade, 15 },
+                        { SkillManager.SkillNameMediumArmor, 5 },
+                        { SkillManager.SkillNameShortBlade, 5 },
                     },
                     AttributeBonusesMale = new Dictionary<string, int>()
                     {
-                        { "Strength",       10 },
-                        { "Intelligence",   -10 },
-                        { "Willpower",      -10 },
-                        { "Endurance",      10 },
-                        { "Personality",    -10 },
+                        { CharacterAttribute.Strength,       10 },
+                        { CharacterAttribute.Intelligence,   -10 },
+                        { CharacterAttribute.Willpower,      -10 },
+                        { CharacterAttribute.Endurance,      10 },
+                        { CharacterAttribute.Personality,    -10 },
                     },
                     AttributeBonusesFemale = new Dictionary<string, int>()
                     {
-                        { "Intelligence",   -10 },
-                        { "Willpower",      -10 },
-                        { "Endurance",      10 },
+                        { CharacterAttribute.Intelligence,   -10 },
+                        { CharacterAttribute.Willpower,      -10 },
+                        { CharacterAttribute.Endurance,      10 },
                     }
                 },
                 new CharacterRace("Wood Elf")
                 {
                     SkillBonuses = new Dictionary<string, int>()
                     {
-                        { "Acrobatics", 5 },
-                        { "Alchemy", 5 },
-                        { "Light Armor", 10 },
-                        { "Marksman", 15 },
-                        { "Sneak", 10 },
+                        { SkillManager.SkillNameAcrobatics, 5 },
+                        { SkillManager.SkillNameAlchemy, 5 },
+                        { SkillManager.SkillNameLightArmor, 10 },
+                        { SkillManager.SkillNameMarksman, 15 },
+                        { SkillManager.SkillNameSneak, 10 },
                     },
                     AttributeBonusesMale = new Dictionary<string, int>()
                     {
-                        { "Strength",       -10 },
-                        { "Willpower",      -10 },
-                        { "Agility",        10 },
-                        { "Speed",          10 },
-                        { "Endurance",      -10 },
+                        { CharacterAttribute.Strength,       -10 },
+                        { CharacterAttribute.Willpower,      -10 },
+                        { CharacterAttribute.Agility,        10 },
+                        { CharacterAttribute.Speed,          10 },
+                        { CharacterAttribute.Endurance,      -10 },
                     },
                     AttributeBonusesFemale = new Dictionary<string, int>()
                     {
-                        { "Strength",       -10 },
-                        { "Willpower",      -10 },
-                        { "Agility",        10 },
-                        { "Speed",          10 },
-                        { "Endurance",      -10 },
+                        { CharacterAttribute.Strength,       -10 },
+                        { CharacterAttribute.Willpower,      -10 },
+                        { CharacterAttribute.Agility,        10 },
+                        { CharacterAttribute.Speed,          10 },
+                        { CharacterAttribute.Endurance,      -10 },
                     }
                 },
             };
